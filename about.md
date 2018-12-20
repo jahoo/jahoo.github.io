@@ -3,6 +3,7 @@ layout: page
 title: about
 permalink: /about/
 ---
+
 I'm a graduate student in [linguistics at McGill](https://mcgill.ca/linguistics/) University, in the [Montreal Computational & Quantitative Linguistics Lab](http://mcqll.org/JacobHoover.About).
 <!-- 
   This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](http://jekyllrb.com/) 
