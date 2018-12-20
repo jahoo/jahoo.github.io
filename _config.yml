@@ -10,7 +10,7 @@ title: Jacob Louis Hoover
 email: jacob.hoover@mail.mcgill.ca
 description: > # this means to ignore newlines until "baseurl:"
   Graduate student in linguistics at McGill University, Montréal, Canada.  
-baseurl: "/about" # the subpath of your site, e.g. /blog
+baseurl: "" # the subpath of your site, e.g. /blog
 url: "http://postylem.github.io/" # the base hostname & protocol for your site
 twitter_username: postylem
 github_username:  postylem
