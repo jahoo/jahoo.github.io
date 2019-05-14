@@ -6,10 +6,10 @@
 # 'jekyll serve'. If you change this file, please restart the server process.
 
 # Site settings
-title: jacob louis hoover
+title:
 email: jacob.hoover@mail.mcgill.ca
 description: > # this means to ignore newlines until "baseurl:"
-  Graduate student in linguistics at McGill University, Montréal, Canada.
+  MA student in linguistics at McGill University, Montréal, Canada.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "http://postylem.github.io/" # the base hostname & protocol for your site
 twitter_username: postylem
