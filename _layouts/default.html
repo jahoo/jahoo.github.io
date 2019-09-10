@@ -7,6 +7,73 @@
 
     {% include header.html %}
 
+    <!-- hidden preamble material: stuff for reagent, pretty printing, and things from metaprob (mostly probably not necessary)  -->
+    <pre class="hidden"><code class="language-eval-clojure">
+    (ns postylem
+      (:require [reagent.core :as r]
+                [clojure.pprint :refer [pprint]]
+                [clojure.string :refer [index-of]]))
+    </code></pre>
+
+    <!-- hidden preamble material for vega-lite rendering  -->
+    <pre class="hidden"><code class="language-eval-clojure">
+    (defn render-vega-lite
+      ([spec elem]
+       (when spec
+         (let [spec (clj->js spec)
+               opts {:renderer "canvas"
+                     :mode "vega-lite"
+                     :actions {
+                        :export true,
+                        :source true,
+                        :compiled true,
+                        :editor true}}
+               vega-spec (. js/vl (compile spec))]
+           (-> (js/vegaEmbed elem spec (clj->js opts))
+             (.then (fn [res]
+                      (. js/vegaTooltip (vegaLite (.-view res) spec))))
+             (.catch (fn [err]
+                       (.log js/console err))))))))
+
+    (defn vega-lite
+      "Reagent component that renders vega-lite."
+      [spec]
+      (r/create-class
+       {:display-name "vega-lite"
+        :component-did-mount (fn [this]
+                               (render-vega-lite spec (r/dom-node this)))
+        :component-will-update (fn [this [_ new-spec]]
+                                 (render-vega-lite new-spec (r/dom-node this)))
+        :reagent-render (fn [spec]
+                          [:div#vis])}))
+
+
+    ;making a histogram from a list of observations
+    (defn list-to-data [l]
+      """ takes a list and returns a record
+      in the right format for vega data,
+      with each list element the label to a field named 'x'"""
+      (defrecord rec [x])
+      {:values (into [] (map ->rec l))})
+
+    (defn makehist [data]
+      {
+       :$schema "https://vega.github.io/schema/vega-lite/v4.json",
+       :data data,
+       :mark "bar",
+       :encoding {
+                  :x {:field "x",
+                      :type "ordinal"},
+                  :y {:aggregate "count",
+                      :type "quantitative"}
+                  }
+       })
+
+    (defn hist [l]
+      (vega-lite (makehist (list-to-data l))))
+    </code></pre>
+
+
     <div class="page-content">
       <div class="wrapper">
         {{ content }}
@@ -15,6 +82,8 @@
 
     {% include footer.html %}
     {% include analytics.html %}
+    <script src="https://storage.googleapis.com/app.klipse.tech/plugin/js/klipse_plugin.js"></script>
   </body>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 
 </html>

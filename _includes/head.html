@@ -6,6 +6,35 @@
   <title>{% if page.title %}{{ page.title | escape }}{% else %}{{ site.title | escape }}{% endif %}</title>
   <meta name="description" content="{% if page.excerpt %}{{ page.excerpt | strip_html | strip_newlines | truncate: 160 }}{% else %}{{ site.description }}{% endif %}">
 
+
+  <link rel="stylesheet" type="text/css" href="https://storage.googleapis.com/app.klipse.tech/css/codemirror.css">
+   <script>
+       window.klipse_settings = {
+         selector: '.language-eval-clojure', // css selector for the html elements you want to klipsify
+         selector_reagent: '.language-reagent', // selector for reagent snippets
+         editor_type: 'codemirror',
+         codemirror_options_in: {
+             indentUnit: 2,
+             lineWrapping: true,
+             lineNumbers: true,
+             autoCloseBrackets: true
+         },
+         codemirror_options_out: {
+             lineWrapping: true,
+             lineNumbers: false,
+             readOnly: "nocursor"
+         }
+       };
+   </script>
+
+   <!-- Import Vega 5 & Vega-Lite 3 (does not have to be from CDN) -->
+   <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+   <script src="https://cdn.jsdelivr.net/npm/vega-lite@3"></script>
+   <!-- Import vega-embed -->
+   <script src="https://cdn.jsdelivr.net/npm/vega-embed"></script>
+
+
+
   <link rel="stylesheet" href="{{ "/css/main.css" | prepend: site.baseurl }}">
   <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
   <link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="{{ "/feed.xml" | prepend: site.baseurl | prepend: site.url }}">
