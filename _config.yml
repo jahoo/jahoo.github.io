@@ -18,4 +18,10 @@ github_username:  postylem
 # Build settings
 markdown: kramdown
 
+
+# USE THE FOLLOWING FOR MATH:
+# $$\LaTeX code$$   (for display)
+# \\[\LaTeX code\\] (also for display)
+# \\(\LaTeX code\\) (for inline)
+
 theme: jekyll-theme-minimal
