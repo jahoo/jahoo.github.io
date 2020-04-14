@@ -3,7 +3,7 @@ layout: page
 title: about
 ---
 
-I'm a graduate student in [linguistics at McGill University](https://mcgill.ca/linguistics/), in the [Montreal Computational & Quantitative Linguistics Lab](https://mcqll.org/), under [Tim O'Donnell](https://people.linguistics.mcgill.ca/~timothy.odonnell/), and an associate student member of [Mila - Quebec AI Institute](https://mila.quebec/).  I'm interested in lots of things, but most of all logic, mathematical linguistics, and the generative / expressive capacity of formal systems, as well as information theory, and exploring what both human and machine learning might be able to tell us about the underlying structure and complexity of language.
+I'm a graduate student in [linguistics at McGill University](https://mcgill.ca/linguistics/), in the [Montreal Computational & Quantitative Linguistics Lab](https://mcqll.org/), under [Tim O'Donnell](http://people.linguistics.mcgill.ca/~timothy.odonnell/), and an associate student member of [Mila - Quebec AI Institute](https://mila.quebec/).  I'm interested in lots of things, but most of all logic, mathematical linguistics, and the generative / expressive capacity of formal systems, as well as information theory, and exploring what both human and machine learning might be able to tell us about the underlying structure and complexity of language.
 
 CV [here](/assets/jlh-academic_cv.pdf).
 
