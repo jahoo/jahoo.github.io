@@ -35,8 +35,12 @@ p, blockquote, pre,
 ul, ol, dl, figure,
 %vertical-rhythm {
     margin-bottom: $spacing-unit / 2;
-}
+    #no-pad {
+            margin-top: 0px;
+            margin-bottom: 0px;
+        }
 
+}
 
 
 /**
@@ -83,6 +87,7 @@ li {
  */
 h1, h2, h3, h4, h5, h6 {
     font-weight: $base-font-weight;
+    color:  $grey-color-dark;
 }
 
 
@@ -113,7 +118,7 @@ blockquote {
     color: $grey-color;
     border-left: 4px solid $grey-color-light;
     padding-left: $spacing-unit / 2;
-    font-size: 18px;
+    @include relative-font-size(1.125);/*font-size: 18px;*/
     letter-spacing: -1px;
     font-style: italic;
 
@@ -129,22 +134,24 @@ blockquote {
  */
 pre,
 code {
-    font-size: 15px;
+    font-family: $code-font-family;
+    @include relative-font-size(0.825);
     border: 1px solid $grey-color-light;
     border-radius: 3px;
-    background-color: #eef;
+    background-color: $code-hl-color;
 }
 
 code {
-    padding: 1px 5px;
+    padding: 1px 3px;
 }
 
 pre {
-    padding: 8px 12px;
+    padding: 6px 6px;
     overflow-x: auto;
-
+    background-color: $code-bg-color;
     > code {
         border: 0;
+        background-color: $code-bg-color;
         padding-right: 0;
         padding-left: 0;
     }
@@ -203,4 +210,29 @@ pre {
             fill: $grey-color;
         }
     }
+}
+
+
+/**
+ * kbd tag
+ */
+
+kbd
+{
+    -moz-border-radius:3px;
+    -moz-box-shadow:0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset;
+    -webkit-border-radius:3px;
+    -webkit-box-shadow:0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset;
+    background-color:#f7f7f7;
+    border:1px solid #ccc;
+    border-radius:3px;
+    box-shadow:0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset;
+    color:#333;
+    display:inline-block;
+    font-family:Arial,Helvetica,sans-serif;
+    font-size:11px;
+    line-height:1.4;
+    margin:0 .1em;
+    padding:.1em .6em;
+    text-shadow:0 1px 0 #fff;
 }

@@ -3,20 +3,29 @@
 ---
 @charset "utf-8";
 
-
+@font-face {
+    font-family: 'FiraCode';
+    src: url('/assets/FiraCode/woff2/FiraCode-Regular.woff2') format('webfont.woff2') , /* Super Modern Browsers */
+    url('/assets/FiraCode/woff/FiraCode-Regular.woff') format('woff'), /* Pretty Modern Browsers */
+    url('/assets/FiraCode/ttf/FiraCode-Regular.ttf')  format('truetype') /* Safari, Android, iOS */;
+}
 
 // Our variables
-$base-font-family: "Helvetica", Helvetica, Arial, sans-serif;
+$base-font-family: "Linux Libertine", Times, serif;
+$alt-font-family: "Linux Biolinum", Helvetica, sans-serif;
+$code-font-family:  "FiraCode";
 $base-font-size:   16px;
 $base-font-weight: 400;
 $small-font-size:  $base-font-size * 0.875;
-$base-line-height: 1.5;
+$base-line-height: 1.3;
 
-$spacing-unit:     30px;
+$spacing-unit:     20px;
 
 $text-color:       #111;
 $background-color: #fdfdfd;
 $brand-color:      #2a7ae2;
+$code-bg-color:    #fcf9f2;
+$code-hl-color:	   #eef;
 
 $grey-color:       #828282;
 $grey-color-light: lighten($grey-color, 40%);
@@ -28,7 +37,10 @@ $content-width:    800px;
 $on-palm:          600px;
 $on-laptop:        800px;
 
-
+.CodeMirror {
+    border: solid 1px darken($code-bg-color, 10%);
+    background: #fffdfc;
+}
 
 // Use media queries like this:
 // @include media-query($on-palm) {
@@ -43,6 +55,10 @@ $on-laptop:        800px;
     }
 }
 
+
+@mixin relative-font-size($ratio) {
+  font-size: $base-font-size * $ratio;
+}
 
 
 // Import partials from `sass_dir` (defaults to `_sass`)
