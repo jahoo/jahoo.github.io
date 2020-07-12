@@ -1,0 +1,95 @@
+/*
+Font faces for the Salome family.
+    - Salome            normal, italic
+    - Salome Fine       normal, italic
+    - Salome Stencil    normal, italic
+    - Salome Deco       normal (majescules only)
+*/
+
+@font-face {
+    font-family: 'Salome';
+    src: url('salome-webfont.eot');
+    src: url('salome-webfont.eot?#iefix') format('embedded-opentype'),
+         url('salome-webfont.woff2') format('woff2'),
+         url('salome-webfont.woff') format('woff'),
+         url('salome-webfont.ttf') format('truetype'),
+         url('salome-webfont.svg#salomeregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'Salome';
+    src: url('salome_italic-webfont.eot');
+    src: url('salome_italic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('salome_italic-webfont.woff2') format('woff2'),
+         url('salome_italic-webfont.woff') format('woff'),
+         url('salome_italic-webfont.ttf') format('truetype'),
+         url('salome_italic-webfont.svg#salomeitalic') format('svg');
+    font-weight: normal;
+    font-style: italic;
+
+}
+
+@font-face {
+    font-family: 'Salome Fine';
+    src: url('salome_fine-webfont.eot');
+    src: url('salome_fine-webfont.eot?#iefix') format('embedded-opentype'),
+         url('salome_fine-webfont.woff2') format('woff2'),
+         url('salome_fine-webfont.woff') format('woff'),
+         url('salome_fine-webfont.ttf') format('truetype'),
+         url('salome_fine-webfont.svg#salome_fineregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'Salome Fine';
+    src: url('salome_fine_italic-webfont.eot');
+    src: url('salome_fine_italic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('salome_fine_italic-webfont.woff2') format('woff2'),
+         url('salome_fine_italic-webfont.woff') format('woff'),
+         url('salome_fine_italic-webfont.ttf') format('truetype'),
+         url('salome_fine_italic-webfont.svg#salome_fineitalic') format('svg');
+    font-weight: normal;
+    font-style: italic;
+
+}
+
+@font-face {
+    font-family: 'Salome Stencil';
+    src: url('salome_stencil-webfont.eot');
+    src: url('salome_stencil-webfont.eot?#iefix') format('embedded-opentype'),
+         url('salome_stencil-webfont.woff2') format('woff2'),
+         url('salome_stencil-webfont.woff') format('woff'),
+         url('salome_stencil-webfont.ttf') format('truetype'),
+         url('salome_stencil-webfont.svg#salome_stencilregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'Salome Stencil';
+    src: url('salome_stencil_italic-webfont.eot');
+    src: url('salome_stencil_italic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('salome_stencil_italic-webfont.woff2') format('woff2'),
+         url('salome_stencil_italic-webfont.woff') format('woff'),
+         url('salome_stencil_italic-webfont.ttf') format('truetype'),
+         url('salome_stencil_italic-webfont.svg#salome_stencilitalic') format('svg');
+    font-weight: normal;
+    font-style: italic;
+
+}
+
+@font-face {
+    font-family: 'Salome Deco';
+    src: url('salome_deco-webfont.eot');
+    src: url('salome_deco-webfont.eot?#iefix') format('embedded-opentype'),
+         url('salome_deco-webfont.woff2') format('woff2'),
+         url('salome_deco-webfont.woff') format('woff'),
+         url('salome_deco-webfont.ttf') format('truetype'),
+         url('salome_deco-webfont.svg#salome_decoregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
