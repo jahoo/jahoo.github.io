@@ -3,16 +3,18 @@
 ---
 @charset "utf-8";
 
+/*Local webfonts*/
 @import "/assets/fonts/FiraCode/fira_code.css";
 @import "/assets/fonts/LinLibertine/style.css";
 @import "/assets/fonts/LinBiolinum/style.css";
 @import "/assets/fonts/Salome/style.css";
-
+/*Stylesheet for "Computer Modern Sans/Serif/Bright/Concrete/Typewriter"*/
+@import "https://cdn.rawgit.com/dreampulse/computer-modern-web-font/master/fonts.css";
 
 // Our variables
-$base-font-family: "Linux Libertine", Times, serif;
-$alt-font-family: "Linux Biolinum", Helvetica, sans-serif;
-$header-font-family: "Salome Fine", Georgia, Times, serif;
+$base-font-family: "Computer Modern Serif", Times, serif;
+$alt-font-family: "Computer Modern Serif", Helvetica, sans-serif;
+$header-font-family: "Computer Modern Sans", Georgia, Times, serif;
 $code-font-family:  "Fira Code", Courier, monospace;
 $base-font-size:   16px;
 $base-font-weight: 400;

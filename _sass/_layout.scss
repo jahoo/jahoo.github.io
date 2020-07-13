@@ -20,6 +20,9 @@
 
     &,
     &:visited {
+        color: $grey-color;
+    }
+    &:hover {
         color: $grey-color-dark;
     }
 }
@@ -27,11 +30,12 @@
 .site-nav {
     float: right;
     line-height: $top-bar-height;/*line-height: 56px;*/
-    font-family: $alt-font-family;
+    font-family: $header-font-family;
     font-weight: bold;
     /*font-style: italic;*/
     margin-bottom: 0;
     @include relative-font-size(1.25);/*font-size: 26px;*/
+
 
 
 
@@ -43,6 +47,13 @@
         color: $grey-color-dark; /*$text-color;*/
         /*line-height: $base-line-height;*/
 
+        &,
+        &:visited {
+            color: $grey-color-dark;
+        }
+        &:hover {
+            color: black;
+        }
         // Gaps between nav items, but not on the last one
         &:not(:last-child) {
             margin-right: 20px;
@@ -201,7 +212,7 @@
 .post-meta {
     font-size: $small-font-size;
     color: $grey-color;
-    font-family: $alt-font-family;
+    font-family: $base-font-family;
     font-style: normal;
 }
 
@@ -220,11 +231,11 @@
 }
 
 .post-title {
-    font-family: $alt-font-family;
+    font-family: $header-font-family;
     font-weight: bold;
     color: $grey-color-dark;
     @include relative-font-size(2.75);
-    letter-spacing: -3px;
+    letter-spacing: -2px;
     line-height: 1;
 
     @include media-query($on-laptop) {
@@ -237,10 +248,10 @@
 
     h1 {
         margin-top: $spacing-unit;
-        @include relative-font-size(2);
+        @include relative-font-size(1.825);
         font-family: $alt-font-family;
         font-weight: bold;
-        letter-spacing: -2px;
+        letter-spacing: -1px;
         @include media-query($on-laptop) {
             @include relative-font-size(1.825);
         }
@@ -248,10 +259,10 @@
 
     h2 {
         margin-top: $spacing-unit;
-        @include relative-font-size(1.825);
+        @include relative-font-size(1.75);
         font-family: $alt-font-family;
         font-weight: bold;
-        letter-spacing: -2px;
+        letter-spacing: -1px;
         @include media-query($on-laptop) {
             @include relative-font-size(1.75);
         }
