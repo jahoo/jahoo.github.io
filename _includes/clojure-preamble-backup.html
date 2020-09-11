@@ -1,0 +1,177 @@
+<!-- hidden preamble material: 
+    stuff for reagent, pretty printing, and things from metaprob (mostly probably not necessary)  
+-->
+<pre class="hidden"><code class="language-eval-clojure">
+(ns jahoo.core
+  (:require [reagent.core :as r]
+            [clojure.zip :as z]
+            [clojure.pprint :refer [pprint]]
+            [clojure.string :refer [index-of]]))
+</code></pre>
+
+<!-- hidden preamble material for Vega (in addition to Vega-Lite) rendering  -->
+<pre class="hidden"><code class="language-eval-clojure">
+(defn render-vega
+  ([spec elem]
+   (when spec
+     (let [spec (clj->js spec)
+           opts {:renderer "canvas"
+                 :mode "vega"
+                 :actions {
+                    :export true,
+                    :source true,
+                    :compiled true,
+                    :editor true}}]
+       (-> (js/vegaEmbed elem spec (clj->js opts))
+         (.then (fn [res]
+                  (. js/vegaTooltip (vega (.-view res) spec))))
+         (.catch (fn [err]
+                   (.log js/console err))))))))
+
+(defn vega
+  "Reagent component that renders vega"
+  [spec]
+  (r/create-class
+   {:display-name "vega"
+    :component-did-mount (fn [this]
+                           (render-vega spec (r/dom-node this)))
+    :component-will-update (fn [this [_ new-spec]]
+                             (render-vega new-spec (r/dom-node this)))
+    :reagent-render (fn [spec]
+                      [:div#vis])}))
+
+
+
+;making a histogram from a list of observations
+(defn list-to-hist-spec [l]
+  """ takes a list and returns a record
+  in the right format for vega data,
+  with each list element the label to a field named 'x'"""
+  (defrecord rec [element])
+  {:values (into [] (map ->rec l))})
+
+(defn makehist [data]
+  {
+   :$schema "https://vega.github.io/schema/vega-lite/v4.json",
+   :data data,
+   :mark "bar",
+   :encoding {
+              :x {:field "element",
+                  :type "ordinal"},
+              :y {:aggregate "count",
+                  :type "quantitative"}
+              }
+   })
+
+(defn hist [l]
+  (vega (makehist (list-to-hist-spec l))))
+
+; for making bar plots
+
+(defn list-to-barplot-data [l m]
+  """ takes a list and returns a record
+  in the right format for vega data,
+  with each list element the label to a field named 'x'"""
+  (defrecord rec [element value])
+  {:values (into [] (map ->rec l m))})
+
+(defn makebarplot [data]
+  {
+   :$schema "https://vega.github.io/schema/vega-lite/v4.json",
+   :data data,
+   :mark "bar",
+   :encoding {
+              :x {:field "element", :type "ordinal"},
+              :y {:field "value", :type "quantitative"}
+              }
+   })
+
+(defn barplot [l m]
+  (vega (makebarplot (list-to-barplot-data l m))))
+
+
+; now, for tree making
+;(thanks to Taylor Wood's answer in this thread on stackoverflow:
+; https://stackoverflow.com/questions/57911965)
+
+(defn list-to-tree-spec [l]
+  """ takes a list and walks through it (with clojure.zip library)
+  and builds the record format for the spec needed to for vega"""
+  (loop [loc (z/seq-zip l), next-id 0, parent-ids [], acc []]
+    (cond
+      (z/end? loc) acc
+
+      (and (z/node loc) (not (z/branch? loc)))
+      (recur
+        (z/next loc)
+        (inc next-id)
+        (cond
+          (some-> (z/right loc) z/branch?) (conj parent-ids next-id)
+          (not (z/right loc)) (some-> parent-ids not-empty pop)
+          :else parent-ids)
+        (conj acc
+              {:id     (str next-id)
+                   :name  (str (z/node loc))
+                   :parent (when (seq parent-ids)
+                             (str (peek parent-ids)))}))
+
+          :else
+          (recur (z/next loc) next-id parent-ids acc))))
+
+    (defn maketree [w h tree-spec]
+    """ makes vega spec for a tree given tree-spec in the right json-like format """
+      {:$schema "https://vega.github.io/schema/vega/v5.json"
+      :data [{:name "tree"
+             :transform [{:key "id" :parentKey "parent" :type "stratify"}
+                         {:as ["x" "y" "depth" "children"]
+                          :method {:signal "layout"}
+                          :size [{:signal "width"} {:signal "height"}]
+                          :type "tree"}]
+             :values tree-spec
+             }
+            {:name "links"
+             :source "tree"
+             :transform [{:type "treelinks"}
+                         {:orient "horizontal"
+                          :shape {:signal "links"}
+                          :type "linkpath"}]}]
+      :height h
+      :marks [{:encode {:update {:path {:field "path"} :stroke {:value "#ccc"}}}
+              :from {:data "links"}
+              :type "path"}
+             {:encode {:enter {:size {:value 50} :stroke {:value "#fff"}}
+                       :update {:fill {:field "depth" :scale "color"}
+                                :x {:field "x"}
+                                :y {:field "y"}}}
+              :from {:data "tree"}
+              :type "symbol"}
+             {:encode {:enter {:baseline {:value "bottom"}
+                               :font {:value "Courier"}
+                               :fontSize {:value 14}
+                               :angle {:value 0}
+                               :text {:field "name"}}
+                       :update {:align {:signal "datum.children ? 'center' : 'center'"}
+                                :dy {:signal "datum.children ? -6 : -6"}
+                                :opacity {:signal "labels ? 1 : 0"}
+                                :x {:field "x"}
+                                :y {:field "y"}}}
+              :from {:data "tree"}
+              :type "text"}]
+      :padding 5
+      :scales [{:domain {:data "tree" :field "depth"}
+               :name "color"
+               :range {:scheme "magma"}
+               :type "linear"
+               :zero true}]
+      :signals [{:bind {:input "checkbox"} :name "labels" :value true}
+               {:bind {:input "radio" :options ["tidy" "cluster"]}
+                :name "layout"
+                :value "tidy"}
+               {:name "links"
+                :value "line"}]
+      :width w}
+    )
+
+    (defn tree [w h list]
+      (vega (maketree w h (list-to-tree-spec list))))
+    </code></pre>
