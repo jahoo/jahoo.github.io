@@ -212,12 +212,12 @@ Or a natural language syntax/derivation tree:
 (def j-tree
   '(CP 
     (TP 
-     (NP_i (N (Aoi-ga "\"A-NOM\"")))
+     (NP_i (N (Aoi-ga "\"Aoi-NOM\"")))
      (T' (VP 
           (PP (NP (daidokoro "\"kitchen\"")) (P (de "\"in\""))) 
           (VP "(t_i)" (V' 
-                   (NP-o (N (hon "\"book\"")))
-                   (V (yon- "\"read\"")))))
+                       (NP (N (hon-o "\"book-ACC\"")))
+                       (V (yon- "\"read\"")))))
          (T (da "\"PST\"")))) 
     (C (to "\"COMP\"")))
   )
