@@ -21,6 +21,7 @@
 </code></pre>
 
 <!-- hidden preamble material for Vega (in addition to Vega-Lite) rendering  -->
+<!-- copy from assets/vega-helpers.clj -->
 <pre class="hidden"><code class="language-eval-clojure">
 (defn render-vega [spec elem]
   (when spec
@@ -186,26 +187,48 @@
 ;(thanks to Taylor Wood's answer in this thread on stackoverflow:
 ; https://stackoverflow.com/questions/57911965)
 
-(defn list-to-tree-spec [l]
-  """ takes a list and walks through it (with clojure.zip library)
-  and builds the record format for the spec needed to for vega"""
-  (loop [loc (z/seq-zip l), next-id 0, parent-ids [], acc []]
-    (cond
-      (z/end? loc) acc
+(defn count-up-to-right [loc]
+  (if (z/up loc)
+    (loop [x loc, pops 0] 
+       (if (z/right x) 
+         pops 
+         (recur (z/up x) (inc pops))))
+    0))
 
-      (and (z/node loc) (not (z/branch? loc)))
-      (recur
-        (z/next loc)
-        (inc next-id)
+(defn list-to-tree-spec
+      "take a list and walk through it (with clojure.zip library)
+      return a tree spec record in right format to pass to vega"
+      [l]
+      (loop [loc (z/seq-zip l), next-id 0, parent-ids [], acc []]
         (cond
-          (some-> (z/right loc) z/branch?) (conj parent-ids next-id)
-          (not (z/right loc)) (some-> parent-ids not-empty pop)
-          :else parent-ids)
-        (conj acc
-              {:id     (str next-id)
-                   :name  (str (z/node loc))
+          (z/end? loc) acc
+
+          (z/end? (z/next loc))
+          (conj acc
+                  {:id     (str next-id)
+                   :name   (str (z/node loc))
                    :parent (when (seq parent-ids)
-                             (str (peek parent-ids)))}))
+                                 (str (peek parent-ids)))})
+
+          (and (z/node loc) (not (z/branch? loc)))
+          (recur
+            (z/next loc)
+            (inc next-id)
+            (cond
+              (not (z/right loc))
+              (let [n (count-up-to-right loc)
+                    popn (apply comp (repeat n pop))]
+                (some-> parent-ids not-empty popn))
+
+              (not (z/left loc))
+              (conj parent-ids next-id)
+
+              :else parent-ids)
+            (conj acc
+                  {:id     (str next-id)
+                   :name   (str (z/node loc))
+                   :parent (when (seq parent-ids)
+                                 (str (peek parent-ids)))}))
 
           :else
           (recur (z/next loc) next-id parent-ids acc))))
@@ -264,6 +287,17 @@
       :width w}
     )
 
-    (defn tree [w h list]
-      (vega (maketree w h (list-to-tree-spec list))))
+    (defn tree-depth 
+      "get the depth of a tree (list)"
+      [list]
+      (if (seq? list)
+        (inc (apply max 0 (map tree-depth list)))
+        0))
+
+    (defn tree
+      "plot tree using vega"
+      [list]
+      (let [spec (list-to-tree-spec list)
+            h (* 30 (tree-depth list))]
+        (vega (maketree 700 h spec)))))
     </code></pre>

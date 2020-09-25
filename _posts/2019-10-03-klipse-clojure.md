@@ -1,14 +1,14 @@
 ---
 layout: post
-title: Using Clojure in interactive code-boxes
+title: Interactive diagrams with Klipse+Vega
 published: true
 ---
 
-The code for rendering the interactive Clojure boxes in this post is in [klipse-clojure-material.html](/assets/klipse-clojure-material.html) (download to see header).
+The code for rendering the visualizations in this post is in [`clojure-preamble.html`](https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html).
 
 ## Klipse code block renderer
 
-Here is an html code block
+Here is an html code block that will run as interactive clojure with [Klipse](https://github.com/viebel/klipse) (note, the return of the last function call will be printed, if you want more to print you can always use `print` or `println`):
 
 ```html
 <pre><code class="language-eval-clojure">
@@ -16,17 +16,17 @@ Here is an html code block
 </code></pre>
 ```
 
-To make this code be hidden, make the class be `hidden` (defined in css). It will still run, and any definitions or side-effects made in in a hidden box will be available in later boxes.
+In markdown, specify the language in a [fenced code block](https://www.markdownguide.org/extended-syntax/#:~:text=syntax%20highlighting%20for%20fenced%20code%20blocks) as `eval-clojure` after the opening fence, like this:
 
-```html
-<pre class="hidden"><code class="language-eval-clojure">
-  (+ 1 1)
-</code></pre>
+~~~
+```eval-clojure
+(clojure code)
 ```
+~~~
 
-that will run as interactive clojure with [Klipse](https://github.com/viebel/klipse) (note, the return of the last function call will be printed, if you want more to print you can always use `print` or `println`):
+and the interpreter will make this into the same HTML as the above. Here's an example:
 
-<pre><code class="language-eval-clojure">
+```eval-clojure
 (defn flip
   ([]
    (if (< (rand 1) 0.5)
@@ -37,28 +37,14 @@ that will run as interactive clojure with [Klipse](https://github.com/viebel/kli
      true
      false)))
 
-(println (flip))
-(println (flip 0.1))
-(flip 0.9)
-</code></pre>
-
-The code will be auto-evaluated with every change. Note that you also can use <kbd>⌘</kbd>+<kbd>return</kbd> / <kbd>CTRL</kbd>+<kbd>⏎</kbd> to re-run.
-
-In markdown, specify the language in a [fenced code block](https://www.markdownguide.org/extended-syntax/#:~:text=syntax%20highlighting%20for%20fenced%20code%20blocks) as `eval-clojure` after the opening fence, like this:
-
-~~~
-```eval-clojure
-(clojure code)
-```
-~~~
-
-and the interpreter will make this into the same HTML as the above. Here's an example (function `flip` is imported from `metaprob.distributions` in the site's preamble code (in `_layouts/default.html`)
-
-```eval-clojure
 (repeatedly 10 flip)
 ```
 
-Or, rather than `eval-clojure`, specify the language `reagent` for a given code box if you want to do some output that involves rendering html elements. This is what we'll have to use to render vega graphics:
+The code will be auto-evaluated with every change. Note that you also can use <kbd>⌘</kbd>+<kbd>return</kbd> / <kbd>CTRL</kbd>+<kbd>⏎</kbd> to re-run. 
+
+It's useful to put some definitions in a hidden preamble, so I use a class `<pre class="hidden">...</pre>` around the code block to make a Klipse clojure box that will be invisible, but will still run. Any definitions or side-effects made in in a hidden box will be available in later boxes.
+
+For visualizations, rather than `eval-clojure`, specify the language `reagent` for a given code box if you want to do some output that involves rendering html elements. This is what we have to use to render vega graphics:
 
 ```reagent
 [:div [:button
@@ -68,20 +54,12 @@ Or, rather than `eval-clojure`, specify the language `reagent` for a given code 
  "Don't press this button."]]
 ```
 
-Note, a regular code block (just triple backticks) or will not be evaluated, or syntax-highlighted:
-
-```
-(repeatedly 10 flip)
-```
-(_TODO: figure out how to make this regular code block be Klipsified as `language-eval-clojure` by default.
-That would be nice.  But, it would require working around the fact that GitHub  kramdown specifically doesn't want to support this, it seems._)
-
 
 # Visualizations:
 
-There's some code in the preamble, which I have set to load, hidden, when this page is rendered (in the body [here](/assets/klipse-clojure-material.html), or in context, see the [`_layouts/default.html`](https://github.com/jahoo/jahoo.github.io/blob/master/_layouts/default.html) file used to render this page) that gets Vega to work with Klipse. It is copied from Oz (thanks for the help on that, Alex!). It defines the useful function `vega`, which will take in a vega spec vector, and output a diagram.  
+There's some code in the preamble, which I have set to load, hidden, when this page is rendered (see the [`clojure-preamble.html`](https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html) file used to render this page) that gets Vega to work with Klipse. It is copied from Oz (thanks for the help on that, Alex!), and defines the useful function `vega`, which will take in a vega spec vector, and output a diagram.  
 
-## Vega for plotting
+<!-- ## Vega for plotting
 
 Here's an example of a histogram. To start, here's how to make a simple bar graph: in a clojure box, create a function to make a reagent element:
 
@@ -167,20 +145,20 @@ or lists...
 
 `hist` is defined in the preamble, so it is available on any page.
 
-
+ -->
 ## Vega for drawing trees
 
 You can define some tree data in clojure's record data format like format:
 
 ```eval-clojure
 (def example-tree-data
-[ {:id 0 :name "a"}
-  {:id 1 :name "b" :parent 0}
-  {:id 2 :name "c" :parent 0}
-  {:id 3 :name "d" :parent 2}   ])
+  [{:id 0 :name "a"}
+   {:id 1 :name "b" :parent 0}
+   {:id 2 :name "c" :parent 0}
+   {:id 3 :name "d" :parent 2}])
 ```
 
-Yes, it's clunky, but that's how you do it. Then the function `(maketree w h tree-data)` (defined in the preamble) will take that data and make the spec for a Vega tree diagram of size `w`px-by-`h`px out of that. Then, in a reagent box you can call `vega` on the result to visualize:
+`(maketree w h tree-data)` (defined in the preamble) will take that data and make the spec for a Vega tree diagram of size `w`px-by-`h`px out of that. Then, in a reagent box you can call `vega` on the result to visualize:
 
 ```reagent
 [:div
@@ -194,28 +172,57 @@ Then here's a function `list-to-tree-spec` which will walk through a list (using
 (list-to-tree-spec '(a (b c)))
 ```
 
-and finally, there's the function `tree`.
+To be easier to use, there's the function `tree`, which should be called in a `reagent` codebox, to plot a tree that will autosize a bit.
 
 ```clojure
-(defn tree [w h list]
-  (vega (maketree w h (list-to-tree-spec list))))
+(defn tree
+  "plot tree using vega"
+  [list]
+  (let [spec (list-to-tree-spec list)
+        h (* 30 (tree-depth list))]
+    (vega (maketree 700 h spec)))))
 ```
 
- Pass it three arguments, `w` width, `h` height and `list` a nested list, which will make a vega tree diagram of `w`px-by-`h`px out of that list.
+Pass it a nested list `list`, and you'll get a visualization.
+
+For example: a clojure function computation tree
+
+```eval-clojure
+(def fib3-tree
+  '("(fib 3)"
+    ("(+ (fib 1) (fib 2))"
+     ("(fib 1)"
+      ("1"))
+     ("(fib 2)"
+      ("(+ (fib 0) (fib 1))"
+       ("(fib 0)"
+        ("0"))
+       ("(fib 1)"
+        ("1"))))))
+  )
+```
 
 ```reagent
-(tree 700 500 '
-  ("(sum '(1 2))"
-    ("(empty? '(1 2))"
-      ("(+ (first '(1 2)) (sum (rest '(1 2))))"
-        ("(first '(1 2))"
-          ("1"))
-        ("(sum (rest '(1 2)))"
-          ("(+ (first '(2)) (sum (rest '(2))))"
-            ("(first '(2))"
-              ("2"))
-            ("(sum (rest '(2)))"
-              ("(empty? '())"
-                ("0"))))))))
-)
+(tree fib3-tree)
+```
+
+Or a natural language syntax/derivation tree:
+
+```eval-clojure
+(def j-tree
+  '(CP 
+    (TP 
+     (NP_i (N (Aoi-ga "\"A-NOM\"")))
+     (T' (VP 
+          (PP (NP (daidokoro "\"kitchen\"")) (P (de "\"in\""))) 
+          (VP "(t_i)" (V' 
+                   (NP-o (N (hon "\"book\"")))
+                   (V (yon- "\"read\"")))))
+         (T (da "\"PST\"")))) 
+    (C (to "\"COMP\"")))
+  )
+```
+
+```reagent
+(tree j-tree)
 ```
