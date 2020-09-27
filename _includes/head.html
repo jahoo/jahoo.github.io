@@ -8,30 +8,32 @@
 
 
   <link rel="stylesheet" type="text/css" href="https://storage.googleapis.com/app.klipse.tech/css/codemirror.css">
-   <script>
-       window.klipse_settings = {
-         selector: '.language-eval-clojure', // css selector for the html elements you want to klipsify
-         selector_reagent: '.language-reagent', // selector for reagent snippets
-         editor_type: 'codemirror',
-         codemirror_options_in: {
-             indentUnit: 2,
-             lineWrapping: true,
-             lineNumbers: true,
-             autoCloseBrackets: true
-         },
-         codemirror_options_out: {
-             lineWrapping: true,
-             lineNumbers: false,
-             // readOnly: "nocursor"
-         }
-       };
-   </script>
+    <script>
+      window.klipse_settings = {
+        selector: '.language-eval-clojure', // css selector for the html elements you want to klipsify
+        selector_reagent: '.language-reagent', // selector for reagent snippets
+        editor_type: 'codemirror',
+        codemirror_options_in: {
+           indentUnit: 2,
+           lineWrapping: true,
+           lineNumbers: true,
+           autoCloseBrackets: true
+        },
+        codemirror_options_out: {
+           lineWrapping: true,
+           lineNumbers: false,
+           readOnly: "true" 
+        },
+        // clojure_cached_macro_ns_regexp: /reagent.*/, // the regexp for clojure macro namespaces that are cached
+        // clojure_cached_ns_regexp: /reagent.*/,       // the regexp for clojure namespaces that are cached
+      };
+    </script>
 
-   <!-- Import Vega 5 & Vega-Lite 3 (does not have to be from CDN) -->
-   <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-   <script src="https://cdn.jsdelivr.net/npm/vega-lite@3"></script>
-   <!-- Import vega-embed -->
-   <script src="https://cdn.jsdelivr.net/npm/vega-embed"></script>
+  <!-- Import Vega 5 & Vega-Lite 3 (does not have to be from CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@3"></script>
+  <!-- Import vega-embed -->
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed"></script>
   <!-- FOR KATEX (https://stackoverflow.com/a/57370526/1676393) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js" integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ" crossorigin="anonymous"></script>

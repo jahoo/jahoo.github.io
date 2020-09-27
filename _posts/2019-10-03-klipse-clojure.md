@@ -4,11 +4,11 @@ title: Interactive diagrams with Klipse+Vega
 published: true
 ---
 
-The code for rendering the visualizations in this post is in [`clojure-preamble.html`](https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html).
+The Clojure code for rendering the visualizations (with [Vega](https://vega.github.io/vega/)) in this post is [here](https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html).
 
-## Klipse code block renderer
+## Using Klipse for code blocks
 
-Here is an html code block that will run as interactive clojure with [Klipse](https://github.com/viebel/klipse) (note, the return of the last function call will be printed, if you want more to print you can always use `print` or `println`):
+Here is an html code block that will run Clojure interactively in the browser, using [Klipse](https://github.com/viebel/klipse):
 
 ```html
 <pre><code class="language-eval-clojure">
@@ -16,7 +16,7 @@ Here is an html code block that will run as interactive clojure with [Klipse](ht
 </code></pre>
 ```
 
-In markdown, specify the language in a [fenced code block](https://www.markdownguide.org/extended-syntax/#:~:text=syntax%20highlighting%20for%20fenced%20code%20blocks) as `eval-clojure` after the opening fence, like this:
+In markdown, specify the language in a [fenced code block](https://www.markdownguide.org/extended-syntax/#:~:text=syntax%20highlighting%20for%20fenced%20code%20blocks) as `eval-clojure` after the opening fence (the 'selector' name for clojure, which can be set in `window.klipse_settings` in the [head](https://github.com/jahoo/jahoo.github.io/blob/master/_includes/head.html) of the html file), like this:
 
 ~~~
 ```eval-clojure
@@ -24,7 +24,7 @@ In markdown, specify the language in a [fenced code block](https://www.markdowng
 ```
 ~~~
 
-and the interpreter will make this into the same HTML as the above. Here's an example:
+and the interpreter will make this into the same HTML as the above (note, the return of the last function call will be printed, if you want more to print you can always use `print` or `println`). Here's an example:
 
 ```eval-clojure
 (defn flip
@@ -36,6 +36,7 @@ and the interpreter will make this into the same HTML as the above. Here's an ex
    (if (< (rand 1) p)
      true
      false)))
+(println "Result of virtual coin flip:" (if (flip) "HEADS" "TAILS"))
 
 (repeatedly 10 flip)
 ```
@@ -54,10 +55,9 @@ For visualizations, rather than `eval-clojure`, specify the language `reagent` f
  "Don't press this button."]]
 ```
 
-
 # Visualizations:
 
-There's some code in the preamble, which I have set to load, hidden, when this page is rendered (see the [`clojure-preamble.html`](https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html) file used to render this page) that gets Vega to work with Klipse. It is copied from Oz (thanks for the help on that, Alex!), and defines the useful function `vega`, which will take in a vega spec vector, and output a diagram.  
+There's some code in the preamble, which I have set to load, hidden, when this page is rendered (see the [clojure-preamble.html](https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html) file used to render this page) that gets Vega to work with Klipse. It is copied from Oz (thanks for the help on that, Alex!), and defines the useful function `vega`, which will take in a vega spec vector, and output a diagram.  
 
 <!-- ## Vega for plotting
 

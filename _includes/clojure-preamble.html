@@ -3,13 +3,14 @@
     seems necessary to use old version of stuff from Oz
     https://github.com/metasoarous/oz/blob/1.6.0-alpha6/src/cljs/oz/core.cljs#L48
 -->
+
 <pre class="hidden"><code class="language-eval-clojure">
 (ns jahoo.core
   (:require [reagent.core :as r]
             [reagent.dom :as rd]
             [clojure.zip :as z]
-            [clojure.pprint :refer [pprint]]
-            [clojure.string :refer [index-of]]
+            ;[clojure.pprint :refer [pprint]]
+            ;[clojure.string :refer [index-of]]
             ;[clojure.string :as str]
             ))
 
@@ -17,12 +18,13 @@
 
 (defn log [a-thing]
   (.log js/console a-thing))
-
 </code></pre>
 
-<!-- hidden preamble material for Vega (in addition to Vega-Lite) rendering  -->
-<!-- copy from assets/vega-helpers.clj -->
 <pre class="hidden"><code class="language-eval-clojure">
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; hidden preamble material for Vega (in addition to Vega-Lite) rendering 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn render-vega [spec elem]
   (when spec
     (let [spec (clj->js spec)
