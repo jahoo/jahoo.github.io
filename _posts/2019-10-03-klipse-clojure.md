@@ -191,14 +191,11 @@ For example: a clojure function computation tree
 (def fib3-tree
   '("(fib 3)"
     ("(+ (fib 1) (fib 2))"
-     ("(fib 1)"
-      ("1"))
+     ("(fib 1)" "1")
      ("(fib 2)"
       ("(+ (fib 0) (fib 1))"
-       ("(fib 0)"
-        ("0"))
-       ("(fib 1)"
-        ("1"))))))
+       ("(fib 0)" "0")
+       ("(fib 1)" "1")))))
   )
 ```
 
