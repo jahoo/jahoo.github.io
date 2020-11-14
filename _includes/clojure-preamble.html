@@ -53,124 +53,135 @@
     :reagent-render (fn [spec]
                       [:div#vis])}))
 
-
 ;making a histogram from a list of observations
-(defn list-to-hist-spec [l]
+(defn list-to-hist-data-lite [l]
   """ takes a list and returns a record
   in the right format for vega data,
   with each list element the label to a field named 'x'"""
   (defrecord rec [category])
   {:values (into [] (map ->rec l))})
 
-(defn makehist [data]
+(defn makehist-lite [data]
   {
    :$schema "https://vega.github.io/schema/vega-lite/v4.json",
    :data data,
    :mark "bar",
    :encoding {
-              :x {:field "element",
+              :x {:field "category",
                   :type "ordinal"},
               :y {:aggregate "count",
                   :type "quantitative"}
               }
    })
 
+
+(defn list-to-hist-data [l]
+  """ takes a list and returns a record
+  in the right format for vega data,
+  with each list element the label to a field named 'x'"""
+  (defrecord rec [category])
+  [{:name "raw",
+    :values (into [] (map ->rec l))}
+   {:name "aggregated"
+    :source "raw"
+    :transform 
+    [{:as ["count"]
+      :type "aggregate"
+      :groupby ["category"]}]}
+   {:name "agg-sorted"
+    :source "aggregated"
+    :transform 
+    [{:type "collect"
+      :sort {:field "category"}}]}
+  ])
+
+(defn makehist [data]
+  (let [n (count (distinct ((data 0) :values)))
+        h 200
+        pad 5
+        w (if (< n 20) (* n 35) (- 700 (* 2 pad)))]
+    {
+    :$schema "https://vega.github.io/schema/vega/v5.json",
+    :width w,
+    :height h,
+    :padding pad,
+
+    :data data,
+
+    :signals [
+      {:name "tooltip",
+        :value {},
+        :on [{:events "rect:mouseover", :update "datum"},
+             {:events "rect:mouseout",  :update "{}"}]}
+    ],
+
+    :scales [
+      {:name "xscale",
+       :type "band",
+       :domain {:data "agg-sorted", :field "category"},
+       :range "width",
+       :padding 0.05,
+       :round true},
+      {:name "yscale",
+       :domain {:data "agg-sorted", :field "count"},
+       :nice true,
+       :range "height"}
+    ],
+
+    :axes [
+      { :orient "bottom", :scale "xscale" },
+      { :orient "left", :scale "yscale" }
+    ],
+
+    :marks [
+      {:type "rect",
+       :from {:data "agg-sorted"},
+       :encode {
+         :enter {
+           :x {:scale "xscale", :field "category"},
+           :width {:scale "xscale", :band 1},
+           :y {:scale "yscale", :field "count"},
+           :y2 {:scale "yscale", :value 0}
+         },
+         :update {:fill {:value "steelblue"}},
+         :hover {:fill {:value "green"}}
+       }
+      },
+      {:type "text",
+       :encode {
+         :enter {
+           :align {:value "center"},
+           :baseline {:value "bottom"},
+           :fill {:value "#333"}
+         },
+         :update {
+           :x {:scale "xscale", :signal "tooltip.category", :band 0.5},
+           :y {:scale "yscale", :signal "tooltip.count", :offset -2},
+           :text {:signal "tooltip.count"},
+           :fillOpacity [
+             {:test "isNaN(tooltip.count)", :value 0},
+             {:value 1}
+           ]
+         }
+       }
+      }
+    ]
+}))
+
+
 (defn hist [l]
-  (vega (makehist (list-to-hist-spec l))))
+  (vega (makehist (list-to-hist-data l))))
 
 ; for making bar plots
 
-(defn list-to-barplot-data [l m]
+(defn list-to-barplot-data-lite [l m]
   """ takes a list and returns a record
   in the right format for vega data,
   with each list element the label to a field named 'x'"""
   (defrecord rec [category amount])
   {:values (into [] (map ->rec l m))})
 
-(defn makebarplot [data]
-  {
-  :$schema "https://vega.github.io/schema/vega/v5.json",
-  :width 400,
-  :height 200,
-  :padding 5,
-
-  :data data,
-
-  :signals [
-    {
-      :name "tooltip",
-      :value {},
-      :on [
-        {:events "rect:mouseover", :update "datum"},
-        {:events "rect:mouseout",  :update "{}"}
-      ]
-    }
-  ],
-
-  :scales [
-    {
-      :name "xscale",
-      :type "band",
-      :domain {:data "table", :field "category"},
-      :range "width",
-      :padding 0.05,
-      :round true
-    },
-    {
-      :name "yscale",
-      :domain {:data "table", :field "amount"},
-      :nice true,
-      :range "height"
-    }
-  ],
-
-  :axes [
-    { :orient "bottom", :scale "xscale" },
-    { :orient "left", :scale "yscale" }
-  ],
-
-  :marks [
-    {
-      :type "rect",
-      :from {:data "table"},
-      :encode {
-        :enter {
-          :x {:scale "xscale", :field "category"},
-          :width {:scale "xscale", :band 1},
-          :y {:scale "yscale", :field "amount"},
-          :y2 {:scale "yscale", :value 0}
-        },
-        :update {
-          :fill {:value "steelblue"}
-        },
-        :hover {
-          :fill {:value "red"}
-        }
-      }
-    },
-    {
-      :type "text",
-      :encode {
-        :enter {
-          :align {:value "center"},
-          :baseline {:value "bottom"},
-          :fill {:value "#333"}
-        },
-        :update {
-          :x {:scale "xscale", :signal "tooltip.category", :band 0.5},
-          :y {:scale "yscale", :signal "tooltip.amount", :offset -2},
-          :text {:signal "tooltip.amount"},
-          :fillOpacity [
-            {:test "isNaN(tooltip.amount)", :value 0},
-            {:value 1}
-          ]
-        }
-      }
-    }
-  ]
-})
-
-(defn makebarplot-old [data]
+(defn makebarplot-lite [data]
   {
    :$schema "https://vega.github.io/schema/vega-lite/v4.json",
    :data data,
@@ -180,6 +191,87 @@
               :y {:field "value", :type "quantitative"}
               }
    })
+
+(defn list-to-barplot-data [l m]
+  """ takes a list and returns a record
+  in the right format for vega data,
+  with each list element the label to a field named 'x'"""
+  (defrecord rec [category amount])
+  {:name "table",
+   :values (into [] (map ->rec l m))})
+
+(defn makebarplot [data]
+  (let [n (count (data :values))
+        h 200
+        pad 5
+        w (if (< n 20) (* n 35) (- 700 (* 2 pad)))]
+    {
+    :$schema "https://vega.github.io/schema/vega/v5.json",
+    :width w,
+    :height h,
+    :padding pad,
+
+    :data data,
+
+    :signals [
+      {:name "tooltip",
+        :value {},
+        :on [{:events "rect:mouseover", :update "datum"},
+             {:events "rect:mouseout",  :update "{}"}]}
+    ],
+
+    :scales [
+      {:name "xscale",
+       :type "band",
+       :domain {:data "table", :field "category"},
+       :range "width",
+       :padding 0.05,
+       :round true},
+      {:name "yscale",
+       :domain {:data "table", :field "amount"},
+       :nice true,
+       :range "height"}
+    ],
+
+    :axes [
+      { :orient "bottom", :scale "xscale" },
+      { :orient "left", :scale "yscale" }
+    ],
+
+    :marks [
+      {:type "rect",
+       :from {:data "table"},
+       :encode {
+         :enter {
+           :x {:scale "xscale", :field "category"},
+           :width {:scale "xscale", :band 1},
+           :y {:scale "yscale", :field "amount"},
+           :y2 {:scale "yscale", :value 0}
+         },
+         :update {:fill {:value "steelblue"}},
+         :hover {:fill {:value "green"}}
+       }
+      },
+      {:type "text",
+       :encode {
+         :enter {
+           :align {:value "center"},
+           :baseline {:value "bottom"},
+           :fill {:value "#333"}
+         },
+         :update {
+           :x {:scale "xscale", :signal "tooltip.category", :band 0.5},
+           :y {:scale "yscale", :signal "tooltip.amount", :offset -2},
+           :text {:signal "tooltip.amount"},
+           :fillOpacity [
+             {:test "isNaN(tooltip.amount)", :value 0},
+             {:value 1}
+           ]
+         }
+       }
+      }
+    ]
+}))
 
 (defn barplot [l m]
   (vega (makebarplot (list-to-barplot-data l m))))
@@ -301,5 +393,5 @@
       [list]
       (let [spec (list-to-tree-spec list)
             h (* 30 (tree-depth list))]
-        (vega (maketree 700 h spec)))))
+        (vega (maketree 700 h spec))))
     </code></pre>

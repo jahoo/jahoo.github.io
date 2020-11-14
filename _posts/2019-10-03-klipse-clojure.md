@@ -59,72 +59,11 @@ For visualizations, rather than `eval-clojure`, specify the language `reagent` f
 
 There's some code in the preamble, which I have set to load, hidden, when this page is rendered (see the [clojure-preamble.html](https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html) file used to render this page) that gets Vega to work with Klipse. It is copied from Oz (thanks for the help on that, Alex!), and defines the useful function `vega`, which will take in a vega spec vector, and output a diagram.  
 
-<!-- ## Vega for plotting
-
-Here's an example of a histogram. To start, here's how to make a simple bar graph: in a clojure box, create a function to make a reagent element:
-
-```eval-clojure
-(defn three-bar-graph [A B C]
-  {:data {
-          :values [
-                   {:value "A", :count A},
-                   {:value "B", :count B},
-                   {:value "C", :count C}
-                   ]
-          },
-   :mark "bar",
-   :encoding {
-              :x {:field "value", :type "ordinal"},
-              :y {:field "count", :type "quantitative"}
-              }})
-```
-
-Then, in a reagent box you can call `vega` on that to print the visualization (and whatever html you want).  Use square brackets rather than parentheses outside the function.
-```reagent
-[:div
-  [:h4 "Example:"]
-  [:p "Here's a " [:code "three-bar-graph"]]
-  [vega (three-bar-graph 10 12 10)]]
-```
+## Vega for plotting
 
 Note the **visualizations need to be in a `reagent` code box** to be rendered. In an `eval-clojure` box they don't render.
 
-```eval-clojure
-(vega (three-bar-graph 10 12 10))
-```
-
 ### Histograms:
-
-The following code (which is executed in the preamble for this page) 
-defines a function `hist` which will render a histogram
-of a given list of observations:
-
-
-```clojure
-(defn list-to-data [l]
-  """ takes a list and returns a record
-  in the right format for vega data,
-  with each list element the label to a field named 'x'"""
-  (defrecord rec [x])
-  {:values (into [] (map ->rec l))})
-
-(defn makehist [data]
-  {
-   :$schema "https://vega.github.io/schema/vega-lite/v4.json",
-   :data data,
-   :mark "bar",
-   :encoding {
-              :x {:field "x",
-                  :type "ordinal"},
-              :y {:aggregate "count",
-                  :type "quantitative"}
-              }
-   })
-
-(defn hist [l]
-  (vega (makehist (list-to-data l))))
-```
-
 
 Here is `hist` called on a list of numbers (**must be in a `reagent` code box**).
 ```reagent
@@ -140,12 +79,12 @@ or lists...
 (defn sample-kleene-ab []
   (if (flip) '() (cons (if (flip) 'a 'b) (sample-kleene-ab))))
 
-(hist (repeatedly 200 sample-kleene-ab))
+(hist (repeatedly 2000 sample-kleene-ab))
 ```
 
-`hist` is defined in the preamble, so it is available on any page.
+`hist` is defined in the [preamble](https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html).
 
- -->
+
 ## Vega for drawing trees
 
 You can define some tree data in clojure's record data format like format:
