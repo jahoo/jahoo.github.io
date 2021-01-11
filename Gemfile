@@ -8,4 +8,5 @@ git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 # gem "jekyll", "~> 3.8.7"
 group :jekyll_plugins do
   gem "github-pages"
+  gem "jekyll-jupyter-notebook"
 end
