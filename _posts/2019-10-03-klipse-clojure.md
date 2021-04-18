@@ -2,6 +2,7 @@
 layout: post
 title: Interactive diagrams with Klipse+Vega
 published: true
+tags: note
 ---
 
 The Clojure code for rendering the visualizations (with [Vega](https://vega.github.io/vega/)) in this post is [here](https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html).

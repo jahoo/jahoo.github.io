@@ -208,6 +208,9 @@
 
 .post-list-heading {
   @include relative-font-size(1.75);
+  font-family: $header-font-family;
+  color: $grey-color;
+  font-style: italic;
 }
 
 .post-meta {
@@ -215,6 +218,13 @@
     color: $grey-color;
     font-family: $base-font-family;
     font-style: normal;
+}
+
+.post-tags {
+    font-size: $small-font-size;
+    color: $grey-color;
+    font-family: $base-font-family;
+    font-style: italic;
 }
 
 .post-link {

@@ -2,6 +2,8 @@
 layout: post
 title: Simplest least-squares in Julia
 published: true 
+tags:
+    - note
 ---
 
 <div>
