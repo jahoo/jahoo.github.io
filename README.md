@@ -1,0 +1,23 @@
+## Workflow
+
+Because jekyll-scholar isn't in the list of GitHub-sanctioned plugins, we need a workaround. Here it is.
+
+#### 1. Editing locally
+- edit the site on the `source` branch locally.
+- run `bundle exec jekyll serve` to serve locally during editing.
+  - may need to run `rvm use 2.7.2` to set Ruby version.
+
+#### 2. Push to remote
+When ready, `git push` to put the edits on the GitHub.
+
+- First time may need to set source: `git push --set-upstream origin source` 
+
+#### 3. Deploy site
+
+```bash
+./bin/deploy --user
+```
+
+Answer `y`. 
+
+- This will build the site from `source` branch (`bundle exec jekyll build` ) and put the resulting site on the `master` branch, where github pages will find it and serve it at [jahoo.github.io](http://jahoo.github.io)
