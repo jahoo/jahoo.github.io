@@ -50,7 +50,8 @@
                 // padding: 2px 6px;
                 cursor: pointer;
             }
-
+            
+            summary::-webkit-details-marker,
             summary::marker {
               display: none
             }
