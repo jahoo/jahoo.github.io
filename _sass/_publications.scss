@@ -1,0 +1,145 @@
+.year {
+    border-top: 1px solid $grey-color-light;
+    color: $grey-color-light;
+    margin: 0 -3em -2.5ex -2em;
+    padding-top: 1ex;
+    text-align: right;
+}
+.bibliography {
+    margin-bottom: 50px;
+    margin-top: 20px;
+    list-style-type: circle;
+    line-height: 1.25;
+
+    li {
+        // border: 2px solid $grey-color-dark;
+        padding: 10px;
+        margin: 10px 0;
+        position: relative;
+
+        span { display: block; }
+        .title { font-weight: $publication-title-font-weight; }
+        .author {
+            a {
+                border-bottom: 1px dashed $theme-color;
+                &:hover {
+                    border-bottom-style: solid;
+                    text-decoration: none;
+                }
+            }
+            > em {
+                border-bottom: 1px solid;
+                font-style: normal;
+            }
+        }
+
+
+        details {
+          max-width: 600px;
+          box-sizing: border-box;
+
+            summary {
+                border: 2px solid transparent;
+                outline: none;
+                list-style: none;
+                
+              color: $grey-color-dark;
+                // &:focus {
+                //     border-color: $grey-color-light;
+                // }
+                // padding: 2px 6px;
+                cursor: pointer;
+            }
+
+            summary::marker {
+              display: none
+            }
+            summary:after {
+              background: $grey-color-light;
+              border-radius: 0px;
+              content: "+";
+              color: $grey-color-dark;
+              float: left;
+              font-weight: bold;
+              margin: 0 5px 0 0;
+              padding: 0;
+              text-align: center;
+              width: 1.2em;
+            }
+
+            .content {
+              border-top: none;
+              padding: 10px;
+              border: 2px solid $grey-color-light;
+              border-top: none;
+              // background-color: $grey-color-light;
+            }
+
+            .content > p {
+                // font-size: $small-font-size;
+                // padding: 2px 6px;
+                color: $grey-color-dark;
+                margin: 10px 20px;
+                text-align: justify;
+                line-height: 1.2em;
+            }
+        }
+
+        details[open] {
+            summary {
+                background-color: $grey-color-light;
+                border: 2px solid $grey-color-light;
+                border-bottom: none;
+            }
+            summary:after {
+                content: "-";
+            }
+        }
+
+        // a.abstract, a.bibtex { cursor: pointer; }
+        // .hidden {
+        //     // font-size: $small-font-size;
+        //     color: $grey-color-dark;
+        //     max-height: 0px;
+        //     overflow: hidden;
+        //     text-align: justify;
+        //     -webkit-transition: 0.15s ease;
+        //     -moz-transition: 0.15s ease;
+        //     -ms-transition: 0.15s ease;
+        //     -o-transition: 0.15s ease;
+        //     transition: all 0.15s ease;
+
+        //     p {
+        //         line-height: 1.2em;
+        //         margin: 30px 30px;
+        //     }
+        //     pre {
+        //         font-size: 1em;
+        //         line-height: 1.4em;
+        //         padding: 10px;
+        //     }
+        // }
+        // .hidden.open {
+        //     max-height: 100em;
+        //     -webkit-transition: 0.15s ease;
+        //     -moz-transition: 0.15s ease;
+        //     -ms-transition: 0.15s ease;
+        //     -o-transition: 0.15s ease;
+        //     transition: all 0.15s ease;
+        // }
+        // span.abstract.hidden {
+        //     border:dotted 1px $background-color;
+        // }
+        // span.abstract.hidden.open {
+        //     border-color: $grey-color;
+        // }
+    }
+    abbr {
+        position: absolute;
+            left: -7em;
+    }
+ }
+.star {
+    color: $theme-color;
+    font-style: normal;
+}

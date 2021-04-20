@@ -5,6 +5,9 @@ published: true
 tags: note
 ---
 
+<!-- The following preamble (in /_includes/) is needed for the Vega stuff -->
+{% include clojure-preamble.html %}
+
 The Clojure code for rendering the visualizations (with [Vega](https://vega.github.io/vega/)) in this post is [here](https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html).
 
 ## Using Klipse for code blocks

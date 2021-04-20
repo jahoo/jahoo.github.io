@@ -12,9 +12,9 @@
 @import "https://cdn.rawgit.com/dreampulse/computer-modern-web-font/master/fonts.css";
 
 // Our variables
-$base-font-family: "Computer Modern Serif", Times, serif;
-$alt-font-family: "Computer Modern Serif", Times, serif;
-$header-font-family: "Computer Modern Serif", Times, serif;
+$base-font-family: "Linux Biolinum", "Computer Modern Serif", Times, serif;
+$alt-font-family: "Linux Libertine", "Computer Modern Serif", Times, serif;
+$header-font-family: "Linux Libertine", "Computer Modern Serif", Times, serif;
 $code-font-family:  "Fira Code", Courier, monospace;
 $base-font-size:   16px;
 $base-font-weight: 400;
@@ -24,21 +24,52 @@ $top-bar-height: $base-line-height * $base-font-size * 1.5;
 
 $spacing-unit:     30px;
 
+// Colors
+$red:               #FF3636 !default;
+$red-1:             #f95020 !default;
+$orange:            #F29105 !default;
+$orange-1:          #ffcc22 !default;
+$blue:              #2698BA !default;
+$blue-1:            #0076df !default;
+$dark-blue:         #00369f !default;
+$green:             #00ab37 !default;
+$green-1:           #11D68B !default;
+$green-2:           #00cf26 !default;
+$dark-green:        #009f06 !default;
+$light-green:       #ddffdd !default;
+$lime_green:        #B7D12A !default;
+$purple:            #B509AC !default;
+$pink:              #f92080 !default;
+$light-pink:        #ffdddd !default;
+$yellow:            #efcc00 !default;
+
+$white:             #fff !default;
+$dark-gray:         #333 !default;
+$mid-gray:          #666 !default;
+$light-gray:        #ccc !default;
+$lighter-gray:      #eee !default;
+
 $text-color:       #111;
 $background-color: #fffffc;//#fdfdfd;
 $brand-color:      #2a7ae2;
 $code-bg-color:    #fcf9f2;
-$code-hl-color:	   #eef;
+$code-hl-color:    #eef;
 
-$grey-color:       #828282;
-$grey-color-light: lighten($grey-color, 40%);
-$grey-color-dark:  darken($grey-color, 25%);
+$grey-color:        #828282;
+$grey-color-light:  lighten($grey-color, 40%);
+$grey-color-bitlight:  lighten($grey-color, 30%);
+$grey-color-dark:   darken($grey-color, 25%);
+
+$theme-color:       $brand-color;
+$theme-color-light: lighten($brand-color, 35%);
 
 // Width of the content area
 $content-width:    800px;
 
 $on-palm:          600px;
 $on-laptop:        800px;
+
+$publication-title-font-weight: 900 !default;
 
 .CodeMirror {
     border: solid 1px darken($code-bg-color, 10%);
@@ -68,7 +99,8 @@ $on-laptop:        800px;
 @import
         "base",
         "layout",
-        "syntax-highlighting"
+        "syntax-highlighting",
+        "publications"
 ;
 
 // for the hidden preamble stuff when using klipse

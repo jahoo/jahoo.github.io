@@ -18,6 +18,23 @@ github_username:  postylem
 # Build settings
 markdown: kramdown
 
+scholar:
+  # style: apa
+  locale: en
+
+  sort_by: year
+  order: descending
+  # group_by: year
+  # group_order: descending
+  
+  # type_names: { article: Papers }
+
+
+  source: /_bibliography
+  bibliography: default.bib
+  bibliography_template: bib # references file _layouts/bib.*
+
+
 # USE THE FOLLOWING FOR MATH:
 # $$\LaTeX code$$   (for display)
 # \\[\LaTeX code\\] (also for display)
