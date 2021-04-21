@@ -1,6 +1,4 @@
-
-// Accordion for showing/hiding abstracts
-class Accordion {
+class Accordion { // Accordion for showing/hiding abstracts
   constructor(el) {
     // Store the <details> element
     this.el = el;
