@@ -109,8 +109,14 @@ class Accordion { // Accordion for showing/hiding abstracts
     // Remove the overflow hidden and the fixed height
     this.el.style.height = this.el.style.overflow = '';
   }
-}
+};
 
-document.querySelectorAll('details').forEach((el) => {
-  new Accordion(el);
-});
+(function(document){
+    document.querySelectorAll('details').forEach((el) => {
+    new Accordion(el);
+  }); 
+})(document);
+
+// document.querySelectorAll('details').forEach((el) => {
+//   new Accordion(el);
+// });
