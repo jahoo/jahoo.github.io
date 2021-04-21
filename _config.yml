@@ -11,7 +11,7 @@ email: jacob.hoover@mail.mcgill.ca
 description: > # this means to ignore newlines until "baseurl:"
   PhD student in linguistics at McGill University and Mila Québec AI Institute, Montréal.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://jahoo.github.io" # the base hostname & protocol for your site
+url: "https://jahoo.github.io" # the base hostname & protocol for your site
 twitter_username: postylem
 github_username:  postylem
 
