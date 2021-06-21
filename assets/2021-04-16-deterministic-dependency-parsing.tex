@@ -1,0 +1,764 @@
+% \documentclass{article}\usepackage{beamerarticle} % comment for beamer
+
+%%%%%%%%%%%%%%%%%%%%%%
+% uncomment for beamer
+\documentclass[10pt]{beamer}% option hyperref={pdfpagelabels=false} may be needed
+\setbeamerfont{headline}{size=\footnotesize}% rather than tiny
+\usepackage[orientation=landscape,size=custom,width=17,height=19,scale=0.5,debug]{beamerposter}
+
+\usetheme[subsection=true]{Edinburgh}
+\usecolortheme{Karlsruhe}
+\usepackage[no-math]{fontspec}
+\setmainfont{Linux Libertine}
+\setsansfont{Linux Biolinum}
+% \setmonofont{Fira Code}
+\usefonttheme{professionalfonts} % can also be passed as option to documentclass
+\setbeamertemplate{enumerate items}[default]
+%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{amsmath,amssymb,amsthm,enumerate,hyperref,mathdots,mathtools}
+\usepackage{booktabs}
+
+\usepackage{algorithm,algpseudocode}
+\usepackage{spot}
+\setspotlightcolor{\spotlightcolor!25}
+\usepackage{multicol}
+\usepackage[yyyymmdd]{datetime}\renewcommand{\dateseparator}{.}
+\usepackage{ulem}\normalem%
+\usepackage{array}
+\newcolumntype{L}{>{$}l<{$}} % math-mode version of "l" column type
+\newcolumntype{C}{>{$}c<{$}} % math-mode version of "c" column type
+\newcolumntype{R}{>{$}r<{$}} % math-mode version of "r" column type
+
+%% make \pause or \onslide<+-> work in align environment
+%% https://tex.stackexchange.com/a/75550
+\makeatletter
+\let\save@measuring@true\measuring@true%
+\def\measuring@true{%
+  \save@measuring@true%
+  % \def\beamer@sortzero##1{\beamer@ifnextcharospec{\beamer@sortzeroread{##1}}{}}%
+  \def\beamer@sortzeroread##1<##2>{}%
+  \def\beamer@finalnospec{}%
+}
+\makeatother
+
+%%%%%%% commands defining backup slides so that frame numbering is correct
+\newcommand{\backupbegin}{
+  \newcounter{framenumberappendix}
+  \setcounter{framenumberappendix}{\value{framenumber}}
+}
+\newcommand{\backupend}{
+  \addtocounter{framenumberappendix}{-\value{framenumber}}
+  \addtocounter{framenumber}{\value{framenumberappendix}}
+}
+
+\input{/Users/j/Library/texmf/custom/information-theory-operators.tex} % for expectation \E{}, entropy \H{}, MI \I{} etc
+\input{tikz-forest-parameters.tex}% import forest,tikz,tikz-dependency, set some things for dep trees
+
+\usepackage[%
+natbib=true,backend=biber,sorting=nymdt,%
+citestyle=authoryear,bibstyle=authoryear,%
+url=false,doi=false,isbn=false,
+]{biblatex}
+\addbibresource{/Users/j/Library/texmf/bibtex/bib/all.bib}
+\input{/Users/j/Library/texmf/custom/jbib_links.tex} % note: imports xcolor, imports and configs hyperref, defines nymdt sorting
+% \usepackage{cleveref} % must come after importing hyperref
+
+\input{/Users/j/Library/texmf/custom/jformat.tex} % general formatting things
+% \usepackage[framemethod=TikZ]{mdframed}
+\theoremstyle{remark}
+\newtheorem{ex}{Example}
+\newtheorem*{myquote}{\large``\hfill ''}
+
+\newcommand{\mypurple}{\color[rgb]{0.5,0,0.7}}
+\newcommand{\myblue}{\color[rgb]{0,0.5,0.8}}
+\newcommand{\myred}{\color[rgb]{1,0,0}}
+
+% \setbeamertemplate{frametitle}{\thesection \hspace{0.2cm}}
+\setbeamertemplate{section in toc}[sections numbered]
+\setbeamertemplate{subsection in toc}[subsections numbered]
+\setbeamertemplate{footline}[frame number]
+
+\title{Deterministic Incremental Dependency Parsing}
+\subtitle{Joakim Nivre, 2008}
+% \date{April, 2021}
+\author{Jacob Louis Hoover}
+
+
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+{%hide headline within these brackets
+  \setbeamertemplate{headline}{}
+  \maketitle
+  \begin{frame}% show an outline
+    \paragraph{Outline}
+    \tableofcontents
+  \end{frame}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Preliminaries}
+\subsection{Dependency structures}
+\begin{frame}
+
+  Dependency structures:
+
+
+  \begin{alertblock}{Examples}
+    \begin{itemize}
+      \item A projective English dependency tree from the Penn Treebank (converted to dependency parse with \citeauthor{nivre.j:2008}'s Penn2Malt).
+        \begin{figure}[H]
+          \begin{dependency}[label style={fill=bg}]
+            \begin{deptext}
+              {[ROOT]}$_0$\& Economic$_1$\& news$_2$\& had$_3$\& little$_4$\& effect$_5$\& on$_6$\& financial$_7$\& markets$_8$\&.$_9$\\
+            \end{deptext}
+            \depedge{3}{2}{NMOD}
+            \depedge{4}{3}{SBJ}
+            \depedge{1}{4}{ROOT}
+            \depedge{6}{5}{NMOD}
+            \depedge{4}{6}{OBJ}
+            \depedge{6}{7}{NMOD}
+            \depedge{9}{8}{NMOD}
+            \depedge{7}{9}{PMOD}
+            \depedge[edge unit distance=0.65ex]{4}{10}{P}
+          \end{dependency}
+        \end{figure}
+
+      \item A non-projective Czech dependency tree from the Prague Dependency Treebank.
+        \begin{figure}[H]
+          \begin{dependency}[label style={fill=bg}]
+            \begin{deptext}
+              {[ROOT]}$_0$\& Z$_1$\& nich$_2$\& je$_3$\& jen$_4$\& jedna$_5$\& na$_6$\& kvalitu$_7$\&.$_8$\\
+              \& {\color{gray} Out-of}\& {\color{gray} them}\& {\color{gray} is}\& {\color{gray} only}\& {\color{gray} one-\textsc{fem-sg}}\& {\color{gray} to}\& {\color{gray} quality}\& {\color{gray}.}\\
+            \end{deptext}
+            \depedge[label style={anchor=west}]{1}{4}{Pred}
+            \depedge[edge unit distance=0.65ex]{1}{9}{AuxK}
+            \depedge{2}{3}{Atr}
+            \depedge[label style={anchor=east}]{4}{6}{Sb}
+            \depedge[label style={anchor=east}]{4}{7}{AuxP}
+            \depedge{6}{5}{AuxZ}
+            \depedge[edge unit distance=1ex]{6}{2}{AuxP}
+            \depedge{7}{8}{Adv}
+          \end{dependency}\\
+          (``Only one of them concerns quality.'')
+        \end{figure}
+    \end{itemize}
+  \end{alertblock}
+
+  \pause%
+
+  Formally
+
+  \begin{itemize}[<+->]
+    \item define \alert{dependency graph} $G=(V,A)$
+      \begin{itemize}
+        \item $V=\{1,\ldots,n\}$ set of nodes
+        \item $A = V\times L \times V$ set of labeled directed arcs
+      \end{itemize}
+    \item define notion of \alert{well-formedness}
+      \begin{itemize}
+        \item by properties \textsc{Root}, \textsc{Single-Head}, and \textsc{Acyclicity}
+      \end{itemize}
+    \item define property \alert{projectivity}
+      \begin{itemize}
+        \item there exists a path from the head of an arc to any node inside the span of the arc
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\subsection{Incremental dependency parsing}
+\begin{frame}
+
+  Common formalization incremental dependency parsing algorithms:
+  \begin{itemize}[<+->]
+    \item \alert{transition system} $S=(C,T,c_s,C_t)$
+      \begin{itemize}
+        \item $C$ a set of configurations, each containing a buffer $\beta$ of (remaining) nodes and a set $A$ of dependency arcs,
+        \item $T$ a set of transitions $t : C \to C$,
+        \item $c_\mathrm{start}$ an initialization function, mapping a sentence $x = (w_0,w_1,\ldots,w_n)$ to a configuration with $\beta = [1, \ldots , n]$,
+        \item $C_\mathrm{terminal} \subseteq C$ a set of terminal configurations.
+      \end{itemize}
+    \item \alert{transition sequence} (derivation): a series of transitions through configurations, starting in a start configuration,
+    \item incrementality
+      \begin{itemize}
+        \item buffer always decreasing in size, and derivation is over when empty
+        \item once an arc is added to $A$, it is never removed
+      \end{itemize}
+    \item correctness of an algorithm (soundness and completeness) for a class of dependency graphs
+    \item an \alert{oracle}
+      \begin{itemize}
+        \item for a transition system $S$, an oracle is a function $o : C \to T$ specifying which transition to take for any given configuration
+      \end{itemize}
+  \end{itemize}
+
+  \onslide<+->
+
+  \begin{alertblock}{\textsc{Parse}$(x=(w_0,\ldots,w_n))$}
+    \begin{algorithmic}[1]
+      \State$c\gets c_s(x)$
+      \While{$c\notin C_t$}
+      \State$c\gets [o(c)](c)$
+      \EndWhile\\
+      \Return$G_c$
+    \end{algorithmic}
+  \end{alertblock}
+
+  \onslide<+->
+
+  \begin{itemize}
+    \item Stack-based Algorithms (for projective structures)
+      \begin{itemize}
+        \item arc-standard
+        \item arc-eager
+      \end{itemize}
+    \item List-based Algorithms
+      \begin{itemize}
+        \item non-projective
+        \item projective
+      \end{itemize}
+  \end{itemize}
+
+\end{frame}
+
+\section{Stack-based Algorithms}
+
+\begin{frame}
+
+  \textbf{Stack-based Algorithms}
+
+  \begin{definition}
+    A \alert{stack-based configuration} for a sentence $x = (w_0, w_1, \ldots, w_n)$ is a triple $c = (\sigma,\beta, A)$, where
+    \begin{enumerate}
+      \item $\sigma$ is a stack of tokens $i \le k$ (for some $k \le n$)
+        \hfill\emph{\small $\leftarrow$ will represent as a list with head to right}
+      \item $\beta$ is a buffer of tokens $j > k$,
+        \hfill\emph{\small $\leftarrow$ will represent as a list with head to left\phantom{w}}
+      \item $A$ is a set of dependency arcs such that $G = (\{0, 1, \ldots, n\}, A)$ is a dependency graph for $x$.
+    \end{enumerate}
+  \end{definition}
+
+
+  \begin{definition}
+    A \alert{stack-based transition system} is a quadruple $S = (C, T, c_\mathrm{start} , C_\mathrm{terminal})$, where
+    \begin{enumerate}
+      \item $C$ is the set of all stack-based configurations,
+      \item $c_\mathrm{start}(x = (w_0,w_1,\ldots,w_n)) = ([0],[1,\ldots,n],\varnothing)$,
+      \item $T$ is a set of transitions, each of which is a function $t : C \to C$,
+      \item $C_\mathrm{terminal} = \{c \in C \mid c = (\sigma,[],A)\}$.
+    \end{enumerate}
+  \end{definition}
+\end{frame}
+
+\subsection{Arc-standard stack-based algorithm}
+
+\begin{frame}
+  \textbf{Arc-standard stack-based algorithm}
+
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figs/arc-standard.png}
+    \caption{Transitions for the arc-standard stack-based parsing algorithm.}
+  \end{figure}
+
+  \begin{myquote}
+    The arc-standard parser is the closest correspondent to the familiar shift-reduce parser for context-free grammars (Aho, Sethi, and Ullman 1986).
+
+    \alert{The $\textsc{Left-Arc}_l$ and $\textsc{Right-Arc}^s_l$ transitions correspond to reduce actions}, replacing a head-dependent structure with its head, whereas \alert{the \textsc{Shift} transition is exactly the same as the shift action}.
+
+    One peculiarity of the transitions, as defined here, is that the ``reduce'' transitions apply to one node on the stack and one node in the buffer, rather than two nodes on the stack. The reason for this formulation is to facilitate comparison with the arc-eager parser and to simplify the definition of terminal configurations.
+  \end{myquote}
+
+\end{frame}
+
+\begin{frame}
+  \textbf{Illustration} Arc-standard transition sequence for English example sentence:
+  \begin{figure}
+    \centering
+    % \caption{Arc-standard transition sequence for English example sentence:}\label{fig:stack-arc-standard}
+    \begin{dependency}
+      \begin{deptext}
+        {\alt<1-17,19>{\myblue}% color1 when in sigma
+          {\alt<18>{\myred}%             color2 when in beta
+        {}}[ROOT]$_0$}\&%                 else no color
+        {\alt<2>{\myblue}%
+          {\alt<1>{\myred}%
+        {}}Economic$_1$}\&
+        {\alt<4>{\myblue}%
+          {\alt<1-3>{\myred}%
+        {}}news$_2$}\&
+        {\alt<6-14,16>{\myblue}%
+          {\alt<1-5,15,17>{\myred}%
+        {}}had$_3$}\&
+        {\alt<7>{\myblue}%
+          {\alt<1-6>{\myred}%
+        {}}little$_4$}\&
+        {\alt<9-13>{\myblue}%
+          {\alt<1-8,14>{\myred}%
+        {}}effect$_5$}\&
+        {\alt<10-12>{\myblue}%
+          {\alt<1-9,13>{\myred}%
+        {}}on$_6$}\&
+        {\alt<11>{\myblue}%
+          {\alt<1-10>{\myred}%
+        {}}financial$_7$}\&
+        {\alt<1-12>{\myred}%
+        {}markets$_8$}\&
+        {\alt<1-16>{\myred}%
+        {}.$_9$} \\
+      \end{deptext}
+      \onslide<3->{\alert<3>{\depedge{3}{2}{NMOD}}}
+      \onslide<5->{\alert<5>{\depedge{4}{3}{SBJ}}}
+      \onslide<8->{\alert<8>{\depedge{6}{5}{NMOD}}}
+      \onslide<12->{\alert<12>{\depedge{9}{8}{NMOD}}}
+      \onslide<13->{\alert<13>{\depedge{7}{9}{PMOD}}}
+      \onslide<14->{\alert<14>{\depedge{6}{7}{NMOD}}}
+      \onslide<15->{\alert<15>{\depedge{4}{6}{OBJ}}}
+      \onslide<17->{\alert<17>{\depedge[edge unit distance=0.65ex]{4}{10}{P}}}
+      \onslide<18->{\alert<18>{\depedge{1}{4}{ROOT}}}
+    \end{dependency}
+    \small
+    \begin{tabular}{RRLLLLR}
+      \toprule
+         &                                             & &{\myblue\sigma}&{\myred\beta}&A    &\\
+   \midrule
+   \onslide<+->
+      1. &                                             &(&[0],         &[1,\ldots,9], &\varnothing &)\\ \onslide<+->
+      2. &\textsc{Shift} \implies                      &(&[0,1],       &[2,\ldots,9], &\varnothing &)\\ \onslide<+->
+      3. &\textsc{Left-Arc}_{\texttt{NMOD}} \implies   &(&[0],         &[2,\ldots,9], &A_1 = \{(2,\texttt{NMOD},1)\} &)\\ \onslide<+->
+      4. &\textsc{Shift} \implies                      &(&[0,2],       &[3,\ldots,9], &A_1 &)\\ \onslide<+->
+      5. &\textsc{Left-Arc}_{\texttt{SBJ}} \implies    &(&[0],         &[3,\ldots,9], &A_2 = A_1 \cup \{(3,\texttt{SBJ},2)\} &)\\ \onslide<+->
+      6. &\textsc{Shift} \implies                      &(&[0,3],       &[4,\ldots,9], &A_2 &)\\ \onslide<+->
+      7. &\textsc{Shift} \implies                      &(&[0,3,4],     &[5,\ldots,9], &A_2 &)\\ \onslide<+->
+      8. &\textsc{Left-Arc}_{\texttt{NMOD}} \implies   &(&[0,3],       &[5,\ldots,9], &A_3 = A_2\cup \{(5,\texttt{NMOD},4)\} &)\\ \onslide<+->
+      9. &\textsc{Shift} \implies                      &(&[0,3,5],     &[6,\ldots,9], &A_3 &)\\ \onslide<+->
+      10.&\textsc{Shift} \implies                      &(&[0,3,5,6],   &[7,8,9],      &A_3 &)\\ \onslide<+->
+      11.&\textsc{Shift} \implies                      &(&[0,3,5,6,7], &[8,9],        &A_3 &)\\ \onslide<+->
+      12.&\textsc{Left-Arc}_{\texttt{NMOD}} \implies   &(&[0,3,5,6],   &[8,9],        &A_4 = A_3\cup \{(8,\texttt{NMOD},7)\} &)\\ \onslide<+->
+      13.&\textsc{Right-Arc}^s_{\texttt{PMOD}}\implies &(&[0,3,5],     &[6,9],        &A_5 = A_4\cup \{(6,\texttt{PMOD},8)\} &)\\ \onslide<+->
+      14.&\textsc{Right-Arc}^s_{\texttt{NMOD}}\implies &(&[0,3],       &[5,9],        &A_6 = A_5\cup \{(5,\texttt{NMOD},6)\} &)\\ \onslide<+->
+      15.&\textsc{Right-Arc}^s_{\texttt{OBJ}}\implies  &(&[0],         &[3,9],        &A_7 = A_6\cup \{(3,\texttt{OBJ},5)\} &)\\ \onslide<+->
+      16.&\textsc{Shift} \implies                      &(&[0,3],       &[9],          &A_7 &)\\ \onslide<+->
+      17.&\textsc{Right-Arc}^s_{\texttt{P}} \implies   &(&[0],         &[3],          &A_8 = A_7\cup \{(3,\texttt{P},9)\} &)\\ \onslide<+->
+      18.&\textsc{Right-Arc}^s_{\texttt{ROOT}}\implies &(&[ ],         &[0],          &A_9 = A_8\cup \{(0,\texttt{ROOT},3)\} &)\\ \onslide<+->
+      19.&\textsc{Shift} \implies                      &(&[0],         &\spot<.(1)>{[]},&A_9 &)\\
+      \bottomrule
+    \end{tabular}
+  \end{figure}
+  \onslide<+->
+\end{frame}
+
+
+\subsection{Arc-eager stack-based algorithm}
+
+
+\begin{frame}
+
+  \textbf{Arc-eager stack-based algorithm}
+
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figs/arc-eager.png}
+    \caption{Transitions for the arc-eager stack-based parsing algorithm.}
+  \end{figure}
+
+  \begin{myquote}
+    The arc-eager parser differs from the arc-standard one by \alert{attaching right dependents (using $\textsc{Right-Arc}^e_l$ transitions) as soon as possible, that is, before the right dependent has found all its right dependents}.
+
+    As a consequence, the $\textsc{Right-Arc}^e_l$ transitions cannot replace the head-dependent structure with the head, as in the arc-standard system, but must store both the head and the dependent on the stack for further processing. The dependent can be popped from the stack at a later time through the \textsc{Reduce} transition, which completes the reduction of this structure.
+  \end{myquote}
+
+\end{frame}
+
+\begin{frame}
+  \textbf{Illustration} Arc-eager transition sequence for English example sentence:
+  \begin{figure}
+    \centering
+    % \caption{Arc-eager transition sequence for English example sentence:}\label{fig:stack-arc-eager}
+    \begin{dependency}
+      \begin{deptext}
+        {\alt<1-17>{\myblue}%   color1 when in sigma
+          {\alt<18>{\myred}%    color2 when in beta
+        {}}[ROOT]$_0$}\&%       else no color
+        {\alt<2>{\myblue}%
+          {\alt<1>{\myred}%
+        {}}Economic$_1$}\&
+        {\alt<4>{\myblue}%
+          {\alt<1-3>{\myred}%
+        {}}news$_2$}\&
+        {\alt<6-17>{\myblue}%
+          {\alt<1-5>{\myred}%
+        {}}had$_3$}\&
+        {\alt<7>{\myblue}%
+          {\alt<1-6>{\myred}%
+        {}}little$_4$}\&
+        {\alt<9-15>{\myblue}%
+          {\alt<1-8>{\myred}%
+        {}}effect$_5$}\&
+        {\alt<10-14>{\myblue}%
+          {\alt<1-9>{\myred}%
+        {}}on$_6$}\&
+        {\alt<11>{\myblue}%
+          {\alt<1-10>{\myred}%
+        {}}financial$_7$}\&
+        {\alt<13>{\myblue}%
+          {\alt<1-12>{\myred}%
+        {}}markets$_8$}\&
+        {\alt<17>{\myblue}%
+          {\alt<1-16>{\myred}%
+        {}}.$_9$} \\
+      \end{deptext}
+      \onslide<3->{\alert<3>{\depedge{3}{2}{NMOD}}}
+      \onslide<5->{\alert<5>{\depedge{4}{3}{SBJ}}}
+      \onslide<6->{\alert<6>{\depedge{1}{4}{ROOT}}}
+      \onslide<8->{\alert<8>{\depedge{6}{5}{NMOD}}}
+      \onslide<9->{\alert<9>{\depedge{4}{6}{OBJ}}}
+      \onslide<10->{\alert<10>{\depedge{6}{7}{NMOD}}}
+      \onslide<12->{\alert<12>{\depedge{9}{8}{NMOD}}}
+      \onslide<13->{\alert<13>{\depedge{7}{9}{PMOD}}}
+      \onslide<17->{\alert<17>{\depedge[edge unit distance=0.65ex]{4}{10}{P}}}
+    \end{dependency}
+    \small
+    \begin{tabular}{RRLLLLR}
+      \toprule
+         &                                                 & &{\myblue\sigma}&{\myred\beta}&A       &\\
+   \midrule
+   \onslide<+->
+      1. &                                                 &(&[0],         &[1,\ldots,9],   &\varnothing                         &)\\ \onslide<+->
+      2. &\textsc{Shift} \implies                          &(&[0, 1],      &[2,\ldots,9],   &\varnothing                         &)\\ \onslide<+->
+      3. &\textsc{Left-Arc}_{\texttt{NMOD}} \implies       &(&[0],         &[2,\ldots,9],   &A_1 =\{(2,\texttt{NMOD},1)\}        &)\\ \onslide<+->
+      4. &\textsc{Shift} \implies                          &(&[0, 2],      &[3,\ldots,9],   &A_1                                 &)\\ \onslide<+->
+      5. &\textsc{Left-Arc}_{\texttt{SBJ}} \implies        &(&[0],         &[3,\ldots,9],   &A_2 =A_1\cup\{(3,\texttt{SBJ},2)\}  &)\\ \onslide<+->
+      6. &\textsc{Right-Arc}^e_{\texttt{ROOT}} \implies    &(&[0, 3],      &[4,\ldots,9],   &A_3 =A_2\cup\{(0,\texttt{ROOT},3)\} &)\\ \onslide<+->
+      7. &\textsc{Shift} \implies                          &(&[0, 3, 4],   &[5,\ldots,9],   &A_3                                 &)\\ \onslide<+->
+      8. &\textsc{Left-Arc}_{\texttt{NMOD}} \implies       &(&[0, 3],      &[5,\ldots,9],   &A_4 =A_3\cup\{(5,\texttt{NMOD},4)\} &)\\ \onslide<+->
+      9. &\textsc{Right-Arc}^e_{\texttt{OBJ}} \implies     &(&[0, 3, 5],   &[6,\ldots,9],   &A_5 =A_4\cup\{(3,\texttt{OBJ},5)\}  &)\\ \onslide<+->
+      10.&\textsc{Right-Arc}^e_{\texttt{NMOD}} \implies    &(&[0,3,5,6],   &[7, 8, 9],      &A_6 =A_5\cup\{(5,\texttt{NMOD},6)\} &)\\ \onslide<+->
+      11.&\textsc{Shift} \implies                          &(&[0,3,5,6,7], &[8, 9],         &A_6                                 &)\\ \onslide<+->
+      12.&\textsc{Left-Arc}_{\texttt{NMOD}} \implies       &(&[0,3,5,6],   &[8, 9],         &A_7 =A_6\cup\{(8,\texttt{NMOD},7)\} &)\\ \onslide<+->
+      13.&\textsc{Right-Arc}^e_{\texttt{PMOD}} \implies    &(&[0,3,5,6,8], &[9],            &A_8 =A_7\cup\{(6,\texttt{PMOD},8)\} &)\\ \onslide<+->
+      14.&\textsc{Reduce}\implies                          &(&[0,3,5,6],   &[9],            &A_8                                 &)\\ \onslide<+->
+      15.&\textsc{Reduce}\implies                          &(&[0, 3, 5],   &[9],            &A_8                                 &)\\ \onslide<+->
+      16.&\textsc{Reduce}\implies                          &(&[0, 3],      &[9],            &A_8                                 &)\\ \onslide<+->
+      17.&\textsc{Right-Arc}^e_{\texttt{P}} \implies       &(&[0, 3, 9],   &\spot<.(1)>{[]},&A_9 =A_8\cup\{(3,\texttt{P},9)\}    &)\\
+      \bottomrule
+    \end{tabular}
+  \end{figure}
+  \onslide<+->
+\end{frame}
+
+\section{List-based Algorithms}
+
+\begin{frame}
+
+  \textbf{List-based Algorithms}
+
+  \begin{definition}
+    A \alert{list-based configuration} for a sentence $x = (w_0, w_1, \ldots, w_n)$ is a quadruple $c = (\lambda_1, \lambda_2,\beta, A)$, where
+    \begin{enumerate}
+      \item $\lambda_1$ is a list of tokens $i_1 \le k_1$ (for some $k_1 \le n$)
+        \begin{itemize}
+          \item \emph{will represent as a list with head to right (nodes in decreasing order)}
+        \end{itemize}
+      \item $\lambda_2$ is a list of tokens $i_2 \le k_2$ (for some $k_2$, such that $k_1 < k_2 \le n$)
+        \begin{itemize}
+          \item \emph{will represent as a list with head to left (nodes in increasing order)}
+        \end{itemize}
+      \item $\beta$ is a buffer of tokens $j > k_2$,
+        \begin{itemize}
+          \item \emph{will represent as a list with head to left}
+        \end{itemize}
+      \item $A$ is a set of dependency arcs such that $G = (\{0, 1, \ldots, n\}, A)$ is a dependency graph for $x$.
+    \end{enumerate}
+  \end{definition}
+
+  Write $\lambda_1.\lambda_2$ for the concatenation of lists $\lambda_1$ and $\lambda_2$. Ex., $[0, 1].[2, 3, 4] = [0, 1, 2, 3, 4]$.
+
+  \begin{definition}
+    A \alert{list-based transition system} is a quadruple $S = (C, T, c_\mathrm{start} , C_\mathrm{terminal})$, where
+    \begin{enumerate}
+      \item $C$ is the set of all list-based configurations,
+      \item $c_\mathrm{start}(x = (w_0,w_1,\ldots,w_n)) = ([0],[],[1,\ldots,n],\varnothing)$,
+      \item $T$ is a set of transitions, each of which is a function $t : C \to C$,
+      \item $C_\mathrm{terminal} = \{c \in C \mid c = (\lambda_1,\lambda_2,[],A)\}$.
+    \end{enumerate}
+    \emph{(Note, only difference from stack-based system is: two lists instead of a single stack)}
+  \end{definition}
+\end{frame}
+
+\subsection{Non-projective list-based algorithm}
+\begin{frame}
+
+  \textbf{Non-projective list-based algorithm}
+
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figs/list-nonproj.png}
+    \caption{Transitions for the arc-eager stack-based parsing algorithm.}
+  \end{figure}
+
+  \begin{myquote}
+    The fact that both the head and the dependent are kept in either $\lambda_2$ or $\beta$ makes it \alert{possible to construct non-projective dependency graphs}, because the $\textsc{No-Arc}^n$ transition allows a node to be passed from $\lambda_1$ to $\lambda_2$ even if it does not (yet) have a head.
+  \end{myquote}
+
+\end{frame}
+
+\begin{frame}
+
+  \textbf{Illustration} Transition sequence for non-projective Czech example sentence:
+  \begin{figure}
+    \centering
+    \begin{dependency}
+      \begin{deptext}
+        {\alt<1-6,8-27,29>{\myblue}%        when in lambda_1
+          {\alt<7,28>{\mypurple}%           when in lambda_2
+            {\alt<0>{\myred}%               when in beta
+        {}}}{[ROOT]}$_0$}\&%            else
+        {\alt<2,4-5,8-12,14-26,29>{\myblue}
+          {\alt<3,6-7,13,27-28>{\mypurple}
+            {\alt<1>{\myred}
+        {}}}Z$_1$}\&
+        {\alt<4,8-11,14-25,29>{\myblue}
+          {\alt<5-7,12-13,26-28>{\mypurple}
+            {\alt<1-3>{\myred}
+        {}}}nich$_2$}\&
+        {\alt<8-10,14-16,18-24,29>{\myblue}
+          {\alt<11-13,17,25-28>{\mypurple}
+            {\alt<1-7>{\myred}
+        {}}}je$_3$}\&
+        {\alt<9,14-15,18-23,29>{\myblue}
+          {\alt<10-13,16-17,24-28>{\mypurple}
+            {\alt<1-8>{\myred}
+        {}}}jen$_4$}\&
+        {\alt<14,18-22,29>{\myblue}
+          {\alt<15-17,23-28>{\mypurple}
+            {\alt<1-13>{\myred}
+        {}}}jedna$_5$}\&
+        {\alt<18,20-21,29>{\myblue}
+          {\alt<19,22-28>{\mypurple}
+            {\alt<1-17>{\myred}
+        {}}}na$_6$}\&
+        {\alt<20,29>{\myblue}
+          {\alt<21-28>{\mypurple}
+            {\alt<1-19>{\myred}
+        {}}}kvalitu$_7$}\&
+        {\alt<29>{\myblue}
+          {\alt<0>{\mypurple}
+            {\alt<1-28>{\myred}
+        {}}}.$_8$}\\
+      \end{deptext}
+      \onslide<3->{\alert<3>{\depedge{2}{3}{Atr}}}
+      \onslide<7->{\alert<7>{\depedge[label style={anchor=west}]{1}{4}{Pred}}}
+      \onslide<10->{\alert<10>{\depedge{6}{5}{AuxZ}}}
+      \onslide<11->{\alert<11>{\depedge[label style={anchor=east}]{4}{6}{Sb}}}
+      \onslide<13->{\alert<13>{\depedge[edge unit distance=1ex]{6}{2}{AuxP}}}
+      \onslide<17->{\alert<17>{\depedge[label style={anchor=east}]{4}{7}{AuxP}}}
+      \onslide<19->{\alert<19>{\depedge{7}{8}{Adv}}}
+      \onslide<28->{\alert<28>{\depedge[edge unit distance=0.65ex]{1}{9}{AuxK}}}
+    \end{dependency}\\
+    \small
+    \begin{tabular}{RRLLLLLR}
+      \toprule
+          &                                              & &{\myblue\lambda_1}&{\mypurple\lambda_2}&{\myred\beta}&A &\\
+    \midrule
+    \onslide<+->
+      1.  &                                              &(&[0],          &[],          &[1,\ldots,8],& \varnothing                           &)\\ \onslide<+->
+      2.  &\textsc{Shift}^\lambda \implies               &(&[0, 1],       &[],          &[2,\ldots,8],& \varnothing                           &)\\ \onslide<+->
+      3.  &\textsc{Right-Arc}^n_{\texttt{Atr}}\implies   &(&[0],          &[1],         &[2,\ldots,8],& A_1 = {(1, \texttt{Atr}, 2)}          &)\\ \onslide<+->
+      4.  &\textsc{Shift}^\lambda \implies               &(&[0, 1, 2],    &[],          &[3,\ldots,8],& A_1                                   &)\\ \onslide<+->
+      5.  &\textsc{No-Arc}^n \implies                    &(&[0, 1],       &[2],         &[3,\ldots,8],& A_1                                   &)\\ \onslide<+->
+      6.  &\textsc{No-Arc}^n \implies                    &(&[0],          &[1, 2],      &[3,\ldots,8],& A_1                                   &)\\ \onslide<+->
+      7.  &\textsc{Right-Arc}^n_{\texttt{Pred}}\implies  &(&[],           &[0, 1, 2],   &[3,\ldots,8],& A_2 = A_1 \cup{(0, \texttt{Pred}, 3)} &)\\ \onslide<+->
+      8.  &\textsc{Shift}^\lambda \implies               &(&[0,\ldots,3], &[],          &[4,\ldots,8],& A_2                                   &)\\ \onslide<+->
+      9.  &\textsc{Shift}^\lambda \implies               &(&[0,\ldots,4], &[],          &[5,\ldots,8],& A_2                                   &)\\ \onslide<+->
+      10. &\textsc{Left-Arc}^n_{\texttt{AuxZ}}\implies   &(&[0,\ldots,3], &[4],         &[5,\ldots,8],& A_3 = A_2 \cup{(5, \texttt{AuxZ}, 4)} &)\\ \onslide<+->
+      11. &\textsc{Right-Arc}^n_{\texttt{Sb}}\implies    &(&[0, 1, 2],    &[3, 4],      &[5,\ldots,8],& A_4 = A_3 \cup{(3, \texttt{Sb}, 5)}   &)\\ \onslide<+->
+      12. &\textsc{No-Arc}^n \implies                    &(&[0, 1],       &[2, 3, 4],   &[5,\ldots,8],& A_4                                   &)\\ \onslide<+->
+      13. &\textsc{Left-Arc}^n_{\texttt{AuxP}}\implies   &(&[0],          &[1,\ldots,4],&[5,\ldots,8],& A_5 = A_4 \cup{(5, \texttt{AuxP}, 1)} &)\\ \onslide<+->
+      14. &\textsc{Shift}^\lambda \implies               &(&[0,\ldots,5], &[],          &[6, 7, 8],   & A_5                                   &)\\ \onslide<+->
+      15. &\textsc{No-Arc}^n \implies                    &(&[0,\ldots,4], &[5],         &[6, 7, 8],   & A_5                                   &)\\ \onslide<+->
+      16. &\textsc{No-Arc}^n \implies                    &(&[0,\ldots,3], &[4, 5],      &[6, 7, 8],   & A_5                                   &)\\ \onslide<+->
+      17. &\textsc{Right-Arc}^n_{\texttt{AuxP}}\implies  &(&[0, 1, 2],    &[3, 4, 5],   &[6, 7, 8],   & A_6 = A_5 \cup{(3, \texttt{AuxP}, 6)} &)\\ \onslide<+->
+      18. &\textsc{Shift}^\lambda \implies               &(&[0,\ldots,6], &[],          &[7, 8],      & A_6                                   &)\\ \onslide<+->
+      19. &\textsc{Right-Arc}^n_{\texttt{Adv}}\implies   &(&[0,\ldots,5], &[6],         &[7, 8],      & A_7 = A_6 \cup{(6, \texttt{Adv}, 7)}  &)\\ \onslide<+->
+      20. &\textsc{Shift}^\lambda \implies               &(&[0,\ldots,7], &[],          &[8],         & A_7                                   &)\\ \onslide<+->
+      21. &\textsc{No-Arc}^n \implies                    &(&[0,\ldots,6], &[7],         &[8],         & A_7                                   &)\\ \onslide<+->
+      22. &\textsc{No-Arc}^n \implies                    &(&[0,\ldots,5], &[6, 7],      &[8],         & A_7                                   &)\\ \onslide<+->
+      23. &\textsc{No-Arc}^n \implies                    &(&[0,\ldots,4], &[5, 6, 7],   &[8],         & A_7                                   &)\\ \onslide<+->
+      24. &\textsc{No-Arc}^n \implies                    &(&[0,\ldots,3], &[4,\ldots,7],&[8],         & A_7                                   &)\\ \onslide<+->
+      25. &\textsc{No-Arc}^n \implies                    &(&[0, 1, 2],    &[3,\ldots,7],&[8],         & A_7                                   &)\\ \onslide<+->
+      26. &\textsc{No-Arc}^n \implies                    &(&[0, 1],       &[2,\ldots,7],&[8],         & A_7                                   &)\\ \onslide<+->
+      27. &\textsc{No-Arc}^n \implies                    &(&[0],          &[1,\ldots,7],&[8],         & A_7                                   &)\\ \onslide<+->
+      28. &\textsc{Right-Arc}^n_{\texttt{AuxK}} \implies &(&[],           &[0,\ldots,7],&[8],         & A_8 = A_7 \cup{(0, \texttt{AuxK}, 8)} &)\\ \onslide<+->
+      29. &\textsc{Shift}^\lambda \implies               &(&[0,\ldots,8], &[],          &\spot<.(1)>{[]},& A_8                                &)\\
+      \bottomrule
+    \end{tabular}
+  \end{figure}
+  \onslide<+->
+\end{frame}
+
+\subsection{Projective list-based algorithm}
+\begin{frame}
+
+  \textbf{Projective list-based algorithm}
+
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figs/list-proj.png}
+    \caption{Transitions for the arc-eager stack-based parsing algorithm.}
+  \end{figure}
+
+  \begin{myquote}
+    The projective, list-based parser uses the \alert{same basic strategy as its non-projective counterpart,
+    but skips any pair (i, j) that could give rise to a non-projective dependency arc}.
+
+    Skipping many node pairs makes it more efficient in practice, although the worst-case time complexity remains the same.
+  \end{myquote}
+
+\end{frame}
+
+\begin{frame}
+  \textbf{Illustration} Transition sequence for projective English example sentence (nearly identical to the arc-eager stack-based sequence):
+  \begin{figure}
+    \centering
+    \begin{dependency}
+      \begin{deptext}
+        {\alt<1-17>{\myblue}%     when in lambda_1
+          {\alt<0>{\mypurple}%    when in lambda_2
+            {\alt<0>{\myred}%
+        {}}}[ROOT]$_0$}\&%
+        {\alt<2>{\myblue}%
+          {\alt<0>{\mypurple}%
+            {\alt<1>{\myred}%
+        {}}}Economic$_1$}\&
+        {\alt<4>{\myblue}%
+          {\alt<0>{\mypurple}%
+            {\alt<1-3>{\myred}%
+        {}}}news$_2$}\&
+        {\alt<6-17>{\myblue}%
+          {\alt<0>{\mypurple}%
+            {\alt<1-5>{\myred}%
+        {}}}had$_3$}\&
+        {\alt<7>{\myblue}%
+          {\alt<0>{\mypurple}%
+            {\alt<1-6>{\myred}%
+        {}}}little$_4$}\&
+        {\alt<9-15>{\myblue}%
+          {\alt<16>{\mypurple}%
+            {\alt<1-8>{\myred}%
+        {}}}effect$_5$}\&
+        {\alt<10-14>{\myblue}%
+          {\alt<15-16>{\mypurple}%
+            {\alt<1-9>{\myred}%
+        {}}}on$_6$}\&
+        {\alt<11>{\myblue}%
+          {\alt<0>{\mypurple}%
+            {\alt<1-10>{\myred}%
+        {}}}financial$_7$}\&
+        {\alt<13>{\myblue}%
+          {\alt<14-16>{\mypurple}%
+            {\alt<1-12>{\myred}%
+        {}}}markets$_8$}\&
+        {\alt<17>{\myblue}%
+          {\alt<0>{\mypurple}%
+            {\alt<1-16>{\myred}%
+        {}}}.$_9$} \\
+      \end{deptext}
+      \onslide<3->{\alert<3>{\depedge{3}{2}{NMOD}}}
+      \onslide<5->{\alert<5>{\depedge{4}{3}{SBJ}}}
+      \onslide<6->{\alert<6>{\depedge{1}{4}{ROOT}}}
+      \onslide<8->{\alert<8>{\depedge{6}{5}{NMOD}}}
+      \onslide<9->{\alert<9>{\depedge{4}{6}{OBJ}}}
+      \onslide<10->{\alert<10>{\depedge{6}{7}{NMOD}}}
+      \onslide<12->{\alert<12>{\depedge{9}{8}{NMOD}}}
+      \onslide<13->{\alert<13>{\depedge{7}{9}{PMOD}}}
+      \onslide<17->{\alert<17>{\depedge[edge unit distance=0.65ex]{4}{10}{P}}}
+    \end{dependency}
+    \small
+    \begin{tabular}{RRLLLLLR}
+      \toprule 
+         &                                              &  &{\myblue\lambda_1}  &{\mypurple\lambda_2}&{\myred\beta}&A &\\
+    \midrule
+    \onslide<+->
+      1. &                                               &(&[0],         &[],      &[1,\ldots,9],  &\varnothing                         &)\\ \onslide<+->
+      2. &\textsc{Shift}^\lambda \implies                &(&[0, 1],      &[],      &[2,\ldots,9],  &\varnothing                         &)\\ \onslide<+->
+      3. &\textsc{Left-Arc}^p_{\texttt{NMOD}} \implies   &(&[0],         &[],      &[2,\ldots,9],  &A_1 =\{(2,\texttt{NMOD},1)\}        &)\\ \onslide<+->
+      4. &\textsc{Shift}^\lambda \implies                &(&[0, 2],      &[],      &[3,\ldots,9],  &A_1                                 &)\\ \onslide<+->
+      5. &\textsc{Left-Arc}^p_{\texttt{SBJ}} \implies    &(&[0],         &[],      &[3,\ldots,9],  &A_2 =A_1\cup\{(3,\texttt{SBJ},2)\}  &)\\ \onslide<+->
+      6. &\textsc{Right-Arc}^p_{\texttt{ROOT}} \implies  &(&[0, 3],      &[],      &[4,\ldots,9],  &A_3 =A_2\cup\{(0,\texttt{ROOT},3)\} &)\\ \onslide<+->
+      7. &\textsc{Shift}^\lambda \implies                &(&[0, 3, 4],   &[],      &[5,\ldots,9],  &A_3                                 &)\\ \onslide<+->
+      8. &\textsc{Left-Arc}^p_{\texttt{NMOD}} \implies   &(&[0, 3],      &[],      &[5,\ldots,9],  &A_4 =A_3\cup\{(5,\texttt{NMOD},4)\} &)\\ \onslide<+->
+      9. &\textsc{Right-Arc}^p_{\texttt{OBJ}} \implies   &(&[0, 3, 5],   &[],      &[6,\ldots,9],  &A_5 =A_4\cup\{(3,\texttt{OBJ},5)\}  &)\\ \onslide<+->
+      10.&\textsc{Right-Arc}^p_{\texttt{NMOD}} \implies  &(&[0,3,5,6],   &[],      &[7, 8, 9],     &A_6 =A_5\cup\{(5,\texttt{NMOD},6)\} &)\\ \onslide<+->
+      11.&\textsc{Shift}^\lambda \implies                &(&[0,3,5,6,7], &[],      &[8, 9],        &A_6                                 &)\\ \onslide<+->
+      12.&\textsc{Left-Arc}^p_{\texttt{NMOD}} \implies   &(&[0,3,5,6],   &[],      &[8, 9],        &A_7 =A_6\cup\{(8,\texttt{NMOD},7)\} &)\\ \onslide<+->
+      13.&\textsc{Right-Arc}^p_{\texttt{PMOD}} \implies  &(&[0,3,5,6,8], &[],      &[9],           &A_8 =A_7\cup\{(6,\texttt{PMOD},8)\} &)\\ \onslide<+->
+      14.&\textsc{No-Arc}^p\implies                      &(&[0,3,5,6],   &[8],     &[9],           &A_8                                 &)\\ \onslide<+->
+      15.&\textsc{No-arc}^p\implies                      &(&[0, 3, 5],   &[6,8],   &[9],           &A_8                                 &)\\ \onslide<+->
+      16.&\textsc{No-arc}^p\implies                      &(&[0, 3],      &[5,6,8], &[9],           &A_8                                 &)\\ \onslide<+->
+      17.&\textsc{Right-Arc}^p_{\texttt{P}} \implies     &(&[0, 3, 9],   &[],      &\spot<.(1)>{[]},&A_9 =A_8\cup\{(3,\texttt{P},9)\}   &)\\
+      \bottomrule
+    \end{tabular}
+  \end{figure}
+  \onslide<+->
+\end{frame}
+
+\section{Experimental Evaluation}
+
+\begin{frame}
+
+  \textbf{Evaluation of the four algorithms} in deterministic data-driven parsing:
+
+  Use an oracle approximated by a classifier trained on treebank data to analyze of the accuracy and efficiency of these systems.
+
+  \begin{itemize}
+    \item Data: CoNLL-X shared task multilingual dependency parsing
+      \pause
+      \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=0.95\textwidth]{figs/datasets.png}
+        \caption{Data sets}
+      \end{figure}
+  \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+
+  \begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figs/efficiency.png}
+    \caption{Parsing efficiency}
+  \end{figure}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\backupbegin%defines begin of backup slides so the numbering stops
+
+%add the Bibliography
+\begin{frame} % use [allowframebreaks] if there are too many
+  % \AtNextBibliography{\footnotesize}
+  \printbibliography[title=Ref.]{}
+\end{frame}
+
+\backupend% end of backup slides
+\end{document}
+
+
+%--- Next Frame ---%
+% \begin{frame}
+% Something first
+
+% \alert<3>{Look here at 3}
+% \only<3>{Appears!}
+
+% \uncover<2->{Uncover 2}
+
+% \end{frame}
+
