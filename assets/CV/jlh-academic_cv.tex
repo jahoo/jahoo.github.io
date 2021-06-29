@@ -1,0 +1,175 @@
+%!TEX program = xelatex
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{fontspec}
+\defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+\setmainfont{Linux Libertine}
+\setsansfont{Linux Biolinum}
+
+% formatting packages
+\usepackage[letterpaper, margin=.85in]{geometry}
+\usepackage{xunicode,xltxtra,url,parskip,array}
+\usepackage{ulem}
+\normalem
+\RequirePackage{color,graphicx}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{multicol}
+\usepackage{longtable}
+% for custom link coloring
+\usepackage{hyperref} 
+\definecolor{linkcolour}{rgb}{0,0.4,0.6}
+\hypersetup{colorlinks,breaklinks,urlcolor=linkcolour, linkcolor=linkcolour}
+
+% for \section definition
+\usepackage{titlesec} 
+\titleformat{\section}{\Large\bf\raggedright}{}{0em}{}[\titlerule]
+\titlespacing{\section}{0pt}{1pt}{0pt}
+
+\titleformat{\subsection}{\large\bf\raggedright}{}{0em}{}
+\titlespacing{\subsection}{0pt}{0pt}{0pt}
+
+%--------------------BEGIN DOCUMENT----------------------
+\begin{document}
+\pagestyle{empty}
+%--------------------TITLE-------------------------------
+% \vspace*{-35pt}
+\Huge{Jacob Louis \scshape{Hoover}}
+\small\textit{\hfill updated: \today}
+%--------------------SECTIONS----------------------------
+
+\begin{tabular}{l}
+	% \textsc{DOB:}   & 03 Jan 1989 \\
+    %\textsc{Address:}   & 
+    	1085 av du Dr-Penfield, Montréal, H3A 1A7, Canada \\
+    %\textsc{Phone:}     & 
+    	% +1 508 808 1033\\
+    %\textsc{email:}     & 
+    	jacob.hoover at mail.mcgill.ca\\
+    	%, hooverjac at mila.quebec\\
+    %\textsc{website:}   & 
+    	\href{http://jahoo.github.io}{jahoo.github.io}
+\end{tabular}
+\vspace*{10pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Education} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% \subsection{Degree study}
+
+\begin{longtable}{p{2cm}|p{14.5cm}}
+2018--(2024)	&PhD student in Linguistics, 
+\textbf{\href{https://www.mcgill.ca/linguistics/graduate}{McGill} University}, and
+\href{http://mila.quebec}{\textbf{Mila}} -- Quebec Artificial Intelligence Institute \\
+& advisor: Timothy J.\ O'Donnell. [Fast-tracked from MA program in 2019] \\
+
+\multicolumn{2}{c}{}\\
+2006--2012		& \textsc{Bachelor of Liberal Arts (ALB)}, \emph{cum laude}, \textbf{Harvard University Extension School}\\
+				&  Field of Study: Mathematics | Minor: Linguistics  \\% |\textsc{GPA}: 3.92 \\
+				%&  Awards:\\
+				%& - Reginald H. Phelps Prize (awarded to top three in graduating class) \\
+				%& - Dean's list Academic Achievement Award (each year) \\
+\end{longtable}
+
+% \subsection{Summer schools}
+
+% \begin{longtable}{p{2cm}|p{14.5cm}}
+% \textsc{Summer 2019}\hfill& \textbf{ESSLLI --- 31st European Summer School in Logic, Language and Information} | RÄ«ga, Latvia\\
+% \textsc{Summer 2018}\hfill& \textbf{2nd Crete Summer School of Linguistics} | Rethymnon, Greece\\
+% \textsc{Summer 2017}\hfill& \textbf{LSA 2017 Linguistic Institute} | Lexington, KY\\
+% 	&courses for grade: Combinatory Categorial Grammar (Prof.\ Mark Steedman), Computational Linguistics (Prof.\ Sandra KÃ¼bler), Phonology (Prof.\ Adam Albright)\\
+% \textsc{Summer 2016} \hfill& \textbf{ESSLLI --- 28th European Summer School in Logic, Language and Information} | Bolzano, Italy\\
+% 	& \textbf{NY -- St. Petersburg Institute of Linguistics, Cognition and Culture} | St. Petersburg, Russia \\
+% 	&short `internship' with Prof.\ Sabine Iatridou (MIT) on the syntax of coördination.\\
+% \end{longtable}
+
+% \subsection{Courses outside of program} 
+
+% \begin{longtable}{p{2cm}|p{14.5cm}}
+% \textsc{Spring 2017} \hfill&\textbf{Boston College} MATH 4480 \uline{Mathematical Logic} course (Prof.\ Robert Reed)\\
+% \textsc{Fall 2016} \hfill& \textbf{Brown University} CLPS 1830, \uline{Grammar and Processing of Ellipsis} seminar (Prof. Pauline Jacobson)\\
+% \hfill& \textbf{MIT} 24.902, \uline{Syntax} course (Prof. David Pesetsky)\\
+% \textsc{Fall 2013} \hfill&\textbf{University of Maryland, College Park}'s \uline{Exploring Quantum Physics} | online certificate (Coursera)\\
+% \hfill&\textbf{BerkeleyX} CS191x: \uline{Quantum Mechanics and Quantum Computation} | online certificate (EdX)\\
+% % \textsc{Spring 2003} & \textbf{Framingham State University} 61.110, \uline{Languages of the World} course with Prof.\ M.\ Mahler \\
+% \end{longtable}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Research} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\begin{longtable}{p{2cm}|p{14.5cm}}
+\textsc{2020}&\textbf{Accounting for variation in number agreement in Icelandic dative--nominative constructions}.  Proceedings of WCCFL 38, Vancouver, BC. Cascadilla Press. In press.\\
+\end{longtable}
+
+\subsection{Works in progress}
+\begin{itemize}
+\item \textbf{Predictability and Linguistic Dependencies} (PhD comprehensive exam project): Using pretrained contextual embedding networks to compare statistical dependency with syntactic dependencies. Committee: Timothy J, O'Donnell, Martina Martinović, and Alessandro Sordoni (Microsoft Research).
+\item \textbf{Estonian indefites in fragment answers: from something to nothing}: Project documenting a semantic puzzle about Estonian indefinites formed from wh-words, which may be interpreted as either a positive existential or a negative when uttered elliptically.
+\end{itemize}
+
+% \subsection{Undergraduate research assistantships}
+
+% \begin{longtable}{p{2cm}|p{14.5cm}}
+% \textsc{Fall 2013} & Research assistant for Rama Novogradsky (\textbf{BU, Harvard Snedeker Lab})\\
+% 	&\footnotesize{Project studying children's early syntactic development. Helped code and interpret data.}\\
+
+% 				   & Research assistant for Maria Polinsky (\textbf{Harvard Polinsky Lab})\\
+% 	&\footnotesize{Helped with coding data in an experiment that looked at the efficacy of different transcription methods.}\\
+
+% \textsc{Fall 2009} & Research assistant for Michael Becker and Andrew Nevins (\textbf{Harvard})\\
+% 	&\footnotesize{Research project on English nouns studying voicing assimilation in forming the plural. Helped in preparing and running experiments, recruiting participants, interpreting and writing up data, and analysis.}\\
+
+% \textsc{2006--2007} & Research assistant for Michael Becker and Andrew Nevins (\textbf{Harvard})\\
+% 	&\footnotesize{Project on voicing assimilation in Turkish nouns forming the accusative case. Helped organize contacting/soliciting participants (Turkish speakers), and gave them the survey of wugs determining whether they accepted voicing assimilation.}\\
+% \end{longtable}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Teaching} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\begin{longtable}{p{2cm}|p{14.5cm}}
+\textsc{Winter 2021}&TA for \textbf{McGill} COMP 596 \uline{Probabilistic Programming} (Prof.\ Timothy O'Donnell)\\
+\textsc{Fall 2020}&TA for \textbf{McGill} COMP 445 \uline{Computational Linguistics} (Prof.\ Timothy O'Donnell)\\
+\textsc{Winter 2020}&TA for \textbf{McGill} LING 201 \uline{Introduction to Linguistics} (Prof.\ Francisco Torreira, Mathieu Paillé)\\
+\textsc{Fall 2019}	&TA for \textbf{McGill} LING 201 \uline{Introduction to Linguistics} (Prof.\ Francisco Torreira, Prof. Junko Shimoyama)\\
+\end{longtable}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Awards} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\begin{longtable}{p{2cm}|p{14.5cm}}
+\textsc{2020}&\textbf{Microsoft Research-Mila Collaboration Grant}, for project supervised by Alessandro Sordoni (MSR Montreal) and Prof.\ Timothy O'Donnell (Mila)\\
+% Towards characterizing compositionality and systematic generalization for natural language representations
+% Alessandro Sordoni (MSR Montreal) and Professor Timothy O'Donnell (Mila)
+\textsc{2019}&\textbf{Graduate Scholar Stipend}, Centre for Research on Brain, Language and Music\\
+\end{longtable}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Community} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\begin{longtable}{p{2cm}|p{14.5cm}}
+%2020          &Graduate Program changes Committee   
+\textsc{2020--}present  &Graduate student representative, McGill Linguistics Department\\
+\textsc{2019--}present	&Vice President, Academic, \textbf{GLAM}, Graduate Linguistics Association of McGill\\
+						&Founding member, \textbf{EARTH-LING}, McGill Linguistics department environmental working group\\
+\textsc{2018--}present	&Graduate student member, \href{http://mcqll.org}{\textbf{MCQLL}}, Montreal Computational and Quantitative Linguistics Lab\\
+\end{longtable}
+Reviewing: CogSci 2021, CoNLL 2020
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Languages} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+\begin{tabular}{ll}
+Native&English\\
+Intermediate&Estonian (2½ years living and working in Estonia: \textasciitilde \ CEF level B2)\\
+Novice&Japanese (two years' university study)\\
+Basic knowledge&Russian, Spanish, French\\
+\multicolumn{2}{c}{}\\
+\textbf{Programming languages}:&Clojure, Java, Julia, Python, R
+\end{tabular}
+
+\section{Ballet career}
+\begin{longtable}{p{2cm}|p{14.5cm}}
+2018--present & I retired from full-time dancing in 2018, when I began my graduate study at McGill, but I have continued with occasional appearances as guest artist with Festival Ballet Providence, RI, and Robinson Ballet in Bangor, ME.\\
+\textsc{2008--2018} & Trained as a ballet dancer at Walnut Hill School and Miami City Ballet School. I worked full-time as professional dancer from 2008 until 2018. I danced soloist roles when at \textbf{José Mateo Ballet Theatre} in Cambridge, MA, (2008--2012) and principal roles when at the \href{http://vanemuine.ee}{\textbf{Vanemuine Theatre}} in Tartu, Estonia (2013--2015), and was a company dancer for \href{http://festivalballetprovidence.org}{\textbf{Festival Ballet}} in Providence, RI (2015--2018).\\
+\end{longtable}
+
+\end{document}
