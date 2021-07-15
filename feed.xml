@@ -1,30 +1,650 @@
----
-layout: null
----
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>{{ site.title | xml_escape }}</title>
-    <description>{{ site.description | xml_escape }}</description>
-    <link>{{ site.url }}{{ site.baseurl }}/</link>
-    <atom:link href="{{ "/feed.xml" | prepend: site.baseurl | prepend: site.url }}" rel="self" type="application/rss+xml"/>
-    <pubDate>{{ site.time | date_to_rfc822 }}</pubDate>
-    <lastBuildDate>{{ site.time | date_to_rfc822 }}</lastBuildDate>
-    <generator>Jekyll v{{ jekyll.version }}</generator>
-    {% for post in site.posts limit:10 %}
+    <title>jacob louis hoover</title>
+    <description>PhD student in linguistics at McGill University and Mila Québec AI Institute, Montréal.
+</description>
+    <link>https://jahoo.github.io/</link>
+    <atom:link href="https://jahoo.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Thu, 15 Jul 2021 09:17:26 -0400</pubDate>
+    <lastBuildDate>Thu, 15 Jul 2021 09:17:26 -0400</lastBuildDate>
+    <generator>Jekyll v3.9.0</generator>
+    
       <item>
-        <title>{{ post.title | xml_escape }}</title>
-        <description>{{ post.content | xml_escape }}</description>
-        <pubDate>{{ post.date | date_to_rfc822 }}</pubDate>
-        <link>{{ post.url | prepend: site.baseurl | prepend: site.url }}</link>
-        <guid isPermaLink="true">{{ post.url | prepend: site.baseurl | prepend: site.url }}</guid>
-        {% for tag in post.tags %}
-        <category>{{ tag | xml_escape }}</category>
-        {% endfor %}
-        {% for cat in post.categories %}
-        <category>{{ cat | xml_escape }}</category>
-        {% endfor %}
+        <title>Nivre's parsing examples animated</title>
+        <description>&lt;p&gt;Here is a &lt;a href=&quot;/assets/2021-04-16-deterministic-dependency-parsing.pdf&quot;&gt;simple (beamer) animation&lt;/a&gt; of deterministic dependency parsing algorithms examples from &lt;a href=&quot;https://doi.org/10.1162/coli.07-056-R1-07-027&quot;&gt;Nivre (2008)&lt;/a&gt;.  View pdf in single-page view / presentation mode.&lt;/p&gt;
+</description>
+        <pubDate>Fri, 16 Apr 2021 00:00:00 -0400</pubDate>
+        <link>https://jahoo.github.io/2021/04/16/deterministic-dependency-parsing.html</link>
+        <guid isPermaLink="true">https://jahoo.github.io/2021/04/16/deterministic-dependency-parsing.html</guid>
+        
+        <category>note</category>
+        
+        
       </item>
-    {% endfor %}
+    
+      <item>
+        <title>Simplest least-squares in Julia</title>
+        <description>&lt;div&gt;
+&lt;iframe src=&quot;/assets/simplest_linear_regression_example.html&quot; width=&quot;100%&quot; height=&quot;1800&quot; frameborder=&quot;none&quot;&gt;
+&lt;/iframe&gt;
+&lt;div /&gt;
+
+
+&lt;/div&gt;
+</description>
+        <pubDate>Mon, 11 Jan 2021 00:00:00 -0500</pubDate>
+        <link>https://jahoo.github.io/2021/01/11/simplest_linear_regression_example.html</link>
+        <guid isPermaLink="true">https://jahoo.github.io/2021/01/11/simplest_linear_regression_example.html</guid>
+        
+        <category>note</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Shannon’s noisy channel-coding theorem</title>
+        <description>&lt;p&gt;&lt;a href=&quot;/assets/pdfs/2020.12.16-noisy_channel_coding-handout.pdf&quot;&gt;Here&lt;/a&gt; are slides I put together going through the proof of the noisy-channel coding theorem (based on the proofs given in &lt;a href=&quot;https://archive.org/details/ElementsOfInformationTheory2ndEd/page/n225&quot;&gt;Cover and Thomas 2006, Ch.7&lt;/a&gt; and &lt;a href=&quot;http://www.inference.org.uk/mackay/itprnn/ps/161.173.pdf&quot;&gt;MacKay 2003, Ch.10&lt;/a&gt;), a central result in information theory, which is a statement about &lt;em&gt;noisy channels&lt;/em&gt; (a set up where a message passed from sender to receiver is disturbed by some random process during transmission).&lt;/p&gt;
+
+&lt;p&gt;The theorem says that it’s possible to communicate across such a channel with &lt;em&gt;arbitrarily low probability of error&lt;/em&gt;, at any rate of transmission bounded by the mutual information between encoded sequences and received sequences, as long as the length of the code is allowed to be as long as necessary.&lt;/p&gt;
+</description>
+        <pubDate>Wed, 16 Dec 2020 00:00:00 -0500</pubDate>
+        <link>https://jahoo.github.io/2020/12/16/noisy-channel-coding.html</link>
+        <guid isPermaLink="true">https://jahoo.github.io/2020/12/16/noisy-channel-coding.html</guid>
+        
+        <category>presentation</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Icelandic agreement talk at WCCFL 38</title>
+        <description>&lt;p&gt;I gave a syntax talk at &lt;a href=&quot;https://wccfl2020.linguistics.ubc.ca/&quot;&gt;WCCFL 38&lt;/a&gt;, at UBC in Vancouver, titled &lt;em&gt;Accounting for variation in number agreement in Icelandic DAT-NOM constructions&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;Basically, when they’re using certain specific verbs that don’t agree with their subjects, some Icelandic speakers let the verb agree with the object, and others don’t, and this seems to depend a little bit on word order.  My proposal is an attempt to provide a concrete mechanism to explain these differences. The proposal uses the feature gluttony mechanism of &lt;a href=&quot;https://ling.auf.net/lingbuzz/004224&quot;&gt;Coon and Keine 2020&lt;/a&gt; (an agreement mechanism wherein \(\varphi\)-probes can enter into agree relationships with multiple goals) to derive reported interspeaker variation in number agreement.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;/assets/pdfs/wccfl2020-Icelandic_gluttony-handout.pdf&quot;&gt;Handout is here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Update: &lt;a href=&quot;/assets/pdfs/wccfl2020-icelandic_gluttony-proceedings.pdf&quot;&gt;proceedings paper here&lt;/a&gt;.&lt;/p&gt;
+</description>
+        <pubDate>Sat, 07 Mar 2020 00:00:00 -0500</pubDate>
+        <link>https://jahoo.github.io/2020/03/07/wccfl.html</link>
+        <guid isPermaLink="true">https://jahoo.github.io/2020/03/07/wccfl.html</guid>
+        
+        <category>presentation</category>
+        
+        <category>paper</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Interactive diagrams with Klipse+Vega</title>
+        <description>&lt;!-- The following preamble (in /_includes/) is needed for the Vega stuff --&gt;
+&lt;!-- hidden preamble material: 
+    stuff for reagent, pretty printing, and things from metaprob (mostly probably not necessary)  
+    seems necessary to use old version of stuff from Oz
+    https://github.com/metasoarous/oz/blob/1.6.0-alpha6/src/cljs/oz/core.cljs#L48
+--&gt;
+
+&lt;pre class=&quot;hidden&quot;&gt;&lt;code class=&quot;language-eval-clojure&quot;&gt;
+(ns jahoo.core
+  (:require [reagent.core :as r]
+            [reagent.dom :as rd]
+            [clojure.zip :as z]
+            ;[clojure.pprint :refer [pprint]]
+            ;[clojure.string :refer [index-of]]
+            ;[clojure.string :as str]
+            ))
+
+(enable-console-print!)
+
+(defn log [a-thing]
+  (.log js/console a-thing))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre class=&quot;hidden&quot;&gt;&lt;code class=&quot;language-eval-clojure&quot;&gt;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; hidden preamble material for Vega (in addition to Vega-Lite) rendering 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn render-vega [spec elem]
+  (when spec
+    (let [spec (clj-&amp;gt;js spec)
+          opts {:renderer &quot;canvas&quot;
+                :mode &quot;vega&quot;
+                :actions {
+                      :export true,
+                      :source true,
+                      :compiled true,
+                      :editor true}}]
+      (-&amp;gt; (js/vegaEmbed elem spec (clj-&amp;gt;js opts))
+          (.then (fn [res]
+                   (. js/vegaTooltip (vega (.-view res) spec))))
+          (.catch (fn [err]
+                    (log err)))))))
+
+(defn vega
+  &quot;Reagent component that renders vega&quot;
+  [spec]
+  (r/create-class
+   {:display-name &quot;vega&quot;
+    :component-did-mount (fn [this]
+                           (render-vega spec (rd/dom-node this)))
+    :component-will-update (fn [this [_ new-spec]]
+                             (render-vega new-spec (rd/dom-node this)))
+    :reagent-render (fn [spec]
+                      [:div#vis])}))
+
+;making a histogram from a list of observations
+(defn list-to-hist-data-lite [l]
+  &quot;&quot;&quot; takes a list and returns a record
+  in the right format for vega data,
+  with each list element the label to a field named 'x'&quot;&quot;&quot;
+  (defrecord rec [category])
+  {:values (into [] (map -&amp;gt;rec l))})
+
+(defn makehist-lite [data]
+  {
+   :$schema &quot;https://vega.github.io/schema/vega-lite/v4.json&quot;,
+   :data data,
+   :mark &quot;bar&quot;,
+   :encoding {
+              :x {:field &quot;category&quot;,
+                  :type &quot;ordinal&quot;},
+              :y {:aggregate &quot;count&quot;,
+                  :type &quot;quantitative&quot;}
+              }
+   })
+
+
+(defn list-to-hist-data [l]
+  &quot;&quot;&quot; takes a list and returns a record
+  in the right format for vega data,
+  with each list element the label to a field named 'x'&quot;&quot;&quot;
+  (defrecord rec [category])
+  [{:name &quot;raw&quot;,
+    :values (into [] (map -&amp;gt;rec l))}
+   {:name &quot;aggregated&quot;
+    :source &quot;raw&quot;
+    :transform 
+    [{:as [&quot;count&quot;]
+      :type &quot;aggregate&quot;
+      :groupby [&quot;category&quot;]}]}
+   {:name &quot;agg-sorted&quot;
+    :source &quot;aggregated&quot;
+    :transform 
+    [{:type &quot;collect&quot;
+      :sort {:field &quot;category&quot;}}]}
+  ])
+
+(defn makehist [data]
+  (let [n (count (distinct ((data 0) :values)))
+        h 200
+        pad 5
+        w (if (&amp;lt; n 20) (* n 35) (- 700 (* 2 pad)))]
+    {
+    :$schema &quot;https://vega.github.io/schema/vega/v5.json&quot;,
+    :width w,
+    :height h,
+    :padding pad,
+
+    :data data,
+
+    :signals [
+      {:name &quot;tooltip&quot;,
+        :value {},
+        :on [{:events &quot;rect:mouseover&quot;, :update &quot;datum&quot;},
+             {:events &quot;rect:mouseout&quot;,  :update &quot;{}&quot;}]}
+    ],
+
+    :scales [
+      {:name &quot;xscale&quot;,
+       :type &quot;band&quot;,
+       :domain {:data &quot;agg-sorted&quot;, :field &quot;category&quot;},
+       :range &quot;width&quot;,
+       :padding 0.05,
+       :round true},
+      {:name &quot;yscale&quot;,
+       :domain {:data &quot;agg-sorted&quot;, :field &quot;count&quot;},
+       :nice true,
+       :range &quot;height&quot;}
+    ],
+
+    :axes [
+      { :orient &quot;bottom&quot;, :scale &quot;xscale&quot; },
+      { :orient &quot;left&quot;, :scale &quot;yscale&quot; }
+    ],
+
+    :marks [
+      {:type &quot;rect&quot;,
+       :from {:data &quot;agg-sorted&quot;},
+       :encode {
+         :enter {
+           :x {:scale &quot;xscale&quot;, :field &quot;category&quot;},
+           :width {:scale &quot;xscale&quot;, :band 1},
+           :y {:scale &quot;yscale&quot;, :field &quot;count&quot;},
+           :y2 {:scale &quot;yscale&quot;, :value 0}
+         },
+         :update {:fill {:value &quot;steelblue&quot;}},
+         :hover {:fill {:value &quot;green&quot;}}
+       }
+      },
+      {:type &quot;text&quot;,
+       :encode {
+         :enter {
+           :align {:value &quot;center&quot;},
+           :baseline {:value &quot;bottom&quot;},
+           :fill {:value &quot;#333&quot;}
+         },
+         :update {
+           :x {:scale &quot;xscale&quot;, :signal &quot;tooltip.category&quot;, :band 0.5},
+           :y {:scale &quot;yscale&quot;, :signal &quot;tooltip.count&quot;, :offset -2},
+           :text {:signal &quot;tooltip.count&quot;},
+           :fillOpacity [
+             {:test &quot;isNaN(tooltip.count)&quot;, :value 0},
+             {:value 1}
+           ]
+         }
+       }
+      }
+    ]
+}))
+
+
+(defn hist [l]
+  (vega (makehist (list-to-hist-data l))))
+
+; for making bar plots
+
+(defn list-to-barplot-data-lite [l m]
+  &quot;&quot;&quot; takes a list and returns a record
+  in the right format for vega data,
+  with each list element the label to a field named 'x'&quot;&quot;&quot;
+  (defrecord rec [category amount])
+  {:values (into [] (map -&amp;gt;rec l m))})
+
+(defn makebarplot-lite [data]
+  {
+   :$schema &quot;https://vega.github.io/schema/vega-lite/v4.json&quot;,
+   :data data,
+   :mark &quot;bar&quot;,
+   :encoding {
+              :x {:field &quot;element&quot;, :type &quot;ordinal&quot;},
+              :y {:field &quot;value&quot;, :type &quot;quantitative&quot;}
+              }
+   })
+
+(defn list-to-barplot-data [l m]
+  &quot;&quot;&quot; takes a list and returns a record
+  in the right format for vega data,
+  with each list element the label to a field named 'x'&quot;&quot;&quot;
+  (defrecord rec [category amount])
+  {:name &quot;table&quot;,
+   :values (into [] (map -&amp;gt;rec l m))})
+
+(defn makebarplot [data]
+  (let [n (count (data :values))
+        h 200
+        pad 5
+        w (if (&amp;lt; n 20) (* n 35) (- 700 (* 2 pad)))]
+    {
+    :$schema &quot;https://vega.github.io/schema/vega/v5.json&quot;,
+    :width w,
+    :height h,
+    :padding pad,
+
+    :data data,
+
+    :signals [
+      {:name &quot;tooltip&quot;,
+        :value {},
+        :on [{:events &quot;rect:mouseover&quot;, :update &quot;datum&quot;},
+             {:events &quot;rect:mouseout&quot;,  :update &quot;{}&quot;}]}
+    ],
+
+    :scales [
+      {:name &quot;xscale&quot;,
+       :type &quot;band&quot;,
+       :domain {:data &quot;table&quot;, :field &quot;category&quot;},
+       :range &quot;width&quot;,
+       :padding 0.05,
+       :round true},
+      {:name &quot;yscale&quot;,
+       :domain {:data &quot;table&quot;, :field &quot;amount&quot;},
+       :nice true,
+       :range &quot;height&quot;}
+    ],
+
+    :axes [
+      { :orient &quot;bottom&quot;, :scale &quot;xscale&quot; },
+      { :orient &quot;left&quot;, :scale &quot;yscale&quot; }
+    ],
+
+    :marks [
+      {:type &quot;rect&quot;,
+       :from {:data &quot;table&quot;},
+       :encode {
+         :enter {
+           :x {:scale &quot;xscale&quot;, :field &quot;category&quot;},
+           :width {:scale &quot;xscale&quot;, :band 1},
+           :y {:scale &quot;yscale&quot;, :field &quot;amount&quot;},
+           :y2 {:scale &quot;yscale&quot;, :value 0}
+         },
+         :update {:fill {:value &quot;steelblue&quot;}},
+         :hover {:fill {:value &quot;green&quot;}}
+       }
+      },
+      {:type &quot;text&quot;,
+       :encode {
+         :enter {
+           :align {:value &quot;center&quot;},
+           :baseline {:value &quot;bottom&quot;},
+           :fill {:value &quot;#333&quot;}
+         },
+         :update {
+           :x {:scale &quot;xscale&quot;, :signal &quot;tooltip.category&quot;, :band 0.5},
+           :y {:scale &quot;yscale&quot;, :signal &quot;tooltip.amount&quot;, :offset -2},
+           :text {:signal &quot;tooltip.amount&quot;},
+           :fillOpacity [
+             {:test &quot;isNaN(tooltip.amount)&quot;, :value 0},
+             {:value 1}
+           ]
+         }
+       }
+      }
+    ]
+}))
+
+(defn barplot [l m]
+  (vega (makebarplot (list-to-barplot-data l m))))
+
+
+; now, for tree making
+;(thanks to Taylor Wood's answer in this thread on stackoverflow:
+; https://stackoverflow.com/questions/57911965)
+
+(defn count-up-to-right [loc]
+  (if (z/up loc)
+    (loop [x loc, pops 0] 
+       (if (z/right x) 
+         pops 
+         (recur (z/up x) (inc pops))))
+    0))
+
+(defn list-to-tree-spec
+      &quot;take a list and walk through it (with clojure.zip library)
+      return a tree spec record in right format to pass to vega&quot;
+      [l]
+      (loop [loc (z/seq-zip l), next-id 0, parent-ids [], acc []]
+        (cond
+          (z/end? loc) acc
+
+          (z/end? (z/next loc))
+          (conj acc
+                  {:id     (str next-id)
+                   :name   (str (z/node loc))
+                   :parent (when (seq parent-ids)
+                                 (str (peek parent-ids)))})
+
+          (and (z/node loc) (not (z/branch? loc)))
+          (recur
+            (z/next loc)
+            (inc next-id)
+            (cond
+              (not (z/right loc))
+              (let [n (count-up-to-right loc)
+                    popn (apply comp (repeat n pop))]
+                (some-&amp;gt; parent-ids not-empty popn))
+
+              (not (z/left loc))
+              (conj parent-ids next-id)
+
+              :else parent-ids)
+            (conj acc
+                  {:id     (str next-id)
+                   :name   (str (z/node loc))
+                   :parent (when (seq parent-ids)
+                                 (str (peek parent-ids)))}))
+
+          :else
+          (recur (z/next loc) next-id parent-ids acc))))
+
+    (defn maketree [w h tree-spec]
+    &quot;&quot;&quot; makes vega spec for a tree given tree-spec in the right json-like format &quot;&quot;&quot;
+      {:$schema &quot;https://vega.github.io/schema/vega/v5.json&quot;
+      :data [{:name &quot;tree&quot;
+             :transform [{:key &quot;id&quot; :parentKey &quot;parent&quot; :type &quot;stratify&quot;}
+                         {:as [&quot;x&quot; &quot;y&quot; &quot;depth&quot; &quot;children&quot;]
+                          :method {:signal &quot;layout&quot;}
+                          :size [{:signal &quot;width&quot;} {:signal &quot;height&quot;}]
+                          :type &quot;tree&quot;}]
+             :values tree-spec
+             }
+            {:name &quot;links&quot;
+             :source &quot;tree&quot;
+             :transform [{:type &quot;treelinks&quot;}
+                         {:orient &quot;horizontal&quot;
+                          :shape {:signal &quot;links&quot;}
+                          :type &quot;linkpath&quot;}]}]
+      :height h
+      :marks [{:encode {:update {:path {:field &quot;path&quot;} :stroke {:value &quot;#ccc&quot;}}}
+              :from {:data &quot;links&quot;}
+              :type &quot;path&quot;}
+             {:encode {:enter {:size {:value 50} :stroke {:value &quot;#fff&quot;}}
+                       :update {:fill {:field &quot;depth&quot; :scale &quot;color&quot;}
+                                :x {:field &quot;x&quot;}
+                                :y {:field &quot;y&quot;}}}
+              :from {:data &quot;tree&quot;}
+              :type &quot;symbol&quot;}
+             {:encode {:enter {:baseline {:value &quot;bottom&quot;}
+                               :font {:value &quot;Courier&quot;}
+                               :fontSize {:value 14}
+                               :angle {:value 0}
+                               :text {:field &quot;name&quot;}}
+                       :update {:align {:signal &quot;datum.children ? 'center' : 'center'&quot;}
+                                :dy {:signal &quot;datum.children ? -6 : -6&quot;}
+                                :opacity {:signal &quot;labels ? 1 : 0&quot;}
+                                :x {:field &quot;x&quot;}
+                                :y {:field &quot;y&quot;}}}
+              :from {:data &quot;tree&quot;}
+              :type &quot;text&quot;}]
+      :padding 5
+      :scales [{:domain {:data &quot;tree&quot; :field &quot;depth&quot;}
+               :name &quot;color&quot;
+               :range {:scheme &quot;magma&quot;}
+               :type &quot;linear&quot;
+               :zero true}]
+      :signals [{:bind {:input &quot;checkbox&quot;} :name &quot;labels&quot; :value true}
+               {:bind {:input &quot;radio&quot; :options [&quot;tidy&quot; &quot;cluster&quot;]}
+                :name &quot;layout&quot;
+                :value &quot;tidy&quot;}
+               {:name &quot;links&quot;
+                :value &quot;line&quot;}]
+      :width w}
+    )
+
+    (defn tree-depth 
+      &quot;get the depth of a tree (list)&quot;
+      [list]
+      (if (seq? list)
+        (inc (apply max 0 (map tree-depth list)))
+        0))
+
+    (defn tree
+      &quot;plot tree using vega&quot;
+      [list]
+      (let [spec (list-to-tree-spec list)
+            h (* 30 (tree-depth list))]
+        (vega (maketree 700 h spec))))
+    &lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The Clojure code for rendering the visualizations (with &lt;a href=&quot;https://vega.github.io/vega/&quot;&gt;Vega&lt;/a&gt;) in this post is &lt;a href=&quot;https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;using-klipse-for-code-blocks&quot;&gt;Using Klipse for code blocks&lt;/h2&gt;
+
+&lt;p&gt;Here is an html code block that will run Clojure interactively in the browser, using &lt;a href=&quot;https://github.com/viebel/klipse&quot;&gt;Klipse&lt;/a&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;pre&amp;gt;&amp;lt;code&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;language-eval-clojure&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+  (+ 1 1)
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;In markdown, specify the language in a &lt;a href=&quot;https://www.markdownguide.org/extended-syntax/#:~:text=syntax%20highlighting%20for%20fenced%20code%20blocks&quot;&gt;fenced code block&lt;/a&gt; as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;eval-clojure&lt;/code&gt; after the opening fence (the ‘selector’ name for clojure, which can be set in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;window.klipse_settings&lt;/code&gt; in the &lt;a href=&quot;https://github.com/jahoo/jahoo.github.io/blob/master/_includes/head.html&quot;&gt;head&lt;/a&gt; of the html file), like this:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;```eval-clojure
+(clojure code)
+```
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;and the interpreter will make this into the same HTML as the above (note, the return of the last function call will be printed, if you want more to print you can always use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;print&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;println&lt;/code&gt;). Here’s an example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-eval-clojure&quot;&gt;(defn flip
+  ([]
+   (if (&amp;lt; (rand 1) 0.5)
+     true
+     false))
+  ([p]
+   (if (&amp;lt; (rand 1) p)
+     true
+     false)))
+(println &quot;Result of virtual coin flip:&quot; (if (flip) &quot;HEADS&quot; &quot;TAILS&quot;))
+
+(repeatedly 10 flip)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The code will be auto-evaluated with every change. Note that you also can use &lt;kbd&gt;⌘&lt;/kbd&gt;+&lt;kbd&gt;return&lt;/kbd&gt; / &lt;kbd&gt;CTRL&lt;/kbd&gt;+&lt;kbd&gt;⏎&lt;/kbd&gt; to re-run.&lt;/p&gt;
+
+&lt;p&gt;It’s useful to put some definitions in a hidden preamble, so I use a class &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;pre class=&quot;hidden&quot;&amp;gt;...&amp;lt;/pre&amp;gt;&lt;/code&gt; around the code block to make a Klipse clojure box that will be invisible, but will still run. Any definitions or side-effects made in in a hidden box will be available in later boxes.&lt;/p&gt;
+
+&lt;p&gt;For visualizations, rather than &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;eval-clojure&lt;/code&gt;, specify the language &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;reagent&lt;/code&gt; for a given code box if you want to do some output that involves rendering html elements. This is what we have to use to render vega graphics:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-reagent&quot;&gt;[:div [:button
+ {:on-click
+  (fn [e]
+    (js/alert &quot;Now you have to close this pop-up!&quot;))}
+ &quot;Don't press this button.&quot;]]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&quot;visualizations&quot;&gt;Visualizations:&lt;/h1&gt;
+
+&lt;p&gt;There’s some code in the preamble, which I have set to load, hidden, when this page is rendered (see the &lt;a href=&quot;https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html&quot;&gt;clojure-preamble.html&lt;/a&gt; file used to render this page) that gets Vega to work with Klipse. It is copied from Oz (thanks for the help on that, Alex!), and defines the useful function &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vega&lt;/code&gt;, which will take in a vega spec vector, and output a diagram.&lt;/p&gt;
+
+&lt;h2 id=&quot;vega-for-plotting&quot;&gt;Vega for plotting&lt;/h2&gt;
+
+&lt;p&gt;Note the &lt;strong&gt;visualizations need to be in a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;reagent&lt;/code&gt; code box&lt;/strong&gt; to be rendered. In an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;eval-clojure&lt;/code&gt; box they don’t render.&lt;/p&gt;
+
+&lt;h3 id=&quot;histograms&quot;&gt;Histograms:&lt;/h3&gt;
+
+&lt;p&gt;Here is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;hist&lt;/code&gt; called on a list of numbers (&lt;strong&gt;must be in a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;reagent&lt;/code&gt; code box&lt;/strong&gt;).&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-reagent&quot;&gt;(hist [0 5 2 1 2 3 4 3 3 3 4 5 19 20 20 21 20 20 19 18])
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;or truth values&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-reagent&quot;&gt;(hist (repeatedly 100 flip))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;or lists…&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-reagent&quot;&gt;(defn sample-kleene-ab []
+  (if (flip) '() (cons (if (flip) 'a 'b) (sample-kleene-ab))))
+
+(hist (repeatedly 2000 sample-kleene-ab))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;hist&lt;/code&gt; is defined in the &lt;a href=&quot;https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html&quot;&gt;preamble&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;vega-for-drawing-trees&quot;&gt;Vega for drawing trees&lt;/h2&gt;
+
+&lt;p&gt;You can define some tree data in clojure’s record data format like format:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-eval-clojure&quot;&gt;(def example-tree-data
+  [{:id 0 :name &quot;a&quot;}
+   {:id 1 :name &quot;b&quot; :parent 0}
+   {:id 2 :name &quot;c&quot; :parent 0}
+   {:id 3 :name &quot;d&quot; :parent 2}])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;(maketree w h tree-data)&lt;/code&gt; (defined in the preamble) will take that data and make the spec for a Vega tree diagram of size &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;w&lt;/code&gt;px-by-&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;h&lt;/code&gt;px out of that. Then, in a reagent box you can call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vega&lt;/code&gt; on the result to visualize:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-reagent&quot;&gt;[:div
+  [:h4 &quot;Here's a tree&quot;]
+  [vega (maketree 200 100 example-tree-data)]]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then here’s a function &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;list-to-tree-spec&lt;/code&gt; which will walk through a list (using the &lt;a href=&quot;https://clojuredocs.org/clojure.zip&quot;&gt;clojure.zip&lt;/a&gt; library) and output that format required:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-eval-clojure&quot;&gt;(list-to-tree-spec '(a (b c)))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To be easier to use, there’s the function &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tree&lt;/code&gt;, which should be called in a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;reagent&lt;/code&gt; codebox, to plot a tree that will autosize a bit.&lt;/p&gt;
+
+&lt;div class=&quot;language-clojure highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;defn&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tree&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;plot tree using vega&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spec&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;list-to-tree-spec&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;h&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;tree-depth&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;vega&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;maketree&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;700&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;h&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;spec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))))&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Pass it a nested list &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;list&lt;/code&gt;, and you’ll get a visualization.&lt;/p&gt;
+
+&lt;p&gt;For example: a clojure function computation tree&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-eval-clojure&quot;&gt;(def fib3-tree
+  '(&quot;(fib 3)&quot;
+    (&quot;(+ (fib 1) (fib 2))&quot;
+     (&quot;(fib 1)&quot; &quot;1&quot;)
+     (&quot;(fib 2)&quot;
+      (&quot;(+ (fib 0) (fib 1))&quot;
+       (&quot;(fib 0)&quot; &quot;0&quot;)
+       (&quot;(fib 1)&quot; &quot;1&quot;)))))
+  )
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-reagent&quot;&gt;(tree fib3-tree)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Or a natural language syntax/derivation tree:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-eval-clojure&quot;&gt;(def j-tree
+  '(CP 
+    (TP 
+     (NP_i (N (Aoi-ga &quot;\&quot;Aoi-NOM\&quot;&quot;)))
+     (T' (VP 
+          (PP (NP (daidokoro &quot;\&quot;kitchen\&quot;&quot;)) (P (de &quot;\&quot;in\&quot;&quot;))) 
+          (VP &quot;(t_i)&quot; (V' 
+                       (NP (N (hon-o &quot;\&quot;book-ACC\&quot;&quot;)))
+                       (V (yon- &quot;\&quot;read\&quot;&quot;)))))
+         (T (da &quot;\&quot;PST\&quot;&quot;)))) 
+    (C (to &quot;\&quot;COMP\&quot;&quot;)))
+  )
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-reagent&quot;&gt;(tree j-tree)
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+        <pubDate>Thu, 03 Oct 2019 00:00:00 -0400</pubDate>
+        <link>https://jahoo.github.io/2019/10/03/klipse-clojure.html</link>
+        <guid isPermaLink="true">https://jahoo.github.io/2019/10/03/klipse-clojure.html</guid>
+        
+        <category>note</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>An equivalence between generative automata and logical constraints</title>
+        <description>&lt;p&gt;I gave a presentation to &lt;a href=&quot;https://mcqll.org/&quot;&gt;MCQLL&lt;/a&gt;, on an an example of the duality of generative systems and constraint-based systems.  The particular example I discussed was a proof of the equivalence in expressive power between Finite state automata (FSA) and monadic second order logic (with a successor function; MSOL[&lt;em&gt;S&lt;/em&gt;]).  That is, I presented the proof that any language for which there exists an FSA can be described equivalently using constraints written in MSOL[&lt;em&gt;S&lt;/em&gt;].&lt;/p&gt;
+
+&lt;p&gt;My slides are &lt;a href=&quot;/assets/pdfs/2018.11.15-generative_vs_constraint.pdf&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 15 Nov 2018 00:00:00 -0500</pubDate>
+        <link>https://jahoo.github.io/2018/11/15/eq-FSA-MSOL.html</link>
+        <guid isPermaLink="true">https://jahoo.github.io/2018/11/15/eq-FSA-MSOL.html</guid>
+        
+        <category>presentation</category>
+        
+        
+      </item>
+    
   </channel>
 </rss>

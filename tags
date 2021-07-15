@@ -1,0 +1,302 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	/Users/j/Documents/GitHub/jahoo.github.io/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	5.9.0	/1469a65f/
+%clearfix	_sass/_base.scss	/^%clearfix {$/;"	P
+%vertical-rhythm	_sass/_base.scss	/^%vertical-rhythm {$/;"	P
+.CodeMirror	css/main.scss	/^.CodeMirror {$/;"	c
+.author	_sass/_publications.scss	/^        .author {$/;"	c
+.bibliography	_sass/_publications.scss	/^.bibliography {$/;"	c
+.bp	_sass/_syntax-highlighting.scss	/^    .bp    { color: #999 } \/\/ Name.Builtin.Pseudo$/;"	c
+.c	_sass/_syntax-highlighting.scss	/^    .c     { color: #998; font-style: italic } \/\/ Comment$/;"	c
+.c1	_sass/_syntax-highlighting.scss	/^    .c1    { color: #998; font-style: italic } \/\/ Comment.Single$/;"	c
+.cm	_sass/_syntax-highlighting.scss	/^    .cm    { color: #998; font-style: italic } \/\/ Comment.Multiline$/;"	c
+.contact-list	_sass/_layout.scss	/^.contact-list,$/;"	c
+.content	_sass/_publications.scss	/^                .content > p {$/;"	c
+.content	_sass/_publications.scss	/^            .content > p {$/;"	c
+.content	_sass/_publications.scss	/^            .content {$/;"	c
+.cp	_sass/_syntax-highlighting.scss	/^    .cp    { color: #999; font-weight: bold } \/\/ Comment.Preproc$/;"	c
+.cs	_sass/_syntax-highlighting.scss	/^    .cs    { color: #999; font-weight: bold; font-style: italic } \/\/ Comment.Special$/;"	c
+.err	_sass/_syntax-highlighting.scss	/^    .err   { color: #a61717; background-color: #e3d2d2 } \/\/ Error$/;"	c
+.footer-col	_sass/_layout.scss	/^    .footer-col {$/;"	c
+.footer-col	_sass/_layout.scss	/^.footer-col {$/;"	c
+.footer-col-1	_sass/_layout.scss	/^    .footer-col-1,$/;"	c
+.footer-col-1	_sass/_layout.scss	/^.footer-col-1 {$/;"	c
+.footer-col-2	_sass/_layout.scss	/^    .footer-col-2 {$/;"	c
+.footer-col-2	_sass/_layout.scss	/^.footer-col-2 {$/;"	c
+.footer-col-3	_sass/_layout.scss	/^    .footer-col-3 {$/;"	c
+.footer-col-3	_sass/_layout.scss	/^.footer-col-3 {$/;"	c
+.footer-col-wrapper	_sass/_layout.scss	/^.footer-col-wrapper {$/;"	c
+.footer-heading	_sass/_layout.scss	/^.footer-heading {$/;"	c
+.gd	_sass/_syntax-highlighting.scss	/^    .gd    { color: #000; background-color: #fdd } \/\/ Generic.Deleted$/;"	c
+.gd	_sass/_syntax-highlighting.scss	/^    .gd .x { color: #000; background-color: #faa } \/\/ Generic.Deleted.Specific$/;"	c
+.ge	_sass/_syntax-highlighting.scss	/^    .ge    { font-style: italic } \/\/ Generic.Emph$/;"	c
+.gh	_sass/_syntax-highlighting.scss	/^    .gh    { color: #999 } \/\/ Generic.Heading$/;"	c
+.gi	_sass/_syntax-highlighting.scss	/^    .gi    { color: #000; background-color: #dfd } \/\/ Generic.Inserted$/;"	c
+.gi	_sass/_syntax-highlighting.scss	/^    .gi .x { color: #000; background-color: #afa } \/\/ Generic.Inserted.Specific$/;"	c
+.go	_sass/_syntax-highlighting.scss	/^    .go    { color: #888 } \/\/ Generic.Output$/;"	c
+.gp	_sass/_syntax-highlighting.scss	/^    .gp    { color: #555 } \/\/ Generic.Prompt$/;"	c
+.gr	_sass/_syntax-highlighting.scss	/^    .gr    { color: #a00 } \/\/ Generic.Error$/;"	c
+.gs	_sass/_syntax-highlighting.scss	/^    .gs    { font-weight: bold } \/\/ Generic.Strong$/;"	c
+.gt	_sass/_syntax-highlighting.scss	/^    .gt    { color: #a00 } \/\/ Generic.Traceback$/;"	c
+.gu	_sass/_syntax-highlighting.scss	/^    .gu    { color: #aaa } \/\/ Generic.Subheading$/;"	c
+.hidden	css/main.scss	/^.hidden {$/;"	c
+.highlight	_sass/_syntax-highlighting.scss	/^.highlight {$/;"	c
+.highlighter-rouge	_sass/_syntax-highlighting.scss	/^    .highlighter-rouge & {$/;"	c
+.icon	_sass/_base.scss	/^.icon {$/;"	c
+.il	_sass/_syntax-highlighting.scss	/^    .il    { color: #099 } \/\/ Literal.Number.Integer.Long$/;"	c
+.k	_sass/_syntax-highlighting.scss	/^    .k     { font-weight: bold } \/\/ Keyword$/;"	c
+.kc	_sass/_syntax-highlighting.scss	/^    .kc    { font-weight: bold } \/\/ Keyword.Constant$/;"	c
+.kd	_sass/_syntax-highlighting.scss	/^    .kd    { font-weight: bold } \/\/ Keyword.Declaration$/;"	c
+.kp	_sass/_syntax-highlighting.scss	/^    .kp    { font-weight: bold } \/\/ Keyword.Pseudo$/;"	c
+.kr	_sass/_syntax-highlighting.scss	/^    .kr    { font-weight: bold } \/\/ Keyword.Reserved$/;"	c
+.kt	_sass/_syntax-highlighting.scss	/^    .kt    { color: #458; font-weight: bold } \/\/ Keyword.Type$/;"	c
+.m	_sass/_syntax-highlighting.scss	/^    .m     { color: #099 } \/\/ Literal.Number$/;"	c
+.menu-icon	_sass/_layout.scss	/^        .menu-icon {$/;"	c
+.menu-icon	_sass/_layout.scss	/^    .menu-icon {$/;"	c
+.mf	_sass/_syntax-highlighting.scss	/^    .mf    { color: #099 } \/\/ Literal.Number.Float$/;"	c
+.mh	_sass/_syntax-highlighting.scss	/^    .mh    { color: #099 } \/\/ Literal.Number.Hex$/;"	c
+.mi	_sass/_syntax-highlighting.scss	/^    .mi    { color: #099 } \/\/ Literal.Number.Integer$/;"	c
+.mo	_sass/_syntax-highlighting.scss	/^    .mo    { color: #099 } \/\/ Literal.Number.Oct$/;"	c
+.na	_sass/_syntax-highlighting.scss	/^    .na    { color: #008080 } \/\/ Name.Attribute$/;"	c
+.nb	_sass/_syntax-highlighting.scss	/^    .nb    { color: #0086B3 } \/\/ Name.Builtin$/;"	c
+.nc	_sass/_syntax-highlighting.scss	/^    .nc    { color: #458; font-weight: bold } \/\/ Name.Class$/;"	c
+.ne	_sass/_syntax-highlighting.scss	/^    .ne    { color: #900; font-weight: bold } \/\/ Name.Exception$/;"	c
+.nf	_sass/_syntax-highlighting.scss	/^    .nf    { color: #900; font-weight: bold } \/\/ Name.Function$/;"	c
+.ni	_sass/_syntax-highlighting.scss	/^    .ni    { color: #800080 } \/\/ Name.Entity$/;"	c
+.nn	_sass/_syntax-highlighting.scss	/^    .nn    { color: #555 } \/\/ Name.Namespace$/;"	c
+.no	_sass/_syntax-highlighting.scss	/^    .no    { color: #008080 } \/\/ Name.Constant$/;"	c
+.nt	_sass/_syntax-highlighting.scss	/^    .nt    { color: #000080 } \/\/ Name.Tag$/;"	c
+.nv	_sass/_syntax-highlighting.scss	/^    .nv    { color: #008080 } \/\/ Name.Variable$/;"	c
+.o	_sass/_syntax-highlighting.scss	/^    .o     { font-weight: bold } \/\/ Operator$/;"	c
+.ow	_sass/_syntax-highlighting.scss	/^    .ow    { font-weight: bold } \/\/ Operator.Word$/;"	c
+.page-container	_sass/_layout.scss	/^.page-container {$/;"	c
+.page-content	_sass/_layout.scss	/^.page-content {$/;"	c
+.page-heading	_sass/_layout.scss	/^.page-heading {$/;"	c
+.page-link	_sass/_layout.scss	/^        .page-link {$/;"	c
+.page-link	_sass/_layout.scss	/^    .page-link {$/;"	c
+.post-content	_sass/_layout.scss	/^.post-content {$/;"	c
+.post-header	_sass/_layout.scss	/^.post-header {$/;"	c
+.post-link	_sass/_layout.scss	/^.post-link {$/;"	c
+.post-list	_sass/_layout.scss	/^.post-list {$/;"	c
+.post-list-heading	_sass/_layout.scss	/^.post-list-heading {$/;"	c
+.post-meta	_sass/_layout.scss	/^.post-meta {$/;"	c
+.post-tags	_sass/_layout.scss	/^.post-tags {$/;"	c
+.post-title	_sass/_layout.scss	/^.post-title {$/;"	c
+.s	_sass/_syntax-highlighting.scss	/^    .s     { color: #d14 } \/\/ Literal.String$/;"	c
+.s1	_sass/_syntax-highlighting.scss	/^    .s1    { color: #d14 } \/\/ Literal.String.Single$/;"	c
+.s2	_sass/_syntax-highlighting.scss	/^    .s2    { color: #d14 } \/\/ Literal.String.Double$/;"	c
+.sb	_sass/_syntax-highlighting.scss	/^    .sb    { color: #d14 } \/\/ Literal.String.Backtick$/;"	c
+.sc	_sass/_syntax-highlighting.scss	/^    .sc    { color: #d14 } \/\/ Literal.String.Char$/;"	c
+.sd	_sass/_syntax-highlighting.scss	/^    .sd    { color: #d14 } \/\/ Literal.String.Doc$/;"	c
+.se	_sass/_syntax-highlighting.scss	/^    .se    { color: #d14 } \/\/ Literal.String.Escape$/;"	c
+.sh	_sass/_syntax-highlighting.scss	/^    .sh    { color: #d14 } \/\/ Literal.String.Heredoc$/;"	c
+.si	_sass/_syntax-highlighting.scss	/^    .si    { color: #d14 } \/\/ Literal.String.Interpol$/;"	c
+.site-footer	_sass/_layout.scss	/^.site-footer {$/;"	c
+.site-header	_sass/_layout.scss	/^.site-header {$/;"	c
+.site-nav	_sass/_layout.scss	/^.site-nav {$/;"	c
+.site-title	_sass/_layout.scss	/^.site-title {$/;"	c
+.social-media-list	_sass/_layout.scss	/^.social-media-list {$/;"	c
+.sr	_sass/_syntax-highlighting.scss	/^    .sr    { color: #009926 } \/\/ Literal.String.Regex$/;"	c
+.ss	_sass/_syntax-highlighting.scss	/^    .ss    { color: #990073 } \/\/ Literal.String.Symbol$/;"	c
+.star	_sass/_publications.scss	/^.star {$/;"	c
+.sx	_sass/_syntax-highlighting.scss	/^    .sx    { color: #d14 } \/\/ Literal.String.Other$/;"	c
+.title	_sass/_publications.scss	/^        .title { font-weight: $publication-title-font-weight; }$/;"	c
+.trigger	_sass/_layout.scss	/^        .trigger {$/;"	c
+.vc	_sass/_syntax-highlighting.scss	/^    .vc    { color: #008080 } \/\/ Name.Variable.Class$/;"	c
+.vg	_sass/_syntax-highlighting.scss	/^    .vg    { color: #008080 } \/\/ Name.Variable.Global$/;"	c
+.vi	_sass/_syntax-highlighting.scss	/^    .vi    { color: #008080 } \/\/ Name.Variable.Instance$/;"	c
+.w	_sass/_syntax-highlighting.scss	/^    .w     { color: #bbb } \/\/ Text.Whitespace$/;"	c
+.wrapper	_sass/_base.scss	/^.wrapper {$/;"	c
+.x	_sass/_syntax-highlighting.scss	/^    .gd .x { color: #000; background-color: #faa } \/\/ Generic.Deleted.Specific$/;"	c
+.x	_sass/_syntax-highlighting.scss	/^    .gi .x { color: #000; background-color: #afa } \/\/ Generic.Inserted.Specific$/;"	c
+.year	_sass/_publications.scss	/^.year {$/;"	c
+1. Editing locally	README.md	/^#### 1. Editing locally$/;"	t	section:Workflow
+2. Push to remote	README.md	/^#### 2. Push to remote$/;"	t	section:Workflow
+3. Deploy site	README.md	/^#### 3. Deploy site$/;"	t	section:Workflow
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinBiolinum/example.html	/^<h1 style="font-family:'Linux Biolinum Bold';font-weight:normal;font-size:42px">AaBbCcDdEeFfGgHh/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinBiolinum/example.html	/^<h1 style="font-family:'Linux Biolinum Capitals Bold Small Caps';font-weight:normal;font-size:42/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinBiolinum/example.html	/^<h1 style="font-family:'Linux Biolinum Capitals Italic Samll Caps';font-weight:normal;font-size:/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinBiolinum/example.html	/^<h1 style="font-family:'Linux Biolinum Capitals Small Caps';font-weight:normal;font-size:42px">A/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinBiolinum/example.html	/^<h1 style="font-family:'Linux Biolinum Italic';font-weight:normal;font-size:42px">AaBbCcDdEeFfGg/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinBiolinum/example.html	/^<h1 style="font-family:'Linux Biolinum Keyboard Regular';font-weight:normal;font-size:42px">AaBb/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinBiolinum/example.html	/^<h1 style="font-family:'Linux Biolinum Outline Bold';font-weight:normal;font-size:42px">AaBbCcDd/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinBiolinum/example.html	/^<h1 style="font-family:'Linux Biolinum Outline Italic';font-weight:normal;font-size:42px">AaBbCc/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinBiolinum/example.html	/^<h1 style="font-family:'Linux Biolinum Outline Regular';font-weight:normal;font-size:42px">AaBbC/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinBiolinum/example.html	/^<h1 style="font-family:'Linux Biolinum Regular';font-weight:normal;font-size:42px">AaBbCcDdEeFfG/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinBiolinum/example.html	/^<h1 style="font-family:'Linux Biolinum Shadow Bold';font-weight:normal;font-size:42px">AaBbCcDdE/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinBiolinum/example.html	/^<h1 style="font-family:'Linux Biolinum Shadow Italic';font-weight:normal;font-size:42px">AaBbCcD/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinBiolinum/example.html	/^<h1 style="font-family:'Linux Biolinum Shadow Regular';font-weight:normal;font-size:42px">AaBbCc/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinBiolinum/example.html	/^<h1 style="font-family:'Linux Biolinum Slanted Bold Slanted';font-weight:normal;font-size:42px">/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinBiolinum/example.html	/^<h1 style="font-family:'Linux Biolinum Slanted Slanted';font-weight:normal;font-size:42px">AaBbC/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinLibertine/example.html	/^<h1 style="font-family:'Linux Libertine Bold Italic';font-weight:normal;font-size:42px">AaBbCcDd/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinLibertine/example.html	/^<h1 style="font-family:'Linux Libertine Bold';font-weight:normal;font-size:42px">AaBbCcDdEeFfGgH/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinLibertine/example.html	/^<h1 style="font-family:'Linux Libertine Capitals';font-weight:normal;font-size:42px">AaBbCcDdEeF/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinLibertine/example.html	/^<h1 style="font-family:'Linux Libertine Italic';font-weight:normal;font-size:42px">AaBbCcDdEeFfG/;"	h
+AaBbCcDdEeFfGgHhŞşIıİi Example	assets/fonts/LinLibertine/example.html	/^<h1 style="font-family:'Linux Libertine';font-weight:normal;font-size:42px">AaBbCcDdEeFfGgHhŞş/;"	h
+Accordion	assets/js/common.js	/^class Accordion { \/\/ Accordion for showing\/hiding abstracts$/;"	c
+And so forth	assets/2018.11.15-generative_vs_constraint.tex	/^\\subsection{And so forth}$/;"	u	section:FSA and MSOL[$S$] over strings
+And so on	assets/2018.11.15-generative_vs_constraint.tex	/^\\subsection{And so on}$/;"	u	section:FSA and MSOL[$S$] over strings
+Arc-eager stack-based algorithm	assets/2021-04-16-deterministic-dependency-parsing.tex	/^\\subsection{Arc-eager stack-based algorithm}$/;"	u	section:Stack-based Algorithms
+Arc-standard stack-based algorithm	assets/2021-04-16-deterministic-dependency-parsing.tex	/^\\subsection{Arc-standard stack-based algorithm}$/;"	u	section:Stack-based Algorithms
+Awards	assets/CV/jlh-academic_cv.tex	/^  \\section{Awards}$/;"	s
+Ballet career	assets/CV/jlh-academic_cv.tex	/^  \\section{Ballet career}$/;"	s
+Binding theory - a system of constraints	assets/2018.11.15-generative_vs_constraint.tex	/^\\subsection{Binding theory - a system of constraints}%%%%%%%$/;"	u	section:Two basic approaches
+Both approaches	assets/2018.11.15-generative_vs_constraint.tex	/^\\subsection{Both approaches}%%%%%%%%$/;"	u	section:Two basic approaches
+Community	assets/CV/jlh-academic_cv.tex	/^  \\section{Community}$/;"	s
+Dependency structures	assets/2021-04-16-deterministic-dependency-parsing.tex	/^\\subsection{Dependency structures}$/;"	u	section:Preliminaries
+Education	assets/CV/jlh-academic_cv.tex	/^\\section{Education}$/;"	s
+Experimental Evaluation	assets/2021-04-16-deterministic-dependency-parsing.tex	/^\\section{Experimental Evaluation}$/;"	s
+FSA and MSOL[$S$] over strings	assets/2018.11.15-generative_vs_constraint.tex	/^\\section{FSA and MSOL[$S$] over strings}%%%%%%%%%%%%%%%%%%%%%%%%$/;"	s
+Finite state automata	assets/2018.11.15-generative_vs_constraint.tex	/^\\subsection{Finite state automata}$/;"	u	section:FSA and MSOL[$S$] over strings
+Generated from: http://www.cufonfonts.com	assets/fonts/LinBiolinum/example.html	/^<h1>Generated from: http:\/\/www.cufonfonts.com<\/h1><br\/>$/;"	h
+Generated from: http://www.cufonfonts.com	assets/fonts/LinLibertine/example.html	/^<h1>Generated from: http:\/\/www.cufonfonts.com<\/h1><br\/>$/;"	h
+Histograms:	_posts/2019-10-03-klipse-clojure.md	/^### Histograms:$/;"	S	section:Visualizations:""Vega for plotting
+Incremental dependency parsing	assets/2021-04-16-deterministic-dependency-parsing.tex	/^\\subsection{Incremental dependency parsing}$/;"	u	section:Preliminaries
+Languages	assets/CV/jlh-academic_cv.tex	/^  \\section{Languages}$/;"	s
+List-based Algorithms	assets/2021-04-16-deterministic-dependency-parsing.tex	/^\\section{List-based Algorithms}$/;"	s
+Minimalist Grammar - a generative system	assets/2018.11.15-generative_vs_constraint.tex	/^\\subsection{Minimalist Grammar - a generative system}$/;"	u	section:Two basic approaches
+Non-projective list-based algorithm	assets/2021-04-16-deterministic-dependency-parsing.tex	/^\\subsection{Non-projective list-based algorithm}$/;"	u	section:List-based Algorithms
+Outline	assets/2018.11.15-generative_vs_constraint.tex	/^\\begin{frame}{Outline}$/;"	f
+Outline	assets/2021-04-16-deterministic-dependency-parsing.tex	/^    \\paragraph{Outline}$/;"	P
+Preliminaries	_posts/2019-11-23-jekyll.md	/^## Preliminaries$/;"	s
+Preliminaries	assets/2021-04-16-deterministic-dependency-parsing.tex	/^\\section{Preliminaries}$/;"	s
+Projective list-based algorithm	assets/2021-04-16-deterministic-dependency-parsing.tex	/^\\subsection{Projective list-based algorithm}$/;"	u	section:List-based Algorithms
+Research	assets/CV/jlh-academic_cv.tex	/^  \\section{Research}$/;"	s
+Stack-based Algorithms	assets/2021-04-16-deterministic-dependency-parsing.tex	/^\\section{Stack-based Algorithms}$/;"	s
+Strings and logic	assets/2018.11.15-generative_vs_constraint.tex	/^\\subsection{Strings and logic}$/;"	u	section:FSA and MSOL[$S$] over strings
+Strings as models	assets/2018.11.15-generative_vs_constraint.tex	/^\\subsection{Strings as models}$/;"	u	section:FSA and MSOL[$S$] over strings
+Teaching	assets/CV/jlh-academic_cv.tex	/^  \\section{Teaching}$/;"	s
+The equivalence of FSAs and MSOL[$S$]	assets/2018.11.15-generative_vs_constraint.tex	/^\\subsection{The equivalence of FSAs and MSOL[$S$]}$/;"	u	section:FSA and MSOL[$S$] over strings
+Two basic approaches	assets/2018.11.15-generative_vs_constraint.tex	/^\\section{Two basic approaches}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%$/;"	s
+Using Klipse for code blocks	_posts/2019-10-03-klipse-clojure.md	/^## Using Klipse for code blocks$/;"	s
+Vega for drawing trees	_posts/2019-10-03-klipse-clojure.md	/^## Vega for drawing trees$/;"	s	chapter:Visualizations:
+Vega for plotting	_posts/2019-10-03-klipse-clojure.md	/^## Vega for plotting$/;"	s	chapter:Visualizations:
+Visualizations:	_posts/2019-10-03-klipse-clojure.md	/^# Visualizations:$/;"	c
+Workflow	README.md	/^## Workflow$/;"	s
+\\	assets/2018.11.15-generative_vs_constraint.tex	/^\\begin{frame}{\\ }$/;"	f
+\\backupbegin	assets/2021-04-16-deterministic-dependency-parsing.tex	/^\\newcommand{\\backupbegin}{$/;"	C
+\\backupend	assets/2021-04-16-deterministic-dependency-parsing.tex	/^\\newcommand{\\backupend}{$/;"	C
+\\myblue	assets/2021-04-16-deterministic-dependency-parsing.tex	/^\\newcommand{\\myblue}{\\color[rgb]{0,0.5,0.8}}$/;"	C
+\\mypurple	assets/2021-04-16-deterministic-dependency-parsing.tex	/^\\newcommand{\\mypurple}{\\color[rgb]{0.5,0,0.7}}$/;"	C
+\\myred	assets/2021-04-16-deterministic-dependency-parsing.tex	/^\\newcommand{\\myred}{\\color[rgb]{1,0,0}}$/;"	C
+\\tree	assets/2018.11.15-generative_vs_constraint.tex	/^\\newcommand{\\tree}[1]{$/;"	C
+alt-font-family	css/main.scss	/^$alt-font-family: "Linux Libertine", "Computer Modern Serif", Times, serif;$/;"	v
+background-color	css/main.scss	/^$background-color: #fffffc;\/\/#fdfdfd;$/;"	v
+base-font-family	css/main.scss	/^$base-font-family: "Linux Biolinum", "Computer Modern Serif", Times, serif;$/;"	v
+base-font-size	css/main.scss	/^$base-font-size:   16px;$/;"	v
+base-font-weight	css/main.scss	/^$base-font-weight: 400;$/;"	v
+base-line-height	css/main.scss	/^$base-line-height: 1.3;$/;"	v
+blue	css/main.scss	/^$blue:              #2698BA !default;$/;"	v
+blue-1	css/main.scss	/^$blue-1:            #0076df !default;$/;"	v
+brand-color	css/main.scss	/^$brand-color:      #2a7ae2;$/;"	v
+clip820	assets/simplest_linear_regression_example.html	/^  <clipPath id="clip820">$/;"	I
+clip820	assets/simplest_linear_regression_example/output_1_0.svg	/^  <clipPath id="clip820">$/;"	d
+clip820	assets/simplest_linear_regression_example/output_1_0.svg	/^  <clipPath id="clip820">$/;"	i
+clip821	assets/simplest_linear_regression_example.html	/^  <clipPath id="clip821">$/;"	I
+clip821	assets/simplest_linear_regression_example/output_1_0.svg	/^  <clipPath id="clip821">$/;"	d
+clip821	assets/simplest_linear_regression_example/output_1_0.svg	/^  <clipPath id="clip821">$/;"	i
+clip822	assets/simplest_linear_regression_example.html	/^  <clipPath id="clip822">$/;"	I
+clip822	assets/simplest_linear_regression_example/output_1_0.svg	/^  <clipPath id="clip822">$/;"	d
+clip822	assets/simplest_linear_regression_example/output_1_0.svg	/^  <clipPath id="clip822">$/;"	i
+clip860	assets/simplest_linear_regression_example.html	/^  <clipPath id="clip860">$/;"	I
+clip860	assets/simplest_linear_regression_example/output_6_0.svg	/^  <clipPath id="clip860">$/;"	d
+clip860	assets/simplest_linear_regression_example/output_6_0.svg	/^  <clipPath id="clip860">$/;"	i
+clip861	assets/simplest_linear_regression_example.html	/^  <clipPath id="clip861">$/;"	I
+clip861	assets/simplest_linear_regression_example/output_6_0.svg	/^  <clipPath id="clip861">$/;"	d
+clip861	assets/simplest_linear_regression_example/output_6_0.svg	/^  <clipPath id="clip861">$/;"	i
+clip862	assets/simplest_linear_regression_example.html	/^  <clipPath id="clip862">$/;"	I
+clip862	assets/simplest_linear_regression_example/output_6_0.svg	/^  <clipPath id="clip862">$/;"	d
+clip862	assets/simplest_linear_regression_example/output_6_0.svg	/^  <clipPath id="clip862">$/;"	i
+code-bg-color	css/main.scss	/^$code-bg-color:    #fcf9f2;$/;"	v
+code-font-family	css/main.scss	/^$code-font-family:  "Fira Code", Courier, monospace;$/;"	v
+code-hl-color	css/main.scss	/^$code-hl-color:    #eef;$/;"	v
+constructor	assets/js/common.js	/^  constructor(el) {$/;"	m	class:Accordion
+content-width	css/main.scss	/^$content-width:    800px;$/;"	v
+dark-blue	css/main.scss	/^$dark-blue:         #00369f !default;$/;"	v
+dark-gray	css/main.scss	/^$dark-gray:         #333 !default;$/;"	v
+dark-green	css/main.scss	/^$dark-green:        #009f06 !default;$/;"	v
+device	css/main.scss	/^@mixin media-query($device) {$/;"	z
+expand	assets/js/common.js	/^  expand() {$/;"	m	class:Accordion
+green	css/main.scss	/^$green:             #00ab37 !default;$/;"	v
+green-1	css/main.scss	/^$green-1:           #11D68B !default;$/;"	v
+green-2	css/main.scss	/^$green-2:           #00cf26 !default;$/;"	v
+grey-color	css/main.scss	/^$grey-color:        #828282;$/;"	v
+grey-color-bitlight	css/main.scss	/^$grey-color-bitlight:  lighten($grey-color, 30%);$/;"	v
+grey-color-dark	css/main.scss	/^$grey-color-dark:   darken($grey-color, 25%);$/;"	v
+grey-color-light	css/main.scss	/^$grey-color-light:  lighten($grey-color, 40%);$/;"	v
+header-font-family	css/main.scss	/^$header-font-family: "Linux Libertine", "Computer Modern Serif", Times, serif;$/;"	v
+hoover	_bibliography/pubs.bib	/^@inproceedings{hoover.j:2020,$/;"	j
+hoover	_bibliography/pubs.bib	/^@misc{hoover.j:2021,$/;"	n
+light-gray	css/main.scss	/^$light-gray:        #ccc !default;$/;"	v
+light-green	css/main.scss	/^$light-green:       #ddffdd !default;$/;"	v
+light-pink	css/main.scss	/^$light-pink:        #ffdddd !default;$/;"	v
+lighter-gray	css/main.scss	/^$lighter-gray:      #eee !default;$/;"	v
+lime_green	css/main.scss	/^$lime_green:        #B7D12A !default;$/;"	v
+media-query	css/main.scss	/^@mixin media-query($device) {$/;"	m
+mid-gray	css/main.scss	/^$mid-gray:          #666 !default;$/;"	v
+navbuttonpad	_sass/_layout.scss	/^        $navbuttonpad:2px;$/;"	v
+navbuttonsize	_sass/_layout.scss	/^        $navbuttonsize: $top-bar-height - $navbuttonpad;$/;"	v
+no-pad	_sass/_base.scss	/^    #no-pad {$/;"	i
+notebook	assets/simplest_linear_regression_example.html	/^  <div tabindex="-1" id="notebook" class="border-box-sizing">$/;"	I
+notebook-container	assets/simplest_linear_regression_example.html	/^    <div class="container" id="notebook-container">$/;"	I
+ns1d21634b0101	assets/fonts/Salome/salome_deco-webfont.svg	/^<svg xmlns="http:\/\/www.w3.org\/2000\/svg">$/;"	n	uri:http://www.w3.org/2000/svg
+ns31a00a670101	assets/fonts/Salome/salome_fine_italic-webfont.svg	/^<svg xmlns="http:\/\/www.w3.org\/2000\/svg">$/;"	n	uri:http://www.w3.org/2000/svg
+ns34b580f20101	assets/fonts/Salome/salome_fine-webfont.svg	/^<svg xmlns="http:\/\/www.w3.org\/2000\/svg">$/;"	n	uri:http://www.w3.org/2000/svg
+ns56214dd70101	assets/fonts/Salome/salome_stencil_italic-webfont.svg	/^<svg xmlns="http:\/\/www.w3.org\/2000\/svg">$/;"	n	uri:http://www.w3.org/2000/svg
+ns6d092f1f0101	assets/simplest_linear_regression_example/output_6_0.svg	/^<svg xmlns="http:\/\/www.w3.org\/2000\/svg" xmlns:xlink="http:\/\/www.w3.org\/1999\/xlink" width/;"	n	uri:http://www.w3.org/2000/svg
+ns981ffd110101	assets/fonts/Salome/salome-webfont.svg	/^<svg xmlns="http:\/\/www.w3.org\/2000\/svg">$/;"	n	uri:http://www.w3.org/2000/svg
+nsc33cc2620101	assets/fonts/Salome/salome_stencil-webfont.svg	/^<svg xmlns="http:\/\/www.w3.org\/2000\/svg">$/;"	n	uri:http://www.w3.org/2000/svg
+nsd8dfcda60101	assets/fonts/Salome/salome_italic-webfont.svg	/^<svg xmlns="http:\/\/www.w3.org\/2000\/svg">$/;"	n	uri:http://www.w3.org/2000/svg
+nsec25ff5a0101	assets/simplest_linear_regression_example/output_1_0.svg	/^<svg xmlns="http:\/\/www.w3.org\/2000\/svg" xmlns:xlink="http:\/\/www.w3.org\/1999\/xlink" width/;"	n	uri:http://www.w3.org/2000/svg
+on-laptop	css/main.scss	/^$on-laptop:        800px;$/;"	v
+on-palm	css/main.scss	/^$on-palm:          600px;$/;"	v
+onAnimationFinish	assets/js/common.js	/^  onAnimationFinish(open) {$/;"	m	class:Accordion
+onClick	assets/js/common.js	/^  onClick(e) {$/;"	m	class:Accordion
+open	assets/js/common.js	/^  open() {$/;"	m	class:Accordion
+orange	css/main.scss	/^$orange:            #F29105 !default;$/;"	v
+orange-1	css/main.scss	/^$orange-1:          #ffcc22 !default;$/;"	v
+pink	css/main.scss	/^$pink:              #f92080 !default;$/;"	v
+proof ($\\leftarrow$)	assets/2018.11.15-generative_vs_constraint.tex	/^\\subsubsection{proof ($\\leftarrow$)}$/;"	b	subsection:FSA and MSOL[$S$] over strings""The equivalence of FSAs and MSOL[$S$]
+proof ($\\rightarrow$)	assets/2018.11.15-generative_vs_constraint.tex	/^\\subsubsection{proof ($\\rightarrow$)}$/;"	b	subsection:FSA and MSOL[$S$] over strings""The equivalence of FSAs and MSOL[$S$]
+publication-title-font-weight	css/main.scss	/^$publication-title-font-weight: 900 !default;$/;"	v
+purple	css/main.scss	/^$purple:            #B509AC !default;$/;"	v
+ratio	css/main.scss	/^@mixin relative-font-size($ratio) {$/;"	z
+red	css/main.scss	/^$red:               #FF3636 !default;$/;"	v
+red-1	css/main.scss	/^$red-1:             #f95020 !default;$/;"	v
+relative-font-size	css/main.scss	/^@mixin relative-font-size($ratio) {$/;"	m
+salome_decoregular	assets/fonts/Salome/salome_deco-webfont.svg	/^<font id="salome_decoregular" horiz-adv-x="1026" >$/;"	d
+salome_decoregular	assets/fonts/Salome/salome_deco-webfont.svg	/^<font id="salome_decoregular" horiz-adv-x="1026" >$/;"	i
+salome_fineitalic	assets/fonts/Salome/salome_fine_italic-webfont.svg	/^<font id="salome_fineitalic" horiz-adv-x="868" >$/;"	d
+salome_fineitalic	assets/fonts/Salome/salome_fine_italic-webfont.svg	/^<font id="salome_fineitalic" horiz-adv-x="868" >$/;"	i
+salome_fineregular	assets/fonts/Salome/salome_fine-webfont.svg	/^<font id="salome_fineregular" horiz-adv-x="868" >$/;"	d
+salome_fineregular	assets/fonts/Salome/salome_fine-webfont.svg	/^<font id="salome_fineregular" horiz-adv-x="868" >$/;"	i
+salome_stencilitalic	assets/fonts/Salome/salome_stencil_italic-webfont.svg	/^<font id="salome_stencilitalic" horiz-adv-x="868" >$/;"	d
+salome_stencilitalic	assets/fonts/Salome/salome_stencil_italic-webfont.svg	/^<font id="salome_stencilitalic" horiz-adv-x="868" >$/;"	i
+salome_stencilregular	assets/fonts/Salome/salome_stencil-webfont.svg	/^<font id="salome_stencilregular" horiz-adv-x="868" >$/;"	d
+salome_stencilregular	assets/fonts/Salome/salome_stencil-webfont.svg	/^<font id="salome_stencilregular" horiz-adv-x="868" >$/;"	i
+salomeitalic	assets/fonts/Salome/salome_italic-webfont.svg	/^<font id="salomeitalic" horiz-adv-x="868" >$/;"	d
+salomeitalic	assets/fonts/Salome/salome_italic-webfont.svg	/^<font id="salomeitalic" horiz-adv-x="868" >$/;"	i
+salomeregular	assets/fonts/Salome/salome-webfont.svg	/^<font id="salomeregular" horiz-adv-x="868" >$/;"	d
+salomeregular	assets/fonts/Salome/salome-webfont.svg	/^<font id="salomeregular" horiz-adv-x="868" >$/;"	i
+shrink	assets/js/common.js	/^  shrink() {$/;"	m	class:Accordion
+small-font-size	css/main.scss	/^$small-font-size:  $base-font-size * 0.875;$/;"	v
+spacing-unit	css/main.scss	/^$spacing-unit:     30px;$/;"	v
+text-color	css/main.scss	/^$text-color:       #111;$/;"	v
+theme-color	css/main.scss	/^$theme-color:       $brand-color;$/;"	v
+theme-color-light	css/main.scss	/^$theme-color-light: lighten($brand-color, 35%);$/;"	v
+top-bar-height	css/main.scss	/^$top-bar-height: $base-line-height * $base-font-size * 1.5;$/;"	v
+white	css/main.scss	/^$white:             #fff !default;$/;"	v
+xlink	assets/simplest_linear_regression_example/output_1_0.svg	/^<svg xmlns="http:\/\/www.w3.org\/2000\/svg" xmlns:xlink="http:\/\/www.w3.org\/1999\/xlink" width/;"	n	uri:http://www.w3.org/1999/xlink
+xlink	assets/simplest_linear_regression_example/output_6_0.svg	/^<svg xmlns="http:\/\/www.w3.org\/2000\/svg" xmlns:xlink="http:\/\/www.w3.org\/1999\/xlink" width/;"	n	uri:http://www.w3.org/1999/xlink
+yellow	css/main.scss	/^$yellow:            #efcc00 !default;$/;"	v
+{{ page.title }}	_layouts/page.html	/^    <h1 class="post-title">{{ page.title }}<\/h1>$/;"	h
+{{ page.title }}	_layouts/post.html	/^    <\/h1>$/;"	h
+{{entry.key}}	_layouts/bib.html	/^<div id="{{entry.key}}">$/;"	I
