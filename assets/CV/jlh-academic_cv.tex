@@ -3,22 +3,34 @@
 
 \usepackage{fontspec}
 \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
-\setmainfont{Linux Libertine}
+\setmainfont{Linux Biolinum}
 \setsansfont{Linux Biolinum}
 
+% For references
+\usepackage[%
+natbib=true,backend=biber,sorting=none,maxnames=10,%
+citestyle=authoryear,bibstyle=authoryear,%
+url=false,doi=false,isbn=false%
+]{biblatex}
+\addbibresource{/Users/j/Library/texmf/bibtex/bib/all.bib}
+
+% jbib_links: makes nice links, and defines nymdt sorting.
+%   Imports mathtools, xcolor, hyperref, cleveref.
+\input{/Users/j/Library/texmf/custom/jbib_links.tex}
+
 % formatting packages
-\usepackage[letterpaper, margin=.85in]{geometry}
+\usepackage[letterpaper, margin=2cm]{geometry}
 \usepackage{xunicode,xltxtra,url,parskip,array}
 \usepackage{ulem}
 \normalem
-\RequirePackage{color,graphicx}
-\usepackage[usenames,dvipsnames]{xcolor}
+\RequirePackage{graphicx}
+% \usepackage[usenames,dvipsnames]{xcolor}
 \usepackage{multicol}
 \usepackage{longtable}
 % for custom link coloring
-\usepackage{hyperref}
-\definecolor{linkcolour}{rgb}{0,0.4,0.6}
-\hypersetup{colorlinks,breaklinks,urlcolor=linkcolour, linkcolor=linkcolour}
+% \usepackage{hyperref}
+% \definecolor{linkcolour}{rgb}{0,0.4,0.6}
+% \hypersetup{colorlinks,breaklinks,urlcolor=linkcolour, linkcolor=linkcolour}
 
 % for \section definition
 \usepackage{titlesec}
@@ -40,7 +52,7 @@
 \begin{tabular}{l}
   % \textsc{DOB:}   & 03 Jan 1989 \\
   %\textsc{Address:}   &
-  1085 av du Dr-Penfield, Montréal, H3A 1A7, Canada \\
+  1085 av du Dr-Penfield, Montréal, H3A 1A7, Canada\\
   %\textsc{Phone:}     &
   % +1 508 808 1033\\
   %\textsc{email:}     &
@@ -56,19 +68,19 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % \subsection{Degree study}
 
-\begin{longtable}{p{2cm}|p{14.5cm}}
+\begin{longtable}{p{1.7cm}|p{15cm}}
   2018--(2024)%
     &%
     PhD student in Linguistics,
     \textbf{\href{https://www.mcgill.ca/linguistics/graduate}{McGill} University}, and
     \href{http://mila.quebec}{\textbf{Mila}} -- Quebec Artificial Intelligence
-    Institute \\
+    Institute\\
     &%
-    advisor: Timothy J.\ O'Donnell. [Fast-tracked from MA program in 2019] \\
+    advisor: Timothy J.\ O'Donnell. [Fast-tracked from MA program in 2019]\\
     \multicolumn{2}{c}{}\\
   2006--2012%
     &%
-    \textsc{Bachelor of Liberal Arts (ALB)}, \emph{cum laude},%
+    \textsc{Bachelor of Liberal Arts (ALB)}, \emph{cum laude},
     \textbf{Harvard University \href{https://extension.harvard.edu/}{Extension School}}\\
     &%
     Field of Study: Mathematics | Minor: Linguistics\\
@@ -82,7 +94,7 @@
 
   % \subsection{Summer schools}
 
-  % \begin{longtable}{p{2cm}|p{14.5cm}}
+  % \begin{longtable}{p{1.7cm}|p{15cm}}
   % \textsc{Summer 2019}\hfill& \textbf{ESSLLI --- 31st
   % European Summer School in Logic, Language and
   % Information} | RÄ«ga, Latvia\\
@@ -105,52 +117,29 @@
 
   % \subsection{Courses outside of program}
 
-  % \begin{longtable}{p{2cm}|p{14.5cm}}
+  % \begin{longtable}{p{1.7cm}|p{15cm}}
   % \textsc{Spring 2017} \hfill&\textbf{Boston College}
-  % MATH 4480 \uline{Mathematical Logic} course (Prof.\
+  % MATH 4480 \emph{Mathematical Logic} course (Prof.\
   % Robert Reed)\\
   % \textsc{Fall 2016} \hfill& \textbf{Brown University}
-  % CLPS 1830, \uline{Grammar and Processing of Ellipsis}
+  % CLPS 1830, \emph{Grammar and Processing of Ellipsis}
   % seminar (Prof. Pauline Jacobson)\\
-  % \hfill& \textbf{MIT} 24.902, \uline{Syntax} course
+  % \hfill& \textbf{MIT} 24.902, \emph{Syntax} course
   % (Prof. David Pesetsky)\\
   % \textsc{Fall 2013} \hfill&\textbf{University of
-  % Maryland, College Park}'s \uline{Exploring Quantum
+  % Maryland, College Park}'s \emph{Exploring Quantum
   % Physics} | online certificate (Coursera)\\
-  % \hfill&\textbf{BerkeleyX} CS191x: \uline{Quantum
+  % \hfill&\textbf{BerkeleyX} CS191x: \emph{Quantum
   % Mechanics and Quantum Computation} | online
   % certificate (EdX)\\
   % % \textsc{Spring 2003} & \textbf{Framingham State
-  % University} 61.110, \uline{Languages of the World}
+  % University} 61.110, \emph{Languages of the World}
   % course with Prof.\ M.\ Mahler \\
   % \end{longtable}
 
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \section{Research}
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \begin{longtable}{p{2cm}|p{14.5cm}}
-    \textsc{2020}&%
-    \textbf{Accounting for variation in number agreement in Icelandic
-    dative--nominative constructions}.
-    Proceedings of WCCFL 38, Vancouver, BC. Cascadilla Press. In press.\\
-  \end{longtable}
-
-  % \subsection{Works in progress}
-  % \begin{itemize}
-  %   \item \textbf{Predictability and Linguistic Dependencies} (PhD comprehensive
-  %     exam project): Using pretrained contextual embedding networks to compare
-  %     statistical dependency with syntactic dependencies. Committee: Timothy J,
-  %     O'Donnell, Martina Martinović, and Alessandro Sordoni (Microsoft
-  %     Research).
-  %   \item \textbf{Estonian indefites in fragment answers: from something to
-  %     nothing}: Project documenting a semantic puzzle about Estonian indefinites
-  %     formed from wh-words, which may be interpreted as either a positive
-  %     existential or a negative when uttered elliptically.
-  % \end{itemize}
-
   % \subsection{Undergraduate research assistantships}
 
-  % \begin{longtable}{p{2cm}|p{14.5cm}}
+  % \begin{longtable}{p{1.7cm}|p{15cm}}
   % \textsc{Fall 2013} & Research assistant for Rama
   % Novogradsky (\textbf{BU, Harvard Snedeker Lab})\\
   %       &\footnotesize{Project studying children's early
@@ -185,25 +174,52 @@
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \section{Teaching}
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \begin{longtable}{p{2cm}|p{14.5cm}}
+  \begin{longtable}{p{1.7cm}|p{15cm}}
+    \textsc{Fall 2021}&%
+      TA for \textbf{McGill} COMP 445 \emph{Computational Linguistics}
+      (Prof.\ Timothy O'Donnell)\\
     \textsc{Winter 2021}&%
-      TA for \textbf{McGill} COMP 596 \uline{Probabilistic Programming}
+      TA for \textbf{McGill} COMP 596 \emph{Probabilistic Programming}
       (Prof.\ Timothy O'Donnell)\\
     \textsc{Fall 2020}&%
-      TA for \textbf{McGill} COMP 445 \uline{Computational Linguistics}
+      TA for \textbf{McGill} COMP 445 \emph{Computational Linguistics}
       (Prof.\ Timothy O'Donnell)\\
     \textsc{Winter 2020}&%
-      TA for \textbf{McGill} LING 201 \uline{Introduction to Linguistics}
+      TA for \textbf{McGill} LING 201 \emph{Introduction to Linguistics}
       (Prof.\ Francisco Torreira, Mathieu Paillé)\\
     \textsc{Fall 2019}&%
-      TA for \textbf{McGill} LING 201 \uline{Introduction to Linguistics}
+      TA for \textbf{McGill} LING 201 \emph{Introduction to Linguistics}
       (Prof.\ Francisco Torreira, Prof\. Junko Shimoyama)\\
   \end{longtable}
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Community}
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \begin{longtable}{p{1.7cm}|p{15cm}}
+    2020
+    &%
+      Graduate Program changes Committee, student member\\
+    \textsc{2020--}pres.
+    &%
+      Graduate student representative, McGill Linguistics Department\\
+      \textsc{2019--}pres.
+    &%
+      Vice President, Academic, \textbf{GLAM}, Graduate Linguistics Association
+      of McGill\\
+    &%
+      Founding member, \textbf{EARTH-LING}, McGill Linguistics department
+      environmental working group\\
+    \textsc{2018--}pres.
+    &%
+      Graduate student member, webmaster, Montreal Computational and
+      Quantitative Linguistics Lab (\href{http://mcqll.org}{\textbf{MCQLL}})\\
+  \end{longtable}
+  Reviewing: CogSci 2021, CoNLL 2020
+
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \section{Awards}
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \begin{longtable}{p{2cm}|p{14.5cm}}
+  \begin{longtable}{p{1.7cm}|p{15cm}}
     \textsc{2020}&%
       \textbf{Microsoft Research-Mila Collaboration Grant}, for project
       supervised by Alessandro Sordoni (MSR Montreal) and Prof.\ Timothy
@@ -217,28 +233,38 @@
   \end{longtable}
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \section{Community}
+  \section{Research}
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \begin{longtable}{p{2cm}|p{14.5cm}}
-    2020
-    &%
-      Graduate Program changes Committee, student member\\
-    \textsc{2020--}present
-    &%
-      Graduate student representative, McGill Linguistics Department\\
-    \textsc{2019--}present
-    &%
-      Vice President, Academic, \textbf{GLAM}, Graduate Linguistics Association
-      of McGill\\
-    &%
-      Founding member, \textbf{EARTH-LING}, McGill Linguistics department
-      environmental working group\\
-    \textsc{2018--}present
-    &%
-      Graduate student member, website maintainer, Montreal Computational and
-      Quantitative Linguistics Lab (\href{http://mcqll.org}{\textbf{MCQLL}})\\
-  \end{longtable}
-  Reviewing: CogSci 2021, CoNLL 2020
+  % \begin{longtable}{p{1.7}|p{15cm}}
+  %   \textsc{2021}&%
+  %   \textbf{Linguistic dependencies and statistical dependence}.
+  %   \\
+  %   \textsc{2020}&%
+  %   \textbf{Accounting for variation in number agreement in Icelandic
+  %   dative--nominative constructions}.
+  %   Proceedings of WCCFL 38, Vancouver, BC. Cascadilla Press. In press.\\
+  % \end{longtable}
+
+  % Print bibliography, manual order
+  \vspace{5pt}
+  \nocite{hoover.j:2021,hoover.j:2020}
+  \AtNextBibliography{\small}
+  \printbibliography[heading=none]{}
+  \vspace{5pt}
+
+  % \subsection{Works in progress}
+  % \begin{itemize}
+  %   \item \textbf{Predictability and Linguistic Dependencies} (PhD comprehensive
+  %     exam project): Using pretrained contextual embedding networks to compare
+  %     statistical dependency with syntactic dependencies. Committee: Timothy J,
+  %     O'Donnell, Martina Martinović, and Alessandro Sordoni (Microsoft
+  %     Research).
+  %   \item \textbf{Estonian indefites in fragment answers: from something to
+  %     nothing}: Project documenting a semantic puzzle about Estonian indefinites
+  %     formed from wh-words, which may be interpreted as either a positive
+  %     existential or a negative when uttered elliptically.
+  % \end{itemize}
+
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \section{Languages}
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -264,8 +290,8 @@
   \end{longtable}
 
   \section{Ballet career}
-  \begin{longtable}{p{2cm}|p{14.5cm}}
-    2018--present
+  \begin{longtable}{p{1.7cm}|p{15cm}}
+    2018--pres.
     &%
       I retired from full-time dancing in 2018, when I began my graduate study
       at McGill, but I have continued with occasional appearances as guest
