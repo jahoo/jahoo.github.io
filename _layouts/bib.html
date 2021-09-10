@@ -36,6 +36,9 @@
     {% elsif entry.howpublished %}
       {{entry.howpublished}}.
     {% endif %}
+    {% if entry.note %}
+      {{entry.note}}.
+    {% endif %} 
     {% if entry.day %}
       {{entry.day}}
     {% endif %}
