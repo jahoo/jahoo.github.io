@@ -692,7 +692,9 @@
 \hat \theta = \arg\min_\theta \{
 \overbrace{||\mathbf{y} - \mathbf{f}_\theta||^2} + \overbrace{\lambda\times\text{wiggliness}(f_\theta)}
 \}</span></p>
-<p><span class="math display">\mathbf{f}_\theta = (f_\theta(\mathbf{x_1}),f_\theta(\mathbf{x_2} \ldots , f_\theta(\mathbf{x_N})^T</span></p>
+<p><span class="math display">\mathbf{f}_\theta = (
+f_\theta(\mathbf{x_1}),f_\theta(\mathbf{x_2})\ldots,f_\theta(\mathbf{x_N})
+)^T</span></p>
 <div class="fragment">
 <p>Wigglinness penalty, for instance, <span class="math inline">\text{wiggliness}(f_\theta)= \int \left( \textstyle\frac{\mathrm{d}^n}{{\mathrm{d}}x^n}f_\theta(x) \right)^2 \mathrm{d}x</span></p>
 <p>Penalty <em>null space</em> (functions not penalized): <span class="math inline">n=2 \implies</span> linear functions</p>
