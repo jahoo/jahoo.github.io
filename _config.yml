@@ -21,7 +21,6 @@ markdown: kramdown
 scholar:
   # style: apa
   locale: en
-
   sort_by: year
   order: descending
   # group_by: year
@@ -40,4 +39,4 @@ scholar:
 # \\[\LaTeX code\\] (also for display)
 # \\(\LaTeX code\\) (for inline)
 
-theme: jekyll-theme-minimal
+# theme: jekyll-theme-minimal
