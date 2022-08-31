@@ -3,7 +3,7 @@ layout: page
 title: about
 ---
 
-Hi. [I](/assets/j.png)’m a PhD student in [linguistics at McGill University](https://mcgill.ca/linguistics/) and [Mila - Quebec AI Institute](https://mila.quebec/). My advisor is [Tim O'Donnell](http://people.linguistics.mcgill.ca/~timothy.odonnell/), and I'm a member of the [Montreal Computational & Quantitative Linguistics Lab](https://mcqll.org/).  I'm interested in lots of things, but most of all mathematical linguistics, [information theory](http://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf), learnability, and the generative/expressive capacity of formal systems. I want to understand what human and machine learning can tell us about the underlying structure and complexity of language.  Human language is complicated, yet we learn to use is expertly without trying. …How do we do that? 🤔 
+Hi. [I](/assets/j.png)’m a PhD student in [linguistics at McGill University](https://mcgill.ca/linguistics/) and [Mila - Quebec AI Institute](https://mila.quebec/). My advisor is [Tim O'Donnell](https://todonnell.github.io/), and I'm a member of the [Montreal Computational & Quantitative Linguistics Lab](https://mcqll.org/).  I'm interested in lots of things, but most of all mathematical linguistics, [information theory](http://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf), learnability, and the generative/expressive capacity of formal systems. I want to understand what human and machine learning can tell us about the underlying structure and complexity of language.  Human language is complicated, yet we learn to use is expertly without trying. …How do we do that? 🤔 
 
 CV [here](/assets/CV/jlh-academic_cv.pdf).
 
