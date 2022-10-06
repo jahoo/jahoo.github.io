@@ -90,17 +90,23 @@
     [<a href="{{ entry.html }}" target="_blank">HTML</a>]
   {% endif %}
   {% if entry.pdf %}
-    [<a href="{{ entry.pdf | prepend: '/assets/pdfs/' | prepend: site.baseurl | prepend: site.url }}" target="_blank">pdf</a>]
+    [<a href="{% if entry.pdf contains 'http' %}{{entry.pdf}}{% else %}{{ entry.pdf | prepend: '/assets/pdfs/' | prepend: site.baseurl | prepend: site.url }}{% endif %}" target="_blank">pdf</a>]
   {% endif %}
   {% if entry.poster %}
-    [<a href="{{ entry.poster | prepend: '/assets/pdfs/' | prepend: site.baseurl | prepend: site.url }}" target="_blank">poster</a>]
+    [<a href="{% if entry.poster contains 'http' %}{{entry.poster}}{% else %}{{ entry.poster | prepend: '/assets/pdfs/' | prepend: site.baseurl | prepend: site.url }}{% endif %}" target="_blank">poster</a>]
   {% endif %}
   {% if entry.slides %}
-    [<a href="{{ entry.slides | prepend: '/assets/pdfs/' | prepend: site.baseurl | prepend: site.url }}" target="_blank">slides</a>]
+    [<a href="{% if entry.slides contains 'http' %}{{entry.slides}}{% else %}{{ entry.slides | prepend: '/assets/pdfs/' | prepend: site.baseurl | prepend: site.url }}{% endif %}" target="_blank">slides</a>]
   {% endif %}
   {% if entry.code %}
     [<a href="{{ entry.code }}" target="_blank">code</a>]
   {% endif %}
+    <details>
+    <summary>bib</summary>
+    <div class="content">
+      {% highlight bibtex %}{{entry.bibtex}}{% endhighlight %}
+    </div>
+  </details>
   </span>
     {% if entry.abstract %}
     <details>
