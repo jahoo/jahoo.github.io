@@ -9,10 +9,10 @@
 % For references
 \usepackage[%
 natbib=true,backend=biber,sorting=none,%
-style=chicago,%
+style=authoryear-icomp,%
 url=false,doi=false,isbn=false%
 ]{biblatex}
-\addbibresource{/Users/j/Library/texmf/bibtex/bib/all.bib}
+\addbibresource{/Users/j/Library/texmf/bibtex/bib/all-biblatex.bib}
 
 % jbib_links: makes nice links, and defines nymdt sorting.
 %   Imports mathtools, xcolor, hyperref, cleveref.
@@ -256,7 +256,12 @@ url=false,doi=false,isbn=false%
 
   % Print bibliography, manual order
   \vspace{5pt}
-  \nocite{hoover.j:2021,hoover.j:2020,hoover.j:2020wccflhandout}
+  \nocite{%
+    hoover.j:2022amlap
+    ,hoover.j:2021emnlp%
+    ,hoover.j:2021wccfl%
+    %,hoover.j:2020wccflhandout
+  }
   \AtNextBibliography{\small}
   \printbibliography[heading=none]{}
   \vspace{5pt}
