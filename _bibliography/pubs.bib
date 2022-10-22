@@ -7,8 +7,29 @@
 %% Saved with string encoding Unicode (UTF-8) 
 
 
-@comment{hoover-etal-2022-amlap,   type = {Poster},   title = {With Better Language Models, Processing Time Is Superlinear in Surprisal},   author = {Hoover, Jacob Louis and Sonderegger, Morgan and Piantadosi, Steven T. and O'Donnell, Timothy J.},   year = {2022},   howpublished = {Poster at Architectures and Mechanisms for Language Processing (AMLaP) 28},   day = 6,   month = sep,   address = {{York, England}},   url = {https://virtual.oxfordabstracts.com/#/event/3067/submission/297},   poster = {https://d3ijlhudpq9yjw.cloudfront.net/cdd9fcfe-abaa-4d50-b0a0-9723ab9e9bc9.pdf} }
+@misc{hoover-etal-2022-amlap,
+  type = {Poster},
+  title = {With Better Language Models, Processing Time Is Superlinear in Surprisal},   
+  author = {Hoover, Jacob Louis and Sonderegger, Morgan and Piantadosi, Steven T. and O'Donnell, Timothy J.},   
+  year = {2022},
+  howpublished = {Poster at Architectures and  Mechanisms for Language Processing (AMLaP) 28},  
+  day = 6,
+  month = sep,
+  address = {{York, England}},
+  url =  {https://virtual.oxfordabstracts.com/#/event/3067/submission/297},
+  poster =  {https://d3ijlhudpq9yjw.cloudfront.net/cdd9fcfe-abaa-4d50-b0a0-9723ab9e9bc9.pdf}
+  }
 
+@misc{hoover.j:2022psyarxiv,
+  title = {The {{Plausibility}} of {{Sampling}} as an {{Algorithmic Theory}} of {{Sentence Processing}}},
+  author = {Hoover, Jacob Louis and Sonderegger, Morgan and Piantadosi, Steven T. and O'Donnell, Timothy J.},
+  year = {2022},
+  month = oct,
+  number = {qjnpv},
+  publisher = {{PsyArXiv}},
+  url = {https//osf.io/qjnpv},
+  abstract = {Words that are more surprising given context take longer to process. However, no incremental parsing algorithm has been shown to directly predict this phenomenon. In this work, we focus on a class of algorithms whose runtime does naturally scale in surprisal---sampling algorithms. Our first contribution is to show that simple examples of such algorithms predict runtime to increase superlinearly with surprisal, and also predict variance in runtime to increase. These two predictions stand in contrast with literature on surprisal theory (Hale, 2001; Levy, 2008), which assumes that the expected processing cost increases linearly with surprisal, and makes no prediction about variance. In the second part of this paper, we conduct an empirical study of the relationship between surprisal and reading time, using a collection of modern language models to estimate surprisal.  We find that with better language models, reading time increases superlinearly in surprisal, and also that variance increases. These results are consistent with the predictions of sampling-based algorithms.},
+}
 
 
 @inproceedings{hoover-2020-icelandic,
@@ -50,7 +71,8 @@
 	title = {Accounting for Variation in Number Agreement in Icelandic Dative-Nominative Constructions},
 	url = {http://www.lingref.com/cpp/wccfl/38/abstract3568.html},
 	year = {2021},
-	bdsk-url-1 = {http://www.lingref.com/cpp/wccfl/38/abstract3568.html}}
+	bdsk-url-1 = {http://www.lingref.com/cpp/wccfl/38/abstract3568.html}
+}
 
 @inproceedings{hoover-etal-2021-linguistic,
 	abstract = {Are pairs of words that tend to occur together also likely to stand in a linguistic dependency? This empirical question is motivated by a long history of literature in cognitive science, psycholinguistics, and NLP. In this work we contribute an extensive analysis of the relationship between linguistic dependencies and statistical dependence between words. Improving on previous work, we introduce the use of large pretrained language models to compute contextualized estimates of the pointwise mutual information between words (CPMI). For multiple models and languages, we extract dependency trees which maximize CPMI, and compare to gold standard linguistic dependencies. Overall, we find that CPMI dependencies achieve an unlabelled undirected attachment score of at most $\approx 0.5$. While far above chance, and consistently above a non-contextualized PMI baseline, this score is generally comparable to a simple baseline formed by connecting adjacent words. We analyze which kinds of linguistic dependencies are best captured in CPMI dependencies, and also find marked differences between the estimates of the large pretrained language models, illustrating how their different training schemes affect the type of dependencies they capture.},
@@ -66,4 +88,8 @@
 	title = {Linguistic Dependencies and Statistical Dependence},
 	url = {https://aclanthology.org/2021.emnlp-main.234},
 	year = {2021},
-	bdsk-url-1 = {https://aclanthology.org/2021.emnlp-main.234}}
+	bdsk-url-1 = {https://aclanthology.org/2021.emnlp-main.234}
+}
+
+
+

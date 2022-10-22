@@ -7,16 +7,67 @@
 \setsansfont{Linux Biolinum}
 
 % For references
+% \newcommand*\publistbasestyle{authoryear}
 \usepackage[%
-natbib=true,backend=biber,sorting=none,%
-style=authoryear-icomp,%
+natbib=true,backend=biber,sorting=none,maxnames=9,
+style=publist,
+plauthorhandling=highlight,
+% marginyear,
+boldyear=false,
+plnumbered=false,
+prinfo=false,
+linktitleall=true,
 url=false,doi=false,isbn=false%
 ]{biblatex}
+
+% Redefine to make year in margin and not in bibentry
+% https://github.com/jspitz/biblatex-publist/issues/20
+\renewbibmacro*{date}{}
+\renewbibmacro*{date+extradate}{}
+\renewbibmacro*{issue+date}{}
+\renewbibmacro*{bpl:year+labelyear}{\nopunct\ignorespaces}
+\newcommand*{\bibyear}{}
+\defbibenvironment{bibliography}
+{\list
+	{\iffieldequals{year}{\bibyear}
+                {}
+		{\printfield{year}%
+		 \savefield{year}{\bibyear}}}
+	{\setlength{\topsep}{0pt}%
+	 \setlength{\itemsep}{\bibitemsep}%
+	 \leftmargin\labelwidth%
+	 \advance\leftmargin\labelsep}}
+{\endlist}
+{\item}
+\renewcommand*\plmarginyear[1]{%
+  \raggedleft\normalfont{#1}%
+}
+
+
+\plauthorname[Jacob Louis]{Hoover}
 \addbibresource{/Users/j/Library/texmf/bibtex/bib/all-biblatex.bib}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[colorlinks]{hyperref}
+\usepackage{mathtools} % imports amsmath
+\usepackage{cleveref} % must come after importing hyperref and amsmath
+\hypersetup{%
+  linkcolor=BrickRed,%
+  citecolor=PineGreen,%
+  filecolor=Mulberry,%
+  urlcolor=NavyBlue,%
+  menucolor=BrickRed,%
+  runcolor=Mulberry,%
+  linkbordercolor=BrickRed,%
+  citebordercolor=PineGreen,%
+  filebordercolor=Mulberry,%
+  urlbordercolor=NavyBlue,%
+  menubordercolor=BrickRed,%
+  runbordercolor=Mulberry%
+}
 
 % jbib_links: makes nice links, and defines nymdt sorting.
 %   Imports mathtools, xcolor, hyperref, cleveref.
-\input{/Users/j/Library/texmf/custom/jbib_links.tex}
+% \input{/Users/j/Library/texmf/custom/jbib_links.tex}
 
 % formatting packages
 \usepackage[letterpaper, margin=2cm]{geometry}
@@ -222,7 +273,7 @@ url=false,doi=false,isbn=false%
     Graduate student member, webmaster, Montreal Computational and Quantitative
     Linguistics Lab (\href{http://mcqll.org}{\textbf{MCQLL}})\\
   \end{longtable}
-  Reviewing: CogSci 2021, CoNLL 2020
+  Reviewing: TACL 2022, CogSci 2021, CoNLL 2020
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \section{Awards}
@@ -257,7 +308,8 @@ url=false,doi=false,isbn=false%
   % Print bibliography, manual order
   \vspace{5pt}
   \nocite{%
-    hoover.j:2022amlap
+    hoover.j:2022psyarxiv%
+    ,hoover.j:2022amlap%
     ,hoover.j:2021emnlp%
     ,hoover.j:2021wccfl%
     %,hoover.j:2020wccflhandout

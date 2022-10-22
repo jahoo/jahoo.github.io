@@ -1,10 +1,10 @@
 ---
 layout: page
-title: pubs
+title: research
 published: true
 ---
 
 
-<!-- Here are my {% bibliography_count -f pubs %} pubs. No ...not that kind of pubs. -->
+<!-- {% bibliography_count -f pubs %} -->
 
 {% bibliography --file pubs %}
