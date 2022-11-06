@@ -1,5 +1,6 @@
 ---
 layout: post
+comments: true
 tags: 
     - note
 author:
@@ -27,6 +28,6 @@ _Rejection sampling_ refers to a particular algorithm involving drawing samples 
 
 
 <div>
-<iframe src="/assets/rejection-sampling-expo.html" width="100%" height="7000" frameborder=none>
+<iframe src="/assets/rejection-sampling-expo.html" width="100%" height="5900" frameborder=none>
 </iframe>
-<div/>
+</div>

@@ -19,7 +19,7 @@ github_username:  postylem
 markdown: kramdown
 
 scholar:
-  # style: apa
+  style: apa
   locale: en
   sort_by: [year, month, day]
   order: descending
@@ -33,6 +33,9 @@ scholar:
   bibliography: default.bib
   bibliography_template: bib # references file _layouts/bib.*
 
+# Comments (see _layouts/posts.html)
+disqus_shortname: jaclouhoo
+# https://help.disqus.com/en/articles/1717111-what-s-a-shortname
 
 # USE THE FOLLOWING FOR MATH:
 # $$\LaTeX code$$   (for display)

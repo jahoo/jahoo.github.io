@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Training Tensor Trains
+comments: true
 published: true 
 tags:
     - presentation

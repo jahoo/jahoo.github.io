@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Shannon’s noisy channel-coding theorem
+comments: true
 published: true 
 tags: presentation
 ---

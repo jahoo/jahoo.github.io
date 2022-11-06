@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Nivre's parsing examples animated
+comments: true
 published: true 
 tags:
     - note
