@@ -10,7 +10,7 @@
   <meta name="generator" content="quarto-99.9.9">
 
   <meta name="dcterms.date" content="2022-11-10">
-  <title>Sampling as an algorithmic theory of processing</title>
+  <title>Sampling as an algorithmic theory of sentence processing</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -361,7 +361,7 @@
 \global\def\I#1{\operatorname{I}(#1)}
 \global\def\H#1{\operatorname{H}(#1)}
 \global\def\KL#1#2{\operatorname{D_{KL}}(#1 \| #2)}
-\global\def\E{\operatorname*{\mathbb{E}}}
+\global\def\E#1{\operatorname*{\mathbb{E}}[#1]}
 \global\def\dee{\mathop{\mathrm{d}\!}}
 \global\def\var#1{\operatorname{var}(#1)}
 \global\def\fade#1{{\color{gray}{#1}}}
@@ -372,7 +372,7 @@
     <div class="slides">
 
 <section class="quarto-title-block center">
-  <h1 class="title">Sampling as an algorithmic theory of processing</h1>
+  <h1 class="title">Sampling as an algorithmic theory of sentence processing</h1>
 
 <div class="quarto-title-authors">
 </div>
@@ -382,43 +382,37 @@
 <section>
 <section class="title-slide slide level1 center">
 <h1>Surprisal and runtime</h1>
-
+<p>Parsing/comprehension can be seen as iterative inference <span class="math display">
+w_{1:n} \mapsto p(z\mid w_{1:n})
+</span></p>
+<p>incrementally:</p>
+<p><span class="math display">
+p(z \mid w_{1:n})
+= \frac{p(w_n \mid z)p(z \mid w_{1:n-1})}{p(w_n|w_{1:n-1})}
+</span></p>
 </section>
 <section class="slide level2">
 <h2>Surprisal and parsing algorithm runtime</h2>
-<!-- 
-
-Parsing/comprehension can be seen as iterative inference
-$$
-w_{1:n} \mapsto p(z\mid w_{1:n})
-$$
-
-incrementally:
-
-$$
-p(z \mid w_{1:n}) 
-= \frac{p(w_n \mid z)p(z \mid w_{1:n-1})}{p(w_n|w_{1:n-1})}
-$$
- -->
-<div class="callout callout-important no-icon callout-captioned callout-style-default">
+<div class="callout callout-note no-icon callout-captioned callout-style-default">
 <div class="callout-body">
 <div class="callout-caption">
 <p><strong>Phenomenon</strong></p>
 </div>
 <div class="callout-content">
-<p>Human processing time increases with <strong>surprisal</strong> <span class="math display">
-\surp{w_n} \coloneqq -\log p(w_n|w_{1:n-1})
-</span></p>
+<p>Human processing time increases with <strong>surprisal</strong>: <span class="math inline">\surp{w_n} \coloneqq -\log p(w_n|w_{1:n-1})</span></p>
 </div>
 </div>
 </div>
 <h3>Most algorithms don’t scale in surprisal</h3>
 <ul>
 <li>Nonprobabilistic algorithms <span class="citation" data-cites="earley.j:1970 rosenkrantz.d:1970">(<a href="#/references" role="doc-biblioref" onclick="">Rosenkrantz and Lewis 1970</a>; <a href="#/references" role="doc-biblioref" onclick="">Earley 1970</a>)</span></li>
-<li>Probabilistic enumerative algorithms <span class="citation" data-cites="stolcke.a:1995 roark.b:2001 stabler.e:2013">(<a href="#/references" role="doc-biblioref" onclick="">Stolcke 1995</a>; <a href="#/references" role="doc-biblioref" onclick="">Roark 2001</a>; <a href="#/references" role="doc-biblioref" onclick="">Stabler 2013</a>)</span>
+<li>Probabilistic enumerative algorithms <span class="citation" data-cites="stolcke.a:1995 roark.b:2001">(<a href="#/references" role="doc-biblioref" onclick="">Stolcke 1995</a>; <a href="#/references" role="doc-biblioref" onclick="">Roark 2001</a>)</span>
 <ul>
-<li># steps needed to integrate new item cannot depend on probability</li>
-<li>remains the case with chunking <span class="citation" data-cites="hale.j:2014 luong.t:2015">(<a href="#/references" role="doc-biblioref" onclick="">Hale 2014</a>; <a href="#/references" role="doc-biblioref" onclick="">Luong et al. 2015</a>)</span></li>
+<li><p>#steps to integrate <span class="math inline">w_n</span> cannot depend on probability</p>
+<div style="font-size:1.8rem;color:gray">
+<p>(without probabilistic pruning)</p>
+</div></li>
+<li><p>remains the case with chunking <span class="citation" data-cites="hale.j:2014 luong.t:2015">(<a href="#/references" role="doc-biblioref" onclick="">Hale 2014</a>; <a href="#/references" role="doc-biblioref" onclick="">Luong et al. 2015</a>)</span></p></li>
 </ul></li>
 <li>RNN or Transformer-based models of parsing <span class="citation" data-cites="costa.f:2003 jin.l:2020 hu.x:2021">(<a href="#/references" role="doc-biblioref" onclick="">Costa 2003</a>; <a href="#/references" role="doc-biblioref" onclick="">Jin and Schuler 2020</a>; <a href="#/references" role="doc-biblioref" onclick="">Hu et al. 2021</a>)</span></li>
 <li>or even causal language models (e.g., LSTM, Transformer-XL, GPT/2/3)</li>
@@ -426,10 +420,10 @@ $$
 <div class="callout callout-important no-icon callout-captioned callout-style-default">
 <div class="callout-body">
 <div class="callout-caption">
-<p><strong>In all cases, amount of work doesn’t directly depend on the probability of input.</strong></p>
+<p><strong>Problem</strong></p>
 </div>
 <div class="callout-content">
-
+<p>Amount of work algorithm does doesn’t directly depend on the probability of input.</p>
 </div>
 </div>
 </div>
@@ -443,23 +437,55 @@ $$
 </div>
 <div class="callout-content">
 <p>prioritize meanings with <strong>higher prior probability</strong> <span class="math inline">p(z\mid w_{1:n-1})</span></p>
+<div style="color:gray">
+<p>probability the <span class="math inline">z</span> is successful: <span class="math inline">\sum_{z} p(w_n \mid z) p(z \mid w_{1:n-1}) = p(w_n \mid w_{1:n-1})</span></p>
+</div>
 </div>
 </div>
 </div>
 <ul>
-<li><p><em>simple guessing</em> (iid) until success</p></li>
+<li><p><em>simple guessing</em> (iid) until success. Expected number of samples <span class="math inline">M</span>:</p>
+<div class="callout callout-none no-icon callout-style-simple">
+<div class="callout-body">
+<div class="callout-content">
+<p><span class="math inline">\E{M} = \frac1p = e^{\surp{w_n}} \qquad \var{M} = \frac{1-p}{p^2} = e^{2\surp{w_n}} - e^{\surp{w_n}} = \mathcal{O}(e^{\surp{w_n}})</span></p>
+</div>
+</div>
+</div></li>
 <li><p><em>guessing without replacement</em> until success</p>
-<div style="font-size:2rem;color:gray">
+<div class="callout callout-none no-icon callout-style-simple">
+<div class="callout-body">
+<div class="callout-content">
+<div style="font-size:1.8rem;color:gray">
 <p>assuming heavy-tailed probabilities</p>
 </div>
-<p><span class="math inline">\longrightarrow</span> expected runtime increases <strong>superlinearly</strong> with surprisal.</p>
-<p><span class="math inline">\longrightarrow</span> runtime variance increases with surprisal.</p></li>
+<p>runtime superlinear, variance increasing</p>
+</div>
+</div>
+</div></li>
 <li><p>also, deterministic <em>probability-ordered search</em></p>
-<div style="font-size:2rem;color:gray">
+<div class="callout callout-none no-icon callout-style-simple">
+<div class="callout-body">
+<div class="callout-content">
+<div style="font-size:1.8rem;color:gray">
 <p>assuming heavy-tailed probabilities</p>
 </div>
-<p><span class="math inline">\longrightarrow</span> expected runtime increases <strong>superlinearly</strong> with surprisal.</p></li>
+<p><span class="math inline">\E{M} = \mathcal{O}(e^{\surp{w_n}})</span></p>
+</div>
+</div>
+</div></li>
 </ul>
+<div class="callout callout-important no-icon callout-captioned callout-style-default">
+<div class="callout-body">
+<div class="callout-caption">
+<p><strong></strong></p>
+</div>
+<div class="callout-content">
+<p><span class="math inline">\longrightarrow</span> expected runtime increases <strong>superlinearly</strong> with surprisal.</p>
+<p><span class="math inline">\longrightarrow</span> runtime variance increases with surprisal.</p>
+</div>
+</div>
+</div>
 </section></section>
 <section>
 <section class="title-slide slide level1 center">
@@ -505,14 +531,55 @@ $$
 <section class="slide level2">
 <h2>Results</h2>
 
-<img data-src="figs/gaulss2_wprevm_wlinear_both_patch.png" class="r-stretch"></section>
+<img data-src="figs/gaulss2_wprevm_wlinear_both_patch.png" class="r-stretch"><div class="callout callout-important no-icon callout-captioned callout-style-default">
+<div class="callout-body">
+<div class="callout-caption">
+<p><strong>better LMs <span class="math inline">\implies</span> more superlinear</strong></p>
+</div>
+<div class="callout-content">
+
+</div>
+</div>
+</div>
+</section>
 <section class="slide level2">
 <h2></h2>
 <div class="columns">
 <div class="column">
-<p>variance increases with surprisal <img data-src="figs/2gaulss_linear_coefs_both.png"></p>
+<div class="callout callout-important no-icon callout-captioned callout-style-default">
+<div class="callout-body">
+<div class="callout-caption">
+<p><strong>better LM <span class="math inline">\implies</span> more superlinear</strong></p>
+</div>
+<div class="callout-content">
+
+</div>
+</div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="figs/2gaulss_halflinear_diffs3_mean_v_mean_surprisal_lengthstogether.png"></p>
+<p></p><figcaption>Superlinearity, measured as the amount by which the slope of the nonlinear GAMs’ predictions at high surprisal exceeds that at lower surprisal (mean and <span class="math inline">95\%</span> CI), versus model perplexity.</figcaption><p></p>
+</figure>
+</div>
+<!-- ![](figs/2gaulss_halflinear_diffs3_meanvar_v_mean_surprisal_lengthstogether.png) -->
 </div><div class="column">
-<p>better LM <span class="math inline">\implies</span> more superlinear <img data-src="figs/2gaulss_halflinear_diffs3_meanvar_v_mean_surprisal_lengthstogether.png"></p>
+<div class="callout callout-important no-icon callout-captioned callout-style-default">
+<div class="callout-body">
+<div class="callout-caption">
+<p><strong>variance increases with surprisal</strong></p>
+</div>
+<div class="callout-content">
+
+</div>
+</div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="figs/2gaulss_linear_coefs_surprisal.1.png"></p>
+<p></p><figcaption>Coefficient estimates (with <span class="math inline">95\%</span> CI) for the main effect of surprisal on log standard deviation in RT, as fit by the linear control GAMs. For all LMs, coefficients are positive, and significant (<span class="math inline">p&lt;0.05</span>).</figcaption><p></p>
+</figure>
+</div>
 </div>
 </div>
 </section></section>
@@ -558,14 +625,56 @@ Roark B (2001) Probabilistic top-down parsing and language modeling. Computation
 <div id="ref-rosenkrantz.d:1970" class="csl-entry" role="doc-biblioentry">
 Rosenkrantz DJ, Lewis PM (1970) <a href="https://doi.org/10.1109/SWAT.1970.5">Deterministic left corner parsing</a>. In: 11th annual symposium on switching and automata theory (swat 1970). pp 139–152
 </div>
-<div id="ref-stabler.e:2013" class="csl-entry" role="doc-biblioentry">
-Stabler EP (2013) Two <span>Models</span> of <span>Minimalist</span>, <span>Incremental Syntactic Analysis</span>. Topics in Cognitive Science 5:611–633. <a href="https://doi.org/10.1111/tops.12031">https://doi.org/10.1111/tops.12031</a>
-</div>
 <div id="ref-stolcke.a:1995" class="csl-entry" role="doc-biblioentry">
 Stolcke A (1995) <a href="https://www.aclweb.org/anthology/J95-2002">An efficient probabilistic context-free parsing algorithm that computes prefix probabilities</a>. Computational Linguistics 21:165–201
 </div>
 <div id="ref-wood.s:2016GAMbeyondEF" class="csl-entry" role="doc-biblioentry">
 Wood SN, Pya N, Säfken B (2016) Smoothing <span>Parameter</span> and <span>Model Selection</span> for <span>General Smooth Models</span>. Journal of the American Statistical Association 111:1548–1563. <a href="https://doi.org/10.1080/01621459.2016.1180986">https://doi.org/10.1080/01621459.2016.1180986</a>
+</div>
+</div>
+</section>
+<section class="slide level2">
+<h2>Guessing without replacement</h2>
+<div class="callout callout-tip callout-captioned callout-style-default">
+<div class="callout-body">
+<div class="callout-caption">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Runtime</strong></p>
+</div>
+<div class="callout-content">
+<ul>
+<li><p>Expected runtime for items with weights <span class="math inline">\{u_\text{target}, u_1, u_2, \ldots, u_K\}</span>, expected number of samples until success is <span class="math display">
+\E{N_\text{WOR}}
+= 1 + \sum_i \Pr(i \prec \text{target})
+= 1 + \sum_i \frac{u_i}{u_i + u_\text{target}}
+</span></p></li>
+<li><p>Similar calculation for variance in runtime.</p></li>
+</ul>
+</div>
+</div>
+</div>
+<h3>Assuming heavy-tailed probabilities (Pareto weights)</h3>
+
+<img data-src="figs/swor_runtime_empirical_smooth.png" class="r-stretch"><div class="callout callout-important no-icon callout-captioned callout-style-default">
+<div class="callout-body">
+<div class="callout-caption">
+<p><strong><span class="math inline">\implies</span> runtime increases exponentially with surprisal</strong></p>
+</div>
+<div class="callout-content">
+
+</div>
+</div>
+</div>
+<div class="callout callout-important no-icon callout-captioned callout-style-default">
+<div class="callout-body">
+<div class="callout-caption">
+<p><strong><span class="math inline">\implies</span> runtime variance increases with surprisal</strong></p>
+</div>
+<div class="callout-content">
+
+</div>
 </div>
 </div>
 </section>
@@ -604,7 +713,16 @@ Wood SN, Pya N, Säfken B (2016) Smoothing <span>Parameter</span> and <span>Mode
 </div>
 </div>
 </div>
-<p><span class="math inline">\implies</span> search runtime increases exponentially with surprisal</p>
+<div class="callout callout-important no-icon callout-captioned callout-style-default">
+<div class="callout-body">
+<div class="callout-caption">
+<p><strong><span class="math inline">\implies</span> search runtime increases exponentially with surprisal</strong></p>
+</div>
+<div class="callout-content">
+
+</div>
+</div>
+</div>
 <!-- Assuming $\alpha = 1$, this simplifies to $\operatorname{Time}(i) \propto e^{-\surp{i}} - 1$. -->
 <aside><ol class="aside-footnotes"><li id="fn1"><p>The density of <span class="math inline">X \sim \operatorname{Pareto}(\alpha,\theta)</span> is <span class="math inline">f(x) = \alpha\theta^\alpha x^{-(\alpha+1)}</span> (for <span class="math inline">x \ge \theta</span>), with parameters <span class="math inline">\alpha&gt;0,\theta&gt;0</span>. Abbreviate with constant <span class="math inline">a = \alpha\theta^\alpha</span>.</p></li></ol></aside></section>
 <section class="slide level2">
@@ -645,7 +763,19 @@ Wood SN, Pya N, Säfken B (2016) Smoothing <span>Parameter</span> and <span>Mode
 </div>
 </div>
 </div>
-<p><span class="math inline">\implies</span> search runtime increases exponentially with surprisal.</p>
+<div class="callout callout-important no-icon callout-captioned callout-style-default">
+<div class="callout-body">
+<div class="callout-caption">
+<p><strong><span class="math inline">\implies</span> search runtime increases exponentially with surprisal</strong></p>
+</div>
+<div class="callout-content">
+
+</div>
+</div>
+</div>
+<!-- 
+cp ~/McGill/projects/EVAL2-processing-surprisal/Research\ and\ reading\ \(local\)/writeups/2022-11-10-meeting-shain-etal/2022-11-10.html ~/Documents/GitHub/jahoo.github.io/nov10/index.html && cp -r ~/McGill/projects/EVAL2-processing-surprisal/Research\ and\ reading\ \(local\)/writeups/2022-11-10-meeting-shain-etal/2022-11-10_files ~/Documents/GitHub/jahoo.github.io/nov10 && cp -r ~/McGill/projects/EVAL2-processing-surprisal/Research\ and\ reading\ \(local\)/writeups/2022-11-10-meeting-shain-etal/figs ~/Documents/GitHub/jahoo.github.io/nov10 
+-->
 <div class="footer footer-default">
 
 </div>
@@ -829,7 +959,7 @@ Wood SN, Pya N, Säfken B (2016) Smoothing <span>Parameter</span> and <span>Mode
         // specified using percentage units.
         width: 1300,
 
-        height: 1100,
+        height: 1200,
 
         // Factor of the display size that should remain empty around the content
         margin: 0.1,
