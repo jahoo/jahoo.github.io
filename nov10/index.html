@@ -459,7 +459,7 @@ p(z \mid w_{1:n})
 <div style="font-size:1.8rem;color:gray">
 <p>assuming heavy-tailed probabilities</p>
 </div>
-<p>runtime superlinear, variance increasing</p>
+<p>runtime superlinear, variance increasing (no closed form; <a href="#/sec-swor">details</a>)</p>
 </div>
 </div>
 </div></li>
@@ -633,7 +633,7 @@ Wood SN, Pya N, Säfken B (2016) Smoothing <span>Parameter</span> and <span>Mode
 </div>
 </div>
 </section>
-<section class="slide level2">
+<section id="sec-swor" class="slide level2">
 <h2>Guessing without replacement</h2>
 <div class="callout callout-tip callout-captioned callout-style-default">
 <div class="callout-body">
@@ -645,7 +645,7 @@ Wood SN, Pya N, Säfken B (2016) Smoothing <span>Parameter</span> and <span>Mode
 </div>
 <div class="callout-content">
 <ul>
-<li><p>Expected runtime for items with weights <span class="math inline">\{u_\text{target}, u_1, u_2, \ldots, u_K\}</span>, expected number of samples until success is <span class="math display">
+<li><p>Expected runtime (#samples until success, for items with weights <span class="math inline">\{u_\text{target}, u_1, u_2, \ldots, u_K\}</span>): <span class="math display">
 \E{N_\text{WOR}}
 = 1 + \sum_i \Pr(i \prec \text{target})
 = 1 + \sum_i \frac{u_i}{u_i + u_\text{target}}
@@ -774,7 +774,7 @@ Wood SN, Pya N, Säfken B (2016) Smoothing <span>Parameter</span> and <span>Mode
 </div>
 </div>
 <!-- 
-cp ~/McGill/projects/EVAL2-processing-surprisal/Research\ and\ reading\ \(local\)/writeups/2022-11-10-meeting-shain-etal/2022-11-10.html ~/Documents/GitHub/jahoo.github.io/nov10/index.html && cp -r ~/McGill/projects/EVAL2-processing-surprisal/Research\ and\ reading\ \(local\)/writeups/2022-11-10-meeting-shain-etal/2022-11-10_files ~/Documents/GitHub/jahoo.github.io/nov10 && cp -r ~/McGill/projects/EVAL2-processing-surprisal/Research\ and\ reading\ \(local\)/writeups/2022-11-10-meeting-shain-etal/figs ~/Documents/GitHub/jahoo.github.io/nov10 
+\cp ~/McGill/projects/EVAL2-processing-surprisal/Research\ and\ reading\ \(local\)/writeups/2022-11-10-meeting-shain-etal/2022-11-10.html ~/Documents/GitHub/jahoo.github.io/nov10/index.html && \cp -r ~/McGill/projects/EVAL2-processing-surprisal/Research\ and\ reading\ \(local\)/writeups/2022-11-10-meeting-shain-etal/2022-11-10_files ~/Documents/GitHub/jahoo.github.io/nov10 && \cp -r ~/McGill/projects/EVAL2-processing-surprisal/Research\ and\ reading\ \(local\)/writeups/2022-11-10-meeting-shain-etal/figs ~/Documents/GitHub/jahoo.github.io/nov10 
 -->
 <div class="footer footer-default">
 
