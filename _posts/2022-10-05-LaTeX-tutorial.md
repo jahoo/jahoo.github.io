@@ -6,4 +6,7 @@ tags:
     - note
 ---
 
-I'm leading a short workshop on $$\LaTeX{}$$ for Linguistics today. Resources are in an [Overleaf document here](https://www.overleaf.com/read/qvdscvjbtjxr).
+I'm leading a short workshop on $$\LaTeX{}$$ for Linguistics today. Resources are 
+
+- in an [Overleaf document here](https://www.overleaf.com/read/qvdscvjbtjxr)
+- and [on GitHub here](https://github.com/postylem/latex-tutorial)
