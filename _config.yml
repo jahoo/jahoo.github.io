@@ -17,6 +17,7 @@ github_username:  postylem
 
 # Build settings
 markdown: kramdown
+highlighter: rouge
 
 scholar:
   style: apa
@@ -27,8 +28,7 @@ scholar:
   # group_order: descending
   bibtex_skip_fields: [ "abstract", "month_numeric", "poster", "handout", "pdf", "code", "slides" ]
   # type_names: { article: Papers }
-
-
+  # linebreaks: true # 
   source: /_bibliography
   bibliography: default.bib
   bibliography_template: bib # references file _layouts/bib.*
