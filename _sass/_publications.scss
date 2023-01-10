@@ -17,7 +17,8 @@
         margin: 10px 0;
         position: relative;
 
-        // span { display: block; }
+        span { display: block; }
+        
         .title { font-weight: $publication-title-font-weight; }
         .author {
             a {
@@ -35,8 +36,10 @@
 
 
         details {
+          span { display: inline; }
           max-width: 600px;
           box-sizing: border-box;
+
 
             summary {
                 border: 2px solid transparent;
