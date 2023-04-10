@@ -6,18 +6,25 @@
 \setmainfont{Linux Biolinum}
 \setsansfont{Linux Biolinum}
 
-% For references
-% \newcommand*\publistbasestyle{authoryear}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%% Publications using biblatex-publist %%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \newcommand*\publistbasestyle{apa6}%default authoryear
 \usepackage[%
-natbib=true,backend=biber,sorting=none,maxnames=9,
+natbib=true,backend=biber,
+maxnames=9,
+giveninits=true,
 style=publist,
 plauthorhandling=highlight,
-% marginyear,
-boldyear=false,
-plnumbered=false,
+nameorder=given-family,
+plsorting=ddt,
+oainfo=simple,
+% marginyear=true,
+hlyear=false,
+plnumbering=none,%global-descending,
 prinfo=false,
-linktitleall=true,
-url=false,doi=false,isbn=false%
+linktitles=url,
+url=false,%isbn=false,doi=false
 ]{biblatex}
 
 % Redefine to make year in margin and not in bibentry
@@ -42,10 +49,13 @@ url=false,doi=false,isbn=false%
 \renewcommand*\plmarginyear[1]{%
   \raggedleft\normalfont{#1}%
 }
-
-
 \plauthorname[Jacob Louis]{Hoover}
 \addbibresource{/Users/j/Library/texmf/bibtex/bib/all-biblatex.bib}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \usepackage[dvipsnames]{xcolor}
 \usepackage[colorlinks]{hyperref}
 \usepackage{mathtools} % imports amsmath
@@ -101,7 +111,7 @@ url=false,doi=false,isbn=false%
 \small\textit{\hfill updated: \today}
 %--------------------SECTIONS----------------------------
 
-\begin{tabular}{p{\textwidth}}
+\begin{tabular}{p{\textwidth-12pt}}
   % \textsc{DOB:}   & 03 Jan 1989 \\
   %\textsc{Address:}   &
   1085 av du Dr-Penfield, Montréal, H3A 1A7, Canada\\
@@ -125,10 +135,11 @@ url=false,doi=false,isbn=false%
 \begin{longtable}{p{1.7cm}|p{15cm}}
   2018--(2024)%
     &%
-    PhD student in Linguistics,
-    \textbf{\href{https://www.mcgill.ca/linguistics/graduate}{McGill} University}, and
-    \href{http://mila.quebec}{\textbf{Mila}} -- Quebec Artificial Intelligence
-    Institute\\
+    \textsc{PhD},
+    \textbf{\href{https://www.mcgill.ca/linguistics/graduate}{McGill} University}
+    Department of Linguistics,\\
+    &\qquad~\href{http://mila.quebec}{\textbf{Mila}} -- Quebec Artificial
+    Intelligence Institute,\\
     &%
     advisor: Timothy J.\ O'Donnell. [Fast-tracked from MA program in 2019]\\
     \multicolumn{2}{c}{}\\
@@ -229,40 +240,54 @@ url=false,doi=false,isbn=false%
   \section{Teaching}
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \begin{longtable}{p{1.7cm}|p{15cm}}
-    Winter 2023&%
-    Instructor for McGill COMP/LING 445 \emph{Computational Linguistics}\\
-    \textsc{Winter 2022}&%
-    TA for McGill COMP/LING 596 \emph{Probabilistic Programming} (Prof.\ Timothy
-    O'Donnell)\\
-    % Casual Research Assistant Computational Linguisitcs
+    \textsc{Winter 2023}&%
+    Instructor, McGill COMP/LING 445 \emph{Computational Linguistics}\\
     \textsc{Fall 2021}&%
     Guest lecture for McGill COMP/LING 445 \emph{Computational Linguistics}\\
-                      & TA for McGill COMP/LING 445 \emph{Computational Linguistics}
-                      (Prof.\ Timothy O'Donnell)\\
-    \textsc{Winter 2021}&%
-    TA for McGill COMP/LING 596 \emph{Probabilistic Programming} (Prof.\ Timothy
-    O'Donnell)\\
-    \textsc{Fall 2020}&%
-    TA for McGill COMP/LING 445 \emph{Computational Linguistics} (Prof.\ Timothy
-    O'Donnell)\\
-    \textsc{Winter 2020}&%
-    TA for McGill LING 201 \emph{Introduction to Linguistics} (Prof.\ Francisco
-    Torreira, Mathieu Paillé)\\
-    \textsc{Fall 2019}&%
-    TA for McGill LING 201 \emph{Introduction to Linguistics} (Prof.\ Francisco
-    Torreira, Prof\. Junko Shimoyama)\\
+    \textsc{2019--2022}&%
+    Teaching Assistant, 6 McGill courses in linguistics/computer science\\
+                       &\quad COMP/LING 596 \emph{Probabilistic Programming}
+                       (\textsc{Winter 2021, 2022)}\\
+                       &\quad COMP/LING 445 \emph{Computational Linguistics}
+                       (\textsc{Fall 2020, 2021})\\
+                       &\quad LING 201 \emph{Introduction to Linguistics}
+                       (\textsc{Fall 2019}, \textsc{Winter 2020})\\
   \end{longtable}
+  % \begin{longtable}{p{1.7cm}|p{15cm}}
+  %   Winter 2023&%
+  %   Instructor for McGill COMP/LING 445 \emph{Computational Linguistics}\\
+  %   \textsc{Winter 2022}&%
+  %   TA for McGill COMP/LING 596 \emph{Probabilistic Programming} (Prof.\ Timothy
+  %   O'Donnell)\\
+  %   % Casual Research Assistant Computational Linguisitcs
+  %   \textsc{Fall 2021}&%
+  %   Guest lecture for McGill COMP/LING 445 \emph{Computational Linguistics}\\
+  %                     & TA for McGill COMP/LING 445 \emph{Computational Linguistics}
+  %                     (Prof.\ Timothy O'Donnell)\\
+  %   \textsc{Winter 2021}&%
+  %   TA for McGill COMP/LING 596 \emph{Probabilistic Programming} (Prof.\ Timothy
+  %   O'Donnell)\\
+  %   \textsc{Fall 2020}&%
+  %   TA for McGill COMP/LING 445 \emph{Computational Linguistics} (Prof.\ Timothy
+  %   O'Donnell)\\
+  %   \textsc{Winter 2020}&%
+  %   TA for McGill LING 201 \emph{Introduction to Linguistics} (Prof.\ Francisco
+  %   Torreira, Mathieu Paillé)\\
+  %   \textsc{Fall 2019}&%
+  %   TA for McGill LING 201 \emph{Introduction to Linguistics} (Prof.\ Francisco
+  %   Torreira, Prof.\ Junko Shimoyama)\\
+  % \end{longtable}
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \section{Community}
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \begin{longtable}{p{1.7cm}|p{15cm}}
-    2020
-    &%
-    Graduate Program changes Committee, student member\\
     \textsc{2020--2022}
     &%
     Graduate student representative, McGill Linguistics Department\\
+    2020
+    &%
+    Graduate Program changes Committee, student member\\
     \textsc{2019--2022}
     &%
     Vice President, Academic, \textbf{GLAM}, Graduate Linguistics Association of
@@ -311,10 +336,11 @@ url=false,doi=false,isbn=false%
   \vspace{5pt}
   \nocite{%
     hoover.j:2022psyarxiv%
+    %,socolof.m:2022coling% 
     ,hoover.j:2022amlap%
     ,hoover.j:2021emnlp%
     ,hoover.j:2021wccfl%
-    %,hoover.j:2020wccflhandout
+    % ,hoover.j:2020wccflhandout
   }
   \AtNextBibliography{\small}
   \printbibliography[heading=none]{}
@@ -347,37 +373,37 @@ url=false,doi=false,isbn=false%
       \textasciitilde\ CEF level B2)\\
     French 
     &%
-      Intermediate (\textasciitilde\ B1)\\
+      Intermediate (\textasciitilde\ B2)\\
     Japanese
     &%
       Novice (two years' university study, at this point rather atrophied)\\
     Russian, Spanish%
     &%
       Basic knowledge\\
-    \multicolumn{2}{c}{}\\
-    \textbf{Programming languages}:
-    &%
-      Clojure, Java, Julia, Python, R
+    % \multicolumn{2}{c}{}\\
+    % \textbf{Programming languages}:
+    % &%
+    %   Clojure, Java, Julia, Python, R
   \end{longtable}
 
   \section{Ballet career}
-  \begin{longtable}{p{1.7cm}|p{15cm}}
-    2018--pres.
+  \begin{longtable}{p{1.7cm}|p{15cm}} 2018--pres.
     &%
-      I retired from full-time dancing in 2018, when I began my graduate study
-      at McGill, but I have continued with occasional appearances as a
-      freelancer and as a guest artist including with Festival Ballet Providence, 
-      RI, and Robinson Ballet in Bangor, ME.\\
+    I retired from full-time dancing in 2018, when I began my graduate study at
+    McGill. I have continued with occasional appearances as an independent
+    artist including with  Festival Ballet Providence,  Rhode Island Women's
+    Choreography Project,  Revolve Dance Project,  and Robinson Ballet in
+    Bangor, ME.\\
     \textsc{2008--2018}
     &%
-      Trained as a ballet dancer at Walnut Hill School and Miami City Ballet
-      School. I worked full-time as professional dancer from 2008 until 2018. I
-      danced soloist roles when at \textbf{José Mateo Ballet Theatre} in
-      Cambridge, MA, (2008--2012) and principal roles when at the
-      \href{http://vanemuine.ee}{\textbf{Vanemuine Theatre}} in Tartu, Estonia
-      (2013--2015), and was a company dancer for
-      \href{http://festivalballetprovidence.org}{\textbf{Festival Ballet}} in
-      Providence, RI (2015--2018).\\
+    I worked full-time as professional dancer from 2008 until 2018. Trained as a
+    ballet dancer at Walnut Hill School and Miami City Ballet School, I danced
+    soloist roles when at \textbf{José Mateo Ballet Theatre} in Cambridge, MA,
+    (2008--2012) and principal roles when at the
+    \href{http://vanemuine.ee}{\textbf{Vanemuine Theatre}} in Tartu, Estonia
+    (2013--2015), and was a company dancer for
+    \href{http://festivalballetprovidence.org}{\textbf{Festival Ballet
+    Providence}}, RI (2015--2018).\\
   \end{longtable}
 
   \end{document}
