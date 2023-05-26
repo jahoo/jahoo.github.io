@@ -44,13 +44,28 @@
     {% endif %}
     {% if entry.publisher %}
       {{entry.publisher}}.
-    {% endif %}   
+    {% endif %}
     {% if entry.address %}
       {{entry.address}}.
-    {% endif %}     
+    {% endif %}
+    {% if entry.mypubstate %}
+      {% if entry.mypubstate == "inpreparation" %}
+        In preparation.
+      {% elsif entry.mypubstate == "submitted" %}
+        Submitted.
+      {% elsif entry.mypubstate == "forthcoming" %}
+        Forthcoming.
+      {% elsif entry.mypubstate == "inpress" %}
+        In press.
+      {% elsif entry.mypubstate == "prepublished" %}
+        Pre-published.
+      {% else %}
+        {{entry.mypubstate}}.
+      {% endif %}
+    {% endif %}
     {% if entry.note %}
       {{entry.note}}.
-    {% endif %} 
+    {% endif %}
     {% if entry.day %}
       {{entry.day}}
     {% endif %}
@@ -97,6 +112,15 @@
   {% endif %}
   {% if entry.slides %}
     [<a href="{% if entry.slides contains 'http' %}{{entry.slides}}{% else %}{{ entry.slides | prepend: '/assets/pdfs/' | prepend: site.baseurl | prepend: site.url }}{% endif %}" target="_blank">slides</a>]
+  {% endif %}
+  {% if entry.myurl %}
+    {% if entry.myurltitle %}
+      [<a href="{{ entry.myurl }}"
+        target="_blank">{{entry.myurltitle}}</a>]
+    {% else %}
+      [<a href="{{ entry.myurl }}"
+        target="_blank">url</a>]
+    {% endif %}
   {% endif %}
   {% if entry.code %}
     [<a href="{{ entry.code }}" target="_blank">code</a>]
