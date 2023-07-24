@@ -36,7 +36,7 @@ url=false,%isbn=false,doi=false
 \renewbibmacro*{bpl:year+labelyear}{\nopunct\ignorespaces}
 \newcommand*{\bibyear}{}
 \defbibenvironment{bibliography}
-{\list
+{\list%
 	{\iffieldequals{year}{\bibyear}
                 {}
 		{\printfield{year}%
@@ -44,7 +44,7 @@ url=false,%isbn=false,doi=false
 	{\setlength{\topsep}{0pt}%
 	 \setlength{\itemsep}{\bibitemsep}%
 	 \leftmargin\labelwidth%
-	 \advance\leftmargin\labelsep}}
+	 \advance\leftmargin\labelsep}}%
 {\endlist}
 {\item}
 \renewcommand*\plmarginyear[1]{%
@@ -85,7 +85,7 @@ url=false,%isbn=false,doi=false
 \usepackage{xunicode,xltxtra,url,parskip,array}
 \usepackage{ulem}
 %\usepackage{orcidlink}
-\normalem
+\normalem%
 \RequirePackage{graphicx}
 % \usepackage[usenames,dvipsnames]{xcolor}
 \usepackage{multicol}
@@ -109,7 +109,7 @@ url=false,%isbn=false,doi=false
 %--------------------TITLE-------------------------------
 % \vspace*{-35pt}
 \Huge{Jacob Louis \scshape{Hoover}}
-\small\textit{\hfill updated: \today}
+\small\textit{\hfill{} updated: \today}
 %--------------------SECTIONS----------------------------
 
 \begin{tabular}{p{\textwidth-12pt}}
@@ -247,11 +247,11 @@ url=false,%isbn=false,doi=false
       & Guest lecture for McGill COMP/LING 445 \emph{Computational Linguistics}\\
     \textsc{2019--2022}%
       & Teaching Assistant, 6 McGill courses in linguistics/computer science\\
-      &\quad COMP/LING 596 \emph{Probabilistic Programming}
-            (\textsc{Winter 2021, 2022)}\\
-      &\quad COMP/LING 445 \emph{Computational Linguistics}
+      &\quad{}COMP/LING 596 \emph{Probabilistic Programming}
+            (\textsc{Winter 2021, 2022})\\
+      &\quad{}COMP/LING 445 \emph{Computational Linguistics}
             (\textsc{Fall 2020, 2021})\\
-      &\quad LING 201 \emph{Introduction to Linguistics}
+      &\quad{}LING 201 \emph{Introduction to Linguistics}
             (\textsc{Fall 2019}, \textsc{Winter 2020})\\
   \end{longtable}
   % \begin{longtable}{p{1.7cm}|p{15cm}}
@@ -301,27 +301,15 @@ url=false,%isbn=false,doi=false
     Graduate student member, webmaster, Montréal Computational and Quantitative
     Linguistics Lab (\href{http://mcqll.org}{\textbf{MCQLL}})\\
   \end{longtable}
-  Reviewer (2020-pres.): 
+  \begin{longtable}[l]{ll}
+    Reviewer for:
+    &%
     \href{https://transacl.org/}{TACL}, % 2022
     \href{https://cognitivesciencesociety.org/}{CogSci}, % 2021
-    \href{https://www.conll.org/}{CoNLL} % 2020
-
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \section{Awards}
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \begin{longtable}{p{1.7cm}|p{15cm}}
-    \textsc{2020}&%
-      \textbf{Microsoft Research-Mila Collaboration Grant}, for project
-      supervised by Alessandro Sordoni (MSR Montreal) and Prof.\ Timothy
-      O'Donnell (Mila)\\
-      % Towards characterizing compositionality and
-      % systematic generalization for natural language
-      % representations
-    \textsc{2019}&%
-      \textbf{Graduate Scholar Stipend}, Centre for Research on Brain, Language
-      and Music (\href{https://crblm.ca/}{CRBLM})\\
-      % Dec 13 2019: amount 3000 CAD
+    \href{https://www.conll.org/}{CoNLL} % 2020, 2023
   \end{longtable}
+
+
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \section{Research}
@@ -339,13 +327,13 @@ url=false,%isbn=false,doi=false
   % Print bibliography, manual order
   \vspace{5pt}
   \nocite{%
-    % hoover.j:2022psyarxiv%
-    hoover.j:2023
-    ,socolof.m:2022coling% 
-    ,hoover.j:2022amlap%
-    ,hoover.j:2021emnlp%
-    ,hoover.j:2021wccfl%
-    % ,hoover.j:2020wccflhandout
+    % hoover.j:2022psyarxiv,%
+    hoover.j:2023,%
+    socolof.m:2022coling,% 
+    hoover.j:2022amlap,%
+    hoover.j:2021emnlp,%
+    hoover.j:2021wccfl%
+    %hoover.j:2020wccflhandout
   }
   \AtNextBibliography{\small}
   \printbibliography[heading=none]{}
@@ -363,6 +351,27 @@ url=false,%isbn=false,doi=false
   %     formed from wh-words, which may be interpreted as either a positive
   %     existential or a negative when uttered elliptically.
   % \end{itemize}
+
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Awards}
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \begin{longtable}{p{1.7cm}|p{15cm}}
+    \textsc{2020}&%
+      \textbf{Microsoft Research-Mila Collaboration Grant}, for project
+      supervised by Alessandro Sordoni (MSR Montreal) and Prof.\ Timothy
+      O'Donnell (Mila). ``Towards characterizing compositionality and systematic
+      generalization for natural language representations.'' \$27k.\\
+      % Title:
+      %   Towards characterizing compositionality and systematic generalization
+      %   for natural language representations
+      % Amount: 27000 CAD
+      % 2020-03 through 2020-12
+    \textsc{2019}&%
+      \textbf{Graduate Scholar Stipend}, Centre for Research on Brain, Language
+      and Music (\href{https://crblm.ca/}{CRBLM}). ``What neural network models
+      can tell us about linguistic structure.'' \$3k.\\
+      % Dec 13 2019: amount 3000 CAD
+  \end{longtable}
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \section{Languages}
