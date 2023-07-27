@@ -113,17 +113,17 @@
   {% if entry.slides %}
     [<a href="{% if entry.slides contains 'http' %}{{entry.slides}}{% else %}{{ entry.slides | prepend: '/assets/pdfs/' | prepend: site.baseurl | prepend: site.url }}{% endif %}" target="_blank">slides</a>]
   {% endif %}
+  {% if entry.code %}
+    [<a href="{{ entry.code }}" target="_blank">code repository</a>]
+  {% endif %}
   {% if entry.myurl %}
     {% if entry.myurltitle %}
       [<a href="{{ entry.myurl }}"
-        target="_blank">{{entry.myurltitle}}</a>]
+        target="_blank">☛ {{entry.myurltitle}}</a>]
     {% else %}
       [<a href="{{ entry.myurl }}"
-        target="_blank">url</a>]
+        target="_blank">☛ url</a>]
     {% endif %}
-  {% endif %}
-  {% if entry.code %}
-    [<a href="{{ entry.code }}" target="_blank">code</a>]
   {% endif %}
     <details>
     <summary>bib</summary>
