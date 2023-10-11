@@ -22,5 +22,5 @@ $$
 $$
 
 Set prior and likelihood to see resulting infometrics:
-<iframe width="100%" height="2731" frameborder="0"
-  src="https://observablehq.com/embed/@postylem/kl-and-surprisal?cells=viewof+dim%2Cinput1%2Cviewof+useLogInput%2Cviewof+allowZeroes%2Cplot1_1%2Cplot1_2%2Cviewof+maxNats%2Cplot1_3%2Cexx_intro%2Cex_1_1%2Cex_1_2%2Cex_1_3%2Cex_2_1%2Cex_2_2%2Cex_2_3%2Cex_3_1%2Cex_3_2%2Cex_3_3%2Cex_4_1%2Cex_4_2%2Cex_4_3"></iframe>
+<iframe width="100%" height="4210" frameborder="0"
+  src="https://observablehq.com/embed/@postylem/kl-and-surprisal@2740?cells=viewof+dim%2Cinput1%2Cviewof+useLogInput%2Cviewof+allowZeroes%2Cplot1_1%2Cplot1_2%2Cviewof+maxNats%2Cplot1_3%2Cmodification_plots%2Cexx_intro%2Cex_1_1%2Cex_1_2%2Cex_1_3%2Cex_2_1%2Cex_2_2%2Cex_2_3%2Cex_3_1%2Cex_3_2%2Cex_3_3%2Cex_4_1%2Cex_4_2%2Cex_4_3"></iframe>
