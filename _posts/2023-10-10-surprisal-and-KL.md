@@ -22,5 +22,5 @@ $$
 $$
 
 Manipulate prior and likelihood to see posterior and resulting infometrics:
-<iframe width="100%" height="2131" frameborder="0"
-  src="https://observablehq.com/embed/@postylem/kl-and-surprisal@3975?cells=viewof+dim%2Cviewof+useLogInput%2Cviewof+allowZeroes%2Cinput1%2Cviewof+scale_likelihood%2Cviewof+applyScaleLikelihood%2Cplot1_1%2Cplot1_2%2Cplot1_3%2Cmodification_plots%2Cviewof+whetherPlotLogSpace%2Cviewof+maxUnits%2Cviewof+base%2Cexx_intro%2Cviewof+ex_selected%2Cviewof+ex_use_selected%2Cex_plot_1%2Cex_plot_2%2Cex_plot_3"></iframe>
+<iframe width="100%" height="2204" frameborder="0"
+  src="https://observablehq.com/embed/@postylem/kl-and-surprisal?cells=viewof+dim%2Cviewof+useLogInput%2Cviewof+allowZeroes%2Cinput1%2Cviewof+scale_likelihood%2Cviewof+applyScaleLikelihood%2Cplot1_1%2Cplot1_2%2Cplot1_3%2Cmodification_plots%2Cviewof+whetherPlotLogSpace%2Cviewof+maxUnits%2Cviewof+base%2Cexx_intro%2Cviewof+ex_selected%2Cviewof+ex_use_selected%2Cex_plot_1%2Cex_plot_2%2Cex_plot_3"></iframe>
