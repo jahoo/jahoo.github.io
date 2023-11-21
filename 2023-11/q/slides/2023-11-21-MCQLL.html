@@ -590,17 +590,40 @@
 </div>
 <aside><div>
 <div class="panel-tabset">
-<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">▽</a></li><li><a href="#tabset-1-2">…</a></li><li><a href="#tabset-1-3">△</a></li></ul>
+<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">△</a></li><li><a href="#tabset-1-2">…</a></li><li><a href="#tabset-1-3">▽</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1">
-
-</div>
-<div id="tabset-1-2">
-<div class="columns">
-<div class="column" style="width:50%;">
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb3" data-startfrom="200" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 199;"><span id="cb3-200"><a href="#cb3-200"></a>viewof whetherShowPosterior <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">toggle</span>({<span class="dt">label</span><span class="op">:</span> <span class="st">"posterior"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> <span class="kw">false</span>})</span>
-<span id="cb3-201"><a href="#cb3-201"></a>viewof whetherShowBreakdown <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">toggle</span>({<span class="dt">label</span><span class="op">:</span> <span class="st">"break down surprisal"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> <span class="kw">false</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb3" data-startfrom="196" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 195;"><span id="cb3-196"><a href="#cb3-196"></a>scale_likelihood <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb3-197"><a href="#cb3-197"></a>input_likelihood_scaled <span class="op">=</span> input_likelihood</span>
+<span id="cb3-198"><a href="#cb3-198"></a><span class="im">import</span> {</span>
+<span id="cb3-199"><a href="#cb3-199"></a>    normalize<span class="op">,</span> get_posterior<span class="op">,</span> get_infometrics<span class="op">,</span> options<span class="op">,</span> probInputTransform</span>
+<span id="cb3-200"><a href="#cb3-200"></a>    } <span class="im">from</span> <span class="st">'@postylem/kl-and-surprisal'</span></span>
+<span id="cb3-201"><a href="#cb3-201"></a></span>
+<span id="cb3-202"><a href="#cb3-202"></a>locald <span class="op">=</span> {<span class="cf">return</span>{ </span>
+<span id="cb3-203"><a href="#cb3-203"></a>    <span class="dt">dim</span><span class="op">:</span>dim<span class="op">,</span></span>
+<span id="cb3-204"><a href="#cb3-204"></a>    <span class="dt">input_prior</span><span class="op">:</span>input_prior<span class="op">,</span></span>
+<span id="cb3-205"><a href="#cb3-205"></a>    <span class="dt">prior</span><span class="op">:</span><span class="fu">normalize</span>(input_prior)<span class="op">,</span></span>
+<span id="cb3-206"><a href="#cb3-206"></a>    <span class="dt">input_likelihood</span><span class="op">:</span>input_likelihood<span class="op">,</span></span>
+<span id="cb3-207"><a href="#cb3-207"></a>    <span class="dt">scale_likelihood</span><span class="op">:</span>scale_likelihood<span class="op">,</span></span>
+<span id="cb3-208"><a href="#cb3-208"></a>    <span class="dt">likelihood</span><span class="op">:</span>input_likelihood_scaled<span class="op">,</span></span>
+<span id="cb3-209"><a href="#cb3-209"></a>    <span class="dt">posterior</span><span class="op">:</span> <span class="fu">get_posterior</span>(input_prior<span class="op">,</span> input_likelihood_scaled)<span class="op">,</span></span>
+<span id="cb3-210"><a href="#cb3-210"></a>    <span class="dt">info</span><span class="op">:</span><span class="fu">get_infometrics</span>(input_prior<span class="op">,</span>input_likelihood_scaled)</span>
+<span id="cb3-211"><a href="#cb3-211"></a>}}<span class="op">;</span></span>
+<span id="cb3-212"><a href="#cb3-212"></a></span>
+<span id="cb3-213"><a href="#cb3-213"></a>maxBits <span class="op">=</span> <span class="dv">6</span></span>
+<span id="cb3-214"><a href="#cb3-214"></a>initial_input_prior <span class="op">=</span>      [<span class="op">.</span><span class="dv">3</span><span class="op">,.</span><span class="dv">2</span><span class="op">,.</span><span class="bn">05</span><span class="op">,.</span><span class="bn">01</span><span class="op">,.</span><span class="bn">0001</span><span class="op">,.</span><span class="bn">01</span>]</span>
+<span id="cb3-215"><a href="#cb3-215"></a>initial_input_likelihood <span class="op">=</span> [<span class="op">.</span><span class="bn">05</span><span class="op">,.</span><span class="bn">00001</span><span class="op">,.</span><span class="bn">00001</span><span class="op">,.</span><span class="bn">0001</span><span class="op">,</span><span class="dv">1</span><span class="op">,.</span><span class="bn">00001</span>]</span>
+<span id="cb3-216"><a href="#cb3-216"></a>initial_dim <span class="op">=</span> initial_input_prior<span class="op">.</span><span class="at">length</span></span>
+<span id="cb3-217"><a href="#cb3-217"></a>initial_event_names <span class="op">=</span> [</span>
+<span id="cb3-218"><a href="#cb3-218"></a>    <span class="st">"                    dinner"</span><span class="op">,</span></span>
+<span id="cb3-219"><a href="#cb3-219"></a>    <span class="st">"                    lunch"</span><span class="op">,</span></span>
+<span id="cb3-220"><a href="#cb3-220"></a>    <span class="st">"                    breakfast"</span><span class="op">,</span></span>
+<span id="cb3-221"><a href="#cb3-221"></a>    <span class="st">"                    ..."</span><span class="op">,</span></span>
+<span id="cb3-222"><a href="#cb3-222"></a>    <span class="st">"                    dimmer"</span><span class="op">,</span></span>
+<span id="cb3-223"><a href="#cb3-223"></a>    <span class="st">"                    ..."</span></span>
+<span id="cb3-224"><a href="#cb3-224"></a>]<span class="op">;</span></span>
+<span id="cb3-225"><a href="#cb3-225"></a>initial_observation_name <span class="op">=</span> <span class="st">"dimmer"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-2-1" data-nodetype="declaration">
@@ -615,127 +638,58 @@
 </div>
 </div>
 </div>
-</div>
-</div><div class="column" style="width:50%;">
-<div class="cell">
-<div class="sourceCode cell-code hidden" id="cb4" data-startfrom="210" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 209;"><span id="cb4-210"><a href="#cb4-210"></a>viewof dim <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">2</span><span class="op">,</span> <span class="dv">10</span>]<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"dimension"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> initial_dim})</span>
-<span id="cb4-211"><a href="#cb4-211"></a>viewof whetherShowValues <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">toggle</span>({<span class="dt">label</span><span class="op">:</span> <span class="st">"show values"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> <span class="kw">false</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-3-1" data-nodetype="declaration">
+<div id="ojs-cell-2-3" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-3-2" data-nodetype="declaration">
-
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div id="tabset-1-3">
-<div class="cell">
-<div class="sourceCode cell-code hidden" id="cb5" data-startfrom="220" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 219;"><span id="cb5-220"><a href="#cb5-220"></a>scale_likelihood <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb5-221"><a href="#cb5-221"></a>input_likelihood_scaled <span class="op">=</span> input_likelihood</span>
-<span id="cb5-222"><a href="#cb5-222"></a><span class="im">import</span> {</span>
-<span id="cb5-223"><a href="#cb5-223"></a>    normalize<span class="op">,</span> get_posterior<span class="op">,</span> get_infometrics<span class="op">,</span> options<span class="op">,</span> probInputTransform</span>
-<span id="cb5-224"><a href="#cb5-224"></a>    } <span class="im">from</span> <span class="st">'@postylem/kl-and-surprisal'</span></span>
-<span id="cb5-225"><a href="#cb5-225"></a></span>
-<span id="cb5-226"><a href="#cb5-226"></a>locald <span class="op">=</span> {<span class="cf">return</span>{ </span>
-<span id="cb5-227"><a href="#cb5-227"></a>    <span class="dt">dim</span><span class="op">:</span>dim<span class="op">,</span></span>
-<span id="cb5-228"><a href="#cb5-228"></a>    <span class="dt">input_prior</span><span class="op">:</span>input_prior<span class="op">,</span></span>
-<span id="cb5-229"><a href="#cb5-229"></a>    <span class="dt">prior</span><span class="op">:</span><span class="fu">normalize</span>(input_prior)<span class="op">,</span></span>
-<span id="cb5-230"><a href="#cb5-230"></a>    <span class="dt">input_likelihood</span><span class="op">:</span>input_likelihood<span class="op">,</span></span>
-<span id="cb5-231"><a href="#cb5-231"></a>    <span class="dt">scale_likelihood</span><span class="op">:</span>scale_likelihood<span class="op">,</span></span>
-<span id="cb5-232"><a href="#cb5-232"></a>    <span class="dt">likelihood</span><span class="op">:</span>input_likelihood_scaled<span class="op">,</span></span>
-<span id="cb5-233"><a href="#cb5-233"></a>    <span class="dt">posterior</span><span class="op">:</span> <span class="fu">get_posterior</span>(input_prior<span class="op">,</span> input_likelihood_scaled)<span class="op">,</span></span>
-<span id="cb5-234"><a href="#cb5-234"></a>    <span class="dt">info</span><span class="op">:</span><span class="fu">get_infometrics</span>(input_prior<span class="op">,</span>input_likelihood_scaled)</span>
-<span id="cb5-235"><a href="#cb5-235"></a>}}<span class="op">;</span></span>
-<span id="cb5-236"><a href="#cb5-236"></a></span>
-<span id="cb5-237"><a href="#cb5-237"></a>maxBits <span class="op">=</span> <span class="dv">6</span></span>
-<span id="cb5-238"><a href="#cb5-238"></a>initial_input_prior <span class="op">=</span>      [<span class="op">.</span><span class="dv">3</span><span class="op">,.</span><span class="dv">2</span><span class="op">,.</span><span class="bn">05</span><span class="op">,.</span><span class="bn">01</span><span class="op">,.</span><span class="bn">0001</span><span class="op">,.</span><span class="bn">01</span>]</span>
-<span id="cb5-239"><a href="#cb5-239"></a>initial_input_likelihood <span class="op">=</span> [<span class="op">.</span><span class="bn">05</span><span class="op">,.</span><span class="bn">00001</span><span class="op">,.</span><span class="bn">00001</span><span class="op">,.</span><span class="bn">0001</span><span class="op">,</span><span class="dv">1</span><span class="op">,.</span><span class="bn">00001</span>]</span>
-<span id="cb5-240"><a href="#cb5-240"></a>initial_dim <span class="op">=</span> initial_input_prior<span class="op">.</span><span class="at">length</span></span>
-<span id="cb5-241"><a href="#cb5-241"></a>initial_event_names <span class="op">=</span> [</span>
-<span id="cb5-242"><a href="#cb5-242"></a>    <span class="st">"                    dinner"</span><span class="op">,</span></span>
-<span id="cb5-243"><a href="#cb5-243"></a>    <span class="st">"                    lunch"</span><span class="op">,</span></span>
-<span id="cb5-244"><a href="#cb5-244"></a>    <span class="st">"                    breakfast"</span><span class="op">,</span></span>
-<span id="cb5-245"><a href="#cb5-245"></a>    <span class="st">"                    ..."</span><span class="op">,</span></span>
-<span id="cb5-246"><a href="#cb5-246"></a>    <span class="st">"                    dimmer"</span><span class="op">,</span></span>
-<span id="cb5-247"><a href="#cb5-247"></a>    <span class="st">"                    ..."</span></span>
-<span id="cb5-248"><a href="#cb5-248"></a>]<span class="op">;</span></span>
-<span id="cb5-249"><a href="#cb5-249"></a>initial_observation_name <span class="op">=</span> <span class="st">"dimmer"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<div id="ojs-cell-4-1" data-nodetype="declaration">
+<div id="ojs-cell-2-4" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-4-2" data-nodetype="declaration">
+<div id="ojs-cell-2-5" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-4-3" data-nodetype="declaration">
+<div id="ojs-cell-2-6" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-4-4" data-nodetype="declaration">
+<div id="ojs-cell-2-7" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-4-5" data-nodetype="declaration">
+<div id="ojs-cell-2-8" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-4-6" data-nodetype="declaration">
+<div id="ojs-cell-2-9" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-4-7" data-nodetype="declaration">
-
-</div>
-</div>
-</div>
-<div class="cell-output cell-output-display">
-<div>
-<div id="ojs-cell-4-8" data-nodetype="declaration">
-
-</div>
-</div>
-</div>
-<div class="cell-output cell-output-display">
-<div>
-<div id="ojs-cell-4-9" data-nodetype="declaration">
-
-</div>
-</div>
-</div>
-<div class="cell-output cell-output-display">
-<div>
-<div id="ojs-cell-4-10" data-nodetype="declaration">
+<div id="ojs-cell-2-10" data-nodetype="declaration">
 
 </div>
 </div>
@@ -745,15 +699,15 @@
 <div class="column" style="width:30%;">
 <p>prior</p>
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb6" data-startfrom="256" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 255;"><span id="cb6-256"><a href="#cb6-256"></a>viewof input_prior <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">form</span>(</span>
-<span id="cb6-257"><a href="#cb6-257"></a>  <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> dim}<span class="op">,</span> (_<span class="op">,</span>i)<span class="kw">=&gt;</span>Inputs<span class="op">.</span><span class="fu">range</span>(</span>
-<span id="cb6-258"><a href="#cb6-258"></a>    [options<span class="op">.</span><span class="at">probMin</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb6-259"><a href="#cb6-259"></a>      <span class="dt">step</span><span class="op">:</span> options<span class="op">.</span><span class="at">probStep</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> initial_input_prior[i]<span class="op">,</span></span>
-<span id="cb6-260"><a href="#cb6-260"></a>      <span class="dt">transform</span><span class="op">:</span> probInputTransform}</span>
-<span id="cb6-261"><a href="#cb6-261"></a>  ))</span>
-<span id="cb6-262"><a href="#cb6-262"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb4" data-startfrom="232" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 231;"><span id="cb4-232"><a href="#cb4-232"></a>viewof input_prior <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">form</span>(</span>
+<span id="cb4-233"><a href="#cb4-233"></a>  <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> dim}<span class="op">,</span> (_<span class="op">,</span>i)<span class="kw">=&gt;</span>Inputs<span class="op">.</span><span class="fu">range</span>(</span>
+<span id="cb4-234"><a href="#cb4-234"></a>    [options<span class="op">.</span><span class="at">probMin</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb4-235"><a href="#cb4-235"></a>      <span class="dt">step</span><span class="op">:</span> options<span class="op">.</span><span class="at">probStep</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> initial_input_prior[i]<span class="op">,</span></span>
+<span id="cb4-236"><a href="#cb4-236"></a>      <span class="dt">transform</span><span class="op">:</span> probInputTransform}</span>
+<span id="cb4-237"><a href="#cb4-237"></a>  ))</span>
+<span id="cb4-238"><a href="#cb4-238"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<div id="ojs-cell-5" data-nodetype="declaration">
+<div id="ojs-cell-3" data-nodetype="declaration">
 
 </div>
 </div>
@@ -761,15 +715,15 @@
 </div><div class="column" style="width:30%;">
 <p>likelihood</p>
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb7" data-startfrom="271" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 270;"><span id="cb7-271"><a href="#cb7-271"></a>viewof input_likelihood <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">form</span>(</span>
-<span id="cb7-272"><a href="#cb7-272"></a>  <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> dim}<span class="op">,</span> (_<span class="op">,</span>i)<span class="kw">=&gt;</span>Inputs<span class="op">.</span><span class="fu">range</span>(</span>
-<span id="cb7-273"><a href="#cb7-273"></a>    [options<span class="op">.</span><span class="at">probMin</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb7-274"><a href="#cb7-274"></a>      <span class="dt">step</span><span class="op">:</span> options<span class="op">.</span><span class="at">probStep</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> initial_input_likelihood[i]<span class="op">,</span></span>
-<span id="cb7-275"><a href="#cb7-275"></a>      <span class="dt">transform</span><span class="op">:</span> probInputTransform}</span>
-<span id="cb7-276"><a href="#cb7-276"></a>  ))</span>
-<span id="cb7-277"><a href="#cb7-277"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb5" data-startfrom="247" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 246;"><span id="cb5-247"><a href="#cb5-247"></a>viewof input_likelihood <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">form</span>(</span>
+<span id="cb5-248"><a href="#cb5-248"></a>  <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> dim}<span class="op">,</span> (_<span class="op">,</span>i)<span class="kw">=&gt;</span>Inputs<span class="op">.</span><span class="fu">range</span>(</span>
+<span id="cb5-249"><a href="#cb5-249"></a>    [options<span class="op">.</span><span class="at">probMin</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb5-250"><a href="#cb5-250"></a>      <span class="dt">step</span><span class="op">:</span> options<span class="op">.</span><span class="at">probStep</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> initial_input_likelihood[i]<span class="op">,</span></span>
+<span id="cb5-251"><a href="#cb5-251"></a>      <span class="dt">transform</span><span class="op">:</span> probInputTransform}</span>
+<span id="cb5-252"><a href="#cb5-252"></a>  ))</span>
+<span id="cb5-253"><a href="#cb5-253"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<div id="ojs-cell-6" data-nodetype="declaration">
+<div id="ojs-cell-4" data-nodetype="declaration">
 
 </div>
 </div>
@@ -777,13 +731,56 @@
 </div><div class="column" style="width:30%;">
 <p>hypotheses</p>
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb8" data-startfrom="287" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 286;"><span id="cb8-287"><a href="#cb8-287"></a>viewof event_names <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">form</span>(</span>
-<span id="cb8-288"><a href="#cb8-288"></a>  <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> dim}<span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> Inputs<span class="op">.</span><span class="fu">text</span>({</span>
-<span id="cb8-289"><a href="#cb8-289"></a>    <span class="dt">value</span><span class="op">:</span> initial_event_names[i]<span class="op">,</span></span>
-<span id="cb8-290"><a href="#cb8-290"></a>    <span class="dt">placeholder</span><span class="op">:</span> <span class="vs">`event </span><span class="sc">${</span>i<span class="sc">}</span><span class="vs"> name`</span></span>
-<span id="cb8-291"><a href="#cb8-291"></a>  }))</span>
-<span id="cb8-292"><a href="#cb8-292"></a>)</span>
-<span id="cb8-293"><a href="#cb8-293"></a>viewof observationName <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">text</span>({<span class="dt">label</span><span class="op">:</span> <span class="st">"observation"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> initial_observation_name<span class="op">,</span> <span class="dt">placeholder</span><span class="op">:</span> <span class="st">"observation name"</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb6" data-startfrom="263" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 262;"><span id="cb6-263"><a href="#cb6-263"></a>viewof event_names <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">form</span>(</span>
+<span id="cb6-264"><a href="#cb6-264"></a>  <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> dim}<span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> Inputs<span class="op">.</span><span class="fu">text</span>({</span>
+<span id="cb6-265"><a href="#cb6-265"></a>    <span class="dt">value</span><span class="op">:</span> initial_event_names[i]<span class="op">,</span></span>
+<span id="cb6-266"><a href="#cb6-266"></a>    <span class="dt">placeholder</span><span class="op">:</span> <span class="vs">`event </span><span class="sc">${</span>i<span class="sc">}</span><span class="vs"> name`</span></span>
+<span id="cb6-267"><a href="#cb6-267"></a>  }))</span>
+<span id="cb6-268"><a href="#cb6-268"></a>)</span>
+<span id="cb6-269"><a href="#cb6-269"></a>viewof observationName <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">text</span>({<span class="dt">label</span><span class="op">:</span> <span class="st">"observation"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> initial_observation_name<span class="op">,</span> <span class="dt">placeholder</span><span class="op">:</span> <span class="st">"observation name"</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-5-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-5-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-1-2">
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="cell">
+<div class="sourceCode cell-code hidden" id="cb7" data-startfrom="282" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 281;"><span id="cb7-282"><a href="#cb7-282"></a>viewof whetherShowPosterior <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">toggle</span>({<span class="dt">label</span><span class="op">:</span> <span class="st">"posterior"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> <span class="kw">true</span>})</span>
+<span id="cb7-283"><a href="#cb7-283"></a>viewof whetherShowBreakdown <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">toggle</span>({<span class="dt">label</span><span class="op">:</span> <span class="st">"break down surprisal"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> <span class="kw">true</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-6-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-6-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="cell">
+<div class="sourceCode cell-code hidden" id="cb8" data-startfrom="292" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 291;"><span id="cb8-292"><a href="#cb8-292"></a>viewof dim <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">2</span><span class="op">,</span> <span class="dv">10</span>]<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"dimension"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> initial_dim})</span>
+<span id="cb8-293"><a href="#cb8-293"></a>viewof whetherShowValues <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">toggle</span>({<span class="dt">label</span><span class="op">:</span> <span class="st">"show values"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> <span class="kw">false</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-7-1" data-nodetype="declaration">
@@ -801,6 +798,9 @@
 </div>
 </div>
 </div>
+</div>
+<div id="tabset-1-3">
+
 </div>
 </div>
 </div>
@@ -1338,7 +1338,7 @@ wlev("coqe", "cone") = 1.39</code></pre>
       });
     </script>
     <script type="ojs-module-contents">
-    eyJjb250ZW50cyI6W3sibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMSIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6ImltcG9ydCB7IFxuICAgIHBsb3RfYmF5ZXMsIHBsb3RfaW5mb21ldHJpY3NfYmFycywgcGxvdF9zdXJwcmlzYWxfcGFydGl0aW9uLCBwbG90X2luZm9tZXRyaWNzX3BhcnRpdGlvblxuICAgIH0gd2l0aCB7bG9jYWxkIGFzIGQsIG1heEJpdHMgYXMgbWF4VW5pdHN9IGZyb20gJ0Bwb3N0eWxlbS9rbC1hbmQtc3VycHJpc2FsJ1xucGxvdF9iYXllcyh7XG4gICAgc2hvd1Bvc3Rlcmlvcjogd2hldGhlclNob3dQb3N0ZXJpb3IsXG4gICAgd2lkdGg6IHdoZXRoZXJTaG93UG9zdGVyaW9yID8gIDEyMDAgOiA4MjgsIFxuICAgIGhlaWdodDogMzUwLCBtYXJnaW5MZWZ0OjEwMCwgbWFyZ2luQm90dG9tOiA1MCxcbiAgICBzaG93VmFsdWVzOiB3aGV0aGVyU2hvd1ZhbHVlcyxcbiAgICBldmVudE5hbWVzOiBldmVudF9uYW1lcywgXG4gICAgZm9udFNpemU6MTgsIHN0eWxlOiB7Zm9udFNpemU6IDE0fSxcbiAgICB0aXRsZTogd2hldGhlclNob3dCcmVha2Rvd24gPyBtZGAjIyBTdXJwcmlzYWw6IEtMICsgUmAgOiBtZGAjIyBTdXJwcmlzYWxgLFxuICAgIHN1YnRpdGxlOiB3aGV0aGVyU2hvd1Bvc3RlcmlvciA/IG1kYEJheWVzaWFuIHVwZGF0ZSBmb3Igb2JzZXJ2YXRpb24gJHt0ZXhgdz1cXHRleHRpdHske29ic2VydmF0aW9uTmFtZX19YH1gIDogbWRgYmVsaWVmcyBhbmQgbGlrZWxpaG9vZCBmb3Igb2JzZXJ2YXRpb24gJHt0ZXhgdz1cXHRleHRpdHske29ic2VydmF0aW9uTmFtZX19YH1gXG59KVxuLy8gcGxvdF9pbmZvbWV0cmljc19iYXJzKHt3aWR0aDogMTIwMCwgbWFyZ2luTGVmdDoxMDB9KVxuLy8gcGxvdF9zdXJwcmlzYWxfcGFydGl0aW9uKHt3aWR0aDogMTIwMCwgbWFyZ2luTGVmdDoxMDB9KVxucGxvdF9pbmZvbWV0cmljc19wYXJ0aXRpb24oe1xuICAgIHBhcnRpdGlvbjogd2hldGhlclNob3dCcmVha2Rvd24sXG4gICAgd2lkdGg6IDEyMDAsIG1hcmdpbkxlZnQ6MTAwLCAvL21hcmdpbkJvdHRvbTogMCxcbiAgICBmb250U2l6ZToxOCwgc3R5bGU6IHtmb250U2l6ZTogMTR9LFxuICAgIHN1YnRpdGxlOiB3aGV0aGVyU2hvd0JyZWFrZG93biA/IG1kYHN1cnByaXNhbCBvZiAke3RleGB3PVxcdGV4dGl0eyR7b2JzZXJ2YXRpb25OYW1lfX1gfSwgZGVjb21wb3NlZGAgOiBtZGBzdXJwcmlzYWwgb2YgJHt0ZXhgdz1cXHRleHRpdHske29ic2VydmF0aW9uTmFtZX19YH1gXG59KVxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC0yIiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoidmlld29mIHdoZXRoZXJTaG93UG9zdGVyaW9yID0gSW5wdXRzLnRvZ2dsZSh7bGFiZWw6IFwicG9zdGVyaW9yXCIsIHZhbHVlOiBmYWxzZX0pXG52aWV3b2Ygd2hldGhlclNob3dCcmVha2Rvd24gPSBJbnB1dHMudG9nZ2xlKHtsYWJlbDogXCJicmVhayBkb3duIHN1cnByaXNhbFwiLCB2YWx1ZTogZmFsc2V9KVxuXG4ifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXQiLCJjZWxsTmFtZSI6Im9qcy1jZWxsLTMiLCJpbmxpbmUiOmZhbHNlLCJzb3VyY2UiOiJ2aWV3b2YgZGltID0gSW5wdXRzLnJhbmdlKFsyLCAxMF0sIHtzdGVwOiAxLCBsYWJlbDogXCJkaW1lbnNpb25cIiwgdmFsdWU6IGluaXRpYWxfZGltfSlcbnZpZXdvZiB3aGV0aGVyU2hvd1ZhbHVlcyA9IElucHV0cy50b2dnbGUoe2xhYmVsOiBcInNob3cgdmFsdWVzXCIsIHZhbHVlOiBmYWxzZX0pXG4ifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXQiLCJjZWxsTmFtZSI6Im9qcy1jZWxsLTQiLCJpbmxpbmUiOmZhbHNlLCJzb3VyY2UiOiJzY2FsZV9saWtlbGlob29kID0gMVxuaW5wdXRfbGlrZWxpaG9vZF9zY2FsZWQgPSBpbnB1dF9saWtlbGlob29kXG5pbXBvcnQge1xuICAgIG5vcm1hbGl6ZSwgZ2V0X3Bvc3RlcmlvciwgZ2V0X2luZm9tZXRyaWNzLCBvcHRpb25zLCBwcm9iSW5wdXRUcmFuc2Zvcm1cbiAgICB9IGZyb20gJ0Bwb3N0eWxlbS9rbC1hbmQtc3VycHJpc2FsJ1xuXG5sb2NhbGQgPSB7cmV0dXJueyBcbiAgICBkaW06ZGltLFxuICAgIGlucHV0X3ByaW9yOmlucHV0X3ByaW9yLFxuICAgIHByaW9yOm5vcm1hbGl6ZShpbnB1dF9wcmlvciksXG4gICAgaW5wdXRfbGlrZWxpaG9vZDppbnB1dF9saWtlbGlob29kLFxuICAgIHNjYWxlX2xpa2VsaWhvb2Q6c2NhbGVfbGlrZWxpaG9vZCxcbiAgICBsaWtlbGlob29kOmlucHV0X2xpa2VsaWhvb2Rfc2NhbGVkLFxuICAgIHBvc3RlcmlvcjogZ2V0X3Bvc3RlcmlvcihpbnB1dF9wcmlvciwgaW5wdXRfbGlrZWxpaG9vZF9zY2FsZWQpLFxuICAgIGluZm86Z2V0X2luZm9tZXRyaWNzKGlucHV0X3ByaW9yLGlucHV0X2xpa2VsaWhvb2Rfc2NhbGVkKVxufX07XG5cbm1heEJpdHMgPSA2XG5pbml0aWFsX2lucHV0X3ByaW9yID0gICAgICBbLjMsLjIsLjA1LC4wMSwuMDAwMSwuMDFdXG5pbml0aWFsX2lucHV0X2xpa2VsaWhvb2QgPSBbLjA1LC4wMDAwMSwuMDAwMDEsLjAwMDEsMSwuMDAwMDFdXG5pbml0aWFsX2RpbSA9IGluaXRpYWxfaW5wdXRfcHJpb3IubGVuZ3RoXG5pbml0aWFsX2V2ZW50X25hbWVzID0gW1xuICAgIFwiICAgICAgICAgICAgICAgICAgICBkaW5uZXJcIixcbiAgICBcIiAgICAgICAgICAgICAgICAgICAgbHVuY2hcIixcbiAgICBcIiAgICAgICAgICAgICAgICAgICAgYnJlYWtmYXN0XCIsXG4gICAgXCIgICAgICAgICAgICAgICAgICAgIC4uLlwiLFxuICAgIFwiICAgICAgICAgICAgICAgICAgICBkaW1tZXJcIixcbiAgICBcIiAgICAgICAgICAgICAgICAgICAgLi4uXCJcbl07XG5pbml0aWFsX29ic2VydmF0aW9uX25hbWUgPSBcImRpbW1lclwiXG4ifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXQiLCJjZWxsTmFtZSI6Im9qcy1jZWxsLTUiLCJpbmxpbmUiOmZhbHNlLCJzb3VyY2UiOiJ2aWV3b2YgaW5wdXRfcHJpb3IgPSBJbnB1dHMuZm9ybShcbiAgQXJyYXkuZnJvbSh7bGVuZ3RoOiBkaW19LCAoXyxpKT0+SW5wdXRzLnJhbmdlKFxuICAgIFtvcHRpb25zLnByb2JNaW4sIDFdLCB7XG4gICAgICBzdGVwOiBvcHRpb25zLnByb2JTdGVwLCB2YWx1ZTogaW5pdGlhbF9pbnB1dF9wcmlvcltpXSxcbiAgICAgIHRyYW5zZm9ybTogcHJvYklucHV0VHJhbnNmb3JtfVxuICApKVxuKVxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC02IiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoidmlld29mIGlucHV0X2xpa2VsaWhvb2QgPSBJbnB1dHMuZm9ybShcbiAgQXJyYXkuZnJvbSh7bGVuZ3RoOiBkaW19LCAoXyxpKT0+SW5wdXRzLnJhbmdlKFxuICAgIFtvcHRpb25zLnByb2JNaW4sIDFdLCB7XG4gICAgICBzdGVwOiBvcHRpb25zLnByb2JTdGVwLCB2YWx1ZTogaW5pdGlhbF9pbnB1dF9saWtlbGlob29kW2ldLFxuICAgICAgdHJhbnNmb3JtOiBwcm9iSW5wdXRUcmFuc2Zvcm19XG4gICkpXG4pXG4ifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXQiLCJjZWxsTmFtZSI6Im9qcy1jZWxsLTciLCJpbmxpbmUiOmZhbHNlLCJzb3VyY2UiOiJ2aWV3b2YgZXZlbnRfbmFtZXMgPSBJbnB1dHMuZm9ybShcbiAgQXJyYXkuZnJvbSh7bGVuZ3RoOiBkaW19LCAoXyxpKSA9PiBJbnB1dHMudGV4dCh7XG4gICAgdmFsdWU6IGluaXRpYWxfZXZlbnRfbmFtZXNbaV0sXG4gICAgcGxhY2Vob2xkZXI6IGBldmVudCAke2l9IG5hbWVgXG4gIH0pKVxuKVxudmlld29mIG9ic2VydmF0aW9uTmFtZSA9IElucHV0cy50ZXh0KHtsYWJlbDogXCJvYnNlcnZhdGlvblwiLCB2YWx1ZTogaW5pdGlhbF9vYnNlcnZhdGlvbl9uYW1lLCBwbGFjZWhvbGRlcjogXCJvYnNlcnZhdGlvbiBuYW1lXCJ9KVxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0UXVpZXQiLCJzb3VyY2UiOiJzaGlueUlucHV0KCd3aGV0aGVyU2hvd1Bvc3RlcmlvcicpIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0UXVpZXQiLCJzb3VyY2UiOiJzaGlueUlucHV0KCd3aGV0aGVyU2hvd0JyZWFrZG93bicpIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0UXVpZXQiLCJzb3VyY2UiOiJzaGlueUlucHV0KCdkaW0nKSJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldFF1aWV0Iiwic291cmNlIjoic2hpbnlJbnB1dCgnd2hldGhlclNob3dWYWx1ZXMnKSJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldFF1aWV0Iiwic291cmNlIjoic2hpbnlJbnB1dCgnaW5wdXRfcHJpb3InKSJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldFF1aWV0Iiwic291cmNlIjoic2hpbnlJbnB1dCgnaW5wdXRfbGlrZWxpaG9vZCcpIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0UXVpZXQiLCJzb3VyY2UiOiJzaGlueUlucHV0KCdldmVudF9uYW1lcycpIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0UXVpZXQiLCJzb3VyY2UiOiJzaGlueUlucHV0KCdvYnNlcnZhdGlvbk5hbWUnKSJ9XX0=
+    eyJjb250ZW50cyI6W3sibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMSIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6ImltcG9ydCB7IFxuICAgIHBsb3RfYmF5ZXMsIHBsb3RfaW5mb21ldHJpY3NfYmFycywgcGxvdF9zdXJwcmlzYWxfcGFydGl0aW9uLCBwbG90X2luZm9tZXRyaWNzX3BhcnRpdGlvblxuICAgIH0gd2l0aCB7bG9jYWxkIGFzIGQsIG1heEJpdHMgYXMgbWF4VW5pdHN9IGZyb20gJ0Bwb3N0eWxlbS9rbC1hbmQtc3VycHJpc2FsJ1xucGxvdF9iYXllcyh7XG4gICAgc2hvd1Bvc3Rlcmlvcjogd2hldGhlclNob3dQb3N0ZXJpb3IsXG4gICAgd2lkdGg6IHdoZXRoZXJTaG93UG9zdGVyaW9yID8gIDEyMDAgOiA4MjgsIFxuICAgIGhlaWdodDogMzUwLCBtYXJnaW5MZWZ0OjEwMCwgbWFyZ2luQm90dG9tOiA1MCxcbiAgICBzaG93VmFsdWVzOiB3aGV0aGVyU2hvd1ZhbHVlcyxcbiAgICBldmVudE5hbWVzOiBldmVudF9uYW1lcywgXG4gICAgZm9udFNpemU6MTgsIHN0eWxlOiB7Zm9udFNpemU6IDE0fSxcbiAgICB0aXRsZTogd2hldGhlclNob3dCcmVha2Rvd24gPyBtZGAjIyBTdXJwcmlzYWw6IEtMICsgUmAgOiBtZGAjIyBTdXJwcmlzYWxgLFxuICAgIHN1YnRpdGxlOiB3aGV0aGVyU2hvd1Bvc3RlcmlvciA/IG1kYEJheWVzaWFuIHVwZGF0ZSBmb3Igb2JzZXJ2YXRpb24gJHt0ZXhgdz1cXHRleHRpdHske29ic2VydmF0aW9uTmFtZX19YH1gIDogbWRgYmVsaWVmcyBhbmQgbGlrZWxpaG9vZCBmb3Igb2JzZXJ2YXRpb24gJHt0ZXhgdz1cXHRleHRpdHske29ic2VydmF0aW9uTmFtZX19YH1gXG59KVxuLy8gcGxvdF9pbmZvbWV0cmljc19iYXJzKHt3aWR0aDogMTIwMCwgbWFyZ2luTGVmdDoxMDB9KVxuLy8gcGxvdF9zdXJwcmlzYWxfcGFydGl0aW9uKHt3aWR0aDogMTIwMCwgbWFyZ2luTGVmdDoxMDB9KVxucGxvdF9pbmZvbWV0cmljc19wYXJ0aXRpb24oe1xuICAgIHBhcnRpdGlvbjogd2hldGhlclNob3dCcmVha2Rvd24sXG4gICAgd2lkdGg6IDEyMDAsIG1hcmdpbkxlZnQ6MTAwLCAvL21hcmdpbkJvdHRvbTogMCxcbiAgICBmb250U2l6ZToxOCwgc3R5bGU6IHtmb250U2l6ZTogMTR9LFxuICAgIHN1YnRpdGxlOiB3aGV0aGVyU2hvd0JyZWFrZG93biA/IG1kYHN1cnByaXNhbCBvZiAke3RleGB3PVxcdGV4dGl0eyR7b2JzZXJ2YXRpb25OYW1lfX1gfSwgZGVjb21wb3NlZGAgOiBtZGBzdXJwcmlzYWwgb2YgJHt0ZXhgdz1cXHRleHRpdHske29ic2VydmF0aW9uTmFtZX19YH1gXG59KVxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC0yIiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoic2NhbGVfbGlrZWxpaG9vZCA9IDFcbmlucHV0X2xpa2VsaWhvb2Rfc2NhbGVkID0gaW5wdXRfbGlrZWxpaG9vZFxuaW1wb3J0IHtcbiAgICBub3JtYWxpemUsIGdldF9wb3N0ZXJpb3IsIGdldF9pbmZvbWV0cmljcywgb3B0aW9ucywgcHJvYklucHV0VHJhbnNmb3JtXG4gICAgfSBmcm9tICdAcG9zdHlsZW0va2wtYW5kLXN1cnByaXNhbCdcblxubG9jYWxkID0ge3JldHVybnsgXG4gICAgZGltOmRpbSxcbiAgICBpbnB1dF9wcmlvcjppbnB1dF9wcmlvcixcbiAgICBwcmlvcjpub3JtYWxpemUoaW5wdXRfcHJpb3IpLFxuICAgIGlucHV0X2xpa2VsaWhvb2Q6aW5wdXRfbGlrZWxpaG9vZCxcbiAgICBzY2FsZV9saWtlbGlob29kOnNjYWxlX2xpa2VsaWhvb2QsXG4gICAgbGlrZWxpaG9vZDppbnB1dF9saWtlbGlob29kX3NjYWxlZCxcbiAgICBwb3N0ZXJpb3I6IGdldF9wb3N0ZXJpb3IoaW5wdXRfcHJpb3IsIGlucHV0X2xpa2VsaWhvb2Rfc2NhbGVkKSxcbiAgICBpbmZvOmdldF9pbmZvbWV0cmljcyhpbnB1dF9wcmlvcixpbnB1dF9saWtlbGlob29kX3NjYWxlZClcbn19O1xuXG5tYXhCaXRzID0gNlxuaW5pdGlhbF9pbnB1dF9wcmlvciA9ICAgICAgWy4zLC4yLC4wNSwuMDEsLjAwMDEsLjAxXVxuaW5pdGlhbF9pbnB1dF9saWtlbGlob29kID0gWy4wNSwuMDAwMDEsLjAwMDAxLC4wMDAxLDEsLjAwMDAxXVxuaW5pdGlhbF9kaW0gPSBpbml0aWFsX2lucHV0X3ByaW9yLmxlbmd0aFxuaW5pdGlhbF9ldmVudF9uYW1lcyA9IFtcbiAgICBcIiAgICAgICAgICAgICAgICAgICAgZGlubmVyXCIsXG4gICAgXCIgICAgICAgICAgICAgICAgICAgIGx1bmNoXCIsXG4gICAgXCIgICAgICAgICAgICAgICAgICAgIGJyZWFrZmFzdFwiLFxuICAgIFwiICAgICAgICAgICAgICAgICAgICAuLi5cIixcbiAgICBcIiAgICAgICAgICAgICAgICAgICAgZGltbWVyXCIsXG4gICAgXCIgICAgICAgICAgICAgICAgICAgIC4uLlwiXG5dO1xuaW5pdGlhbF9vYnNlcnZhdGlvbl9uYW1lID0gXCJkaW1tZXJcIlxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC0zIiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoidmlld29mIGlucHV0X3ByaW9yID0gSW5wdXRzLmZvcm0oXG4gIEFycmF5LmZyb20oe2xlbmd0aDogZGltfSwgKF8saSk9PklucHV0cy5yYW5nZShcbiAgICBbb3B0aW9ucy5wcm9iTWluLCAxXSwge1xuICAgICAgc3RlcDogb3B0aW9ucy5wcm9iU3RlcCwgdmFsdWU6IGluaXRpYWxfaW5wdXRfcHJpb3JbaV0sXG4gICAgICB0cmFuc2Zvcm06IHByb2JJbnB1dFRyYW5zZm9ybX1cbiAgKSlcbilcbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtNCIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6InZpZXdvZiBpbnB1dF9saWtlbGlob29kID0gSW5wdXRzLmZvcm0oXG4gIEFycmF5LmZyb20oe2xlbmd0aDogZGltfSwgKF8saSk9PklucHV0cy5yYW5nZShcbiAgICBbb3B0aW9ucy5wcm9iTWluLCAxXSwge1xuICAgICAgc3RlcDogb3B0aW9ucy5wcm9iU3RlcCwgdmFsdWU6IGluaXRpYWxfaW5wdXRfbGlrZWxpaG9vZFtpXSxcbiAgICAgIHRyYW5zZm9ybTogcHJvYklucHV0VHJhbnNmb3JtfVxuICApKVxuKVxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC01IiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoidmlld29mIGV2ZW50X25hbWVzID0gSW5wdXRzLmZvcm0oXG4gIEFycmF5LmZyb20oe2xlbmd0aDogZGltfSwgKF8saSkgPT4gSW5wdXRzLnRleHQoe1xuICAgIHZhbHVlOiBpbml0aWFsX2V2ZW50X25hbWVzW2ldLFxuICAgIHBsYWNlaG9sZGVyOiBgZXZlbnQgJHtpfSBuYW1lYFxuICB9KSlcbilcbnZpZXdvZiBvYnNlcnZhdGlvbk5hbWUgPSBJbnB1dHMudGV4dCh7bGFiZWw6IFwib2JzZXJ2YXRpb25cIiwgdmFsdWU6IGluaXRpYWxfb2JzZXJ2YXRpb25fbmFtZSwgcGxhY2Vob2xkZXI6IFwib2JzZXJ2YXRpb24gbmFtZVwifSlcbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtNiIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6InZpZXdvZiB3aGV0aGVyU2hvd1Bvc3RlcmlvciA9IElucHV0cy50b2dnbGUoe2xhYmVsOiBcInBvc3RlcmlvclwiLCB2YWx1ZTogdHJ1ZX0pXG52aWV3b2Ygd2hldGhlclNob3dCcmVha2Rvd24gPSBJbnB1dHMudG9nZ2xlKHtsYWJlbDogXCJicmVhayBkb3duIHN1cnByaXNhbFwiLCB2YWx1ZTogdHJ1ZX0pXG5cbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtNyIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6InZpZXdvZiBkaW0gPSBJbnB1dHMucmFuZ2UoWzIsIDEwXSwge3N0ZXA6IDEsIGxhYmVsOiBcImRpbWVuc2lvblwiLCB2YWx1ZTogaW5pdGlhbF9kaW19KVxudmlld29mIHdoZXRoZXJTaG93VmFsdWVzID0gSW5wdXRzLnRvZ2dsZSh7bGFiZWw6IFwic2hvdyB2YWx1ZXNcIiwgdmFsdWU6IGZhbHNlfSlcbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldFF1aWV0Iiwic291cmNlIjoic2hpbnlJbnB1dCgnaW5wdXRfcHJpb3InKSJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldFF1aWV0Iiwic291cmNlIjoic2hpbnlJbnB1dCgnaW5wdXRfbGlrZWxpaG9vZCcpIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0UXVpZXQiLCJzb3VyY2UiOiJzaGlueUlucHV0KCdldmVudF9uYW1lcycpIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0UXVpZXQiLCJzb3VyY2UiOiJzaGlueUlucHV0KCdvYnNlcnZhdGlvbk5hbWUnKSJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldFF1aWV0Iiwic291cmNlIjoic2hpbnlJbnB1dCgnd2hldGhlclNob3dQb3N0ZXJpb3InKSJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldFF1aWV0Iiwic291cmNlIjoic2hpbnlJbnB1dCgnd2hldGhlclNob3dCcmVha2Rvd24nKSJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldFF1aWV0Iiwic291cmNlIjoic2hpbnlJbnB1dCgnZGltJykifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXRRdWlldCIsInNvdXJjZSI6InNoaW55SW5wdXQoJ3doZXRoZXJTaG93VmFsdWVzJykifV19
     </script>
     <script type="module">
     if (window.location.protocol === "file:") { alert("The OJS runtime does not work with file:// URLs. Please use a web server to view this document."); }
