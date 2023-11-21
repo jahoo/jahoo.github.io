@@ -1,0 +1,163 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "sampling and sentence processing",
+    "section": "",
+    "text": "\\global\\def\\I#1{\\operatorname{I}(#1)}\n\\global\\def\\H#1{\\operatorname{H}(#1)}\n\\global\\def\\surp#1{\\operatorname{surp}(#1)}\n\\global\\def\\KL#1#2{\\operatorname{D_{KL}}(#1 \\| #2)}\n\\global\\def\\E{\\operatorname*{\\mathbb{E}}}\n\\global\\def\\dee{\\mathop{\\mathrm{d}\\!}}\n\\global\\def\\var#1{\\operatorname{\\mathbb{V}}(#1)}\n\\global\\def\\Var#1#2{\\operatorname{\\mathbb{V}}\\!\\!{}_{#1}(#2)}\n\\global\\def\\indep{\\bot\\!\\!\\!\\bot}"
+  },
+  {
+    "objectID": "index.html#notebooks-on-various-topics",
+    "href": "index.html#notebooks-on-various-topics",
+    "title": "sampling and sentence processing",
+    "section": "./notebooks on various topics",
+    "text": "./notebooks on various topics\n\n\n\n\n\nWhy surprising doesn’t always mean difficult to process\n\n\n\n\n\n\n\n\nNov 21, 2023\n\n\n11/17/23, 10:48:10 AM\n\n\n\n\n\n\n\nLiterature review\n\n\nparsing, sampling, and linguistic phenomena\n\n\n\n\n\n11/16/23, 1:07:43 PM\n\n\n\n\n\n\n\nKL(P||Q) idea\n\n\n\n\n\n\n\n\nNov 21, 2023\n\n\n10/20/23, 12:16:08 PM\n\n\n\n\n\n\n\ninteractive KL and surprisal decomposition\n\n\n\n\n\n\n\n\nNov 21, 2023\n\n\n10/19/23, 3:16:09 PM\n\n\n\n\n\n\n\nDifficulty and surprisal\n\n\n\n\n\n\n\n\nNov 21, 2023\n\n\n10/17/23, 5:23:25 PM\n\n\n\n\n\n\n\nBayesian incremental parsing\n\n\nMaking a formal framework\n\n\n\n\n\n8/26/23, 10:39:52 PM\n\n\n\n\n\n\n\nDensity of transformed random variable\n\n\n\n\n\n\n\n\nNov 2, 2022\n\n\n2/27/23, 9:15:29 PM\n\n\n\n\n\n\n\nRejection sampling\n\n\nThe rejection sampling algorithm, and how guess-and-check is a special case.\n\n\n\n\n\nAug 29, 2022\n\n\n2/14/23, 1:57:33 PM\n\n\n\n\n\n\n\na noisy channel LM\n\n\nstarting a new project\n\n\n\n\n\nInvalid Date\n\n\n11/8/22, 10:43:52 PM\n\n\n\n\n\n\n\nBeams of particles\n\n\nbuilding an SMC parsing model\n\n\n\n\n\n7/14/22, 10:27:20 PM\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "index.html#notes-on-particular-papers",
+    "href": "index.html#notes-on-particular-papers",
+    "title": "sampling and sentence processing",
+    "section": "./notes on particular papers",
+    "text": "./notes on particular papers\n\n\n\n\n\nNotes on SMC for LLMs\n\n\nSequential Monte Carlo Steering of Large Language Models using Probabilistic Programs\n\n\n\n\n\nAug 1, 2023\n\n\n11/9/23, 1:43:36 PM\n\n\n\n\n\n\n\nNotes on Resource-rational surprisal\n\n\nA resource-rational model of human processing of recursive linguistic structure\n\n\n\n\n\nNov 1, 2022\n\n\n1/15/23, 9:44:58 PM\n\n\n\n\n\n\n\nNotes on GCN parsing\n\n\nStrongly Incremental Constituency Parsing with Graph Neural Networks \n\n\n\n\n\nJan 1, 2021\n\n\n5/18/22, 11:55:44 AM\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "index.html#logs",
+    "href": "index.html#logs",
+    "title": "sampling and sentence processing",
+    "section": "logs",
+    "text": "logs\n\n\n\n\n\nKL theory and noisy surprisal\n\n\nBranch off of processing-surprisal.md\n\n\n\n\n\n11/21/23, 12:01:36 PM\n\n\n\n\n\n\n\nPlausibility of sampling nonlinear surprisal project\n\n\nContinuation of eval2/log.md\n\n\n\n\n\nNov 21, 2023\n\n\n5/23/23, 4:02:45 PM\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "index.html#slides",
+    "href": "index.html#slides",
+    "title": "sampling and sentence processing",
+    "section": "slides",
+    "text": "slides\n\n\n\n\n\nWhen unpredictable \\ne difficult\n\n\nTesting a belief-divergence theory of processing cost\n\n\n\n\n\nNov 21, 2023\n\n\n11/21/23, 2:54:27 PM\n\n\n\n\n\n\n\nTitle\n\n\nSubtitle\n\n\n\n\n\n11/17/23, 10:08:00 AM\n\n\n\n\n\n\n\nIllusions etc\n\n\nconstructions that are unexpectedly easy to process\n\n\n\n\n\n11/10/23, 10:49:25 AM\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "index.html#other",
+    "href": "index.html#other",
+    "title": "sampling and sentence processing",
+    "section": "other",
+    "text": "other\n\n\n\n\n\nSampling-based processing\n\n\nDissertation proposal\n\n\n\n\n\nJun 27, 2022\n\n\n10/19/23, 8:08:11 PM\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "slides/2023-11-21-MCQLL.html#motivation",
+    "href": "slides/2023-11-21-MCQLL.html#motivation",
+    "title": "when unpredictable \\ne difficult",
+    "section": "Motivation",
+    "text": "Motivation\n\nslides at jahoo.github.io/2023-11\n\nDuring incremental processing, effort is not constant.\n\nGenerally, if input less consistent with what we already believe \\leadsto more effort to process.\n\n\n\n\n\n\\textit{Yesterday, I had a lasagna for}\n\n\n\n… \\textit{dinner}\nvery predictable (✅ no update) \\leadsto easy\n… \\textit{breakfast}\nless predictable (⚠️ update!) \\leadsto less easy\n\n\n\n\n\n\n\n\nIntuition: changing what you believe takes effort. Can estimate this update-cost with surprisal\n\n\\surp{w} \\coloneqq -\\log \\Pr(w\\mid \\mathrm{context})\n\n\n\nBUT, sometimes, a word can be very surprising without resulting in a large change in beliefs.\n\n… \\textit{dimmer}\nhighly unpredictable \\leadsto extremely difficult? no huge belief update, probably just means ‘dinner’!\n\n\n\nProposed explanation: processing cost is update-cost (KL-divergence)."
+  },
+  {
+    "objectID": "slides/2023-11-21-MCQLL.html#kl-theory",
+    "href": "slides/2023-11-21-MCQLL.html#kl-theory",
+    "title": "when unpredictable \\ne difficult",
+    "section": "KL theory",
+    "text": "KL theory\n\nslides at jahoo.github.io/2023-11\n\nHypothesis: cost(w) \\approx {\\colorKL \\text{belief update (KL divergence)}}:\n\n{\\colorKL\\KL{\\operatorname{posterior}}{\\operatorname{prior}}}\n= %\\overbrace{-\\log \\mathop{\\mathbb{E}}_{\\operatorname{prior}} \\operatorname{likelihood} }^%\n{\\surp{w}}\n- {\\colorR\\underbrace{\\mathop{\\mathbb{E}}_{\\operatorname{posterior}}[-\\log \\operatorname{likelihood}]}_{\\operatorname{R}(w)}}\n\nHow to think of these terms?\n\nIn the general case of a nondeterministic relationship between intended meanings and observed words:\n\n\n\n\n\n\n\n\\surp{w} the quantity of information in the word.\n{\\colorR R(w)} measures the quantity of information that is cancelled (doesn’t contribute to belief update)\n\nBig R \\leadsto less difficult than predicted by surprisal.\n\n\n\n\nWith a nondeterministic relationship between intended meanings and observed words:\n\nKL = surprisal.\n\n\nOn last point:\n\nThis is a ‘pointwise’ definition, so anywhere where the relationship is deterministic, “KL theory” doesn’t differ from surprisal theory. (That is, when the relation between intended meanings and ovservable words is a function, or equiv, when the likelihood is binary)"
+  },
+  {
+    "objectID": "slides/2023-11-21-MCQLL.html#section",
+    "href": "slides/2023-11-21-MCQLL.html#section",
+    "title": "when unpredictable \\ne difficult",
+    "section": "",
+    "text": "Central intuition: Typos are unpredictable without causing huge belief updates\n\nexpectation through noise model (inside listener’s head) Model of the comprehender:\n\nknows observed word might not be intended (has noise/error model) prob of observing w given intended z\n\nwalk through interpretation with dimmer\n\nnoise model doesn’t predict infinite surprisal for typo, but still predicts it is high, compared ‘breakfast’ which causes larger shift in beliefs\n\nreveal breakdown\ngo back to intuition\n\n\n\nslides at jahoo.github.io/2023-11\n\n\nimport { \n    plot_bayes, plot_infometrics_bars, plot_surprisal_partition, plot_infometrics_partition\n    } with {locald as d, maxBits as maxUnits} from '@postylem/kl-and-surprisal'\nplot_bayes({\n    showPosterior: whetherShowPosterior,\n    width: whetherShowPosterior ?  1200 : 828, \n    height: 350, marginLeft:100, marginBottom: 50,\n    showValues: whetherShowValues,\n    eventNames: event_names, \n    fontSize:18, style: {fontSize: 14},\n    title: whetherShowBreakdown ? md`## Surprisal: KL + R` : md`## Surprisal`,\n    subtitle: whetherShowPosterior ? md`Bayesian update for observation ${tex`w=\\textit{${observationName}}`}` : md`beliefs and likelihood for observation ${tex`w=\\textit{${observationName}}`}`\n})\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nplot_infometrics_partition({\n    partition: whetherShowBreakdown,\n    width: 1200, marginLeft:100, //marginBottom: 0,\n    fontSize:18, style: {fontSize: 14},\n    subtitle: whetherShowBreakdown ? md`surprisal of ${tex`w=\\textit{${observationName}}`}, decomposed` : md`surprisal of ${tex`w=\\textit{${observationName}}`}`\n})\n\n\n\n\n\n\n\n\n\n\\operatorname{surprisal} = -\\log p(w) =  -\\log \\textstyle\\sum_z p(z)p(w|z) = -\\log \\mathop{\\mathbb{E}}_{\\operatorname{prior}} \\operatorname{likelihood}  \n\n\n\n{\\colorKL\\operatorname{KL}(\\operatorname{posterior}\\|\\operatorname{prior})}\n= \\overbrace{-\\log \\mathop{\\mathbb{E}}_{\\operatorname{prior}} \\operatorname{likelihood} }%^{\\operatorname{surprisal}}\n- {\\colorR\\underbrace{\\mathop{\\mathbb{E}}_{\\operatorname{posterior}}[-\\log \\operatorname{likelihood}]}_{\\operatorname{R}}}\n\n\n\n\n\n▽…△\n\n\n\n\n\n\n\n\nviewof whetherShowPosterior = Inputs.toggle({label: \"posterior\", value: false})\nviewof whetherShowBreakdown = Inputs.toggle({label: \"break down surprisal\", value: false})\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nviewof dim = Inputs.range([2, 10], {step: 1, label: \"dimension\", value: initial_dim})\nviewof whetherShowValues = Inputs.toggle({label: \"show values\", value: false})\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nscale_likelihood = 1\ninput_likelihood_scaled = input_likelihood\nimport {\n    normalize, get_posterior, get_infometrics, options, probInputTransform\n    } from '@postylem/kl-and-surprisal'\n\nlocald = {return{ \n    dim:dim,\n    input_prior:input_prior,\n    prior:normalize(input_prior),\n    input_likelihood:input_likelihood,\n    scale_likelihood:scale_likelihood,\n    likelihood:input_likelihood_scaled,\n    posterior: get_posterior(input_prior, input_likelihood_scaled),\n    info:get_infometrics(input_prior,input_likelihood_scaled)\n}};\n\nmaxBits = 6\ninitial_input_prior =      [.3,.2,.05,.01,.0001,.01]\ninitial_input_likelihood = [.05,.00001,.00001,.0001,1,.00001]\ninitial_dim = initial_input_prior.length\ninitial_event_names = [\n    \"                    dinner\",\n    \"                    lunch\",\n    \"                    breakfast\",\n    \"                    ...\",\n    \"                    dimmer\",\n    \"                    ...\"\n];\ninitial_observation_name = \"dimmer\"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nprior\n\nviewof input_prior = Inputs.form(\n  Array.from({length: dim}, (_,i)=&gt;Inputs.range(\n    [options.probMin, 1], {\n      step: options.probStep, value: initial_input_prior[i],\n      transform: probInputTransform}\n  ))\n)\n\n\n\n\n\n\n\nlikelihood\n\nviewof input_likelihood = Inputs.form(\n  Array.from({length: dim}, (_,i)=&gt;Inputs.range(\n    [options.probMin, 1], {\n      step: options.probStep, value: initial_input_likelihood[i],\n      transform: probInputTransform}\n  ))\n)\n\n\n\n\n\n\n\nhypotheses\n\nviewof event_names = Inputs.form(\n  Array.from({length: dim}, (_,i) =&gt; Inputs.text({\n    value: initial_event_names[i],\n    placeholder: `event ${i} name`\n  }))\n)\nviewof observationName = Inputs.text({label: \"observation\", value: initial_observation_name, placeholder: \"observation name\"})"
+  },
+  {
+    "objectID": "slides/2023-11-21-MCQLL.html#prediction",
+    "href": "slides/2023-11-21-MCQLL.html#prediction",
+    "title": "When unpredictable \\ne difficult",
+    "section": "Prediction",
+    "text": "Prediction\n\nThe children’s eyes lit up when they saw the ice cream _____\n\n\n\n\n\n\n\n“cone” – expected word ✅ \\leadsto low cost\n“come” – unexpected! ⚠️ change beliefs! \\leadsto high cost\n“cohe” – even less predicted❓ but probably means “cone”…\nobservation is not interpreted literally, AND doesn’t resolve ambiguity\n\\implies beliefs don’t change much \\leadsto low cost\n\n\n\n\n\n\ncomecohe"
+  },
+  {
+    "objectID": "slides/2023-11-21-MCQLL.html#prediction-1",
+    "href": "slides/2023-11-21-MCQLL.html#prediction-1",
+    "title": "When unpredictable \\ne difficult",
+    "section": "Prediction",
+    "text": "Prediction\n\nThe children’s eyes lit up when they saw the ice cream _____\n\nPrediction opposite from standard surprisal theory:\n\n\n\nsurprisal:\ncost(\\textsf{come}) \\ll cost(\\textsf{cohe})\n\n\nKL:\ncost(\\textsf{come}) &gt; cost(\\textsf{cohe})\n\n\n\n\nIngredients:\n\nContext {\\small\\color{gray}\\textsf{The children's eyes lit up when they saw the ice cream}}\nTriplet\n\nWord A: \\textsf{come}\nWord B: \\textsf{cone}\nAmbiguous typo \\textsf{cohe}\n\n\nNote: word B doesn’t need to be more surprising than word A, but this will amplify the effect."
+  },
+  {
+    "objectID": "slides/2023-11-21-MCQLL.html#experiment",
+    "href": "slides/2023-11-21-MCQLL.html#experiment",
+    "title": "When unpredictable \\ne difficult",
+    "section": "Experiment",
+    "text": "Experiment\nGenerate examples (wordA, wordB), ambig_typo like (‘come’, ‘cone’): ‘cohe’ in context where\n\nin context there exist two possible words (wordA, wordB), similar to each other\ngenerate third word ambig_typo, confusable equally with both\n\n\n\n\n\nExamples\n\n\n\n\n\n\n\n\n\ntriplet(s)\ncontext\n\n\n\n\n(‘bend’, ‘bond’): [‘bcnd’]\n“In the workshop, the instructor demonstrated how to manipulate metal to create a strong _____ between the pieces.”\n\n\n(‘ballet’, ‘ballot’): [‘ballct’]\n“The community center will host a special event this weekend, and everyone is excited about the _____.”\n\n\n(‘beard’, ‘board’): [‘bcard’]\n“The woodworker carefully examined the texture of his _____ to determine its quality.”\n\n\n(‘bread’, ‘broad’): [‘brcad’]\n“While she sometimes liked narrow slices of cheese, she preferred to use _____ slices for her sandwiches.”\n\n\n(‘cake’, ‘cane’): [‘caxe’]\n“At Jeremiah’s 100th birthday party, everyone admired the ornate decorations on his birthday _____.”\n\n\n(‘come’, ‘cone’): [‘cohe’, ‘cowe’]\n“The children’s eyes lit up when they saw the ice cream _____.”\n\n\n(‘coal’, ‘coat’): [‘coai’, ‘coaj’]\n“In the cold winter months, he never left home without his _____.”\n\n\n(‘damn’, ‘dawn’): [‘dann’]\n“She woke just after sunrise and gazed out the window in the cold ____ light”\n\n\n(‘plans’, ‘plays’): [‘plaxs’]\n“The director was excited about the upcoming _____ for the theater season.”\n\n\n(‘starry’, ‘scary’): [‘stary’,‘scarry’]\n“There was no moon out, and the clear night was dark and ____.”\n\n\n\n…"
+  },
+  {
+    "objectID": "slides/2023-11-21-MCQLL.html#experiment-1",
+    "href": "slides/2023-11-21-MCQLL.html#experiment-1",
+    "title": "When unpredictable \\ne difficult",
+    "section": "Experiment",
+    "text": "Experiment\nGenerate examples (wordA, wordB), ambig_typo like (‘come’, ‘cone’): ‘cohe’ in context where\n\nin context there exist two possible words (wordA, wordB), similar to each other\ngenerate third word ambig_typo, confusable equally with both\nget probabilities\n\nget cloze completions on blanks (just to debug, maybe get some better stimuli)\nnorm correction probabilities on Turk/Prolific\nE.g.:\n\nHow would you correct the underlined typo:\nThe children’s eyes lit up when they saw the ice cream cohe\n\nlikewise out of context (‘here’s a word with a typo. how would you correct this word: cohe’)\nalso from LLM p_{LM}(w | \\textsf{context})\n\nlonger term thing, get some scores from humans on what their actual misspelling model is, and use this to train the weight matrix of a lev dist likelihood model\n\n\n\nget reading times\n\ncontext + (wordA or wordB or ambig_typo)"
+  },
+  {
+    "objectID": "slides/2023-11-21-MCQLL.html#section-5",
+    "href": "slides/2023-11-21-MCQLL.html#section-5",
+    "title": "When unpredictable \\ne difficult",
+    "section": "",
+    "text": "Switches to flip, Knobs to turn\n\nambig to be real word or not\nnoise level\n\nhigh …………….. low\n……. tweet …….. billboard\nignore all input ….. trust even unlikely details"
+  },
+  {
+    "objectID": "slides/2023-11-21-MCQLL.html#kl-theory-derivation",
+    "href": "slides/2023-11-21-MCQLL.html#kl-theory-derivation",
+    "title": "when unpredictable \\ne difficult",
+    "section": "KL theory derivation",
+    "text": "KL theory derivation\n\n\\begin{aligned}\n\\operatorname{KL}(p_{Z\\mid w}\\|p_{Z})\n&& = && \\mathop{\\mathbb{E}}_{p_{Z\\mid w}}[\\log \\frac{p(z\\mid w)}{p(z)}]\n&& = && \\mathop{\\mathbb{E}}_{p_{Z\\mid w}}[\\log \\frac{p(w\\mid z)}{p(w)}]\\\\\n&& = && -\\log p(w)\n&& - && \\mathop{\\mathbb{E}}_{p_{Z\\mid w}}[-\\log p(w\\mid z)]\\\\\n&& = && -\\log \\mathop{\\mathbb{E}}_{p_{Z}}[p(w\\mid z)]\n&& - && \\mathop{\\mathbb{E}}_{p_{Z\\mid w}}[-\\log p(w\\mid z)]\\\\\n\\operatorname{KL}(\\operatorname{posterior}\\|\\operatorname{prior})\n&& = && \\underbrace{-\\log \\mathop{\\mathbb{E}}_{\\operatorname{prior}} \\operatorname{lik} }_{\\operatorname{surprisal}}\n&& - &&\n\\underbrace{\\mathop{\\mathbb{E}}_{\\operatorname{posterior}}[-\\log \\operatorname{lik}]}_{\\operatorname{R}}\n\\end{aligned}"
+  },
+  {
+    "objectID": "slides/2023-11-21-MCQLL.html#target-stimuli",
+    "href": "slides/2023-11-21-MCQLL.html#target-stimuli",
+    "title": "when unpredictable \\ne difficult",
+    "section": "Target stimuli",
+    "text": "Target stimuli\n\n\\textit{The children's eyes lit up when they saw the ice cream} \\dots\n\n\n\n\n\n\n\n✅ …\\textit{cone} – expected word \\leadsto low cost\n⚠️ …\\textit{come} – unexpected! change beliefs! \\leadsto high cost\n❓…\\textit{cowe} – even less predicted but probably means “cone”…\nobservation is not interpreted literally, AND doesn’t resolve ambiguity\n\\implies beliefs don’t change much \\leadsto low cost\n\n\n\n\n\n\n⚠️❓"
+  },
+  {
+    "objectID": "slides/2023-11-21-MCQLL.html#target-stimuli-1",
+    "href": "slides/2023-11-21-MCQLL.html#target-stimuli-1",
+    "title": "when unpredictable \\ne difficult",
+    "section": "Target stimuli",
+    "text": "Target stimuli\n\n\\textit{The children's eyes lit up when they saw the ice cream} \\dots\n\nCompare effort on typo (❓\\textit{cowe}) to unexpected, similar word (⚠️\\textit{come}).\nPrediction is opposite from surprisal theory:\n\n\n\n\n\n\n\n\n\n\n\n\n⚠️\n\n❓\n\n\n\n\nsurprisal:\n\\operatorname{effort}(\\textit{come})\n{}&lt;{}\n\\operatorname{effort}(\\textit{cowe})\n\n\nKL:\n\\operatorname{effort}(\\textit{come})\n{}&gt;{}\n\\operatorname{effort}(\\textit{cowe})\n\n\n\n\n\n\n\n\nPlan\n\nGenerate examples.\nPreregister predicted pattern.\nGet human reading times, and test prediction."
+  },
+  {
+    "objectID": "slides/2023-11-21-MCQLL.html#target-stimuli-2",
+    "href": "slides/2023-11-21-MCQLL.html#target-stimuli-2",
+    "title": "when unpredictable \\ne difficult",
+    "section": "Target stimuli",
+    "text": "Target stimuli\nGenerate examples ✅, ⚠️, ❓ where (like \\textit{come}, \\textit{cone}, \\textit{cowe}) in context:\n\nthink of context there exist two possible words (✅, ⚠️), similar [one-letter substitution]\ngenerate third word ❓, confusable equally with either [substitution of visually similar letter]\n\n\n\n\n\nExamples\n\n\n\n\n\n\n\n\n\nwords\ncontext\n\n\n\n\n(bend, bond): [bcnd]\n“In the workshop, the instructor demonstrated how to manipulate metal to create a strong _____ between the pieces.”\n\n\n(ballet, ballot): [ballct]\n“The community center will host a special event this weekend, and everyone is excited about the _____.”\n\n\n(beard, board): [bcard]\n“The woodworker carefully examined the texture of his _____ to determine its quality.”\n\n\n(bread, broad): [brcad]\n“While she sometimes liked narrow slices of cheese, she preferred to use _____ slices for her sandwiches.”\n\n\n(cake, cane): [caxe]\n“At Jeremiah’s 100th birthday party, everyone admired the ornate decorations on his birthday _____.”\n\n\n(come, cone): [cohe, cowe]\n“The children’s eyes lit up when they saw the ice cream _____.”\n\n\n(coal, coat): [coai, coaj]\n“In the cold winter months, he never left home without his _____.”\n\n\n(damn, dawn): [dann]\n“She woke just before sunrise and gazed out the window in the cold ____ light”\n\n\n(plans, plays): [plaxs]\n“The director was excited about the upcoming _____ for the theater season.”\n\n\n(starry, scary): [stary,scarry]\n“There was no moon out, and the clear night was dark and ____.”\n\n\n\n…"
+  },
+  {
+    "objectID": "slides/2023-11-21-MCQLL.html#sanity-check",
+    "href": "slides/2023-11-21-MCQLL.html#sanity-check",
+    "title": "when unpredictable \\ne difficult",
+    "section": "Sanity check",
+    "text": "Sanity check\nPreregistration:\nFor each \\texttt{context}:\n\nfor each w in {✅, ⚠️, ❓}:\n\nget \\mathrm{KL}(w),\\mathrm{surprisal}(w)\nrequires estimate of\n\nprior p(Z=\\cdot \\mid \\texttt{context}) — use LM (GPT2)\npr( • | The children's eyes lit up when they saw the ice cream\")\n\n            prob\ncone          0.17338\ntruck         0.04660\ncones         0.04183\nand           0.03700\non            0.02206\n...\nlikelihood p(w \\mid Z=\\cdot, \\texttt{context}) — use exponentiated weighted Levenshtein distance (OCR-based)\nwlev(\"cone\", \"cone\") = 0.00\nwlev(\"come\", \"cone\") = 0.94\nwlev(\"cowe\", \"cone\") = 1.08\nwlev(\"coqe\", \"cone\") = 1.39\np(w \\mid Z=\\cdot, \\texttt{context}) = e^{-\\gamma \\texttt{wlev}(\\cdot, w)}"
+  },
+  {
+    "objectID": "slides/2023-11-21-MCQLL.html#sanity-check-results",
+    "href": "slides/2023-11-21-MCQLL.html#sanity-check-results",
+    "title": "when unpredictable \\ne difficult",
+    "section": "Sanity check results",
+    "text": "Sanity check results\n\nboxplotsboxplotsdetails"
+  },
+  {
+    "objectID": "slides/2023-11-21-MCQLL.html#test-predictions",
+    "href": "slides/2023-11-21-MCQLL.html#test-predictions",
+    "title": "when unpredictable \\ne difficult",
+    "section": "Test predictions",
+    "text": "Test predictions\nPlan:\nget reading times\n\ncontext + each of {✅ or ⚠️ or ❓}\n\nalso\n\nget cloze completions on blanks (just to debug, maybe get some better stimuli)\nget norms for correction probabilities (ask people to fix the typos) in context (and in isolation)\n\nSuggestions?"
+  },
+  {
+    "objectID": "slides/2023-11-21-MCQLL.html#one-more-thing",
+    "href": "slides/2023-11-21-MCQLL.html#one-more-thing",
+    "title": "when unpredictable \\ne difficult",
+    "section": "One more thing",
+    "text": "One more thing\nAs is, the setup is: Given some predictable word (✅\\textit{cone}), compare effort on typo (❓\\textit{cowe}) to a similar, unexpected word (⚠️\\textit{come}):\n\nsurprisal predicts it is harder. KL predicts easier.\n\nBut we’re not just predicting that typos are always easy.\n\n\nAlso need typos that aren’t similar to expected word:\n\n✅\n⚠️_simil\n❓_simil\n\n\n\n⚠️_dissim\n❓_dissim\n\n\n\n\\textit{The children's eyes lit up when they saw the ice cream} \\dots"
+  },
+  {
+    "objectID": "slides/2023-11-21-MCQLL.html#thanks",
+    "href": "slides/2023-11-21-MCQLL.html#thanks",
+    "title": "when unpredictable \\ne difficult",
+    "section": "THANKS!",
+    "text": "THANKS!"
+  }
+]
