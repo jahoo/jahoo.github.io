@@ -946,15 +946,13 @@ Z \to W
 </ul>
 </div>
 <div class="fragment">
+<p>AFAIK there aren’t candidate algorithms for inference that link processing cost directly to surprisal.</p>
 <ul>
-<li><p>models of perceptual discrimination <span class="citation" data-cites="norris.d:2006 norris.d:2009">(<a href="#/thanks" role="doc-biblioref" onclick="">Norris 2006</a>, <a href="#/thanks" role="doc-biblioref" onclick="">2009</a>)</span></p>
+<li><p>note however models of perceptual discrimination <span class="citation" data-cites="norris.d:2006 norris.d:2009">(<a href="#/thanks" role="doc-biblioref" onclick="">Norris 2006</a>, <a href="#/thanks" role="doc-biblioref" onclick="">2009</a>)</span></p>
 <ul>
-<li>Drift-diffusion / sequential probability ratio test, number of steps scales in this KL.</li>
+<li>Drift-diffusion / sequential probability ratio test, taking steps to reach threshold of certainty, average number of steps scales in surprisal.</li>
 </ul></li>
 </ul>
-</div>
-<div class="fragment">
-<p>AFAIK there aren’t candidate algorithms linking processing cost directly to surprisal.</p>
 </div>
 </section>
 <section>
@@ -1337,17 +1335,17 @@ Norris, Dennis. 2006. <span>“The <span>Bayesian</span> Reader: <span>Explainin
 <p>repeat <a href="#/sec-demo">demo slide</a></p>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb11" data-startfrom="770" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 769;"><span id="cb11-770"><a href="#cb11-770"></a><span class="fu">plot_bayes</span>({</span>
-<span id="cb11-771"><a href="#cb11-771"></a>    <span class="dt">pr</span><span class="op">:</span>locald2<span class="op">.</span><span class="at">prior</span><span class="op">,</span> <span class="dt">lik</span><span class="op">:</span>locald2<span class="op">.</span><span class="at">likelihood</span><span class="op">,</span></span>
-<span id="cb11-772"><a href="#cb11-772"></a>    <span class="dt">showPosterior</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
-<span id="cb11-773"><a href="#cb11-773"></a>    <span class="dt">width</span><span class="op">:</span> <span class="dv">1800</span><span class="op">,</span> </span>
-<span id="cb11-774"><a href="#cb11-774"></a>    <span class="dt">height</span><span class="op">:</span> <span class="dv">350</span><span class="op">,</span> <span class="dt">marginLeft</span><span class="op">:</span><span class="dv">100</span><span class="op">,</span> <span class="dt">marginBottom</span><span class="op">:</span> <span class="dv">50</span><span class="op">,</span></span>
-<span id="cb11-775"><a href="#cb11-775"></a>    <span class="dt">showValues</span><span class="op">:</span> whetherShowValues2<span class="op">,</span></span>
-<span id="cb11-776"><a href="#cb11-776"></a>    <span class="dt">eventNames</span><span class="op">:</span> event_names2<span class="op">,</span> </span>
-<span id="cb11-777"><a href="#cb11-777"></a>    <span class="dt">fontSize</span><span class="op">:</span><span class="dv">18</span><span class="op">,</span> <span class="dt">style</span><span class="op">:</span> {<span class="dt">fontSize</span><span class="op">:</span> <span class="dv">14</span>}<span class="op">,</span></span>
-<span id="cb11-778"><a href="#cb11-778"></a>    <span class="co">// title: md`### surprisal:  KL + R`,</span></span>
-<span id="cb11-779"><a href="#cb11-779"></a>    <span class="dt">subtitle</span><span class="op">:</span> <span class="kw">true</span> <span class="op">?</span> <span class="fu">md</span><span class="vs">`Bayesian update for observation </span><span class="sc">${</span><span class="fu">tex</span><span class="vs">`w=</span><span class="sc">\t</span><span class="vs">extit{</span><span class="sc">${</span>observationName2<span class="sc">}</span><span class="vs">}`</span><span class="sc">}</span><span class="vs">`</span> <span class="op">:</span> <span class="fu">md</span><span class="vs">`beliefs and likelihood for observation </span><span class="sc">${</span><span class="fu">tex</span><span class="vs">`w=</span><span class="sc">\t</span><span class="vs">extit{</span><span class="sc">${</span>observationName<span class="sc">}</span><span class="vs">}`</span><span class="sc">}</span><span class="vs">`</span></span>
-<span id="cb11-780"><a href="#cb11-780"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb11" data-startfrom="769" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 768;"><span id="cb11-769"><a href="#cb11-769"></a><span class="fu">plot_bayes</span>({</span>
+<span id="cb11-770"><a href="#cb11-770"></a>    <span class="dt">pr</span><span class="op">:</span>locald2<span class="op">.</span><span class="at">prior</span><span class="op">,</span> <span class="dt">lik</span><span class="op">:</span>locald2<span class="op">.</span><span class="at">likelihood</span><span class="op">,</span></span>
+<span id="cb11-771"><a href="#cb11-771"></a>    <span class="dt">showPosterior</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb11-772"><a href="#cb11-772"></a>    <span class="dt">width</span><span class="op">:</span> <span class="dv">1800</span><span class="op">,</span> </span>
+<span id="cb11-773"><a href="#cb11-773"></a>    <span class="dt">height</span><span class="op">:</span> <span class="dv">350</span><span class="op">,</span> <span class="dt">marginLeft</span><span class="op">:</span><span class="dv">100</span><span class="op">,</span> <span class="dt">marginBottom</span><span class="op">:</span> <span class="dv">50</span><span class="op">,</span></span>
+<span id="cb11-774"><a href="#cb11-774"></a>    <span class="dt">showValues</span><span class="op">:</span> whetherShowValues2<span class="op">,</span></span>
+<span id="cb11-775"><a href="#cb11-775"></a>    <span class="dt">eventNames</span><span class="op">:</span> event_names2<span class="op">,</span> </span>
+<span id="cb11-776"><a href="#cb11-776"></a>    <span class="dt">fontSize</span><span class="op">:</span><span class="dv">18</span><span class="op">,</span> <span class="dt">style</span><span class="op">:</span> {<span class="dt">fontSize</span><span class="op">:</span> <span class="dv">14</span>}<span class="op">,</span></span>
+<span id="cb11-777"><a href="#cb11-777"></a>    <span class="co">// title: md`### surprisal:  KL + R`,</span></span>
+<span id="cb11-778"><a href="#cb11-778"></a>    <span class="dt">subtitle</span><span class="op">:</span> <span class="kw">true</span> <span class="op">?</span> <span class="fu">md</span><span class="vs">`Bayesian update for observation </span><span class="sc">${</span><span class="fu">tex</span><span class="vs">`w=</span><span class="sc">\t</span><span class="vs">extit{</span><span class="sc">${</span>observationName2<span class="sc">}</span><span class="vs">}`</span><span class="sc">}</span><span class="vs">`</span> <span class="op">:</span> <span class="fu">md</span><span class="vs">`beliefs and likelihood for observation </span><span class="sc">${</span><span class="fu">tex</span><span class="vs">`w=</span><span class="sc">\t</span><span class="vs">extit{</span><span class="sc">${</span>observationName<span class="sc">}</span><span class="vs">}`</span><span class="sc">}</span><span class="vs">`</span></span>
+<span id="cb11-779"><a href="#cb11-779"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-8-1" data-nodetype="expression">
@@ -1355,13 +1353,13 @@ Norris, Dennis. 2006. <span>“The <span>Bayesian</span> Reader: <span>Explainin
 </div>
 </div>
 </div>
-<div class="sourceCode cell-code hidden" id="cb12" data-startfrom="783" data-source-offset="-599"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 782;"><span id="cb12-783"><a href="#cb12-783"></a><span class="fu">plot_infometrics_partition</span>({</span>
-<span id="cb12-784"><a href="#cb12-784"></a>    <span class="dt">infometrics</span><span class="op">:</span>locald2<span class="op">.</span><span class="at">info</span><span class="op">,</span></span>
-<span id="cb12-785"><a href="#cb12-785"></a>    <span class="dt">partition</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
-<span id="cb12-786"><a href="#cb12-786"></a>    <span class="dt">width</span><span class="op">:</span> <span class="dv">1800</span><span class="op">,</span> <span class="dt">marginLeft</span><span class="op">:</span><span class="dv">100</span><span class="op">,</span> <span class="co">//marginBottom: 0,</span></span>
-<span id="cb12-787"><a href="#cb12-787"></a>    <span class="dt">fontSize</span><span class="op">:</span><span class="dv">18</span><span class="op">,</span> <span class="dt">style</span><span class="op">:</span> {<span class="dt">fontSize</span><span class="op">:</span> <span class="dv">14</span>}<span class="op">,</span></span>
-<span id="cb12-788"><a href="#cb12-788"></a>    <span class="dt">subtitle</span><span class="op">:</span> <span class="fu">md</span><span class="vs">`surprisal of </span><span class="sc">${</span><span class="fu">tex</span><span class="vs">`w=</span><span class="sc">\t</span><span class="vs">extit{</span><span class="sc">${</span>observationName2<span class="sc">}</span><span class="vs">}`</span><span class="sc">}</span><span class="vs">, decomposed`</span></span>
-<span id="cb12-789"><a href="#cb12-789"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb12" data-startfrom="782" data-source-offset="-599"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 781;"><span id="cb12-782"><a href="#cb12-782"></a><span class="fu">plot_infometrics_partition</span>({</span>
+<span id="cb12-783"><a href="#cb12-783"></a>    <span class="dt">infometrics</span><span class="op">:</span>locald2<span class="op">.</span><span class="at">info</span><span class="op">,</span></span>
+<span id="cb12-784"><a href="#cb12-784"></a>    <span class="dt">partition</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb12-785"><a href="#cb12-785"></a>    <span class="dt">width</span><span class="op">:</span> <span class="dv">1800</span><span class="op">,</span> <span class="dt">marginLeft</span><span class="op">:</span><span class="dv">100</span><span class="op">,</span> <span class="co">//marginBottom: 0,</span></span>
+<span id="cb12-786"><a href="#cb12-786"></a>    <span class="dt">fontSize</span><span class="op">:</span><span class="dv">18</span><span class="op">,</span> <span class="dt">style</span><span class="op">:</span> {<span class="dt">fontSize</span><span class="op">:</span> <span class="dv">14</span>}<span class="op">,</span></span>
+<span id="cb12-787"><a href="#cb12-787"></a>    <span class="dt">subtitle</span><span class="op">:</span> <span class="fu">md</span><span class="vs">`surprisal of </span><span class="sc">${</span><span class="fu">tex</span><span class="vs">`w=</span><span class="sc">\t</span><span class="vs">extit{</span><span class="sc">${</span>observationName2<span class="sc">}</span><span class="vs">}`</span><span class="sc">}</span><span class="vs">, decomposed`</span></span>
+<span id="cb12-788"><a href="#cb12-788"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-8-2" data-nodetype="expression">
@@ -1383,33 +1381,33 @@ Norris, Dennis. 2006. <span>“The <span>Bayesian</span> Reader: <span>Explainin
 ## ... -->
 <!-- ## △ -->
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb13" data-startfrom="801" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 800;"><span id="cb13-801"><a href="#cb13-801"></a>scale_likelihood2 <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb13-802"><a href="#cb13-802"></a>input_likelihood_scaled2 <span class="op">=</span> input_likelihood2</span>
-<span id="cb13-803"><a href="#cb13-803"></a></span>
-<span id="cb13-804"><a href="#cb13-804"></a>locald2 <span class="op">=</span> {<span class="cf">return</span>{ </span>
-<span id="cb13-805"><a href="#cb13-805"></a>    <span class="dt">dim</span><span class="op">:</span>dim2<span class="op">,</span></span>
-<span id="cb13-806"><a href="#cb13-806"></a>    <span class="dt">input_prior</span><span class="op">:</span>input_prior2<span class="op">,</span></span>
-<span id="cb13-807"><a href="#cb13-807"></a>    <span class="dt">prior</span><span class="op">:</span><span class="fu">normalize</span>(input_prior2)<span class="op">,</span></span>
-<span id="cb13-808"><a href="#cb13-808"></a>    <span class="dt">input_likelihood</span><span class="op">:</span>input_likelihood2<span class="op">,</span></span>
-<span id="cb13-809"><a href="#cb13-809"></a>    <span class="dt">scale_likelihood</span><span class="op">:</span>scale_likelihood2<span class="op">,</span></span>
-<span id="cb13-810"><a href="#cb13-810"></a>    <span class="dt">likelihood</span><span class="op">:</span>input_likelihood_scaled2<span class="op">,</span></span>
-<span id="cb13-811"><a href="#cb13-811"></a>    <span class="dt">posterior</span><span class="op">:</span> <span class="fu">get_posterior</span>(input_prior2<span class="op">,</span> input_likelihood_scaled2)<span class="op">,</span></span>
-<span id="cb13-812"><a href="#cb13-812"></a>    <span class="dt">info</span><span class="op">:</span><span class="fu">get_infometrics</span>(input_prior2<span class="op">,</span>input_likelihood_scaled2)</span>
-<span id="cb13-813"><a href="#cb13-813"></a>}}<span class="op">;</span></span>
-<span id="cb13-814"><a href="#cb13-814"></a></span>
-<span id="cb13-815"><a href="#cb13-815"></a>maxBits2 <span class="op">=</span> <span class="dv">6</span></span>
-<span id="cb13-816"><a href="#cb13-816"></a>initial_input_prior2 <span class="op">=</span>      [<span class="op">.</span><span class="dv">3</span><span class="op">,.</span><span class="bn">01</span><span class="op">,.</span><span class="bn">03</span><span class="op">,.</span><span class="bn">02</span><span class="op">,.</span><span class="bn">015</span><span class="op">,.</span><span class="bn">012</span>]</span>
-<span id="cb13-817"><a href="#cb13-817"></a>initial_input_likelihood2 <span class="op">=</span> [<span class="op">.</span><span class="bn">02</span><span class="op">,.</span><span class="dv">25</span><span class="op">,.</span><span class="bn">00001</span><span class="op">,.</span><span class="bn">00001</span><span class="op">,.</span><span class="bn">00001</span><span class="op">,.</span><span class="bn">014</span>]</span>
-<span id="cb13-818"><a href="#cb13-818"></a>initial_dim2 <span class="op">=</span> initial_input_prior2<span class="op">.</span><span class="at">length</span></span>
-<span id="cb13-819"><a href="#cb13-819"></a>initial_event_names2 <span class="op">=</span> [</span>
-<span id="cb13-820"><a href="#cb13-820"></a>    <span class="st">"                    ✅"</span><span class="op">,</span></span>
-<span id="cb13-821"><a href="#cb13-821"></a>    <span class="st">"                    ⚠️"</span><span class="op">,</span></span>
+<div class="sourceCode cell-code hidden" id="cb13" data-startfrom="800" data-source-offset="-0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 799;"><span id="cb13-800"><a href="#cb13-800"></a>scale_likelihood2 <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb13-801"><a href="#cb13-801"></a>input_likelihood_scaled2 <span class="op">=</span> input_likelihood2</span>
+<span id="cb13-802"><a href="#cb13-802"></a></span>
+<span id="cb13-803"><a href="#cb13-803"></a>locald2 <span class="op">=</span> {<span class="cf">return</span>{ </span>
+<span id="cb13-804"><a href="#cb13-804"></a>    <span class="dt">dim</span><span class="op">:</span>dim2<span class="op">,</span></span>
+<span id="cb13-805"><a href="#cb13-805"></a>    <span class="dt">input_prior</span><span class="op">:</span>input_prior2<span class="op">,</span></span>
+<span id="cb13-806"><a href="#cb13-806"></a>    <span class="dt">prior</span><span class="op">:</span><span class="fu">normalize</span>(input_prior2)<span class="op">,</span></span>
+<span id="cb13-807"><a href="#cb13-807"></a>    <span class="dt">input_likelihood</span><span class="op">:</span>input_likelihood2<span class="op">,</span></span>
+<span id="cb13-808"><a href="#cb13-808"></a>    <span class="dt">scale_likelihood</span><span class="op">:</span>scale_likelihood2<span class="op">,</span></span>
+<span id="cb13-809"><a href="#cb13-809"></a>    <span class="dt">likelihood</span><span class="op">:</span>input_likelihood_scaled2<span class="op">,</span></span>
+<span id="cb13-810"><a href="#cb13-810"></a>    <span class="dt">posterior</span><span class="op">:</span> <span class="fu">get_posterior</span>(input_prior2<span class="op">,</span> input_likelihood_scaled2)<span class="op">,</span></span>
+<span id="cb13-811"><a href="#cb13-811"></a>    <span class="dt">info</span><span class="op">:</span><span class="fu">get_infometrics</span>(input_prior2<span class="op">,</span>input_likelihood_scaled2)</span>
+<span id="cb13-812"><a href="#cb13-812"></a>}}<span class="op">;</span></span>
+<span id="cb13-813"><a href="#cb13-813"></a></span>
+<span id="cb13-814"><a href="#cb13-814"></a>maxBits2 <span class="op">=</span> <span class="dv">6</span></span>
+<span id="cb13-815"><a href="#cb13-815"></a>initial_input_prior2 <span class="op">=</span>      [<span class="op">.</span><span class="dv">3</span><span class="op">,.</span><span class="bn">01</span><span class="op">,.</span><span class="bn">03</span><span class="op">,.</span><span class="bn">02</span><span class="op">,.</span><span class="bn">015</span><span class="op">,.</span><span class="bn">012</span>]</span>
+<span id="cb13-816"><a href="#cb13-816"></a>initial_input_likelihood2 <span class="op">=</span> [<span class="op">.</span><span class="bn">02</span><span class="op">,.</span><span class="dv">25</span><span class="op">,.</span><span class="bn">00001</span><span class="op">,.</span><span class="bn">00001</span><span class="op">,.</span><span class="bn">00001</span><span class="op">,.</span><span class="bn">014</span>]</span>
+<span id="cb13-817"><a href="#cb13-817"></a>initial_dim2 <span class="op">=</span> initial_input_prior2<span class="op">.</span><span class="at">length</span></span>
+<span id="cb13-818"><a href="#cb13-818"></a>initial_event_names2 <span class="op">=</span> [</span>
+<span id="cb13-819"><a href="#cb13-819"></a>    <span class="st">"                    ✅"</span><span class="op">,</span></span>
+<span id="cb13-820"><a href="#cb13-820"></a>    <span class="st">"                    ⚠️"</span><span class="op">,</span></span>
+<span id="cb13-821"><a href="#cb13-821"></a>    <span class="st">"                    ..."</span><span class="op">,</span></span>
 <span id="cb13-822"><a href="#cb13-822"></a>    <span class="st">"                    ..."</span><span class="op">,</span></span>
 <span id="cb13-823"><a href="#cb13-823"></a>    <span class="st">"                    ..."</span><span class="op">,</span></span>
-<span id="cb13-824"><a href="#cb13-824"></a>    <span class="st">"                    ..."</span><span class="op">,</span></span>
-<span id="cb13-825"><a href="#cb13-825"></a>    <span class="st">"                    ..."</span></span>
-<span id="cb13-826"><a href="#cb13-826"></a>]<span class="op">;</span></span>
-<span id="cb13-827"><a href="#cb13-827"></a>initial_observation_name2 <span class="op">=</span> <span class="st">"❓"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-824"><a href="#cb13-824"></a>    <span class="st">"                    ..."</span></span>
+<span id="cb13-825"><a href="#cb13-825"></a>]<span class="op">;</span></span>
+<span id="cb13-826"><a href="#cb13-826"></a>initial_observation_name2 <span class="op">=</span> <span class="st">"❓"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-9-1" data-nodetype="declaration">
@@ -1478,13 +1476,13 @@ Norris, Dennis. 2006. <span>“The <span>Bayesian</span> Reader: <span>Explainin
 <div class="column" style="width:30%;">
 <p>unnormalized prior</p>
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb14" data-startfrom="835" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 834;"><span id="cb14-835"><a href="#cb14-835"></a>viewof input_prior2 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">form</span>(</span>
-<span id="cb14-836"><a href="#cb14-836"></a>  <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> dim2}<span class="op">,</span> (_<span class="op">,</span>i)<span class="kw">=&gt;</span>Inputs<span class="op">.</span><span class="fu">range</span>(</span>
-<span id="cb14-837"><a href="#cb14-837"></a>    [options<span class="op">.</span><span class="at">probMin</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb14-838"><a href="#cb14-838"></a>      <span class="dt">step</span><span class="op">:</span> options<span class="op">.</span><span class="at">probStep</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> initial_input_prior2[i]<span class="op">,</span></span>
-<span id="cb14-839"><a href="#cb14-839"></a>      <span class="dt">transform</span><span class="op">:</span> probInputTransform}</span>
-<span id="cb14-840"><a href="#cb14-840"></a>  ))</span>
-<span id="cb14-841"><a href="#cb14-841"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb14" data-startfrom="834" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 833;"><span id="cb14-834"><a href="#cb14-834"></a>viewof input_prior2 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">form</span>(</span>
+<span id="cb14-835"><a href="#cb14-835"></a>  <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> dim2}<span class="op">,</span> (_<span class="op">,</span>i)<span class="kw">=&gt;</span>Inputs<span class="op">.</span><span class="fu">range</span>(</span>
+<span id="cb14-836"><a href="#cb14-836"></a>    [options<span class="op">.</span><span class="at">probMin</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb14-837"><a href="#cb14-837"></a>      <span class="dt">step</span><span class="op">:</span> options<span class="op">.</span><span class="at">probStep</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> initial_input_prior2[i]<span class="op">,</span></span>
+<span id="cb14-838"><a href="#cb14-838"></a>      <span class="dt">transform</span><span class="op">:</span> probInputTransform}</span>
+<span id="cb14-839"><a href="#cb14-839"></a>  ))</span>
+<span id="cb14-840"><a href="#cb14-840"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div id="ojs-cell-10" data-nodetype="declaration">
 
@@ -1494,13 +1492,13 @@ Norris, Dennis. 2006. <span>“The <span>Bayesian</span> Reader: <span>Explainin
 </div><div class="column" style="width:30%;">
 <p>likelihood</p>
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb15" data-startfrom="849" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 848;"><span id="cb15-849"><a href="#cb15-849"></a>viewof input_likelihood2 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">form</span>(</span>
-<span id="cb15-850"><a href="#cb15-850"></a>  <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> dim2}<span class="op">,</span> (_<span class="op">,</span>i)<span class="kw">=&gt;</span>Inputs<span class="op">.</span><span class="fu">range</span>(</span>
-<span id="cb15-851"><a href="#cb15-851"></a>    [options<span class="op">.</span><span class="at">probMin</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb15-852"><a href="#cb15-852"></a>      <span class="dt">step</span><span class="op">:</span> options<span class="op">.</span><span class="at">probStep</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> initial_input_likelihood2[i]<span class="op">,</span></span>
-<span id="cb15-853"><a href="#cb15-853"></a>      <span class="dt">transform</span><span class="op">:</span> probInputTransform}</span>
-<span id="cb15-854"><a href="#cb15-854"></a>  ))</span>
-<span id="cb15-855"><a href="#cb15-855"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb15" data-startfrom="848" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 847;"><span id="cb15-848"><a href="#cb15-848"></a>viewof input_likelihood2 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">form</span>(</span>
+<span id="cb15-849"><a href="#cb15-849"></a>  <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> dim2}<span class="op">,</span> (_<span class="op">,</span>i)<span class="kw">=&gt;</span>Inputs<span class="op">.</span><span class="fu">range</span>(</span>
+<span id="cb15-850"><a href="#cb15-850"></a>    [options<span class="op">.</span><span class="at">probMin</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb15-851"><a href="#cb15-851"></a>      <span class="dt">step</span><span class="op">:</span> options<span class="op">.</span><span class="at">probStep</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> initial_input_likelihood2[i]<span class="op">,</span></span>
+<span id="cb15-852"><a href="#cb15-852"></a>      <span class="dt">transform</span><span class="op">:</span> probInputTransform}</span>
+<span id="cb15-853"><a href="#cb15-853"></a>  ))</span>
+<span id="cb15-854"><a href="#cb15-854"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div id="ojs-cell-11" data-nodetype="declaration">
 
@@ -1510,12 +1508,12 @@ Norris, Dennis. 2006. <span>“The <span>Bayesian</span> Reader: <span>Explainin
 </div><div class="column" style="width:30%;">
 <p>hypotheses</p>
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb16" data-startfrom="863" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 862;"><span id="cb16-863"><a href="#cb16-863"></a>viewof event_names2 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">form</span>(</span>
-<span id="cb16-864"><a href="#cb16-864"></a>  <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> dim2}<span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> Inputs<span class="op">.</span><span class="fu">text</span>({</span>
-<span id="cb16-865"><a href="#cb16-865"></a>    <span class="dt">value</span><span class="op">:</span> initial_event_names2[i]<span class="op">,</span></span>
-<span id="cb16-866"><a href="#cb16-866"></a>    <span class="dt">placeholder</span><span class="op">:</span> <span class="vs">`event </span><span class="sc">${</span>i<span class="sc">}</span><span class="vs"> name`</span></span>
-<span id="cb16-867"><a href="#cb16-867"></a>  }))</span>
-<span id="cb16-868"><a href="#cb16-868"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb16" data-startfrom="862" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 861;"><span id="cb16-862"><a href="#cb16-862"></a>viewof event_names2 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">form</span>(</span>
+<span id="cb16-863"><a href="#cb16-863"></a>  <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> dim2}<span class="op">,</span> (_<span class="op">,</span>i) <span class="kw">=&gt;</span> Inputs<span class="op">.</span><span class="fu">text</span>({</span>
+<span id="cb16-864"><a href="#cb16-864"></a>    <span class="dt">value</span><span class="op">:</span> initial_event_names2[i]<span class="op">,</span></span>
+<span id="cb16-865"><a href="#cb16-865"></a>    <span class="dt">placeholder</span><span class="op">:</span> <span class="vs">`event </span><span class="sc">${</span>i<span class="sc">}</span><span class="vs"> name`</span></span>
+<span id="cb16-866"><a href="#cb16-866"></a>  }))</span>
+<span id="cb16-867"><a href="#cb16-867"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div id="ojs-cell-12" data-nodetype="declaration">
 
@@ -1528,7 +1526,7 @@ Norris, Dennis. 2006. <span>“The <span>Bayesian</span> Reader: <span>Explainin
 <div class="columns">
 <div class="column" style="width:30%;">
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb17" data-startfrom="878" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 877;"><span id="cb17-878"><a href="#cb17-878"></a>viewof dim2 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">2</span><span class="op">,</span> <span class="dv">10</span>]<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"dimension"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> initial_dim2})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb17" data-startfrom="877" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 876;"><span id="cb17-877"><a href="#cb17-877"></a>viewof dim2 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">2</span><span class="op">,</span> <span class="dv">10</span>]<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"dimension"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> initial_dim2})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div id="ojs-cell-13" data-nodetype="declaration">
 
@@ -1537,7 +1535,7 @@ Norris, Dennis. 2006. <span>“The <span>Bayesian</span> Reader: <span>Explainin
 </div>
 </div><div class="column" style="width:30%;">
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb18" data-startfrom="883" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 882;"><span id="cb18-883"><a href="#cb18-883"></a>viewof observationName2 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">text</span>({<span class="dt">label</span><span class="op">:</span> <span class="st">"observation"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> initial_observation_name2<span class="op">,</span> <span class="dt">placeholder</span><span class="op">:</span> <span class="st">"observation name"</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb18" data-startfrom="882" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 881;"><span id="cb18-882"><a href="#cb18-882"></a>viewof observationName2 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">text</span>({<span class="dt">label</span><span class="op">:</span> <span class="st">"observation"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> initial_observation_name2<span class="op">,</span> <span class="dt">placeholder</span><span class="op">:</span> <span class="st">"observation name"</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div id="ojs-cell-14" data-nodetype="declaration">
 
@@ -1546,7 +1544,7 @@ Norris, Dennis. 2006. <span>“The <span>Bayesian</span> Reader: <span>Explainin
 </div>
 </div><div class="column" style="width:30%;">
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb19" data-startfrom="888" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 887;"><span id="cb19-888"><a href="#cb19-888"></a>viewof whetherShowValues2 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">toggle</span>({<span class="dt">label</span><span class="op">:</span> <span class="st">"show values"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> <span class="kw">false</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb19" data-startfrom="887" data-source-offset="0"><pre class="sourceCode numberSource js number-lines code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 886;"><span id="cb19-887"><a href="#cb19-887"></a>viewof whetherShowValues2 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">toggle</span>({<span class="dt">label</span><span class="op">:</span> <span class="st">"show values"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> <span class="kw">false</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div id="ojs-cell-15" data-nodetype="declaration">
 

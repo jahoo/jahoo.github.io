@@ -32,7 +32,7 @@
     "href": "index.html#slides",
     "title": "sampling and sentence processing",
     "section": "slides",
-    "text": "slides\n\n\n\n\n\nwhen unpredictable \\ne difficult\n\n\ntesting a belief-divergence theory of processing cost\n\n\n\n\n\nNov 21, 2023\n\n\n12/1/23, 1:07:48 PM\n\n\n\n\n\n\n\nWhen unpredictable \\ne difficult\n\n\nTesting a belief-divergence theory of processing cost\n\n\n\n\n\nNov 21, 2023\n\n\n11/21/23, 4:27:48 PM\n\n\n\n\n\n\n\nTitle\n\n\nSubtitle\n\n\n\n\n\n11/17/23, 10:08:00 AM\n\n\n\n\n\n\n\nIllusions etc\n\n\nconstructions that are unexpectedly easy to process\n\n\n\n\n\n11/10/23, 10:49:25 AM\n\n\n\n\n\n\nNo matching items"
+    "text": "slides\n\n\n\n\n\nwhen unpredictable \\ne difficult\n\n\ntesting a belief-divergence theory of processing cost\n\n\n\n\n\nNov 21, 2023\n\n\n12/1/23, 2:01:10 PM\n\n\n\n\n\n\n\nWhen unpredictable \\ne difficult\n\n\nTesting a belief-divergence theory of processing cost\n\n\n\n\n\nNov 21, 2023\n\n\n11/21/23, 4:27:48 PM\n\n\n\n\n\n\n\nTitle\n\n\nSubtitle\n\n\n\n\n\n11/17/23, 10:08:00 AM\n\n\n\n\n\n\n\nIllusions etc\n\n\nconstructions that are unexpectedly easy to process\n\n\n\n\n\n11/10/23, 10:49:25 AM\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "index.html#other",
@@ -74,7 +74,7 @@
     "href": "slides/2023-12-01-CPL.html#aside-motivation-in-terms-of-ideas-about-algorithms",
     "title": "📓",
     "section": "Aside: Motivation in terms of ideas about algorithms",
-    "text": "Aside: Motivation in terms of ideas about algorithms\n\nHypothesis: cost(w) \\approx {\\colorKL \\text{belief update } {\\colorKL\\KL{\\operatorname{posterior}}{\\operatorname{prior}}} \\text{)}}:\n\nWhy belief update as processing cost? (and why this particular measure of belief update size?)\n\nThis precise quantity shows up in potential algorithmic models\n\nsampling-based models of approximate inference (Hoover et al. 2023)\n\ne.g. importance sampling from prior: \\#\\text{samples}_{\\mathrm{IS}(p\\leftarrow q)} \\approx e^{\\KL p q}\n\n\n\n\n\nmodels of perceptual discrimination (Norris 2006, 2009)\n\nDrift-diffusion / sequential probability ratio test, number of steps scales in this KL.\n\n\n\n\nAFAIK there aren’t candidate algorithms linking processing cost directly to surprisal."
+    "text": "Aside: Motivation in terms of ideas about algorithms\n\nHypothesis: cost(w) \\approx {\\colorKL \\text{belief update } {\\colorKL\\KL{\\operatorname{posterior}}{\\operatorname{prior}}} \\text{)}}:\n\nWhy belief update as processing cost? (and why this particular measure of belief update size?)\n\nThis precise quantity shows up in potential algorithmic models\n\nsampling-based models of approximate inference (Hoover et al. 2023)\n\ne.g. importance sampling from prior: \\#\\text{samples}_{\\mathrm{IS}(p\\leftarrow q)} \\approx e^{\\KL p q}\n\n\n\n\nAFAIK there aren’t candidate algorithms for inference that link processing cost directly to surprisal.\n\nnote however models of perceptual discrimination (Norris 2006, 2009)\n\nDrift-diffusion / sequential probability ratio test, taking steps to reach threshold of certainty, average number of steps scales in surprisal."
   },
   {
     "objectID": "slides/2023-12-01-CPL.html#target-stimuli",
