@@ -1,0 +1,163 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "sampling and sentence processing",
+    "section": "",
+    "text": "\\global\\def\\I#1{\\operatorname{I}(#1)}\n\\global\\def\\H#1{\\operatorname{H}(#1)}\n\\global\\def\\surp#1{\\operatorname{surp}(#1)}\n\\global\\def\\KL#1#2{\\operatorname{D_{KL}}(#1 \\| #2)}\n\\global\\def\\E{\\operatorname*{\\mathbb{E}}}\n\\global\\def\\dee{\\mathop{\\mathrm{d}\\!}}\n\\global\\def\\var#1{\\operatorname{\\mathbb{V}}(#1)}\n\\global\\def\\Var#1#2{\\operatorname{\\mathbb{V}}\\!\\!{}_{#1}(#2)}\n\\global\\def\\indep{\\bot\\!\\!\\!\\bot}"
+  },
+  {
+    "objectID": "index.html#notebooks-on-various-topics",
+    "href": "index.html#notebooks-on-various-topics",
+    "title": "sampling and sentence processing",
+    "section": "./notebooks on various topics",
+    "text": "./notebooks on various topics\n\n\n\n\n\nWhy surprising doesn’t always mean difficult to process\n\n\n\n\n\n\n\n\nDec 1, 2023\n\n\n11/17/23, 10:48:10 AM\n\n\n\n\n\n\n\nLiterature review\n\n\nparsing, sampling, and linguistic phenomena\n\n\n\n\n\n11/16/23, 1:07:43 PM\n\n\n\n\n\n\n\nKL(P||Q) idea\n\n\n\n\n\n\n\n\nDec 1, 2023\n\n\n10/20/23, 12:16:08 PM\n\n\n\n\n\n\n\ninteractive KL and surprisal decomposition\n\n\n\n\n\n\n\n\nDec 1, 2023\n\n\n10/19/23, 3:16:09 PM\n\n\n\n\n\n\n\nDifficulty and surprisal\n\n\n\n\n\n\n\n\nDec 1, 2023\n\n\n10/17/23, 5:23:25 PM\n\n\n\n\n\n\n\nBayesian incremental parsing\n\n\nMaking a formal framework\n\n\n\n\n\n8/26/23, 10:39:52 PM\n\n\n\n\n\n\n\nDensity of transformed random variable\n\n\n\n\n\n\n\n\nNov 2, 2022\n\n\n2/27/23, 9:15:29 PM\n\n\n\n\n\n\n\nRejection sampling\n\n\nThe rejection sampling algorithm, and how guess-and-check is a special case.\n\n\n\n\n\nAug 29, 2022\n\n\n2/14/23, 1:57:33 PM\n\n\n\n\n\n\n\na noisy channel LM\n\n\nstarting a new project\n\n\n\n\n\nInvalid Date\n\n\n11/8/22, 10:43:52 PM\n\n\n\n\n\n\n\nBeams of particles\n\n\nbuilding an SMC parsing model\n\n\n\n\n\n7/14/22, 10:27:20 PM\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "index.html#notes-on-particular-papers",
+    "href": "index.html#notes-on-particular-papers",
+    "title": "sampling and sentence processing",
+    "section": "./notes on particular papers",
+    "text": "./notes on particular papers\n\n\n\n\n\nNotes on SMC for LLMs\n\n\nSequential Monte Carlo Steering of Large Language Models using Probabilistic Programs\n\n\n\n\n\nAug 1, 2023\n\n\n11/9/23, 1:43:36 PM\n\n\n\n\n\n\n\nNotes on Resource-rational surprisal\n\n\nA resource-rational model of human processing of recursive linguistic structure\n\n\n\n\n\nNov 1, 2022\n\n\n1/15/23, 9:44:58 PM\n\n\n\n\n\n\n\nNotes on GCN parsing\n\n\nStrongly Incremental Constituency Parsing with Graph Neural Networks \n\n\n\n\n\nJan 1, 2021\n\n\n5/18/22, 11:55:44 AM\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "index.html#logs",
+    "href": "index.html#logs",
+    "title": "sampling and sentence processing",
+    "section": "logs",
+    "text": "logs\n\n\n\n\n\nKL theory and noisy surprisal\n\n\nBranch off of processing-surprisal.md\n\n\n\n\n\n11/28/23, 9:58:01 AM\n\n\n\n\n\n\n\nPlausibility of sampling nonlinear surprisal project\n\n\nContinuation of eval2/log.md\n\n\n\n\n\nDec 1, 2023\n\n\n5/23/23, 4:02:45 PM\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "index.html#slides",
+    "href": "index.html#slides",
+    "title": "sampling and sentence processing",
+    "section": "slides",
+    "text": "slides\n\n\n\n\n\nwhen unpredictable \\ne difficult\n\n\ntesting a belief-divergence theory of processing cost\n\n\n\n\n\nNov 21, 2023\n\n\n12/1/23, 1:07:48 PM\n\n\n\n\n\n\n\nWhen unpredictable \\ne difficult\n\n\nTesting a belief-divergence theory of processing cost\n\n\n\n\n\nNov 21, 2023\n\n\n11/21/23, 4:27:48 PM\n\n\n\n\n\n\n\nTitle\n\n\nSubtitle\n\n\n\n\n\n11/17/23, 10:08:00 AM\n\n\n\n\n\n\n\nIllusions etc\n\n\nconstructions that are unexpectedly easy to process\n\n\n\n\n\n11/10/23, 10:49:25 AM\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "index.html#other",
+    "href": "index.html#other",
+    "title": "sampling and sentence processing",
+    "section": "other",
+    "text": "other\n\n\n\n\n\nSampling-based processing\n\n\nDissertation proposal\n\n\n\n\n\nJun 27, 2022\n\n\n10/19/23, 8:08:11 PM\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "slides/2023-12-01-CPL.html#motivation",
+    "href": "slides/2023-12-01-CPL.html#motivation",
+    "title": "📓",
+    "section": "Motivation",
+    "text": "Motivation\n\nslides at jahoo.github.io/2023-12\n\nDuring incremental processing, effort is not constant.\n\nGenerally, if input less consistent with what we already believe \\leadsto more effort to process.\n\n\n\n\n\\textit{Yesterday, I had a lasagna for}\n\n\n\n\n\n… \\textit{dinner}\nvery predictable (✅ no update) \\leadsto easy\n… \\textit{breakfast}\nless predictable (⚠️ update!) \\leadsto less easy\n\n\n\n\n\n\nIntuition: changing what you believe takes effort. Can estimate this update-cost with surprisal\n\n\\surp{w} \\coloneqq -\\log p(w\\mid \\mathrm{context})\n\n\n\nBUT, sometimes, a word can be very surprising without resulting in a large change in beliefs.\n\n… \\textit{dimmer}\nhighly unpredictable \\leadsto extremely difficult? no huge belief update, probably just means ‘dinner’!\n\n\n\nProposed explanation: processing cost is update-cost (KL-divergence) prior -&gt; posterior."
+  },
+  {
+    "objectID": "slides/2023-12-01-CPL.html#surprisal-in-a-joint-model",
+    "href": "slides/2023-12-01-CPL.html#surprisal-in-a-joint-model",
+    "title": "📓",
+    "section": "surprisal in a joint model",
+    "text": "surprisal in a joint model\n\n\\operatorname{surprisal}\n= -\\log p(w)\n\\phantom{\n= -\\log \\textstyle\\sum_z p(z)p(w \\mid z)\n= -\\log \\mathop{\\mathbb{E}}_{\\operatorname{prior}} \\operatorname{likelihood}\n}\n\n\nJoint model: variable Z is the structure / intended message, which gives rise to observation W\n\nZ \\to W\n\nwith message z having \\operatorname{likelihood}=p(w \\mid z), and prior p(z)\n\\implies to get surprisal, marginalize joint over all possible z (the negative log marginal likelihood):\n\n\n\\operatorname{surprisal}\n= -\\log p(w )\n% \\phantom{\n= -\\log \\textstyle\\sum_z p(z  )p(w \\mid z)\n= -\\log \\mathop{\\mathbb{E}}_{\\operatorname{prior}} \\operatorname{likelihood}\n% }\n\n\n\n\nAn observation will have large surprisal if it is unlikely under hypotheses given weight in the prior.\n\nunexpected continuations :e.g. \\textit{breakfast} (large belief update)\nalso typos: e.g., \\textit{dimmer} note: surprisal large but not infinite, even if it was certainly not intended\n… belief update is small, how so?\n\n\n\n\n\nI’m eliding an extra variable for context \\mathrm{c}, \n\\operatorname{surprisal}\n= -\\log p(w \\mid \\mathrm{c} )\n% \\phantom{\n= -\\log \\textstyle\\sum_z p(z \\mid \\mathrm{c} )p(w \\mid z, \\mathrm{c})\n= -\\log \\mathop{\\mathbb{E}}_{\\operatorname{prior}} \\operatorname{likelihood}\n% }"
+  },
+  {
+    "objectID": "slides/2023-12-01-CPL.html#sec-demo",
+    "href": "slides/2023-12-01-CPL.html#sec-demo",
+    "title": "📓",
+    "section": "",
+    "text": "Central intuition: Typos are unpredictable without causing huge belief updates\n\nexpectation through noise model (inside listener’s head) Model of the comprehender:\n\nknows observed word might not be intended (has noise/error model) prob of observing w given intended z\n\nwalk through interpretation with dimmer\n\nnoise model doesn’t predict infinite surprisal for typo, but still predicts it is high, compared ‘breakfast’ which causes larger shift in beliefs\n\nreveal breakdown\ngo back to intuition\n\n\n\nslides at jahoo.github.io/2023-12\n\n\nimport { \n    plot_bayes, plot_infometrics_bars, plot_surprisal_partition, plot_infometrics_partition\n    } with {locald as d, maxBits as maxUnits} from '@postylem/kl-and-surprisal@5002'\nplot_bayes({\n    showPosterior: whetherShowPosterior,\n    width: whetherShowPosterior ?  1800 : 1220, \n    height: 350, marginLeft:100, marginBottom: 50,\n    showValues: whetherShowValues,\n    eventNames: event_names, \n    fontSize:18, style: {fontSize: 14},\n    title: whetherShowBreakdown ? md`## KL = surprisal – R` : md`## surprisal in a joint model`,\n    subtitle: whetherShowPosterior ? md`Bayesian update for observation ${tex`w=\\textit{${observationName}}`}` : md`prior beliefs distribution, and likelihood function for observation ${tex`w=\\textit{${observationName}}`}`\n})\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nplot_infometrics_partition({\n    partition: whetherShowBreakdown,\n    width: 1800, marginLeft:100, //marginBottom: 0,\n    fontSize:18, style: {fontSize: 14},\n    subtitle: whetherShowBreakdown ? md`surprisal of ${tex`w=\\textit{${observationName}}`}, decomposed` : md`surprisal of ${tex`w=\\textit{${observationName}}`}`\n})\n\n\n\n\n\n\n\n\n\n\\operatorname{surprisal} = -\\log p(w) =  -\\log \\textstyle\\sum_z p(z)p(w|z) = -\\log \\mathop{\\mathbb{E}}_{\\operatorname{prior}} \\operatorname{likelihood}  \n\n\n\n{\\colorKL\\operatorname{KL}(\\operatorname{posterior}\\|\\operatorname{prior})}\n= \\overbrace{-\\log \\mathop{\\mathbb{E}}_{\\operatorname{prior}} \\operatorname{likelihood} }%^{\\operatorname{surprisal}}\n- {\\colorR\\underbrace{\\mathop{\\mathbb{E}}_{\\operatorname{posterior}}[-\\log \\operatorname{likelihood}]}_{\\operatorname{R}}}\n\n\n\n\n\n▽…△\n\n\n\n\n\n\n\n\nviewof whetherShowPosterior = Inputs.toggle({label: \"posterior\", value: false})\nviewof whetherShowBreakdown = Inputs.toggle({label: \"break down surprisal\", value: false})\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nviewof dim = Inputs.range([2, 10], {step: 1, label: \"dimension\", value: initial_dim})\nviewof whetherShowValues = Inputs.toggle({label: \"show values\", value: false})\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nscale_likelihood = 1\ninput_likelihood_scaled = input_likelihood\nimport {\n    normalize, get_posterior, get_infometrics, options, probInputTransform\n    } from '@postylem/kl-and-surprisal'\n\nlocald = {return{ \n    dim:dim,\n    input_prior:input_prior,\n    prior:normalize(input_prior),\n    input_likelihood:input_likelihood,\n    scale_likelihood:scale_likelihood,\n    likelihood:input_likelihood_scaled,\n    posterior: get_posterior(input_prior, input_likelihood_scaled),\n    info:get_infometrics(input_prior,input_likelihood_scaled)\n}};\n\nmaxBits = 10\ninitial_input_prior =      [.3,.2,.05,.01,.000001,.01]\ninitial_input_likelihood = [.05,.00001,.00001,.0001,1,.1]\ninitial_dim = initial_input_prior.length\ninitial_event_names = [\n    \"                    dinner\",\n    \"                    lunch\",\n    \"                    breakfast\",\n    \"                    ...\",\n    \"                    dimmer\",\n    \"                    ...\"\n];\ninitial_observation_name = \"dimmer\"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nunnormalized prior\n\nviewof input_prior = Inputs.form(\n  Array.from({length: dim}, (_,i)=&gt;Inputs.range(\n    [options.probMin, 1], {\n      step: options.probStep, value: initial_input_prior[i],\n      transform: probInputTransform}\n  ))\n)\n\n\n\n\n\n\n\nlikelihood\n\nviewof input_likelihood = Inputs.form(\n  Array.from({length: dim}, (_,i)=&gt;Inputs.range(\n    [options.probMin, 1], {\n      step: options.probStep, value: initial_input_likelihood[i],\n      transform: probInputTransform}\n  ))\n)\nviewof observationName = Inputs.text({label: \"observation\", value: initial_observation_name, placeholder: \"observation name\"})\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nhypotheses\n\nviewof event_names = Inputs.form(\n  Array.from({length: dim}, (_,i) =&gt; Inputs.text({\n    value: initial_event_names[i],\n    placeholder: `event ${i} name`\n  }))\n)"
+  },
+  {
+    "objectID": "slides/2023-12-01-CPL.html#proposing-kl-theory",
+    "href": "slides/2023-12-01-CPL.html#proposing-kl-theory",
+    "title": "📓",
+    "section": "Proposing “KL theory”",
+    "text": "Proposing “KL theory”\n\nHypothesis: cost(w) \\approx {\\colorKL \\text{belief update (KL divergence)}}:\n\n\n{\\colorKL\\KL{\\operatorname{posterior}}{\\operatorname{prior}}}\n= %\\overbrace{-\\log \\mathop{\\mathbb{E}}_{\\operatorname{prior}} \\operatorname{likelihood} }^%\n{\\surp{w}}\n- {\\colorR\\underbrace{\\mathop{\\mathbb{E}}_{\\operatorname{posterior}}[-\\log \\operatorname{likelihood}]}_{\\operatorname{R}(w)}}\n\nHow to think of these terms?\n\nIn the general case of a nondeterministic relationship between intended meanings and observed words:\n\n\n\n\n\n\n\n\\surp{w} the quantity of information in w.\n{\\colorR R(w)} the quantity of information that is cancelled (doesn’t contribute to belief update)\n“reconstruction information”\n\nLarge R \\implies w is substantially less difficult than predicted by surprisal.\n\n\n\n\nWith a deterministic relationship between intended meanings and observed words (Levy 2005, 2008):\n\nR = 0 always, and KL = surprisal.\n\n\nOn last point:\n\nThis is a ‘pointwise’ definition, so anywhere where the relationship is deterministic, “KL theory” doesn’t differ from surprisal theory. (That is, when the relation between intended meanings and ovservable words is a function, or equiv, when the likelihood is binary)\n\nFinding examples where R is non-negligible == what I’m interested in!"
+  },
+  {
+    "objectID": "slides/2023-12-01-CPL.html#aside-motivation-in-terms-of-ideas-about-algorithms",
+    "href": "slides/2023-12-01-CPL.html#aside-motivation-in-terms-of-ideas-about-algorithms",
+    "title": "📓",
+    "section": "Aside: Motivation in terms of ideas about algorithms",
+    "text": "Aside: Motivation in terms of ideas about algorithms\n\nHypothesis: cost(w) \\approx {\\colorKL \\text{belief update } {\\colorKL\\KL{\\operatorname{posterior}}{\\operatorname{prior}}} \\text{)}}:\n\nWhy belief update as processing cost? (and why this particular measure of belief update size?)\n\nThis precise quantity shows up in potential algorithmic models\n\nsampling-based models of approximate inference (Hoover et al. 2023)\n\ne.g. importance sampling from prior: \\#\\text{samples}_{\\mathrm{IS}(p\\leftarrow q)} \\approx e^{\\KL p q}\n\n\n\n\n\nmodels of perceptual discrimination (Norris 2006, 2009)\n\nDrift-diffusion / sequential probability ratio test, number of steps scales in this KL.\n\n\n\n\nAFAIK there aren’t candidate algorithms linking processing cost directly to surprisal."
+  },
+  {
+    "objectID": "slides/2023-12-01-CPL.html#target-stimuli",
+    "href": "slides/2023-12-01-CPL.html#target-stimuli",
+    "title": "📓",
+    "section": "Target stimuli",
+    "text": "Target stimuli\nTypos in predictable contexts:\n\n\\textit{The children's eyes lit up when they saw the ice cream} \\dots\n\n\n\n\n\n\n\n✅ …\\textit{cone} – expected word \\leadsto low cost\n⚠️ …\\textit{come} – unexpected! change beliefs! \\leadsto high cost\n❓…\\textit{cowe} – even less predicted but don’t learn much — probably means “cone”…\nobservation is not interpreted literally, AND doesn’t resolve ambiguity\n\\implies beliefs don’t change much \\leadsto low cost\n\n\n\n\n\n\n⚠️❓"
+  },
+  {
+    "objectID": "slides/2023-12-01-CPL.html#target-stimuli-1",
+    "href": "slides/2023-12-01-CPL.html#target-stimuli-1",
+    "title": "📓",
+    "section": "Target stimuli",
+    "text": "Target stimuli\n\n\\textit{The children's eyes lit up when they saw the ice cream} \\dots\n\nCompare effort on typo (❓\\textit{cowe}) to unexpected, similar word (⚠️\\textit{come}).\nPrediction is opposite from surprisal theory:\n\n\n\n\n\n\n\n\n\n\n\n\n⚠️\n\n❓\n\n\n\n\nsurprisal:\n\\operatorname{effort}(\\textit{come})\n{}&lt;{}\n\\operatorname{effort}(\\textit{cowe})\n\n\nKL:\n\\operatorname{effort}(\\textit{come})\n{}&gt;{}\n\\operatorname{effort}(\\textit{cowe})\n\n\n\n\nCaveats\n\nif the typo (❓) is not easily correctable, it will cause larger shift in beliefs \\implies difference in predictions less clear.\nif the unexpected word (⚠️) is not itself high surprisal, difference in predictions less clear"
+  },
+  {
+    "objectID": "slides/2023-12-01-CPL.html#target-stimuli-2",
+    "href": "slides/2023-12-01-CPL.html#target-stimuli-2",
+    "title": "📓",
+    "section": "Target stimuli",
+    "text": "Target stimuli\nGenerated 40 example items context, with three conditions per item: ✅, ⚠️, ❓ (like \\textit{come}, \\textit{cone}, \\textit{cowe}):\n\nin context there exist two possible words (✅, ⚠️), similar [one-letter substitution]\ngenerate third word (❓), confusable equally with either [substitution of visually similar letter]\n\n\n\n\n\nSketch examples\n\n\n\n\n\n\n\n\n\n\ncontext [with typo]\n✅\n⚠️\n\n\n\n\nThe children’s eyes lit up when they saw the ice cream [cowe] since it looked so tasty.\ncone\ncome\n\n\nAfter a full game of table tennis, there are usually several lost [bolls] under the table.\nballs\nbills\n\n\nThe woodworker carefully examined the texture of his [bcard] to determine its quality.\nboard\nbeard\n\n\nThe malfunction in the production line was traced back to a seized gear, hindered by a single rusty [bclt] in the …\nbolt\nbelt\n\n\nIn the workshop, the instructor demonstrated how to manipulate metal to create a strong [bcnd] between the pieces.\nbond\nbend\n\n\nThe sergeant plays in a military band, where he is the most talented musician on the [basc] without a doubt.\nbase\nbass\n\n\nTo stay warm in the cold winter months, she never left home without bringing her [coaj] with her outside.\ncoat\ncoal\n\n\nThey took their paddles from the shed, and spent their summer afternoon on the lake, leisurely [bcating] on the water.\nboating\nbeating\n\n\nThe meaning of the speech changed dramatically when viewed in [contezt] with the others.\ncontext\ncontest\n\n\nMost lifestyle and nutrition coaches agree you should avoid excessive [fots] as a part of your daily routine.\nfats\nfits\n\n\nAt Jeremiah’s 100th birthday party, everyone admired the ornate decorations on his birthday [caxe] when they c….\ncake\ncane\n\n\nThe CEO offered investors partial ownership of the company, but also had a significant [shane] of her own.\nshare\nshame\n\n\n\n\\qquad\\vdots"
+  },
+  {
+    "objectID": "slides/2023-12-01-CPL.html#sanity-check",
+    "href": "slides/2023-12-01-CPL.html#sanity-check",
+    "title": "📓",
+    "section": "Sanity check",
+    "text": "Sanity check\nFor each \\texttt{context}, for each w in {✅, ⚠️, ❓}:\n\nget \\mathrm{KL}(w),\\mathrm{surprisal}(w) \\longleftarrow requires estimate prior, and likelihood fn given w\n\n\n\nprior p(Z=\\cdot \\mid \\texttt{context}) using LM — used GPT2\npr( • | The children's eyes lit up when they saw the ice cream\")\n\n            prob\ncone          0.17338\ntruck         0.04660\ncones         0.04183\nand           0.03700\non            0.02206\n...\nlikelihood p(w \\mid Z=\\cdot, \\texttt{context}) — used exponentiated weighted Levenshtein distance (OCR-based)\nwlev(\"cone\", \"cone\") = 0.00\nwlev(\"come\", \"cone\") = 0.94\nwlev(\"cowe\", \"cone\") = 1.08\nwlev(\"coqe\", \"cone\") = 1.39\np(w \\mid Z=\\cdot, \\texttt{context}) = e^{-\\gamma \\texttt{wlev}(\\cdot, w)}"
+  },
+  {
+    "objectID": "slides/2023-12-01-CPL.html#sanity-check-results",
+    "href": "slides/2023-12-01-CPL.html#sanity-check-results",
+    "title": "📓",
+    "section": "Sanity check results",
+    "text": "Sanity check results\n\npredictionslinkeddetails"
+  },
+  {
+    "objectID": "slides/2023-12-01-CPL.html#pilot",
+    "href": "slides/2023-12-01-CPL.html#pilot",
+    "title": "📓",
+    "section": "Pilot",
+    "text": "Pilot\nSelf-paced reading time pilot study (on PCIbex):\n\nreading reading times in critical words (three different groups random by item)\ncontext + each of {✅ or ⚠️ or ❓}\ncomprehension question after each sentence\n\n50 participants (Prolific). 40 items each. Avg time 12 minutes to complete study."
+  },
+  {
+    "objectID": "slides/2023-12-01-CPL.html#pilot-results",
+    "href": "slides/2023-12-01-CPL.html#pilot-results",
+    "title": "📓",
+    "section": "Pilot results",
+    "text": "Pilot results\n\nOverallbreak downdetails\n\n\n\nPreliminary results:\n\n\nObservations:\nOn average, each typo took longer to process than either of the corresponding non-typos.\nSimilar to surprisal prediction, (or not-easily-corrected typo in KL)\nLarger surprisal items barely slower than smaller! (but significant, at 0.05 level, paired t-test)\n\n\n\n\nBreaking down results by answer:\nQ: are the typos easier when they are interpreted as having the less surprising meaning?\n\n\n\n\nYES.\nTypos take shorter when interpreted as the more expected meaning. (significant, paired t-test, at 0.05 level)\n\n\n\n\n\n\n\n\n\nBreaking down by answer to the comrenension question: do the typos take shorter when they are interpreted as being the less surprising meaning? YES.\nselect only items where a majority of answers were ‘as expected’ in both of the non typo conditions (that is, implied_target_type == target_type)"
+  },
+  {
+    "objectID": "slides/2023-12-01-CPL.html#takeaways",
+    "href": "slides/2023-12-01-CPL.html#takeaways",
+    "title": "📓",
+    "section": "Takeaways",
+    "text": "Takeaways\nRecall intuition:\n\ndespite being unpredictable (some) typos are not harder than (some) unexpected words.\n\n\nEither not correct, or these first pilot stimuli didn’t get at this effectively.\nIf we want to capture this, need to design better stimuli that\n\n\ntypo (❓) is more natural (use naturally occuring typos? or, transposition of characters at least)\nunexpected word (⚠️) is much more extremely unexpected\nnot necessarily similar to expected word (remove confound, at expense of symmetry)\nuse longer words overall, where reading times are less likely to be at floor\n\n\n\n\n\nsuggestions welcome!"
+  },
+  {
+    "objectID": "slides/2023-12-01-CPL.html#one-more-thing-pilot-2-underway",
+    "href": "slides/2023-12-01-CPL.html#one-more-thing-pilot-2-underway",
+    "title": "📓",
+    "section": "One more thing: Pilot 2 (underway)",
+    "text": "One more thing: Pilot 2 (underway)\nAs is, the setup is: Given some predictable word (✅\\textit{cone}), compare effort on typo (❓\\textit{cowe}) to a similar, unexpected word (⚠️\\textit{come}):\n\nsurprisal predicts it is harder. KL predicts easier.\n\nBut we’re not just predicting that typos are always easy.\n\n\nAlso need typos that aren’t similar to expected word:\n\n✅\n⚠️_simil\n❓_simil\n\n\n\n⚠️_dissim\n❓_dissim\n\n\n\n\\textit{The children's eyes lit up when they saw the ice cream} \\dots"
+  },
+  {
+    "objectID": "slides/2023-12-01-CPL.html#thanks",
+    "href": "slides/2023-12-01-CPL.html#thanks",
+    "title": "📓",
+    "section": "THANKS!",
+    "text": "THANKS!\nReferences\n\n\nHoover, Jacob Louis, Morgan Sonderegger, Steven T. Piantadosi, and Timothy J. O’Donnell. 2023. “The Plausibility of Sampling as an Algorithmic Theory of Sentence Processing.” Open Mind: Discoveries in Cognitive Science 7 (July): 350–91. https://doi.org/10.1162/opmi_a_00086.\n\n\nLevy, Roger. 2005. “Probabilistic Models of Word Order and Syntactic Discontinuity.” PhD thesis, Stanford University. https://www.proquest.com/dissertations-theses/probabilistic-models-word-order-syntactic/docview/305432573/se-2?accountid=12339.\n\n\n———. 2008. “Expectation-Based Syntactic Comprehension.” Cognition 106 (3): 1126–77. https://doi.org/10.1016/j.cognition.2007.05.006.\n\n\nNorris, Dennis. 2006. “The Bayesian Reader: Explaining Word Recognition as an Optimal Bayesian Decision Process.” Psychological Review 113 (2): 327–57. https://doi.org/10.1037/0033-295X.113.2.327.\n\n\n———. 2009. “Putting It All Together: A Unified Account of Word Recognition and Reaction-Time Distributions.” Psychological Review 116 (1): 207–19. https://doi.org/10.1037/a0014259."
+  },
+  {
+    "objectID": "slides/2023-12-01-CPL.html#update-size-surprisal---r",
+    "href": "slides/2023-12-01-CPL.html#update-size-surprisal---r",
+    "title": "📓",
+    "section": "update size = surprisal - R",
+    "text": "update size = surprisal - R\n\nrepeat demo slide\n\n\nplot_bayes({\n    pr:locald2.prior, lik:locald2.likelihood,\n    showPosterior: true,\n    width: 1800, \n    height: 350, marginLeft:100, marginBottom: 50,\n    showValues: whetherShowValues2,\n    eventNames: event_names2, \n    fontSize:18, style: {fontSize: 14},\n    // title: md`### surprisal:  KL + R`,\n    subtitle: true ? md`Bayesian update for observation ${tex`w=\\textit{${observationName2}}`}` : md`beliefs and likelihood for observation ${tex`w=\\textit{${observationName}}`}`\n})\n\n\n\n\n\n\n\nplot_infometrics_partition({\n    infometrics:locald2.info,\n    partition: true,\n    width: 1800, marginLeft:100, //marginBottom: 0,\n    fontSize:18, style: {fontSize: 14},\n    subtitle: md`surprisal of ${tex`w=\\textit{${observationName2}}`}, decomposed`\n})\n\n\n\n\n\n\n\n\n\n\n{\\colorKL\\operatorname{KL}(\\operatorname{posterior}\\|\\operatorname{prior})}\n= \\underbrace{-\\log \\mathop{\\mathbb{E}}_{\\operatorname{prior}} \\operatorname{likelihood}}_{\\mathrm{surprisal}}\n- {\\colorR\\underbrace{\\mathop{\\mathbb{E}}_{\\operatorname{posterior}}[-\\log \\operatorname{likelihood}]}_{\\operatorname{R}(w)}}\n\n\n\n\n\nscale_likelihood2 = 1\ninput_likelihood_scaled2 = input_likelihood2\n\nlocald2 = {return{ \n    dim:dim2,\n    input_prior:input_prior2,\n    prior:normalize(input_prior2),\n    input_likelihood:input_likelihood2,\n    scale_likelihood:scale_likelihood2,\n    likelihood:input_likelihood_scaled2,\n    posterior: get_posterior(input_prior2, input_likelihood_scaled2),\n    info:get_infometrics(input_prior2,input_likelihood_scaled2)\n}};\n\nmaxBits2 = 6\ninitial_input_prior2 =      [.3,.01,.03,.02,.015,.012]\ninitial_input_likelihood2 = [.02,.25,.00001,.00001,.00001,.014]\ninitial_dim2 = initial_input_prior2.length\ninitial_event_names2 = [\n    \"                    ✅\",\n    \"                    ⚠️\",\n    \"                    ...\",\n    \"                    ...\",\n    \"                    ...\",\n    \"                    ...\"\n];\ninitial_observation_name2 = \"❓\"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nunnormalized prior\n\nviewof input_prior2 = Inputs.form(\n  Array.from({length: dim2}, (_,i)=&gt;Inputs.range(\n    [options.probMin, 1], {\n      step: options.probStep, value: initial_input_prior2[i],\n      transform: probInputTransform}\n  ))\n)\n\n\n\n\n\n\n\nlikelihood\n\nviewof input_likelihood2 = Inputs.form(\n  Array.from({length: dim2}, (_,i)=&gt;Inputs.range(\n    [options.probMin, 1], {\n      step: options.probStep, value: initial_input_likelihood2[i],\n      transform: probInputTransform}\n  ))\n)\n\n\n\n\n\n\n\nhypotheses\n\nviewof event_names2 = Inputs.form(\n  Array.from({length: dim2}, (_,i) =&gt; Inputs.text({\n    value: initial_event_names2[i],\n    placeholder: `event ${i} name`\n  }))\n)\n\n\n\n\n\n\n\n\n\n\n\n\nviewof dim2 = Inputs.range([2, 10], {step: 1, label: \"dimension\", value: initial_dim2})\n\n\n\n\n\n\n\n\nviewof observationName2 = Inputs.text({label: \"observation\", value: initial_observation_name2, placeholder: \"observation name\"})\n\n\n\n\n\n\n\n\nviewof whetherShowValues2 = Inputs.toggle({label: \"show values\", value: false})"
+  },
+  {
+    "objectID": "slides/2023-12-01-CPL.html#kl-theory-derivation",
+    "href": "slides/2023-12-01-CPL.html#kl-theory-derivation",
+    "title": "📓",
+    "section": "KL theory derivation",
+    "text": "KL theory derivation\n\n\\begin{aligned}\n\\operatorname{KL}(p_{Z\\mid w}\\|p_{Z})\n&& = && \\mathop{\\mathbb{E}}_{p_{Z\\mid w}}[\\log \\frac{p(z\\mid w)}{p(z)}]\n&& = && \\mathop{\\mathbb{E}}_{p_{Z\\mid w}}[\\log \\frac{p(w\\mid z)}{p(w)}]\\\\\n&& = && -\\log p(w)\n&& - && \\mathop{\\mathbb{E}}_{p_{Z\\mid w}}[-\\log p(w\\mid z)]\\\\\n&& = && -\\log \\mathop{\\mathbb{E}}_{p_{Z}}[p(w\\mid z)]\n&& - && \\mathop{\\mathbb{E}}_{p_{Z\\mid w}}[-\\log p(w\\mid z)]\\\\\n\\operatorname{KL}(\\operatorname{posterior}\\|\\operatorname{prior})\n&& = && \\underbrace{-\\log \\mathop{\\mathbb{E}}_{\\operatorname{prior}} \\operatorname{lik} }_{\\operatorname{surprisal}}\n&& - &&\n\\underbrace{\\mathop{\\mathbb{E}}_{\\operatorname{posterior}}[-\\log \\operatorname{lik}]}_{\\operatorname{R}}\n\\end{aligned}"
+  }
+]
