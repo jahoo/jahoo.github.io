@@ -1,0 +1,29 @@
+[
+  {
+    "listing": "/index.html",
+    "items": [
+      "/notebooks/simulation_biased_coin.html",
+      "/notebooks/kl-surp-R-study.html",
+      "/notebooks/lit_review.html",
+      "/notebooks/kl-pq-study.html",
+      "/notebooks/interactive-kl-and-surprisal.html",
+      "/notebooks/difficulty-surprisal-summary.html",
+      "/notebooks/bayesian_parsing.html",
+      "/notebooks/transform-pdf.html",
+      "/notebooks/rejection-sampling-expo.html",
+      "/notebooks/noisy-channel-lm.html",
+      "/notebooks/particles.html",
+      "/notes/lew.a.2023LLaMPPL-notes.html",
+      "/notes/hahn.m.2022PNAS-notes.html",
+      "/notes/yang.k.2020-notes.html",
+      "/logs/2-beyond-surprisal.html",
+      "/logs/1-plausibility-sampling.html",
+      "/slides/KL-demo.html",
+      "/slides/2023-12-01-CPL.html",
+      "/slides/2023-11-21-MCQLL.html",
+      "/slides/2023-11-17.html",
+      "/slides/2023-08-03.html",
+      "/diss-proposal/diss-proposal.html"
+    ]
+  }
+]
