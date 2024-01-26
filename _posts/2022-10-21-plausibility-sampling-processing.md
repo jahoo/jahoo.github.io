@@ -4,6 +4,7 @@ title: Sampling for processing
 published: true 
 tags:
     - note
+    - paper
 ---
 
 I just posted a preprint titled [_The Plausibility of Sampling as an Algorithmic Theory of Sentence Processing_](https://osf.io/qjnpv). 
@@ -14,7 +15,8 @@ In this work, we focus on a class of algorithms whose runtime does naturally sca
 
 In the second part of this paper, we conduct an empirical study of the relationship between surprisal and reading time, using a collection of modern language models to estimate surprisal, and fitting Generalized Additive Models of the relationship. We find that with better language models, reading time increases superlinearly in surprisal, and also that variance increases. These results are consistent with the predictions of sampling-based algorithms.
 
----
+-----
+</br>
 
 _2023-06 update_
 : [Here](https://doi.org/10.1162/opmi_a_00086) is a link to the published version in the journal _Open Mind_ (2023) 7: 350--391.
