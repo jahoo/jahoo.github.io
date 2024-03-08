@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-99.9.9">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Jacob Louis Hoover">
+
+<title>📓 – Difficulty and surprisal</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": true,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">📓</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul>
+  <li><a href="#difficulty-as-kl" id="toc-difficulty-as-kl" class="nav-link active" data-scroll-target="#difficulty-as-kl">Difficulty as KL</a>
+  <ul class="collapse">
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
+  <li><a href="#decomposing-kl-between-prior-and-posterior" id="toc-decomposing-kl-between-prior-and-posterior" class="nav-link" data-scroll-target="#decomposing-kl-between-prior-and-posterior">Decomposing KL between prior and posterior</a></li>
+  <li><a href="#decomposing-kl-between-proposal-and-posterior" id="toc-decomposing-kl-between-proposal-and-posterior" class="nav-link" data-scroll-target="#decomposing-kl-between-proposal-and-posterior">Decomposing KL between <em>proposal</em> and posterior</a></li>
+  <li><a href="#incremental-version" id="toc-incremental-version" class="nav-link" data-scroll-target="#incremental-version">Incremental version</a></li>
+  </ul></li>
+  <li><a href="#kl-theory-vs-lc-surprisal-theory" id="toc-kl-theory-vs-lc-surprisal-theory" class="nav-link" data-scroll-target="#kl-theory-vs-lc-surprisal-theory">KL theory vs (LC-)surprisal theory</a></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">Discussion</a>
+  <ul class="collapse">
+  <li><a href="#requirements-of-a-parametric-relationship" id="toc-requirements-of-a-parametric-relationship" class="nav-link" data-scroll-target="#requirements-of-a-parametric-relationship">Requirements of a parametric relationship</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content">
+<div class="hidden">
+<p><span class="math display">
+\global\def\I#1{\operatorname{I}(#1)}
+\global\def\H#1{\operatorname{H}(#1)}
+\global\def\surp#1{\operatorname{surp}(#1)}
+\global\def\DIV#1#2#3#4{\operatorname{D_{#1}}(#3#2#4)}
+\global\def\KL#1#2{\DIV{KL}\|{#1}{#2}}
+\global\def\E{\operatorname*{\mathbb{E}}}
+\global\def\dee{\mathop{\mathrm{d}\!}}
+\global\def\var#1{\operatorname{\mathbb{V}}(#1)}
+\global\def\Var#1#2{\operatorname{\mathbb{V}}\!\!{}_{#1}(#2)}
+\global\def\indep{\bot\!\!\!\bot}
+\global\def\uu{\breve u}
+</span></p>
+</div>
+<div class="hidden">
+<p><span class="math display">
+% Moved below, for vscode
+</span></p>
+</div>
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Difficulty and surprisal</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Jacob Louis Hoover </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><span class="math display">
+% included just for quarto VSCode to display nicely
+\global\def\uu{\breve u}
+\global\def\R{\operatorname{R}_{\pZu}(\uu)}
+\global\def\Rs#1{\operatorname{R}_{#1}(\uu)}
+\global\def\cPOST{\color{0A00A0}}
+\global\def\cPRIO{\color{008008}}
+\global\def\cPROP{\color{A00A00}}
+\global\def\pZu{{\cPOST p_{Z\mid\uu}}}
+\global\def\pzu{{\cPOST p(z\mid \uu)}}
+\global\def\qZu{{\cPROP q_{Z; \uu}}}
+\global\def\qzu{{\cPROP q(z; \uu)}}
+\global\def\Dq{D_{\pZu}^{\qZu \leftarrow  p_Z}(\uu)}
+\global\def\surp#1{\operatorname{surp}(#1)}
+\global\def\priorZ{{\cPRIO p_{Z\mid \mathbf\uu_{&lt; i}}}}
+\global\def\posteriorZ{{\cPOST p_{Z\mid \mathbf\uu_{\le i}}}}
+\global\def\proposalZ{{\cPROP q_{Z; \mathbf\uu_{\le i}}}}
+\global\def\priorz{{\cPRIO p(z\mid \mathbf\uu_{&lt; i})}}
+\global\def\posteriorz{{\cPOST p(z\mid \mathbf\uu_{\le i})}}
+\global\def\proposalz{{\cPROP q(z; \mathbf\uu_{\le i})}}
+\global\def\Dqi{D_{ {\cPOST p} }^{{\cPROP q} \leftarrow  {\cPRIO p} }(\uu)}
+\global\def\Ri{\Rs{{\cPOST p}}}
+%
+\global\def\posteriorU{{{p_\mathrm{LM}}(\mathbf U_{&gt;i}\mid \mathbf\uu_{\le i})}}
+\global\def\proposalU{{{q_\mathrm{LM}}(\mathbf U_{&gt;i}\mid \mathbf\uu_{\le i})}}
+\global\def\posterioru{{{p_\mathrm{LM}}(\mathbf u_{&gt;i}\mid \mathbf\uu_{\le i})}}
+\global\def\proposalu{{{q_\mathrm{LM}}(\mathbf u_{&gt;i}\mid \mathbf\uu_{\le i})}}
+\global\def\prioru{p_\mathrm{LM}(\mathbf u_{&gt;i}\mid \mathbf\uu_{&lt; i})}
+%
+\global\def\posteriorN{{{p_\mathrm{LM}}(\mathbf U_{i+1}\mid \mathbf\uu_{\le i})}}
+\global\def\posteriorn{{{p_\mathrm{LM}}(u_{i+1}\mid \mathbf\uu_{\le i})}}
+\global\def\dpdq{\frac{\dee p}{\dee q}}
+</span></p>
+<section id="difficulty-as-kl" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="difficulty-as-kl">Difficulty as KL</h2>
+<p>Say we want to approximate some target distribution <span class="math inline">p</span> using samples from some other distribution <span class="math inline">q</span>.</p>
+<p>If we use samples from <span class="math inline">q</span> to approximate <span class="math inline">p</span>, using importance sampling, the number of samples necessary and sufficient for for an accurate approximation is exponential in the relative entropy:</p>
+<p><span class="math display">
+\#\text{samples}_{\mathrm{IS}(p\leftarrow q)} \approx e^{\KL p q}
+</span></p>
+<p>For proof, see <span class="citation" data-cites="chatterjee.s:2018">Chatterjee &amp; Diaconis (<a href="#ref-chatterjee.s:2018" role="doc-biblioref">2018</a>)</span>, who show that taking <span class="math inline">e^{\KL p q}</span> samples from <span class="math inline">q</span> is a necessary and sufficient condition for the absolute value of the error to be close to zero with high probability.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Conditions for Chatterjee result
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Technically, this result only obtains when the log density of <span class="math inline">p</span> wrt <span class="math inline">q</span> is likely to be concentrated around its expected value.</p>
+<p>That is, that <span class="math inline">\log \dpdq(Z)</span> (where <span class="math inline">Z\sim p</span>) is concentrated around <span class="math inline">\E_p{\log \dpdq(Z)} = \KL p q</span>. Or equivalently, that <span class="math inline">\dpdq(Z')\log \dpdq(Z')</span> (where <span class="math inline">Z'\sim q</span>) is concentrated around <span class="math inline">\E_q{\dpdq(Z')\log \dpdq(Z')} = \KL p q</span>. Roughly, this requirement is that the expected variance in importance weights is small.</p>
+<p>More precisely, their result says that in order to bound the <span class="math inline">L^1</span>-error of the estimate close to zero with high probability, a sample size of</p>
+<ul>
+<li><span class="math inline">e^{\KL p q + \mathcal{O}(s)}</span> is sufficient</li>
+<li><span class="math inline">e^{\KL p q - \mathcal{O}(s)}</span> is necessary</li>
+</ul>
+<p>where <span class="math inline">s</span> is the typical order of fluctuations in <span class="math inline">\log \dpdq(Z)</span> around its expected value, <span class="math inline">\KL p q</span>.</p>
+</div>
+</div>
+<p>So, for a sampling-based mechanism we can define the update cost as this exponentiatied relative entropy:</p>
+<p><span class="math display">
+\mathrm{cost} \coloneqq e^{\KL p q}
+</span></p>
+<p>also note, many empirical studies of human reading time as a function of surprisal log transform the response variable, which in fact implies an exponential relationship like this. this is acknowledged, if only rarely <span class="citation" data-cites="oh.b:2024arxiv">(for example, in <a href="#ref-oh.b:2024arxiv" role="doc-biblioref">Oh et al., 2024</a>)</span></p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Or… choose your fave divergence:
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<p>The number of samples necessary for IS can also be related to other divergences (other than KL). See <span class="citation" data-cites="agapiou.s:2017">Agapiou et al. (<a href="#ref-agapiou.s:2017" role="doc-biblioref">2017</a>)</span> discuss the <span class="math inline">\chi^2</span>-divergence, and also <span class="citation" data-cites="sanz-alonso.d:2018">Sanz-Alonso (<a href="#ref-sanz-alonso.d:2018" role="doc-biblioref">2018</a>)</span> (who also dicsuss Hellinger and TV).</p>
+<ul>
+<li><span class="math inline">\DIV{\chi^2}\| p q = \E_q{((\dpdq)^2)}-1 = \E_p{(\dpdq)}-1</span></li>
+<li><span class="math inline">\KL p q = \E_q{(\dpdq\log\dpdq)} =\E_p{(\log\dpdq)}</span></li>
+</ul>
+<p>Note it’s clear by Jensen’s that <span class="math inline">e^{\mathrm{KL}}\le \mathrm{D}_{\chi^2} + 1</span>.</p>
+<p>The result discussed in <span class="citation" data-cites="agapiou.s:2017">Agapiou et al. (<a href="#ref-agapiou.s:2017" role="doc-biblioref">2017</a>)</span> is:</p>
+<ul>
+<li>They define
+<ul>
+<li>unnormalized density <span class="math inline">g</span> as <span class="math inline">\frac1{\E_q{g}}g(\cdot)\coloneqq\dpdq(\cdot)</span>, and</li>
+<li>denote with <span class="math inline">\rho</span> the second moment of this RN-derivative: <span class="math inline">\rho\coloneqq \E_q(\dpdq^2) = \frac{\E_q{g^2}}{(\E_q{g})^2}</span>
+<ul>
+<li><span class="math inline">\rho \ge 1</span> since <span class="math inline">(\E_q{g})^2\le\E_q{\mathbf1^2}\E_q{g^2}= \E_q{g^2}</span> by Cauchy-Schwarz.</li>
+</ul></li>
+</ul></li>
+<li>Their main result is that <strong>both bias and MSE of IS are</strong> <span class="math inline">\approx\rho/N</span></li>
+<li>This gives, for some fixed accuracy, the sufficient sample size in terms of KL and chi-squared divergences as:
+<ul>
+<li>growing linearly in chi-squared, since <span class="math inline">\DIV{\chi^2}\| p q = \E_q{((\dpdq)^2)}-1 = \rho-1</span></li>
+<li>exponentially in KL, since <span class="math inline">\KL p q= \E_q{(\dpdq\log\dpdq)} =\E_p{(\log\dpdq)}\le\log\E_p{(\dpdq)} = \log \E_q{((\dpdq)^2)}=\log \rho</span>, by Jensen’s ineq. so <span class="math inline">e^{\KL p q} \le \rho</span></li>
+</ul></li>
+</ul>
+<p>There are many references for the relationships between KL and <span class="math inline">\chi^2</span> and other probability metrics/divergences <span class="citation" data-cites="gibbs.a:2002 sanz-alonso.d:2018">(see <a href="#ref-gibbs.a:2002" role="doc-biblioref">Gibbs &amp; Su, 2002</a>; <a href="#ref-sanz-alonso.d:2018" role="doc-biblioref">Sanz-Alonso, 2018</a>)</span>.</p>
+<p><span class="math inline">\implies</span> For us, the point is: we could alternatively say <span class="math inline">\mathrm{cost} \coloneqq \DIV{\chi^2}\| p q</span>, and it would amount to something roughly similar as <span class="math inline">\mathrm{cost} \coloneqq e^{\KL p q}</span>.</p>
+</div>
+</div>
+</div>
+<section id="setup" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="setup">Setup</h3>
+<ul>
+<li><p>Let <span class="math inline">p_{Z,U}</span> be a hypothetical joint distribution for <span class="math inline">Z</span> a latent random variable, and <span class="math inline">U</span> an observable random variable. We don’t assume we have any access to this distribution, but we’ll make use of the following derived distributions:</p>
+<ul>
+<li>the marginal <span class="math inline">p_Z</span> (the <strong>prior</strong> distribution on <span class="math inline">Z</span>)</li>
+<li>the conditional <span class="math inline">\pZu</span>, for any fixed outcome <span class="math inline">\uu</span> of <span class="math inline">U</span> (the <strong>posterior</strong> on <span class="math inline">Z</span>).<br>
+Assume <span class="math inline">\pZu\ll p_Z</span>, that is <span class="math inline">\pZu=0</span> anywhere <span class="math inline">p_Z=0</span>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></li>
+</ul></li>
+<li><p>Let <strong>the proposal</strong> <span class="math inline">\qZu</span> be some other distribution over <span class="math inline">Z</span>, which may depend on the outcome <span class="math inline">\uu</span>. Again assume <span class="math inline">\pZu\ll\qZu</span>.</p></li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;A sufficient but not quite necessary condition for IS weights to be well defined. Also a natural property in a Bayesian setting where the posterior is a reweighted version of the prior, so can’t put mass outside the support of the prior.</p></div></div><p>I’m writing a breve on the outcome variable just to denote that it is fixed.</p>
+</section>
+<section id="decomposing-kl-between-prior-and-posterior" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="decomposing-kl-between-prior-and-posterior">Decomposing KL between prior and posterior</h3>
+<p>The relative entropy of prior <span class="math inline">p_Z</span> with respect to posterior <span class="math inline">\pZu</span> can be written as:</p>
+<p><span class="math display">
+\begin{aligned}
+\KL{\pZu}{p_Z}
+    &amp;= \E_{\pZu}{ \log\frac{\pzu}{p(z)} }
+     = \E_{\pZu}{ \log\frac{p(z,\uu)}{p(z)p(\uu)} }\\
+    &amp;= \E_{\pZu}{ \log\frac{p(\uu\mid z)}{p(\uu)} }\\
+    &amp;= \log \frac1{p(\uu)}
+     + \E_{\pZu}{\log p(\uu\mid z)} \\
+    &amp;= \underbrace{-\log p(\uu)}_{\surp{\uu}}
+     - \underbrace{\E_{\pZu}{-\log p(\uu\mid z)}}_{\coloneqq\ \R}
+\end{aligned}
+</span></p>
+<p>So the relative entropy between prior and posterior consists of</p>
+<ul>
+<li>the <em>surprisal</em>, <span class="math inline">\surp{\uu}\ge0</span>,</li>
+<li>minus a term which we denote <span class="math inline">\R</span>, which I’ll call ‘reconstruction information’. It is the posterior-expected conditional surprisal… the number of bits by which surprisal of the observation exceeds the size of the belief update it causes. We can think of <span class="math inline">\R</span> measuring how many bits of surprisal are irrelevant to belief-updating.
+<ul>
+<li>Note that <span class="math inline">0\le\R\le \surp{\uu}</span></li>
+</ul></li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>We could define a more general <span class="math inline">\Rs{q}</span> generally as</p>
+<div id="def-R" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 1</strong></span> <span id="eq-def-R"><span class="math display">
+\Rs{q} \coloneqq \E_{z\sim q}{\log \frac1{p(\uu|z,\breve c)}}
+\tag{1}</span></span></p>
+<p>where <span class="math inline">q</span> is any distribution over the latent variable <span class="math inline">Z</span> (such as a proposal, or variational approximation to the posterior), and <span class="math inline">\uu</span> is a fixed observed outcome of <span class="math inline">U</span>. Both the probability and the proposal may optionally depend on context <span class="math inline">\breve c</span>.</p>
+</div>
+<ul>
+<li><span class="math inline">\mathrm{R}_{\qZu}(\uu)</span> (for <span class="math inline">\qZu</span> an approximation to the posterior <span class="math inline">\pZu</span>) is sometimes called the <em>(negative) reconstruction error</em> in variational inference literature <span class="citation" data-cites="liang.d:2018 dehaene.d:2019">(<a href="#ref-dehaene.d:2019" role="doc-biblioref">Dehaene et al., 2019</a>; <a href="#ref-liang.d:2018" role="doc-biblioref">Liang et al., 2018</a>)</span> or original autoencoders literature <span class="citation" data-cites="vincent.p:2010">(such as <a href="#ref-vincent.p:2010" role="doc-biblioref">Vincent et al., 2010</a>)</span>.</li>
+<li>in a bounded-rational decision-making framework <span class="citation" data-cites="ortega.p:2013 genewein.t:2015">(<a href="#ref-genewein.t:2015" role="doc-biblioref">Genewein et al., 2015</a>; as in <a href="#ref-ortega.p:2013" role="doc-biblioref">Ortega &amp; Braun, 2013</a>)</span>, the negative of this quantity is the <em>expected utility</em>.</li>
+</ul>
+</div></div><p>Note <span class="math inline">\R=0</span> is a necessary and sufficient condition for the relative entropy between prior and posterior equalling surprisal:</p>
+<p><span class="math display">
+\KL{\pZu}{p_Z}=-\log p(\uu) \quad\iff\quad \R=0
+</span></p>
+<p><span class="math inline">U</span> being a deterministic function of <span class="math inline">Z</span> is a sufficient condition for this to hold <span class="citation" data-cites="levy.r:2008">(this is the assumption made in the proofs of the equivalence of KL and surprisal, such as in <a href="#ref-levy.r:2008" role="doc-biblioref">Levy, 2008</a>)</span>.</p>
+</section>
+<section id="decomposing-kl-between-proposal-and-posterior" class="level3">
+<h3 class="anchored" data-anchor-id="decomposing-kl-between-proposal-and-posterior">Decomposing KL between <em>proposal</em> and posterior</h3>
+<p>If instead of sampling from the prior, we were sampling from some proposal distribution <em>proposal</em> <span class="math inline">\qZu</span>, then the we can break down that divergence with respect to posterior <span class="math inline">\pZu</span>, to get an additional term:</p>
+<p><span class="math display">
+\begin{aligned}
+\KL{\pZu}{\qZu}
+    &amp;= \E_{\pZu}\log\frac{\pzu}{\qzu}\\
+    &amp;= \E_{\pZu}\log\frac{\pzu}{p(z)}\frac{p(z)}{\qzu}\\
+    &amp;= \KL{\pZu}{p_Z}
+        + \E_{\pZu}\log\frac{p(z)}{\qzu}\\
+    &amp;= {\surp{\uu}} - {\R}
+       - \underbrace{\E_{\pZu}\log\frac{\qzu}{p(z)}}_{\coloneqq\ \Dq}\\
+\end{aligned}
+</span></p>
+<p>where the term <span class="math inline">\Dq</span>, quantifies how much better <span class="math inline">\qZu</span> is than <span class="math inline">p_Z</span> for estimating <span class="math inline">\pZu</span>. More precisely, as a difference in KLs, it represents the <em>reduction</em> in excess surprise resulting from using <span class="math inline">\qZu</span> instead of <span class="math inline">p_Z</span>, when the actual distribution is <span class="math inline">\pZu</span>:</p>
+<p><span class="math display">
+\Dq = \KL{\pZu}{p_Z} - \KL{\pZu}{\qZu}
+</span></p>
+<p>Equivalently it can be viewed as measuring the reduction in <em>cross-entropy</em>: <span class="math display">
+\Dq = \E_{\pZu}\log\frac{1}{p(z)}- \E_{\pZu}\log\frac{1}{\qzu}=\H{\pZu,p_Z}-\H{\pZu,\qZu}
+</span></p>
+<p><strong>Interpretation</strong>:</p>
+<ul>
+<li><span class="math inline">\Dq &gt; 0</span> if <span class="math inline">\qZu</span> is better than <span class="math inline">p_Z</span> for estimating <span class="math inline">\pZu</span> and</li>
+<li><span class="math inline">\Dq &lt; 0</span> if <span class="math inline">\qZu</span> is worse than <span class="math inline">p_Z</span> for estimating <span class="math inline">\pZu</span>, and</li>
+<li><span class="math inline">\Dq = 0</span> if <span class="math inline">\qZu = p_Z</span>.</li>
+</ul>
+<p><strong>Bounds</strong>: <span class="math inline">-\infty\le\Dq\le\KL{\pZu}{p_Z}={\surp{\uu}} - {\R}</span>.</p>
+<div class="quarto-figure quarto-figure-left">
+<figure class="figure">
+<p><img src="img/KL.png" class="img-fluid figure-img" style="width:40.0%"></p>
+<figcaption>Just to get a visual picture of the boundaries, here are level surfaces of <a href="https://www.geogebra.org/3d/asbesfpq"><span class="math inline">D_\mathrm{KL} = S - (R + D)</span></a></figcaption>
+</figure>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+General identity for change in KLs
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>This could be seen as a result of the general identity</p>
+<p><span class="math display">
+\KL P Q = \KL P R - \E_P\log\frac{\dee Q}{\dee R}
+</span></p>
+<p>for any measures <span class="math inline">P, Q, R</span>, on the same space with <span class="math inline">P\ll R</span> and <span class="math inline">P\ll Q</span>.</p>
+</div>
+</div>
+</div>
+<p>This could alternatively be written as</p>
+<p><span class="math display">
+\begin{aligned}
+\KL{\pZu}{\qZu}
+    &amp;= \surp{\uu}
+    - \left(
+        \E_{\pZu}{\log\frac1{p(\uu\mid z)}}
+        + \E_{\pZu}{\log\frac{\qzu}{p(z)}}
+    \right)\\
+    &amp;= \surp{\uu}
+    + \underbrace{\E_{\pZu}{\log\frac{p(z,\uu)}{\qzu}}}_{-\R-\Dq}
+\end{aligned}
+</span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Comparison with VAE and ‘Bayesian Surprise’
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The expectation here looks a lot like <span class="math inline">\operatorname{ELBO}(\uu)\coloneqq\E_{\qZu}\left[\log\frac{p(z, \uu)}{\qzu}\right]</span> in variational inference (aka negative variational free energy), but they differ in what the expectation is taken with respect to.</p>
+<p>For comparison, using the same notation, the usual derivation in VAE looks like this. See, e.g., <span class="citation" data-cites="kingma.d:2017 dayan.p:1995">(<a href="#ref-kingma.d:2017" role="doc-biblioref">Kingma, 2017</a>; though this math goes back before VAEs at least to <a href="#ref-dayan.p:1995" role="doc-biblioref">Dayan et al., 1995</a>, eq 2.5)</span>:</p>
+<p><span class="math display">
+\begin{aligned}
+\log p(\uu)
+    &amp;= \KL{\qZu}{\pZu}
+    + \overbrace{\E_{\qZu}{\log\frac{p(z, \uu)}{\qzu}}}^{\operatorname{ELBO}(\uu)}\\
+\end{aligned}
+</span></p>
+<p>So, we get a very similar equation to the above for a KL in the opposite direction:</p>
+<p><span class="math display">
+\begin{aligned}
+\KL{\qZu}{\pZu}
+    &amp;= -\surp{\uu}
+    - \E_{\qZu}{\log\frac{p(z, \uu)}{\qzu}}
+\end{aligned}
+</span></p>
+<p>or</p>
+<p><span class="math display">
+\begin{aligned}
+\KL{\qZu}{\pZu}
+    &amp;= - \surp{\uu}  
+    - \E_{\qZu}{\log\frac{p(\uu\mid z)p(z)}{\qzu}}\\
+    &amp;= -\surp{\uu}
+    - \E_{\qZu}{\log p(\uu\mid z)}
+    + \KL{\qZu}{p_Z}\\
+    &amp;= - \surp{\uu}
+    + \underbrace{\E_{\qZu}{-\log p(\uu\mid z)}}_{\text{neg. reconstr. error }\operatorname{R}_{\qZu}(\uu)}
+    + \underbrace{\KL{\qZu}{p_Z}}_{\text{regularizer}}\\
+\end{aligned}
+</span></p>
+<p>In this setup, <span class="math inline">\qZu</span> is chosen in order to maximize the ELBO. The ELBO consists of two components, the reconstruction error (which is a negative-log-likelihood term, to be maximized) minus the KL between <span class="math inline">\qZu</span> and the prior (which can be seen as a regularization term, to be minimized).</p>
+<p>These equations look very similar, but it is very different from the case we are interested in, where expectations are taken with respect to the true unknown posterior.</p>
+<hr>
+<p>While this direction of KL (with expectation over <span class="math inline">\qZu</span>) may be the “backward” direction from the point of view of the connection with sampling, it might be important to understand whether/how it relates to processing effort in some way, since when <span class="math inline">\qZu=p_Z</span>, this is precisely the divergence used as “Bayesian Surprise” <span class="citation" data-cites="baldi.p:2002 baldi.p:2010">(<a href="#ref-baldi.p:2002" role="doc-biblioref">Baldi, 2002</a>; <a href="#ref-baldi.p:2010" role="doc-biblioref">Baldi &amp; Itti, 2010</a>)</span> (see lit review). Might be that this was chosen purely for computational convenience, but even so, worth understanding what it implies.</p>
+<p>Depending on which direction of KL we choose to use we have two ways of expressing the surprisal:</p>
+<p><span class="math display">
+\begin{aligned}
+\surp{\uu}
+    &amp;= \overbrace{\E_{\qZu}{\log\frac{\qzu}{p(\uu\mid z)p(z)}}}^{-\operatorname{ELBO}(\uu)}
+    - \KL{\qZu}{\pZu}\\
+\surp{\uu}
+    &amp;= \underbrace{\E_{\pZu}{\log \frac{\qzu}{p(\uu\mid z)p(z)}}}_{\R+\Dq}
+    + \KL{\pZu}{\qZu}
+\end{aligned}
+</span></p>
+<p>or, put another way, with R, D, and the ELBO we can express the sum of the KL and reverse-KL <span class="math inline">\DIV{J},pq\coloneqq \KL pq  + \KL qp = \E_q{(\dpdq-1)\log\dpdq} = \DIV{\lambda t.(t-1)\log t}\|pq</span> (this symmetric <span class="math inline">f</span>-divergence is actually the one originally proposed by K&amp;L, and earlier defined by Jeffreys):</p>
+<p><span class="math display">
+\overbrace{\E_{\qZu}{\log\frac{\qzu}{p(\uu\mid z)p(z)}}}^{-\operatorname{ELBO}(\uu)}
+- \overbrace{\E_{\pZu}{\log \frac{\qzu}{p(\uu\mid z)p(z)}}}^{\R+\Dq}\ge0
+= {\DIV{J},{\pZu}{\qZu}}
+</span></p>
+<p>This is a bit pointless in the abstract, since,<span class="math inline">\Dq</span> can be positive or negative, hence no bounds are implied. Yet, when we just consider the case where <span class="math inline">\qZu=p_Z</span>, then <span class="math inline">D = 0</span>, and we have</p>
+<p><span class="math display">
+\overbrace{\E_{p_Z}{\log\frac{1}{p(\uu\mid z)}}}^{-\operatorname{ELBO}(\uu)=\operatorname{R}_{p_Z}(\uu)}
+- \overbrace{\E_{\pZu}{\log \frac{1}{p(\uu\mid z)}}}^{\R}
+= \DIV{J},{\pZu}{p_Z}\ge0
+</span></p>
+<p>where all the terms are nonnegative, so then we can say the magnitude of the ELBO (or, free energy, I guess) is in fact a upper bound on the magnitude of surprisal, which is an upper bound on R.</p>
+<p><span class="math display">
+0\le\R\le\surp{\uu}\le-\operatorname{ELBO}(\uu)=\operatorname{R}_{p_Z}(\uu)
+</span></p>
+<p>Is it useful to say that surprisal is bounded between R below and prior-reconstruction error/free energy above?</p>
+</div>
+</div>
+</div>
+</section>
+<section id="incremental-version" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="incremental-version">Incremental version</h3>
+<p>Above we’re assuming all the probabilities depend on a (notationally suppressed) ‘context’ random var. Now let’s write out the same derivation but with the observation being explicitly the <span class="math inline">i</span>th item in a sequence <span class="math inline">\uu_1, \uu_2, \ldots</span>. So the ‘context’ is <span class="math inline">\mathbf\uu_{&lt;i}</span>, and <span class="math inline">\mathbf\uu_{\le i}</span> the context with the current observation.</p>
+<ul>
+<li>prior <span class="math inline">p_Z</span> above becomes <span class="math inline">\priorZ</span></li>
+<li>posterior <span class="math inline">\pZu</span> above becomes <span class="math inline">\posteriorZ</span></li>
+<li>proposal <span class="math inline">\qZu</span> above becomes <span class="math inline">\proposalZ</span></li>
+</ul>
+<p>Decomposing the KL into two pieces (Leaving R+D as a single term), we can write the KL as:<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;where the first step is since</p>
+<p><span class="math display">
+\begin{aligned}
+&amp;\log \frac{\posteriorZ(z)}{\priorZ(z)}\\
+&amp;= \log \frac{p({z\mid \mathbf\uu_{&lt; i},\uu_i})}{p({z\mid \mathbf\uu_{&lt; i}})}\\
+&amp;= \log \frac{p({z,\uu_i\mid \mathbf\uu_{&lt; i}})}{p({z\mid \mathbf\uu_{&lt; i}})p({\uu_i\mid \mathbf\uu_{&lt; i}})}\\
+&amp;= \log \frac{p({\uu_i\mid z, \mathbf\uu_{&lt; i}})}{p({\uu_i\mid \mathbf\uu_{&lt; i}})}\\
+&amp;= \surp{\uu_i}+\log{p({\uu_i\mid z, \mathbf\uu_{&lt; i}})}
+\end{aligned}
+</span></p>
+<!-- (by $\frac{P(A|BC)}{P(A| C)}  =\frac{P(AB|C)}{P(B|C)P(A|C)}  =\frac{P(B|AC)}{P(B| C)}$) -->
+<p>and the second is since<br>
+<span class="math display">
+\begin{aligned}
+&amp;=  \log\frac1{p({\uu_i\mid z, \mathbf\uu_{&lt; i}})}\frac{\proposalZ}{\priorZ}\\
+&amp;= \log\frac{q({z; \mathbf\uu_{\le i}})}{p({\uu_i\mid z, \mathbf\uu_{&lt; i}})p({z\mid \mathbf\uu_{&lt; i}})}
+\end{aligned}
+</span></p></div></div><p><span class="math display">
+\begin{aligned}
+\KL{\posteriorZ}{\proposalZ}
+&amp;= \E_{\posteriorZ}{\log\frac{\posteriorZ}{\proposalZ}}
+= \E_{\posteriorZ}{\log\frac{\posteriorZ}{\priorZ}\frac{\priorZ}{\proposalZ}}\\
+&amp;= \surp{\uu_i}-\E_{\posteriorZ}{\log\frac1{p({\uu_i\mid z, \mathbf\uu_{&lt; i}})}\frac{\priorZ}{\proposalZ}}\\
+&amp;= \surp{\uu_i}-\E_{\posteriorZ}{\log\frac{q({z; \mathbf\uu_{\le i}})}{p({z,\uu_i\mid \mathbf\uu_{&lt; i}})}}
+\end{aligned}
+</span></p>
+<p>Or, breaking the KL into three pieces</p>
+<p><span class="math display">
+\begin{aligned}
+\KL{\posteriorZ}{\proposalZ}
+    &amp;= \E_{\posteriorZ}{\log\frac{\posteriorZ}{\proposalZ}}
+    = \E_{\posteriorZ}{\log\frac{\posteriorZ}{\priorZ}\frac{\priorZ}{\proposalZ}}\\
+    &amp;= \KL{\posteriorZ}{\priorZ}
+        - \E_{\posteriorZ}{\log\frac{\proposalZ}{\priorZ}}\\
+    &amp;= \underbrace{\log \frac1{p(\uu_i\mid\mathbf\uu_{&lt; i})}}_{\surp{\uu}}
+        - \underbrace{\E_{\posteriorZ}{\log\frac1{p(\uu_i\mid {\cPOST z},\mathbf\uu_{&lt; i})}}}_{\Ri}
+        - \underbrace{\E_{\posteriorZ}{\log\frac{\proposalZ}{\priorZ}}}_{\Dqi}
+\end{aligned}
+</span></p>
+<p>We can also write out the surprisal term as the joint marginalized over the prior meanings:</p>
+<p><span class="math display">
+\begin{aligned}
+\KL{\posteriorZ}{\proposalZ}
+    &amp;= \underbrace{
+        \log \frac1{\E_{\priorZ} {p(\uu_i\mid {\cPRIO z},\mathbf\uu_{&lt; i})}}
+    }_{\surp{\uu}}
+        - \underbrace{
+            \E_{\posteriorZ}{\log\frac1{p(\uu_i\mid {\cPOST z},\mathbf\uu_{&lt; i})}}
+        }_{\Ri}
+        - \underbrace{
+            \E_{\posteriorZ}{\log\frac{\proposalZ}{\priorZ}}
+        }_{\Dqi}
+\end{aligned}
+</span></p>
+<p>Let’s look at the first two terms above (the q=prior situation), and let’s break down the posterior into prior and likelihood (Bayes), recalling that the negative log marginal likelihood is the surprisal:<br>
+<span class="math display">
+\posteriorz =
+\frac{\priorz p(\uu_i\mid z,\mathbf\uu_{&lt; i})}
+{p(\uu_i\mid\mathbf\uu_{&lt;i})}
+= e^{\surp{\uu_i}}
+      \priorz p(\uu_i\mid z,\mathbf\uu_{&lt; i})
+</span></p>
+<p>So,</p>
+<p><span class="math display">
+\begin{align}
+\KL{\posteriorZ}{\priorZ}
+&amp;= \overbrace{
+\log \frac1{p(\uu_i\mid \mathbf\uu_{&lt;i})}
+}^{\surp{\uu_i}}
+- \overbrace{
+\E_{\posteriorZ}{\log\frac1{p(\uu_i\mid {\cPOST z},\mathbf\uu_{&lt; i})}}
+}^{\Ri}
+\\
+&amp;=  \log \frac1{\E_{\priorZ} {p(\uu_i\mid {\cPRIO z},\mathbf\uu_{&lt; i})}}\\
+&amp;\quad - e^{\surp{\uu_i}}\E_{\priorZ}p(\uu_i\mid {\cPRIO z},\mathbf\uu_{&lt; i})\log\frac1{p(\uu_i\mid {\cPOST z},\mathbf\uu_{&lt; i})}
+\end{align}
+</span></p>
+<p>This is complicated looking, but one thing it means is if the prior is a one-hot/Dirac delta entirely concentrated on some value <span class="math inline">{\cPRIO z'}</span>, then the KL is zero.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
+<div class="no-row-height column-margin column-container"><div id="fn3"><p><sup>3</sup>&nbsp;Note in this degenerate case surprisal = negative log likelihood of <span class="math inline">\cPRIO z'</span>.</p></div></div><p><span class="math display">
+\KL{\posteriorZ}{{\cPRIO \delta_{z'}}} =
+\log \frac1{ p(\uu_i\mid z',\mathbf\uu_{&lt; i})}
+- \log\frac1{p(\uu_i\mid z',\mathbf\uu_{&lt; i})} = 0
+</span></p>
+<section id="what-does-it-mean" class="level4">
+<h4 class="anchored" data-anchor-id="what-does-it-mean">What does it mean?</h4>
+<p><span class="math inline">\KL{\posteriorZ}{\proposalZ}</span> is the <strong>magnitude of the belief update</strong> from the proposal <span class="math inline">\proposalZ</span> to the posterior <span class="math inline">\posteriorZ</span>. Importance sampling is ideally exponential in this quantity (if such an algorithm exists). This quantity can be broken down into three pieces as <strong>KL = S – R – D</strong>.</p>
+<ul>
+<li><strong>S</strong> (nonnegative) is the surprisal of <span class="math inline">\uu_i</span>, how unexpected it is (under the true prior)</li>
+<li><strong>R</strong> (nonnegative) measures the nondeterminism in converting from meanings in the posterior to <span class="math inline">\uu_i</span>. If, under the posterior, <span class="math inline">\uu_i</span> is a certainty, then R is zero.</li>
+<li><strong>D</strong> (positive or negative) measures how helpful it is to use the proposal <span class="math inline">\proposalZ</span> rather than the prior <span class="math inline">\priorZ</span> for this particular <span class="math inline">\uu_i</span> and context. Positive if helpful, zero if not at all helpful, negative if misleading.</li>
+</ul>
+</section>
+<section id="relationship-to-lossy-context-surprisal" class="level4">
+<h4 class="anchored" data-anchor-id="relationship-to-lossy-context-surprisal">Relationship to lossy-context surprisal</h4>
+<p>By Jensen’s inequality (note <span class="math inline">-\log(\cdot)</span> is concave up):</p>
+<p><span class="math display">
+\surp{\uu}
+%= -\log p(\uu_i\mid\mathbf\uu_{&lt; i})
+= -\log \E_{\priorZ}{p(\uu_i\mid {\cPRIO z},\mathbf\uu_{&lt; i})}
+\le \E_{\priorZ}{ -\log p(\uu_i\mid {\cPRIO z},\mathbf\uu_{&lt; i})}\\
+%= \E_{\priorZ}{ -\log p(\uu_i\mid {\cPRIO z})}\quad\text{if }U_i\indep U_{\le i} \mid {\cPRIO Z}\\
+</span></p>
+<p>If we interpret the latent variable <span class="math inline">\cPRIO z \sim \priorZ</span> as a lossy/noised version of the context, and make an independence assumption, <span class="math inline">U_i\indep U_{\le i} \mid {\cPRIO Z}</span>, then surprisal is upperbounded by lossy-context surprisal <span class="math inline">\E_{\priorZ}{ -\log p(\uu_i\mid {\cPRIO z})}</span>, as defined in <span class="citation" data-cites="futrell.r:2020">Futrell et al. (<a href="#ref-futrell.r:2020" role="doc-biblioref">2020</a>)</span>. <!-- ^[See below: @sec-lossy-context-surprisal.] --></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Possible independence assumptions
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><p>For the S term: we might want to add an assumption that <span class="math inline">U_i\indep U_{\le i} \mid Z_{i-1}</span> (motivated by a model wherein <span class="math inline">\cPOST z \sim \posteriorZ</span> contains all the useful information from <span class="math inline">\uu_{\le i}</span>)</p>
+<p>This assumption would yield that <span class="math inline">p(\uu_i\mid\mathbf\uu_{&lt; i}) = \E_{\priorZ} p(\uu_i\mid {\cPRIO z})</span>, so:</p>
+<p><span class="math display">
+\surp{\uu_i} = \log \frac1{\E_{\priorZ}{p(\uu_i\mid {\cPRIO z})}}
+</span></p></li>
+<li><p>For the R term: If we assume that <span class="math inline">U_i\indep U_{\le i} \mid Z_i</span> (this might be somewhat less obviously reasonable to assume), then we get something similar for R:</p>
+<p><span class="math display">
+R_{\posteriorZ}(\uu) = \E_{\posteriorZ}{\log\frac1{p(\uu_i\mid {\cPOST z})}}
+</span></p></li>
+</ul>
+</div>
+</div>
+</div>
+<!-- 
+### Estimation
+
+Estimate surprisal with a causal LM (like GPT-2/3) simply as
+
+$$
+\operatorname{surp}(\uu_i) 
+\approx \operatorname{surp}_{p_\mathrm{LM}}(\uu_i) 
+:= -\log p_\mathrm{LM}(\uu_i\mid \mathbf \uu_{<i})
+$$
+
+To estimate the other term(s), we need something else.
+
+#### Letting $Z$ be string continuations
+
+If we use $\mathbf U_{>i}$ as $Z$
+
+Then, we can estimate $S-R$ as
+
+$$
+\begin{aligned}
+\KL{\posteriorZ}{\priorZ}
+=&\E_\posteriorZ\log\frac{\posteriorZ}{\priorZ}\\
+\approx&\E_\posteriorU\log\frac
+    {p_\mathrm{LM}(\uu_i \mid \mathbf\uu_{< i}, \mathbf u_{>i})}
+    {p_\mathrm{LM}(\uu_i \mid \mathbf\uu_{< i})}\\
+&=\operatorname{surp}_{p_\mathrm{LM}}(\uu_i)
+- 
+\underbrace{
+    \E_\posteriorU\log\frac1{p_\mathrm{LM}(\uu_i \mid \mathbf\uu_{< i}, \mathbf u_{>i})}
+}_R
+    \\
+\end{aligned}
+$$
+
+This is, the causal-LM-surprisal of the word (given previous context), minus the expected masked-LM-surprisal of the word (given previous context and following completion) expectation over predicted completions (by the causal LM).
+
+Let $r_{\mathbf\uu_{\le i}}(\mathbf u_{>i}):=\operatorname{surp_{masked}}(\uu_i\mid\mathbf \uu_{<i},\mathbf u_{>i}) \overset{\mathrm{MLM}}\approx \log\frac1{p_\mathrm{MLM}(\uu_i \mid \mathbf\uu_{< i}, \mathbf u_{>i})}$, (this is precisely the loss that the masked-LM objective minimizes) and sample continuations from causal LM, $p_{\mathrm{LM}}$, for a Monte-Carlo approximation of $R$:
+
+$$
+\begin{aligned}
+R(\uu_i) &= \E_\posterioru{r_{\mathbf\uu_{\le i}}(\mathbf u_{>i})} \\
+&\overset{MC}{\approx}
+\frac1K\sum_{k=1}^{K}{r_{\mathbf\uu_{\le i}}(\mathbf u_{>i}^{(k)})} , \qquad\mathbf u_{>i}^{(k)}\sim p_\mathrm{LM}(\cdot|\mathbf \uu_{\le i})
+\end{aligned}
+$$
+
+Requires $\mathrm{LM}$ to be trained for
+
+-   $p_{\mathrm{LM}}(\mathbf U_{>j}\mid \mathbf \uu_{<j})$ --- causal/prefix-LM task (GPT-like)
+-   $p_{\mathrm{LM}}(U_j\mid \mathbf \uu_{<j},{\color{gray}u_j=\mathtt{[MASK]},}\mathbf u_{>j})$ --- masked/infilling LM (BERT-like)
+
+An appropriate choice would be UL2 [@tay.y:2023UL2].[^5]
+
+[^5]: See [notes: LM objectives](lit_review.qmd#the-differing-lm-objectives).
+
+A priori predictions (can use surp=LCsurp here):
+
+-   **same as surprisal theory**: R negligible (so KL $\approx$ surp) when the current word is (generally nearly) deterministically predictable from continuations when masked.
+-   **easier than surprisal theory** R large (so KL small) when current word is hard to predict from continuations when masked. Maybe: resumptive pronouns. Typos (added/repeated uninformative word). Agreement mismatched things.
+
+::: {.callout-note collapse="true"}
+#### Not useful for S-R-D
+
+We could also try to estimate the full $S-R-D$ as
+
+$$
+\begin{aligned}
+\KL{\posteriorZ}{\proposalZ}
+=&\E_\posteriorZ\log\frac{\posteriorZ}{\proposalZ}\\
+\approx&\E_\posteriorU\log\frac{\posterioru}{\proposalu}\\
+&=
+\E_\posterioru\sum_{j>i}
+\left[
+    \operatorname{surp}_{q_\mathrm{LM}}(u_j)-\operatorname{surp}_{p_\mathrm{LM}}(u_j)
+\right]
+\end{aligned}
+$$
+
+Then we this just becomes a comparison of surprisal under the LMs for p and for q. \[If we choose $q_\mathrm{LM}=p_\mathrm{LM}$, then this just trivially cancels so KL = 0, of course\].
+
+For the expectation we could estimate with Monte-Carlo: sample $K$ times from from $p_\mathrm{LM}$ and average.
+
+However, this isn't relevant, since we *don't* have plausible models for p and q to compare.
+
+------------------------------------------------------------------------
+
+The calculation for the R+D term is as follows:
+
+$$
+\begin{aligned}
+R(\uu_i)+D(\uu_i)
+&=
+\E_\posterioru
+    \log
+     \frac{q(\mathbf u_{>i};\mathbf \uu_{\le i})}
+          {p(\mathbf u_{>i},\uu_i|\mathbf \uu_{<i})}\\
+&\approx
+\E_\posterioru
+    \log
+     \frac{\proposalu}
+          {p_\mathrm{LM}(\mathbf u_{\ge i} \mid \mathbf \uu_{<i})}\\
+&\phantom{\approx}= 
+\E_\posterioru
+    \log
+     \frac{\prod_{j>i}q_\mathrm{LM}(u_j\mid \mathbf u_{<j})}
+          {p_\mathrm{LM}(\uu_i\mid \mathbf \uu_{<i})
+           \prod_{j>i}p_\mathrm{LM}(u_j\mid \mathbf \uu_{<i})}\\
+&\phantom{\approx}= 
+\operatorname{surp}_{p_\mathrm{LM}}(\uu_i)
++ \E_\posterioru{
+    \sum_{j>i}\left( \operatorname{surp}_{p_\mathrm{LM}}(u_j)
+                   - \operatorname{surp}_{q_\mathrm{LM}}(u_j) \right)}
+\end{aligned}
+$$
+:::
+
+#### Letting $Z$ be just the next (sub)word?
+
+If we use $U_{i+1}$ as $Z$
+
+Then, we can estimate $S-R$ as
+
+$$
+\begin{aligned}
+\KL\posteriorZ\priorZ
+% =&\E_\posteriorZ\log\frac{\posteriorZ}{\priorZ}\\
+\approx&
+% \E_\posteriorN\log\frac
+%     {p_\mathrm{LM}(\uu_i \mid \mathbf\uu_{< i}, u_{i+1})}
+%     {p_\mathrm{LM}(\uu_i \mid \mathbf\uu_{< i})}\\
+% &=
+\operatorname{surp}_{p_\mathrm{LM}}(\uu_i)
+-
+\underbrace{
+    \E_{u_{i+1}\sim\posteriorN}{
+        \log\frac1{p_\mathrm{LM}(\uu_i\mid\mathbf\uu_{< i}, u_{i+1})}
+    }
+}_R
+    \\
+\end{aligned}
+$$
+
+That is, the causal-LM-surprisal of the token (given previous context), minus the expected masked-LM-surprisal of the token (given previous context and next token), expectation over predicted next tokens (by the causal LM).
+
+This is just as above, but with only one token of completion, we can calculate expectation exactly by looping over vocab, to get an exact value for R (assuming a deterministic tokenizer). Let $r_{\mathbf\uu_{\le i}}(u_{i+1}):=\operatorname{surp_{masked}}(\uu_i\mid\mathbf \uu_{<i},u_{i+1}) \overset{\mathrm{MLM}}\approx \log\frac1{p_\mathrm{MLM}(\uu_i \mid \mathbf\uu_{< i}, u_{i+1})}$, (this is precisely the loss that the masked-LM objective minimizes) and **loop over all possible next tokens**, scoring according to the causal LM, $p_{\mathrm{LM}}$ for an exact computation of $R$:
+
+$$
+\begin{aligned}
+R(\uu_i) &= \E_{\posteriorn}{r_{\mathbf\uu_{\le i}}(u_{i+1})} 
+\\
+% &\overset{MC}{\approx}
+% \frac1K\sum_{k=1}^{K}{r_{\mathbf\uu_{\le i}}(u_{i+1}^{(k)})} , \qquad u_{i+1}^{(k)}\sim p_\mathrm{LM}(\cdot|\mathbf \uu_{\le i})
+&= \sum_{u_{i+1}\in V} \posteriorn r_{\mathbf\uu_{\le i}}(u_{i+1})
+\\
+&= \sum_{u_{i+1}\in V} 
+p_{\mathrm {LM}}(\uu_{i+1} \mid \mathbf\uu_{1\ldots i}) 
+\operatorname{surp_{masked}}(u_i\mid \mathbf\uu_{1\ldots i-1},{\color{gray}u_i=\mathtt{[MASK]},}u_{i+1}) 
+\end{aligned}
+$$
+
+Requires $\mathrm{LM}$ to be trained for
+
+-   $p_{\mathrm{LM}}(U_{j+1}\mid \mathbf \uu_{<j})$ --- causal/prefix-LM next-word prediction task (GPT-like)
+-   $p_{\mathrm{LM}}(U_j\mid \mathbf \uu_{<j},{\color{gray}u_j=\mathtt{[MASK]},}u_{j+1})$ --- reconstructing penultimate token *in incomplete sentences* (not quite the usual BERT-like masked/infilling LM task)
+
+::: {.callout-note collapse="true"}
+but with such an LM (assuming deterministic tokenizer), can calculate exact value for KL:
+
+``` python
+def get_masked_surprisals(target=CURR_W, prefix=PREFIX):
+    """
+    Get masked surprisal of target coming between prefix and nexttok:
+    $$-\log p(u_{i...i+N}=target \mid u_{1...i-1}=prefix, u_{i+N+1}=nexttok)$$
+    for all nexttok in the vocabulary.
+    """
+    
+    masked_surprisals = - F.log_softmax(masked_logits, dim=-1)
+    return masked_surprisals
+
+
+# Constants (observed)
+PREFIX # sequence of tokens up to and not including current word
+CURR_W # current word (possibly multitoken)
+
+# nexttok logits requires just one forward pass
+next_tok_logits = LM.get_nexttok_logits(PREFIX + CURR_W) # a vector with vocabsize elements (per next token)
+masked_surprisals = get_masked_surprisals(target=CURR_W, prefix=PREFIX) # a vector with vocabsize elements (per next token)
+
+nexttok_probabilities = F.softmax(nexttok_logits, dim=-1)
+R = (next_tok_probabilities * reconstruction_surps).sum(-1)
+
+
+
+############## Below is just a sketch...
+def get_R(nexttok_logits, reconstruction_surps):
+    """r is masked_logits
+    """
+    nexttok_probabilities = F.softmax(nexttok_logits, dim=-1)
+    R = (nexttok_probabilities * reconstruction_surps).sum(-1)
+
+    return R.view(-1)
+```
+:::
+
+#### Letting $Z$ be *distributions* over continuations?
+
+Todo maybe. For this estimation, we need a way to represent (sample *and* score) distributions over continuations. Not sure how to do this.
+ -->
+</section>
+</section>
+</section>
+<section id="kl-theory-vs-lc-surprisal-theory" class="level2">
+<h2 class="anchored" data-anchor-id="kl-theory-vs-lc-surprisal-theory">KL theory vs (LC-)surprisal theory</h2>
+<p>We have the decomposition</p>
+<p><span class="math display">
+\KL\posteriorZ\proposalZ
+= \surp{\uu} - \left(\Ri + \Dqi\right)
+</span></p>
+<ol type="1">
+<li><p><strong>Surprisal theory</strong> models difficulty as <span class="math inline">\approx\mathrm{S}</span>. Generalizing, we can describe surprisal theory as difficulty <span class="math inline">\approx f(\mathrm{S})</span>, for monotonic increasing <span class="math inline">f</span> (not necessarily linear).</p></li>
+<li><p>We would like to propose <strong>KL-theory</strong> which models difficulty as <span class="math inline">\approx f(\mathrm{D_{KL}})</span> instead (motivated by algorithmic complexity of sampling being <span class="math inline">\approx e^{\mathrm{D_{KL}}}</span>).</p></li>
+</ol>
+<p><strong>Q:</strong> When do these make different predictions?</p>
+<p><strong>A:</strong> When <span class="math inline">\surp{\uu}</span> is high, but <span class="math inline">[\Ri+\Dqi]</span> is similarly high. Then surprisal theory predicts <span class="math inline">\uu</span> is difficult, and KL theory predicts it is not.</p>
+<p>The possible cases leading to high surprisal but low KL:</p>
+<ul>
+<li><p>Assume D is negligible. We get low KL when <span class="math inline">\uu</span> <em>remains</em> unpredictable on average even when given the latent <span class="math inline">z_i</span> (which encodes information about <span class="math inline">y_i</span>). Intuitively: when the latent variable forgets/misrepresents the identity of <span class="math inline">y_i</span>. For example, a perceived production error/typo?</p></li>
+<li><p>Assume R is negligible. We get low KL when <span class="math inline">\proposalZ</span> is much better than <span class="math inline">\priorZ</span>. That is, when your smart proposal gives a large reduction in excess surprise.</p></li>
+<li><p>When both of the above happen simultaneously.</p></li>
+</ul>
+<!-- 
+### Lossy-context surprisal {#sec-lossy-context-surprisal}
+
+Define noisy-channel/"lossy-context" surprisal [@futrell.r:2017; @futrell.r:2020; @hahn.m:2022PNAS]:
+
+$$
+S_\mathrm{lc}(\uu) := \E_{p_M(z_{<i}\mid \uu_{<i})}{-\log{p(\uu_i\mid z_{<i})}}
+$$
+
+where $z_{<i}$ is the lossy version of the context $\uu_{<i}$ (such as, a string with some words deleted/replaced).
+
+::: {.callout-note collapse="true"}
+### Lossy surprisal $\ge$ non-lossy surprisal
+
+It's simple to see that lossy surprisal is lower-bounded by non-lossy surprisal:
+
+$$
+\begin{aligned}
+S_\mathrm{lc}(\uu)
+&\coloneqq \E_{\priorZ}{-\log{p(\uu_i\mid {\cPRIO z})}}&\\
+&=         \E_{\priorZ}{-\log{p(\uu_i\mid {\cPRIO z}, \uu_{< i})}}&\text{if }U_i\indep U_{\le i} \mid {\cPRIO Z}\\
+&\ge -\log{\E_{\priorZ}{{p(\uu_i\mid {\cPRIO z}, \uu_{< i})}}}&\\
+&=   -\log{\int{\priorz}{p(\uu_i\mid {\cPRIO z}, \uu_{< i})}\dee{\cPRIO z}}&\\
+% &=  -\log{\int{p(\uu_i,{\cPRIO z}\mid \uu_{< i})}\dee{z}}\\
+&=   -\log{{p(\uu_i\mid \uu_{< i})}} &= \surp{\uu} \\
+\end{aligned}
+$$
+
+Where the bound is due to Jensen's inequality, since negative log is concave-up, and the integral disappears by the definition of conditioning.
+
+**Note: There may be something odd about this Markov assumption for the true generative model (the latent Z is not actually D-separating past from present... right?)** but it is reasonable from the comprehender's perpsective, if Z is the compressed/noised memory of the context.
+:::
+
+The predictions of noisy channel-surprisal are things like:
+
+-   Two predictions in @futrell.r:2020 [section 3.4].
+    1.  Less probable context $\implies$ less accurate predictions [@futrell.r:2020, Supplement A, Proposition 1]. Thus, on average, higher surprisal than with more probable contexts (this predicts more difficulty predicting the last verb in a multiple-embedding construction: "structural forgetting").
+
+        "Less accurate predictions" is quantified as higher "memory distortion" ($\mathrm{dist}_{p_M} = S_\mathrm{lc}-S$), which has the following upper bounds
+
+        $$
+        \mathrm{dist}_{p_M}=\E_{p_M}{\frac{p(\uu_i\mid\uu_{<i})}{p(\uu_i\mid z_{<i})}} \le \E_{p_M} \log \frac1{p(\uu_{<i}\mid z_{<i})} \le \log \frac1{p(\uu_{<i})}
+        $$
+
+        (This says more probable context $\implies$ lower upper bound on distortion.)
+
+    2.  With more noise, expectations about next word will regress to a naive prior (disregarding the context) [@futrell.r:2020, Supplemet A, Proposition 2].
+
+::: {.callout-note collapse="true"}
+### Entropy bounds
+
+They bound the *expected* lossy-context surrpisal between expected veridical-context surprisal and expected no-context (unigram) surprisal.
+
+$$
+\begin{aligned}
+\E_{p(U_{\le i})}{S(\uu_i) } 
+    &&\le&& \E_{p(U_{\le i})}{S_\mathrm{lc}(\uu_i) } 
+    &&\le&& \E_{p(U_{\le i})}{S_\mathrm{unig}(\uu_i) }\\
+\E_{p(U_{\le i})}{\log \frac1{p(\uu_i\mid\uu_{<i})}} 
+    &&\le&& \E_{p(U_{\le i})}{\E_{p_M}\log{\frac1{p(\uu_i\mid z_{<i})}}} 
+    &&\le&& \E_{p(U_{\le i})}{\log \frac1{p(\uu_i)}}\\
+\E_{p(U_{\le i})}{\log \frac1{p(\uu_i\mid\uu_{<i})}} 
+    &&\le&& \E_{p(U_{\le i})p(Z<i\mid U_{<i})}{\log{\frac1{p(\uu_i\mid z_{<i})}}} 
+    &&\le&& \E_{p(U_{\le i})}{\log \frac1{p(\uu_i)}}
+\end{aligned}
+$$
+
+Since $\H{U_i\mid U_{<i}} = \H{U_i\mid U_{<i}, Z_{<i}} \le \H{U_i\mid Z_{<i}}\le \H{U_i}$.
+:::
+
+-   Prediction 1 above is exemplified with predicting the "structural forgetting" effect. In multiple embeddings, LCsurp theory predicts lowered surprisal for ungrammatical continuations which can be predicted with nonveridical context.
+
+    > \[~1~ The $N_1$ \[~2~ C the $N_2$ \[~3~ C the $N_3$ $V_3$\] $V_2$\] $V_1$\].
+
+    -   [@futrell.r:2020]
+
+        $N_1$=apartment, $N_2$=maid, $N_3$=cleaning service
+
+        $V_3$=sent over, $V_2$=cleaned, $V_1$=was well-decorated
+
+        ==\> Empirical observation: Compared to what would be predicted by veridical-surprisal theory, following V3, the grammatical V2V1 is more difficult, and ungrammatical just V1 is less difficult (sentence-grammaticality judgements).
+
+    > \[~1~ The $N_1$ \[~2~ C the $N_2$ \[~3~ C the $N_3$ $V_3$\] $V_2$ the patient\] $V_1$\].
+
+    -   [@hahn.m:2022PNAS]
+
+        $N_1$=report, $N_2$=doctor, $N_3$=lawyer
+
+        $V_3$=distrusted, $V_2$=annoyed, $V_1$=was surprising
+
+        ==\> Empirical observation: the difficulty at grammatical V1 is higher when "embedding bias" is lower (when it's easier to assume nonveridical context like "report about" rather than "report that").
+
+    What does KL theory say here? Intuitively: we could make the same predictions.
+
+    -   Compared to non-lossy-surprisal which predicts very high difficulty for nonveridical continuations, I think we expect *lowered difficulty for ungrammatical continuations which can be predicted with nonveridical context*, because the surprisal of the veridical next item can be high, if the overwhelmingly most likely $z_i | \uu_{1:}$ disregards/'corrects' it.
+
+    -   When a context could be easily modified to make a grammatical continuation surprising (low embedding bias verb followed by embedded clause) we could expect $\Dqi < 0$: that is, that $\proposalZ$ is worse than the prior $\priorZ$ at predicting the veridically grammatical final verb.
+
+    We also have other predictions: could explain why typos are not super difficult to process (assuming this is true): that is, for words where the rational thing to do is ignore them/modify them, even given veridical access to them.
+
+::: callout-important
+Experiments to do:
+
+-   1: look at classic predictions of (LC-)surprisal theory and see whether KL-theory makes the same predictions
+    -   like 'structural forgetting'
+-   2: look at places where KL-theory makes new predictions
+    -   run a mechanical turk experiment
+
+For either, we require **a way to estimate this divergene** to compare with empirical data.
+
+-   idea: adapt what @hahn.m:2022PNAS did for LCSurp.
+:::
+
+-   also TODO [see @futrell.r:2020, section 6.4]:
+
+    -   information-theoretic explanation of adjective ordering [@hahn.m:2018cogsci].
+
+    -   similarity-based interference effects:
+
+        > The phenomena of similarity-based interference in agreement and anaphora interpretation remain unexplored from this perspective [@jager.l:2017].
+
+-   you'll see increased difficulty (over what would be predicted by nonlossy surprisal theory) if the observation is unlikely given expected noisy representation of the past when it wouldn't be surprising given the true unnoisy representation.
+
+::: {.callout-caution collapse="true"}
+### TODO
+
+Note the expectation taken for our noise term conditions on the observed word: $\E_{\posteriorZ}\left[-\log{p(\uu_i\mid z_i,\uu_{< i})}\right]$ whereas the similar expectation defined in the lossy-context-surprisal literature is defined as something like $S_\mathrm{lc}(\uu) = \E_{\priorZ}\left[-\log{p(\uu_i\mid z_i,\uu_{< i})}\right]$ in our notation. (Note with a Markov assumption we can drop the previous observations $\uu_{< i}$ from these two expressions, which looks more like how lossy-context surprisal is defined anyway).
+
+This means that formally (with the Markov assumption), we can relate $\Rs{\posteriorZ}$ to $S_\mathrm{lc}(\uu)$ as:
+
+$$
+\begin{aligned}
+S_\mathrm{lc}(\uu) 
+&\coloneqq \E_{\priorZ}\left[\log\frac1{p(\uu_i\mid z_i)}\right] = \Rs{\priorZ}\\
+&= \E_{\posteriorZ}\left[\frac{\dee{\priorZ}}{\dee{\posteriorZ}}\log\frac1{p(\uu_i\mid z_i)}\right] \\
+\Rs{\posteriorZ} &\coloneqq \E_{\posteriorZ}\left[\log\frac1{p(\uu_i\mid z_i)}\right]\\
+&= \E_{\priorZ}\left[\frac{\dee{\posteriorZ}}{\dee{\priorZ}}\log\frac1{p(\uu_i\mid z_i)}\right] 
+\end{aligned}
+$$
+
+with some absolute continuity requirements.
+:::
+ -->
+<!-- 
+## What sentences to look at:
+
+Context: there are keys on the table
+
+::: column-page
+| $\uu_{<i}$          | ${\cPOST Z\mid \uu_{<i}}$ | ${Z^+|\cPOST z}$      | $\uu_{i}$ | $\operatorname{S}$ | ${\cPRIO Z\mid \uu_{\le i}}$     | $R$  | $\operatorname{D_{KL}}$ |
+|---------|---------|---------|---------|---------|---------|---------|---------|
+| Find my keys on the | $1_{[\text{(as is)}]}$    | $1_{[\text{+table}]}$ | table     | LOW                | $1_{[\text{(as is)}]}$           | LOW  | LOW                     |
+| ''                  | ''                        | ''                    | the       | HIGH               | $1$<sub>\[... the ~~the~~\]<sub> | LOW  | HIGH                    |
+| ''                  | ''                        | ''                    | share     | HIGH               | ?                                | HIGH | LOW                     |
+| ''                  | ''                        | ''                    | fable     | MID                | $1$<sub>\[... the table\]<sub>   | MID  | LOW                     |
+
+: Sketchy predictions
+:::
+
+| $\uu_{<i}$          | $\uu_{i}$ | $\operatorname{S}$ | $R$  | $\operatorname{D_{KL}} = S - R$ |
+|---------------|---------------|---------------|---------------|---------------|
+| Find my keys on the | table     | LOW                | LOW  | LOW                             |
+| ''                  | double    | HIGH               | LOW  | HIGH                            |
+| ''                  | share     | HIGH               | HIGH | LOW                             |
+| ''                  | fable     | MID                | MID  | LOW                             |
+
+: Simple predictions
+
+Some suggestions from CPG:
+
+-   "My grandfather just left us. He kicked the rattlesnake." (Michaela) Intuition: "rattlesnake" is surprising given previous context (high S), but easy to reconstruct (low R). So KL theory predicts high difficulty at this word.\
+-   "Agreement attraction" [aka "Broken agreement", @bock.k:1991]
+    -   *The key to the cabinets are on the table*
+    -   *The cost of the improvements have not yet been estimated*
+    -   see reading time study @wagers.m:2009
+-   Grammatical illusions, eg "negative polarity illusions" [@muller.h:2020]
+    -   *The bills that no senator voted for will ever become law.*
+
+See Colin Phillips or Hanna Muller's work [like @kelley.p:2018; @muller.h:2020; @parker.d:2016]. 
+-->
+</section>
+<section id="discussion" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="discussion">Discussion</h2>
+<ol type="1">
+<li><p>The number of samples from <span class="math inline">p_Z</span> for an IS estimate of <span class="math inline">\pZu</span> is <span class="math inline">e^{\KL{\pZu}{p_Z}}</span>.</p></li>
+<li><p>The number of samples from <span class="math inline">\qZu</span> for an IS estimate of <span class="math inline">\pZu</span> is <span class="math inline">e^{\KL{\pZu}{\qZu}}</span>.</p></li>
+</ol>
+<p>If the observable <span class="math inline">U</span> is assumed to be a deterministic function of the latent <span class="math inline">Z</span> (as in <span class="citation" data-cites="levy.r:2008">Levy (<a href="#ref-levy.r:2008" role="doc-biblioref">2008</a>)</span>, where latent state consists partially of the observable string), then <span class="math inline">\R=0</span>, and thus <span class="math inline">\KL{\pZu}{p_Z}=-\log p(\uu)</span>. Thus, IS <span class="citation" data-cites="chen.y:2005">(which, with a binary likelihood function becomes simply rejection sampling, see <a href="#ref-chen.y:2005" role="doc-biblioref">Chen, 2005</a>)</span>, will require <span class="math inline">e^{-\log p(\uu)}=\frac1{p(\uu)}</span> samples.</p>
+<p>This gives us a clear prediction for runtime being an exponential function of surprisal.</p>
+<p>However, there are two issues with this:</p>
+<ul>
+<li>If we want to model the latent states as not containing the observations within them, then <span class="math inline">U</span> will not be a deterministic function of <span class="math inline">Z</span> in general (and so <span class="math inline">\R</span> may be nonzero?), and thus the runtime will depend on <span class="math inline">\R</span> as well as suprisal.</li>
+<li>Independent of the previous point, if we want to sample from something smarter than simply the prior, then the number of samples needed will be <span class="math inline">e^{\KL{\pZu}{\qZu}}</span>, and so the runtime will depend on <span class="math inline">\Dq</span> (and possibly also <span class="math inline">\R</span>)</li>
+</ul>
+<section id="requirements-of-a-parametric-relationship" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="requirements-of-a-parametric-relationship">Requirements of a parametric relationship</h3>
+<p>What properties of <span class="math inline">\qZu</span> or <span class="math inline">\R</span> would have to hold to have runtime be a particular parametric relationship with surprisal (such as a linear one)?</p>
+<p>If we don’t assume anything particular about <span class="math inline">\qZu</span>, then, the sampling-based update cost is</p>
+<p><span class="math display">
+\begin{aligned}
+\operatorname{cost}(\uu)
+    &amp;= e^{\KL\pZu\qZu}\\
+    &amp;= e^{\surp{\uu} - \R - \Dq}
+\end{aligned}
+</span></p>
+<p>If <span class="math inline">\operatorname{cost}(\uu) = f(\surp{\uu})</span> for some linking function <span class="math inline">f</span>, then</p>
+<p><span class="math display">
+\begin{aligned}
+f(\surp{\uu})
+    &amp;= e^{\surp{\uu} - \R - \Dq}\\
+\log f(\surp{\uu})
+    &amp;= \surp{\uu} - \R - \Dq\\
+\end{aligned}
+</span></p>
+<p>so</p>
+<p><span class="math display">
+\begin{aligned}
+\R + \Dq
+    &amp;= \surp{\uu} - \log f(\surp{\uu}) \\
+    % &amp;= - \log\left(p(\uu) f( \surp{\uu})\right) \\
+e^{\R + \Dq}
+    &amp;= \frac1{p(\uu) f(\surp{\uu})}
+\end{aligned}
+</span></p>
+<p>If we assume we’re sampling from the prior (so <span class="math inline">\qZu=p_Z</span>), then <span class="math inline">\Dq=0</span>, so</p>
+<p><span class="math display">
+\R = \surp{\uu} - \log f(\surp{\uu})
+</span></p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Parametric relationships<a href="https://www.desmos.com/calculator/yyuosjboz6">.</a> <iframe src="https://www.desmos.com/calculator/yyuosjboz6?embed" width="200" height="300" style="border: 1px solid #ccc" frameborder="0"></iframe></p>
+</div></div><p>Thus, if we measure cost as reading time (RT), and fit RT as a function of surprisal, <span class="math inline">\operatorname{cost}(\uu) = \operatorname{RT}(\uu) = f_\mathrm{GAM}(\surp{\uu})</span>, we can inspect the implies about the term <span class="math inline">G\coloneqq \R + \Dq</span>, by simply subtracting the log fit RT value from the surprisal.</p>
+<p><span class="math display">
+G(s) = s - \log f_\mathrm{GAM}(s)
+</span></p>
+<!-- 
+### Optimal code-length
+
+We're interested in the question: How many bits of information are required to transform prior $p_Z$ into posterior $\pZu$?
+
+Just using bayes rule, we can break this down into three parts
+
+$$
+-\log \pzu 
+= -\log p(z) - \log \frac{p(\uu\mid z)}{p(\uu)}
+= \log p(\uu) -\log p(z) - \log p(\uu\mid z)
+$$
+
+TBC -->
+
+
+
+</section>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-agapiou.s:2017" class="csl-entry" role="listitem">
+Agapiou, S., Papaspiliopoulos, O., Sanz-Alonso, D., &amp; Stuart, A. M. (2017). Importance sampling: Intrinsic dimension and computational cost. <em>Statistical Science</em>, <em>32</em>(3). <a href="https://doi.org/10.1214/17-STS611">https://doi.org/10.1214/17-STS611</a>
+</div>
+<div id="ref-baldi.p:2002" class="csl-entry" role="listitem">
+Baldi, P. (2002). A computational theory of surprise. In M. Blaum, P. G. Farrell, &amp; H. C. A. van Tilborg (Eds.), <em>Information, <span>Coding</span> and <span>Mathematics</span>: <span>Proceedings</span> of <span>Workshop</span> honoring <span>Prof</span>. <span>Bob McEliece</span> on his 60th birthday</em> (pp. 1–25). Springer US. <a href="https://doi.org/10.1007/978-1-4757-3585-7_1">https://doi.org/10.1007/978-1-4757-3585-7_1</a>
+</div>
+<div id="ref-baldi.p:2010" class="csl-entry" role="listitem">
+Baldi, P., &amp; Itti, L. (2010). Of bits and wows: <span>A Bayesian</span> theory of surprise with applications to attention. <em>Neural Networks</em>, <em>23</em>(5), 649–666. <a href="https://doi.org/10.1016/j.neunet.2009.12.007">https://doi.org/10.1016/j.neunet.2009.12.007</a>
+</div>
+<div id="ref-chatterjee.s:2018" class="csl-entry" role="listitem">
+Chatterjee, S., &amp; Diaconis, P. (2018). The sample size required in importance sampling. <em>The Annals of Applied Probability</em>, <em>28</em>(2). <a href="https://doi.org/10.1214/17-aap1326">https://doi.org/10.1214/17-aap1326</a>
+</div>
+<div id="ref-chen.y:2005" class="csl-entry" role="listitem">
+Chen, Y. (2005). Another look at rejection sampling through importance sampling. <em>Statistics &amp; Probability Letters</em>, <em>72</em>(4), 277–283. <a href="https://doi.org/10.1016/j.spl.2005.01.002">https://doi.org/10.1016/j.spl.2005.01.002</a>
+</div>
+<div id="ref-dayan.p:1995" class="csl-entry" role="listitem">
+Dayan, P., Hinton, G. E., Neal, R. M., &amp; Zemel, R. S. (1995). The <span>Helmholtz</span> machine. <em>Neural Computation</em>, <em>7</em>(5), 889–904. <a href="https://doi.org/10.1162/neco.1995.7.5.889">https://doi.org/10.1162/neco.1995.7.5.889</a>
+</div>
+<div id="ref-dehaene.d:2019" class="csl-entry" role="listitem">
+Dehaene, D., Frigo, O., Combrexelle, S., &amp; Eline, P. (2019, September 25). <em>Iterative energy-based projection on a normal data manifold for anomaly localization</em>. International <span>Conference</span> on <span>Learning Representations</span>, 2020. <a href="https://openreview.net/forum?id=HJx81ySKwr">https://openreview.net/forum?id=HJx81ySKwr</a>
+</div>
+<div id="ref-futrell.r:2020" class="csl-entry" role="listitem">
+Futrell, R., Gibson, E., &amp; Levy, R. (2020). Lossy-context surprisal: <span>An</span> information-theoretic model of memory effects in sentence processing. <em>Cognitive Science</em>, <em>44</em>(3), e12814. <a href="https://doi.org/10.1111/cogs.12814">https://doi.org/10.1111/cogs.12814</a>
+</div>
+<div id="ref-genewein.t:2015" class="csl-entry" role="listitem">
+Genewein, T., Leibfried, F., Grau-Moya, J., &amp; Braun, D. A. (2015). Bounded rationality, abstraction, and hierarchical decision-making: An information-theoretic optimality principle. <em>Frontiers in Robotics and AI</em>, <em>2</em>. <a href="https://www.frontiersin.org/article/10.3389/frobt.2015.00027">https://www.frontiersin.org/article/10.3389/frobt.2015.00027</a>
+</div>
+<div id="ref-gibbs.a:2002" class="csl-entry" role="listitem">
+Gibbs, A. L., &amp; Su, F. E. (2002). On choosing and bounding probability metrics. <em>International Statistical Review</em>, <em>70</em>(3), 419–435. <a href="https://doi.org/10.1111/j.1751-5823.2002.tb00178.x">https://doi.org/10.1111/j.1751-5823.2002.tb00178.x</a>
+</div>
+<div id="ref-kingma.d:2017" class="csl-entry" role="listitem">
+Kingma, D. P. (2017). <em>Variational inference &amp; deep learning: <span>A</span> new synthesis</em> [PhD thesis, University of Amsterdam]. <a href="https://pure.uva.nl/ws/files/17891313/Thesis.pdf">https://pure.uva.nl/ws/files/17891313/Thesis.pdf</a>
+</div>
+<div id="ref-levy.r:2008" class="csl-entry" role="listitem">
+Levy, R. (2008). Expectation-based syntactic comprehension. <em>Cognition</em>, <em>106</em>(3), 1126–1177. <a href="https://doi.org/10.1016/j.cognition.2007.05.006">https://doi.org/10.1016/j.cognition.2007.05.006</a>
+</div>
+<div id="ref-liang.d:2018" class="csl-entry" role="listitem">
+Liang, D., Krishnan, R. G., Hoffman, M. D., &amp; Jebara, T. (2018). Variational autoencoders for collaborative filtering. <em>Proceedings of the 2018 <span>World Wide Web Conference</span></em>, 689–698. <a href="https://doi.org/10.1145/3178876.3186150">https://doi.org/10.1145/3178876.3186150</a>
+</div>
+<div id="ref-oh.b:2024arxiv" class="csl-entry" role="listitem">
+Oh, B.-D., Yue, S., &amp; Schuler, W. (2024, February 3). <em>Frequency explains the inverse correlation of large language models’ size, training data amount, and surprisal’s fit to reading times</em>. <a href="https://doi.org/10.48550/arXiv.2402.02255">https://doi.org/10.48550/arXiv.2402.02255</a>
+</div>
+<div id="ref-ortega.p:2013" class="csl-entry" role="listitem">
+Ortega, P. A., &amp; Braun, D. A. (2013). Thermodynamics as a theory of decision-making with information-processing costs. <em>Proceedings of the Royal Society A: Mathematical, Physical and Engineering Sciences</em>, <em>469</em>(2153), 20120683. <a href="https://doi.org/10.1098/rspa.2012.0683">https://doi.org/10.1098/rspa.2012.0683</a>
+</div>
+<div id="ref-sanz-alonso.d:2018" class="csl-entry" role="listitem">
+Sanz-Alonso, D. (2018). Importance sampling and necessary sample size: An information theory approach. <em>SIAM/ASA Journal on Uncertainty Quantification</em>, <em>6</em>(2), 867–879. <a href="https://doi.org/10.1137/16M1093549">https://doi.org/10.1137/16M1093549</a>
+</div>
+<div id="ref-vincent.p:2010" class="csl-entry" role="listitem">
+Vincent, P., Larochelle, H., Lajoie, I., Bengio, Y., &amp; Manzagol, P.-A. (2010). Stacked denoising autoencoders: <span>Learning</span> useful representations in a deep network with a local denoising criterion. <em>Journal of Machine Learning Research</em>, <em>11</em>, 3371–3408.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
