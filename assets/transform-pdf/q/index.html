@@ -24,7 +24,6 @@ ul.task-list li input[type="checkbox"] {
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="site_libs/quarto-search/fuse.min.js"></script>
@@ -44,17 +43,18 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
 <link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
-  "location": "navbar",
-  "copy-button": true,
+  "location": "sidebar",
+  "copy-button": false,
   "collapse-after": 3,
-  "panel-placement": "end",
-  "type": "overlay",
+  "panel-placement": "start",
+  "type": "textbox",
   "limit": 50,
   "keyboard-shortcut": [
     "f",
     "/",
     "s"
   ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -257,31 +257,11 @@ window.Quarto = {
 
 </head>
 
-<body class="nav-fixed">
+<body>
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
-      <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">📓</span>
-    </a>
-  </div>
-        <div class="quarto-navbar-tools tools-end">
-  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
-  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
-  <div class="quarto-reader-toggle-btn">
-  <i class="bi"></i>
-  </div>
-</a>
-</div>
-          <div id="quarto-search" class="" title="Search"></div>
-      </div> <!-- /container-fluid -->
-    </nav>
-</header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
@@ -338,41 +318,7 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="notebooks-on-various-topics"><code>./notebooks</code> on various topics</h2>
 <div id="listing-notebooks-listings" class="quarto-listing quarto-listing-container-default">
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-listing-file-modified-sort="1709922788315" data-listing-reading-time-sort="35" data-listing-word-count-sort="6855">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./notebooks/difficulty-surprisal-summary.html" class="no-external">Difficulty and surprisal</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./notebooks/difficulty-surprisal-summary.html" class="no-external"></a>
-</div>
-</div>
-<div class="metadata">
-<p><a href="./notebooks/difficulty-surprisal-summary.html" class="no-external"></a></p><a href="./notebooks/difficulty-surprisal-summary.html" class="no-external">
-<div class="metadata-value listing-file-modified">
-3/8/24, 1:33:08 PM
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="1" data-listing-file-modified-sort="1709922439439" data-listing-reading-time-sort="39" data-listing-word-count-sort="7759">
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./notebooks/bayesian_parsing.html" class="no-external">Bayesian incremental parsing</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./notebooks/bayesian_parsing.html" class="no-external">Making a formal framework</a>
-</div>
-</div>
-<div class="metadata">
-<p><a href="./notebooks/bayesian_parsing.html" class="no-external"></a></p><a href="./notebooks/bayesian_parsing.html" class="no-external">
-<div class="metadata-value listing-file-modified">
-3/8/24, 1:27:19 PM
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="2" data-listing-date-sort="1667361600000" data-listing-file-modified-sort="1709918397655" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="739">
+<div class="quarto-post image-right" data-index="0" data-listing-date-sort="1667361600000" data-listing-file-modified-sort="1709918397655" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="739">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./notebooks/transform-pdf.html" class="no-external">Density of transformed random variable</a>
@@ -392,7 +338,24 @@ Nov 2, 2022
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-listing-file-modified-sort="1709916503537" data-listing-reading-time-sort="67" data-listing-word-count-sort="13370">
+<div class="quarto-post image-right" data-index="1" data-listing-file-modified-sort="1709916597236" data-listing-reading-time-sort="31" data-listing-word-count-sort="6179">
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./notebooks/difficulty-surprisal-summary.html" class="no-external">Difficulty and surprisal</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./notebooks/difficulty-surprisal-summary.html" class="no-external"></a>
+</div>
+</div>
+<div class="metadata">
+<p><a href="./notebooks/difficulty-surprisal-summary.html" class="no-external"></a></p><a href="./notebooks/difficulty-surprisal-summary.html" class="no-external">
+<div class="metadata-value listing-file-modified">
+3/8/24, 11:49:57 AM
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="2" data-listing-file-modified-sort="1709916503537" data-listing-reading-time-sort="67" data-listing-word-count-sort="13370">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./notebooks/lit_review.html" class="no-external">Literature review</a>
@@ -409,7 +372,7 @@ Nov 2, 2022
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="4" data-listing-file-modified-sort="1703104315272" data-listing-reading-time-sort="3" data-listing-word-count-sort="564">
+<div class="quarto-post image-right" data-index="3" data-listing-file-modified-sort="1703104315272" data-listing-reading-time-sort="3" data-listing-word-count-sort="564">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./notebooks/simulation_biased_coin.html" class="no-external">biased coin</a>
@@ -426,7 +389,7 @@ Nov 2, 2022
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="5" data-listing-date-sort="1709874000000" data-listing-file-modified-sort="1700236090014" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2119">
+<div class="quarto-post image-right" data-index="4" data-listing-date-sort="1709874000000" data-listing-file-modified-sort="1700236090014" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2119">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./notebooks/kl-surp-R-study.html" class="no-external">Why surprising doesn’t always mean difficult to process</a>
@@ -446,7 +409,7 @@ Mar 8, 2024
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="6" data-listing-date-sort="1709874000000" data-listing-file-modified-sort="1697818568582" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2857">
+<div class="quarto-post image-right" data-index="5" data-listing-date-sort="1709874000000" data-listing-file-modified-sort="1697818568582" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2857">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./notebooks/kl-pq-study.html" class="no-external">KL(P||Q) idea</a>
@@ -466,7 +429,7 @@ Mar 8, 2024
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="7" data-listing-date-sort="1709874000000" data-listing-file-modified-sort="1697742969187" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="64">
+<div class="quarto-post image-right" data-index="6" data-listing-date-sort="1709874000000" data-listing-file-modified-sort="1697742969187" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="64">
 <div class="body">
 <h3 class="no-anchor listing-title">
 <a href="./notebooks/interactive-kl-and-surprisal.html" class="no-external">interactive KL and surprisal decomposition</a>
@@ -482,6 +445,23 @@ Mar 8, 2024
 </div>
 <div class="metadata-value listing-file-modified">
 10/19/23, 3:16:09 PM
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="7" data-listing-file-modified-sort="1693103992288" data-listing-reading-time-sort="39" data-listing-word-count-sort="7756">
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./notebooks/bayesian_parsing.html" class="no-external">Bayesian incremental parsing</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./notebooks/bayesian_parsing.html" class="no-external">Making a formal framework</a>
+</div>
+</div>
+<div class="metadata">
+<p><a href="./notebooks/bayesian_parsing.html" class="no-external"></a></p><a href="./notebooks/bayesian_parsing.html" class="no-external">
+<div class="metadata-value listing-file-modified">
+8/26/23, 10:39:52 PM
 </div>
 </a>
 </div>

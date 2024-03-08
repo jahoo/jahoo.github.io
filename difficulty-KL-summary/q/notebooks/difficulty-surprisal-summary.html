@@ -8,7 +8,7 @@
 
 <meta name="author" content="Jacob Louis Hoover">
 
-<title>📓</title>
+<title>📓 – Difficulty and surprisal</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 /* CSS for citations */
 div.csl-bib-body { }
@@ -44,7 +78,7 @@ div.csl-indent {
 }</style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -88,6 +122,9 @@ div.csl-indent {
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
@@ -171,12 +208,13 @@ window.Quarto = {
   <li><a href="#decomposing-kl-between-prior-and-posterior" id="toc-decomposing-kl-between-prior-and-posterior" class="nav-link" data-scroll-target="#decomposing-kl-between-prior-and-posterior">Decomposing KL between prior and posterior</a></li>
   <li><a href="#decomposing-kl-between-proposal-and-posterior" id="toc-decomposing-kl-between-proposal-and-posterior" class="nav-link" data-scroll-target="#decomposing-kl-between-proposal-and-posterior">Decomposing KL between <em>proposal</em> and posterior</a></li>
   <li><a href="#incremental-version" id="toc-incremental-version" class="nav-link" data-scroll-target="#incremental-version">Incremental version</a></li>
-  </ul></li>
   <li><a href="#kl-theory-vs-lc-surprisal-theory" id="toc-kl-theory-vs-lc-surprisal-theory" class="nav-link" data-scroll-target="#kl-theory-vs-lc-surprisal-theory">KL theory vs (LC-)surprisal theory</a></li>
-  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">Discussion</a>
+  </ul></li>
+  <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes</a>
   <ul class="collapse">
   <li><a href="#requirements-of-a-parametric-relationship" id="toc-requirements-of-a-parametric-relationship" class="nav-link" data-scroll-target="#requirements-of-a-parametric-relationship">Requirements of a parametric relationship</a></li>
   </ul></li>
+  <li><a href="#ordered-search-runtime" id="toc-ordered-search-runtime" class="nav-link" data-scroll-target="#ordered-search-runtime">Ordered search runtime</a></li>
   </ul>
 </nav>
     </div>
@@ -884,9 +922,8 @@ Todo maybe. For this estimation, we need a way to represent (sample *and* score)
  -->
 </section>
 </section>
-</section>
-<section id="kl-theory-vs-lc-surprisal-theory" class="level2">
-<h2 class="anchored" data-anchor-id="kl-theory-vs-lc-surprisal-theory">KL theory vs (LC-)surprisal theory</h2>
+<section id="kl-theory-vs-lc-surprisal-theory" class="level3">
+<h3 class="anchored" data-anchor-id="kl-theory-vs-lc-surprisal-theory">KL theory vs (LC-)surprisal theory</h3>
 <p>We have the decomposition</p>
 <p><span class="math display">
 \KL\posteriorZ\proposalZ
@@ -1085,8 +1122,9 @@ Some suggestions from CPG:
 See Colin Phillips or Hanna Muller's work [like @kelley.p:2018; @muller.h:2020; @parker.d:2016]. 
 -->
 </section>
-<section id="discussion" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="discussion">Discussion</h2>
+</section>
+<section id="notes" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="notes">Notes</h2>
 <ol type="1">
 <li><p>The number of samples from <span class="math inline">p_Z</span> for an IS estimate of <span class="math inline">\pZu</span> is <span class="math inline">e^{\KL{\pZu}{p_Z}}</span>.</p></li>
 <li><p>The number of samples from <span class="math inline">\qZu</span> for an IS estimate of <span class="math inline">\pZu</span> is <span class="math inline">e^{\KL{\pZu}{\qZu}}</span>.</p></li>
@@ -1153,16 +1191,229 @@ $$
 $$
 
 TBC -->
-
-
-
 </section>
+</section>
+<section id="ordered-search-runtime" class="level1 page-columns page-full">
+<h1>Ordered search runtime</h1>
+<p>Putting aside probabilistic algorithms, one <em>deterministic</em> algorithm whose runtime clearly increases with surprisal is simple probability-ordered search. Assuming the items to be searched are examined in order of decreasing probability, the time to find a given item is determined by the number of items which have higher probability.</p>
+<p>To say anything about the expected runtime requires making some assumption about how item probabilities are distributed. <span class="citation" data-cites="anderson.j:1998atomic">Anderson &amp; Lebiere (<a href="#ref-anderson.j:1998atomic" role="doc-biblioref">1998</a>)</span> assume <em>need odds</em> are Pareto distributed. Thus they have the following pdf<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
+<div class="no-row-height column-margin column-container"><div id="fn4"><p><sup>4</sup>&nbsp;The density of <span class="math inline">X \sim \operatorname{Pareto}(\alpha,\theta)</span> is <span class="math inline">f(x) = \alpha\theta^\alpha x^{-(\alpha+1)}</span> (for <span class="math inline">x \ge \theta</span>), with parameters <span class="math inline">\alpha&gt;0,\theta&gt;0</span>. Here we abbreviate with <span class="math inline">a = \alpha\theta^\alpha</span>.</p></div></div><p><span class="math display">
+\begin{equation}
+f(o)= ao^{-(\alpha + 1)}
+\end{equation}
+</span></p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="5a91a612" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Plots</span>, <span class="bu">Distributions</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">gr</span>(size<span class="op">=</span>(<span class="fl">200</span>,<span class="fl">200</span>))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>α,θ <span class="op">=</span> <span class="fl">1</span>, <span class="fl">1</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">x-&gt;pdf</span>(<span class="fu">Pareto</span>(α,θ),x), </span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  xlim<span class="op">=</span>(θ,<span class="fl">5</span>), label<span class="op">=</span><span class="st">"pdf of Pareto(</span><span class="sc">$</span><span class="st">α,</span><span class="sc">$</span><span class="st">θ)")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<!--?xml version="1.0" encoding="utf-8"?-->
+<svg xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" width="200" height="200" viewbox="0 0 800 800">
+<defs>
+  <clippath id="clip530">
+    <rect x="0" y="0" width="800" height="800"></rect>
+  </clippath>
+</defs>
+<path clip-path="url(#clip530)" d="M0 800 L800 800 L800 0 L0 0  Z" fill="#ffffff" fill-rule="evenodd" fill-opacity="1"></path>
+<defs>
+  <clippath id="clip531">
+    <rect x="160" y="79" width="561" height="561"></rect>
+  </clippath>
+</defs>
+<path clip-path="url(#clip530)" d="M140.598 677.168 L752.756 677.168 L752.756 47.2441 L140.598 47.2441  Z" fill="#ffffff" fill-rule="evenodd" fill-opacity="1"></path>
+<defs>
+  <clippath id="clip532">
+    <rect x="140" y="47" width="613" height="631"></rect>
+  </clippath>
+</defs>
+<polyline clip-path="url(#clip532)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:2; stroke-opacity:0.1; fill:none" points="140.598,677.168 140.598,47.2441 "></polyline>
+<polyline clip-path="url(#clip532)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:2; stroke-opacity:0.1; fill:none" points="293.638,677.168 293.638,47.2441 "></polyline>
+<polyline clip-path="url(#clip532)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:2; stroke-opacity:0.1; fill:none" points="446.677,677.168 446.677,47.2441 "></polyline>
+<polyline clip-path="url(#clip532)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:2; stroke-opacity:0.1; fill:none" points="599.716,677.168 599.716,47.2441 "></polyline>
+<polyline clip-path="url(#clip532)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:2; stroke-opacity:0.1; fill:none" points="752.756,677.168 752.756,47.2441 "></polyline>
+<polyline clip-path="url(#clip530)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:4; stroke-opacity:1; fill:none" points="140.598,677.168 752.756,677.168 "></polyline>
+<polyline clip-path="url(#clip530)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:4; stroke-opacity:1; fill:none" points="140.598,677.168 140.598,658.27 "></polyline>
+<polyline clip-path="url(#clip530)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:4; stroke-opacity:1; fill:none" points="293.638,677.168 293.638,658.27 "></polyline>
+<polyline clip-path="url(#clip530)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:4; stroke-opacity:1; fill:none" points="446.677,677.168 446.677,658.27 "></polyline>
+<polyline clip-path="url(#clip530)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:4; stroke-opacity:1; fill:none" points="599.716,677.168 599.716,658.27 "></polyline>
+<polyline clip-path="url(#clip530)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:4; stroke-opacity:1; fill:none" points="752.756,677.168 752.756,658.27 "></polyline>
+<path clip-path="url(#clip530)" d="M130.98 722.833 L138.619 722.833 L138.619 696.467 L130.309 698.134 L130.309 693.875 L138.573 692.208 L143.249 692.208 L143.249 722.833 L150.888 722.833 L150.888 726.768 L130.98 726.768 L130.98 722.833 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M288.29 722.833 L304.61 722.833 L304.61 726.768 L282.665 726.768 L282.665 722.833 Q285.328 720.078 289.911 715.448 Q294.517 710.796 295.698 709.453 Q297.943 706.93 298.823 705.194 Q299.726 703.435 299.726 701.745 Q299.726 698.99 297.781 697.254 Q295.86 695.518 292.758 695.518 Q290.559 695.518 288.105 696.282 Q285.675 697.046 282.897 698.597 L282.897 693.875 Q285.721 692.74 288.175 692.162 Q290.628 691.583 292.665 691.583 Q298.036 691.583 301.23 694.268 Q304.425 696.953 304.425 701.444 Q304.425 703.574 303.614 705.495 Q302.827 707.393 300.721 709.986 Q300.142 710.657 297.04 713.874 Q293.939 717.069 288.29 722.833 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M450.925 708.134 Q454.281 708.851 456.156 711.12 Q458.054 713.388 458.054 716.722 Q458.054 721.837 454.536 724.638 Q451.017 727.439 444.536 727.439 Q442.36 727.439 440.045 726.999 Q437.754 726.583 435.3 725.726 L435.3 721.212 Q437.244 722.347 439.559 722.925 Q441.874 723.504 444.397 723.504 Q448.795 723.504 451.087 721.768 Q453.402 720.032 453.402 716.722 Q453.402 713.666 451.249 711.953 Q449.119 710.217 445.3 710.217 L441.272 710.217 L441.272 706.374 L445.485 706.374 Q448.934 706.374 450.763 705.009 Q452.591 703.62 452.591 701.027 Q452.591 698.365 450.693 696.953 Q448.818 695.518 445.3 695.518 Q443.378 695.518 441.179 695.935 Q438.98 696.351 436.341 697.231 L436.341 693.064 Q439.004 692.324 441.318 691.953 Q443.656 691.583 445.716 691.583 Q451.04 691.583 454.142 694.013 Q457.244 696.421 457.244 700.541 Q457.244 703.412 455.601 705.402 Q453.957 707.37 450.925 708.134 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M602.726 696.282 L590.92 714.731 L602.726 714.731 L602.726 696.282 M601.499 692.208 L607.378 692.208 L607.378 714.731 L612.309 714.731 L612.309 718.62 L607.378 718.62 L607.378 726.768 L602.726 726.768 L602.726 718.62 L587.124 718.62 L587.124 714.106 L601.499 692.208 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M743.034 692.208 L761.39 692.208 L761.39 696.143 L747.316 696.143 L747.316 704.615 Q748.335 704.268 749.353 704.106 Q750.372 703.921 751.39 703.921 Q757.177 703.921 760.557 707.092 Q763.936 710.263 763.936 715.68 Q763.936 721.259 760.464 724.36 Q756.992 727.439 750.673 727.439 Q748.497 727.439 746.228 727.069 Q743.983 726.698 741.575 725.958 L741.575 721.259 Q743.659 722.393 745.881 722.948 Q748.103 723.504 750.58 723.504 Q754.585 723.504 756.923 721.398 Q759.261 719.291 759.261 715.68 Q759.261 712.069 756.923 709.962 Q754.585 707.856 750.58 707.856 Q748.705 707.856 746.83 708.273 Q744.978 708.689 743.034 709.569 L743.034 692.208 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><polyline clip-path="url(#clip532)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:2; stroke-opacity:0.1; fill:none" points="140.598,560.295 752.756,560.295 "></polyline>
+<polyline clip-path="url(#clip532)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:2; stroke-opacity:0.1; fill:none" points="140.598,436.489 752.756,436.489 "></polyline>
+<polyline clip-path="url(#clip532)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:2; stroke-opacity:0.1; fill:none" points="140.598,312.684 752.756,312.684 "></polyline>
+<polyline clip-path="url(#clip532)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:2; stroke-opacity:0.1; fill:none" points="140.598,188.878 752.756,188.878 "></polyline>
+<polyline clip-path="url(#clip532)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:2; stroke-opacity:0.1; fill:none" points="140.598,65.0721 752.756,65.0721 "></polyline>
+<polyline clip-path="url(#clip530)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:4; stroke-opacity:1; fill:none" points="140.598,677.168 140.598,47.2441 "></polyline>
+<polyline clip-path="url(#clip530)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:4; stroke-opacity:1; fill:none" points="140.598,560.295 159.496,560.295 "></polyline>
+<polyline clip-path="url(#clip530)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:4; stroke-opacity:1; fill:none" points="140.598,436.489 159.496,436.489 "></polyline>
+<polyline clip-path="url(#clip530)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:4; stroke-opacity:1; fill:none" points="140.598,312.684 159.496,312.684 "></polyline>
+<polyline clip-path="url(#clip530)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:4; stroke-opacity:1; fill:none" points="140.598,188.878 159.496,188.878 "></polyline>
+<polyline clip-path="url(#clip530)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:4; stroke-opacity:1; fill:none" points="140.598,65.0721 159.496,65.0721 "></polyline>
+<path clip-path="url(#clip530)" d="M73.0198 546.094 Q69.4087 546.094 67.58 549.659 Q65.7745 553.2 65.7745 560.33 Q65.7745 567.436 67.58 571.001 Q69.4087 574.543 73.0198 574.543 Q76.6541 574.543 78.4596 571.001 Q80.2883 567.436 80.2883 560.33 Q80.2883 553.2 78.4596 549.659 Q76.6541 546.094 73.0198 546.094 M73.0198 542.39 Q78.83 542.39 81.8855 546.997 Q84.9642 551.58 84.9642 560.33 Q84.9642 569.057 81.8855 573.663 Q78.83 578.247 73.0198 578.247 Q67.2097 578.247 64.131 573.663 Q61.0754 569.057 61.0754 560.33 Q61.0754 551.58 64.131 546.997 Q67.2097 542.39 73.0198 542.39 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M93.1818 571.696 L98.066 571.696 L98.066 577.575 L93.1818 577.575 L93.1818 571.696 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M112.279 573.64 L128.598 573.64 L128.598 577.575 L106.654 577.575 L106.654 573.64 Q109.316 570.885 113.899 566.256 Q118.506 561.603 119.686 560.261 Q121.932 557.737 122.811 556.001 Q123.714 554.242 123.714 552.552 Q123.714 549.798 121.77 548.061 Q119.848 546.325 116.746 546.325 Q114.547 546.325 112.094 547.089 Q109.663 547.853 106.885 549.404 L106.885 544.682 Q109.709 543.548 112.163 542.969 Q114.617 542.39 116.654 542.39 Q122.024 542.39 125.219 545.075 Q128.413 547.761 128.413 552.251 Q128.413 554.381 127.603 556.302 Q126.816 558.2 124.709 560.793 Q124.131 561.464 121.029 564.682 Q117.927 567.876 112.279 573.64 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M70.9365 422.288 Q67.3254 422.288 65.4967 425.853 Q63.6912 429.395 63.6912 436.524 Q63.6912 443.631 65.4967 447.195 Q67.3254 450.737 70.9365 450.737 Q74.5707 450.737 76.3763 447.195 Q78.205 443.631 78.205 436.524 Q78.205 429.395 76.3763 425.853 Q74.5707 422.288 70.9365 422.288 M70.9365 418.584 Q76.7467 418.584 79.8022 423.191 Q82.8809 427.774 82.8809 436.524 Q82.8809 445.251 79.8022 449.857 Q76.7467 454.441 70.9365 454.441 Q65.1264 454.441 62.0477 449.857 Q58.9921 445.251 58.9921 436.524 Q58.9921 427.774 62.0477 423.191 Q65.1264 418.584 70.9365 418.584 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M91.0984 447.89 L95.9827 447.89 L95.9827 453.769 L91.0984 453.769 L91.0984 447.89 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M119.015 423.284 L107.209 441.732 L119.015 441.732 L119.015 423.284 M117.788 419.209 L123.668 419.209 L123.668 441.732 L128.598 441.732 L128.598 445.621 L123.668 445.621 L123.668 453.769 L119.015 453.769 L119.015 445.621 L103.413 445.621 L103.413 441.107 L117.788 419.209 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M71.2606 298.482 Q67.6495 298.482 65.8208 302.047 Q64.0152 305.589 64.0152 312.718 Q64.0152 319.825 65.8208 323.39 Q67.6495 326.931 71.2606 326.931 Q74.8948 326.931 76.7004 323.39 Q78.5291 319.825 78.5291 312.718 Q78.5291 305.589 76.7004 302.047 Q74.8948 298.482 71.2606 298.482 M71.2606 294.779 Q77.0707 294.779 80.1263 299.385 Q83.205 303.968 83.205 312.718 Q83.205 321.445 80.1263 326.052 Q77.0707 330.635 71.2606 330.635 Q65.4504 330.635 62.3717 326.052 Q59.3162 321.445 59.3162 312.718 Q59.3162 303.968 62.3717 299.385 Q65.4504 294.779 71.2606 294.779 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M91.4225 324.084 L96.3067 324.084 L96.3067 329.964 L91.4225 329.964 L91.4225 324.084 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M117.071 310.82 Q113.922 310.82 112.071 312.973 Q110.242 315.126 110.242 318.876 Q110.242 322.603 112.071 324.779 Q113.922 326.931 117.071 326.931 Q120.219 326.931 122.047 324.779 Q123.899 322.603 123.899 318.876 Q123.899 315.126 122.047 312.973 Q120.219 310.82 117.071 310.82 M126.353 296.168 L126.353 300.427 Q124.594 299.593 122.788 299.154 Q121.006 298.714 119.246 298.714 Q114.617 298.714 112.163 301.839 Q109.733 304.964 109.385 311.283 Q110.751 309.269 112.811 308.205 Q114.871 307.117 117.348 307.117 Q122.557 307.117 125.566 310.288 Q128.598 313.436 128.598 318.876 Q128.598 324.2 125.45 327.417 Q122.302 330.635 117.071 330.635 Q111.075 330.635 107.904 326.052 Q104.733 321.445 104.733 312.718 Q104.733 304.524 108.621 299.663 Q112.51 294.779 119.061 294.779 Q120.82 294.779 122.603 295.126 Q124.408 295.473 126.353 296.168 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M71.5152 174.677 Q67.9041 174.677 66.0754 178.241 Q64.2699 181.783 64.2699 188.913 Q64.2699 196.019 66.0754 199.584 Q67.9041 203.126 71.5152 203.126 Q75.1494 203.126 76.955 199.584 Q78.7837 196.019 78.7837 188.913 Q78.7837 181.783 76.955 178.241 Q75.1494 174.677 71.5152 174.677 M71.5152 170.973 Q77.3254 170.973 80.3809 175.579 Q83.4596 180.163 83.4596 188.913 Q83.4596 197.639 80.3809 202.246 Q77.3254 206.829 71.5152 206.829 Q65.7051 206.829 62.6264 202.246 Q59.5708 197.639 59.5708 188.913 Q59.5708 180.163 62.6264 175.579 Q65.7051 170.973 71.5152 170.973 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M91.6771 200.278 L96.5614 200.278 L96.5614 206.158 L91.6771 206.158 L91.6771 200.278 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M116.746 189.746 Q113.413 189.746 111.492 191.528 Q109.594 193.311 109.594 196.436 Q109.594 199.561 111.492 201.343 Q113.413 203.126 116.746 203.126 Q120.08 203.126 122.001 201.343 Q123.922 199.538 123.922 196.436 Q123.922 193.311 122.001 191.528 Q120.103 189.746 116.746 189.746 M112.071 187.755 Q109.061 187.014 107.371 184.954 Q105.705 182.894 105.705 179.931 Q105.705 175.788 108.645 173.38 Q111.608 170.973 116.746 170.973 Q121.908 170.973 124.848 173.38 Q127.788 175.788 127.788 179.931 Q127.788 182.894 126.098 184.954 Q124.432 187.014 121.445 187.755 Q124.825 188.542 126.7 190.834 Q128.598 193.126 128.598 196.436 Q128.598 201.459 125.52 204.144 Q122.464 206.829 116.746 206.829 Q111.029 206.829 107.95 204.144 Q104.895 201.459 104.895 196.436 Q104.895 193.126 106.793 190.834 Q108.691 188.542 112.071 187.755 M110.358 180.371 Q110.358 183.056 112.024 184.561 Q113.714 186.065 116.746 186.065 Q119.756 186.065 121.445 184.561 Q123.158 183.056 123.158 180.371 Q123.158 177.686 121.445 176.181 Q119.756 174.677 116.746 174.677 Q113.714 174.677 112.024 176.181 Q110.358 177.686 110.358 180.371 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M62.2328 78.417 L69.8717 78.417 L69.8717 52.0514 L61.5616 53.718 L61.5616 49.4588 L69.8254 47.7921 L74.5013 47.7921 L74.5013 78.417 L82.1402 78.417 L82.1402 82.3521 L62.2328 82.3521 L62.2328 78.417 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M91.5845 76.4725 L96.4688 76.4725 L96.4688 82.3521 L91.5845 82.3521 L91.5845 76.4725 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M116.654 50.8708 Q113.043 50.8708 111.214 54.4356 Q109.409 57.9773 109.409 65.1068 Q109.409 72.2133 111.214 75.7781 Q113.043 79.3197 116.654 79.3197 Q120.288 79.3197 122.094 75.7781 Q123.922 72.2133 123.922 65.1068 Q123.922 57.9773 122.094 54.4356 Q120.288 50.8708 116.654 50.8708 M116.654 47.1671 Q122.464 47.1671 125.52 51.7736 Q128.598 56.3569 128.598 65.1068 Q128.598 73.8337 125.52 78.4401 Q122.464 83.0234 116.654 83.0234 Q110.844 83.0234 107.765 78.4401 Q104.709 73.8337 104.709 65.1068 Q104.709 56.3569 107.765 51.7736 Q110.844 47.1671 116.654 47.1671 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><polyline clip-path="url(#clip532)" style="stroke:#009af9; stroke-linecap:round; stroke-linejoin:round; stroke-width:4; stroke-opacity:1; fill:none" points="140.598,65.0721 141.595,73.0545 142.591,80.8835 143.587,88.563 144.584,96.0967 146.887,112.974 149.19,129.135 151.493,144.62 153.797,159.465 156.1,173.706 158.403,187.375 160.706,200.502 163.009,213.116 165.313,225.242 167.616,236.906 169.919,248.131 172.222,258.938 176.829,279.382 181.435,298.385 184.204,309.169 186.972,319.506 189.74,329.422 192.508,338.938 198.045,356.858 203.581,373.417 208.263,386.456 212.944,398.692 217.625,410.188 222.306,421.003 227.391,432.041 232.476,442.399 237.561,452.132 242.646,461.288 247.334,469.257 252.022,476.806 256.709,483.964 261.397,490.758 271.449,504.207 281.501,516.3 293.147,528.846 304.793,540.036 315.143,548.996 325.492,557.144 334.568,563.698 343.644,569.758 353.539,575.857 363.434,581.481 373.387,586.708 383.341,591.545 405.351,601.04 426.294,608.78 448.069,615.735 466.399,620.869 488.777,626.389 509.278,630.836 528.212,634.501 547.391,637.841 568.885,641.199 588.363,643.936 610.663,646.759 631.312,649.116 651.668,651.228 671.433,653.101 691.694,654.859 713.893,656.619 746.14,658.906 752.756,659.34 "></polyline>
+<path clip-path="url(#clip530)" d="M263.707 171.922 L732.351 171.922 L732.351 68.2416 L263.707 68.2416  Z" fill="#ffffff" fill-rule="evenodd" fill-opacity="1"></path>
+<polyline clip-path="url(#clip530)" style="stroke:#000000; stroke-linecap:round; stroke-linejoin:round; stroke-width:4; stroke-opacity:1; fill:none" points="263.707,171.922 732.351,171.922 732.351,68.2416 263.707,68.2416 263.707,171.922 "></polyline>
+<polyline clip-path="url(#clip530)" style="stroke:#009af9; stroke-linecap:round; stroke-linejoin:round; stroke-width:4; stroke-opacity:1; fill:none" points="270.508,120.082 311.319,120.082 "></polyline>
+<path clip-path="url(#clip530)" d="M322.403 133.473 L322.403 147.223 L318.121 147.223 L318.121 111.436 L322.403 111.436 L322.403 115.371 Q323.745 113.056 325.783 111.945 Q327.843 110.811 330.69 110.811 Q335.412 110.811 338.352 114.561 Q341.315 118.311 341.315 124.422 Q341.315 130.533 338.352 134.283 Q335.412 138.033 330.69 138.033 Q327.843 138.033 325.783 136.922 Q323.745 135.787 322.403 133.473 M336.894 124.422 Q336.894 119.723 334.949 117.061 Q333.028 114.376 329.648 114.376 Q326.269 114.376 324.324 117.061 Q322.403 119.723 322.403 124.422 Q322.403 129.121 324.324 131.806 Q326.269 134.468 329.648 134.468 Q333.028 134.468 334.949 131.806 Q336.894 129.121 336.894 124.422 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M365.435 115.371 L365.435 101.343 L369.694 101.343 L369.694 137.362 L365.435 137.362 L365.435 133.473 Q364.093 135.787 362.032 136.922 Q359.995 138.033 357.125 138.033 Q352.426 138.033 349.463 134.283 Q346.523 130.533 346.523 124.422 Q346.523 118.311 349.463 114.561 Q352.426 110.811 357.125 110.811 Q359.995 110.811 362.032 111.945 Q364.093 113.056 365.435 115.371 M350.921 124.422 Q350.921 129.121 352.843 131.806 Q354.787 134.468 358.167 134.468 Q361.546 134.468 363.491 131.806 Q365.435 129.121 365.435 124.422 Q365.435 119.723 363.491 117.061 Q361.546 114.376 358.167 114.376 Q354.787 114.376 352.843 117.061 Q350.921 119.723 350.921 124.422 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M391.592 101.343 L391.592 104.885 L387.518 104.885 Q385.227 104.885 384.324 105.811 Q383.444 106.737 383.444 109.144 L383.444 111.436 L390.458 111.436 L390.458 114.746 L383.444 114.746 L383.444 137.362 L379.162 137.362 L379.162 114.746 L375.088 114.746 L375.088 111.436 L379.162 111.436 L379.162 109.63 Q379.162 105.302 381.176 103.334 Q383.19 101.343 387.565 101.343 L391.592 101.343 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M420.273 114.422 Q416.847 114.422 414.856 117.107 Q412.865 119.769 412.865 124.422 Q412.865 129.075 414.833 131.76 Q416.824 134.422 420.273 134.422 Q423.676 134.422 425.666 131.737 Q427.657 129.051 427.657 124.422 Q427.657 119.815 425.666 117.13 Q423.676 114.422 420.273 114.422 M420.273 110.811 Q425.828 110.811 429 114.422 Q432.171 118.033 432.171 124.422 Q432.171 130.788 429 134.422 Q425.828 138.033 420.273 138.033 Q414.694 138.033 411.523 134.422 Q408.375 130.788 408.375 124.422 Q408.375 118.033 411.523 114.422 Q414.694 110.811 420.273 110.811 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M452.356 101.343 L452.356 104.885 L448.282 104.885 Q445.99 104.885 445.087 105.811 Q444.208 106.737 444.208 109.144 L444.208 111.436 L451.222 111.436 L451.222 114.746 L444.208 114.746 L444.208 137.362 L439.925 137.362 L439.925 114.746 L435.851 114.746 L435.851 111.436 L439.925 111.436 L439.925 109.63 Q439.925 105.302 441.939 103.334 Q443.953 101.343 448.328 101.343 L452.356 101.343 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M475.851 106.644 L475.851 119.63 L481.731 119.63 Q484.995 119.63 486.777 117.94 Q488.559 116.251 488.559 113.126 Q488.559 110.024 486.777 108.334 Q484.995 106.644 481.731 106.644 L475.851 106.644 M471.175 102.802 L481.731 102.802 Q487.541 102.802 490.504 105.44 Q493.49 108.056 493.49 113.126 Q493.49 118.241 490.504 120.857 Q487.541 123.473 481.731 123.473 L475.851 123.473 L475.851 137.362 L471.175 137.362 L471.175 102.802 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M509.231 124.329 Q504.069 124.329 502.078 125.51 Q500.087 126.69 500.087 129.538 Q500.087 131.806 501.569 133.149 Q503.073 134.468 505.643 134.468 Q509.184 134.468 511.314 131.968 Q513.467 129.445 513.467 125.278 L513.467 124.329 L509.231 124.329 M517.726 122.57 L517.726 137.362 L513.467 137.362 L513.467 133.426 Q512.008 135.787 509.832 136.922 Q507.657 138.033 504.508 138.033 Q500.527 138.033 498.166 135.811 Q495.828 133.565 495.828 129.815 Q495.828 125.44 498.745 123.218 Q501.684 120.996 507.495 120.996 L513.467 120.996 L513.467 120.579 Q513.467 117.639 511.522 116.042 Q509.601 114.422 506.106 114.422 Q503.883 114.422 501.777 114.954 Q499.67 115.487 497.726 116.551 L497.726 112.616 Q500.064 111.714 502.263 111.274 Q504.462 110.811 506.545 110.811 Q512.17 110.811 514.948 113.727 Q517.726 116.644 517.726 122.57 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M541.522 115.417 Q540.805 115.001 539.948 114.815 Q539.115 114.607 538.096 114.607 Q534.485 114.607 532.541 116.968 Q530.619 119.306 530.619 123.704 L530.619 137.362 L526.337 137.362 L526.337 111.436 L530.619 111.436 L530.619 115.464 Q531.962 113.102 534.115 111.968 Q536.268 110.811 539.346 110.811 Q539.786 110.811 540.318 110.88 Q540.851 110.927 541.499 111.042 L541.522 115.417 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M567.124 123.334 L567.124 125.417 L547.541 125.417 Q547.818 129.815 550.179 132.13 Q552.564 134.422 556.8 134.422 Q559.253 134.422 561.545 133.82 Q563.86 133.218 566.128 132.014 L566.128 136.042 Q563.837 137.014 561.429 137.524 Q559.022 138.033 556.545 138.033 Q550.342 138.033 546.707 134.422 Q543.096 130.811 543.096 124.653 Q543.096 118.288 546.522 114.561 Q549.971 110.811 555.804 110.811 Q561.036 110.811 564.068 114.19 Q567.124 117.547 567.124 123.334 M562.865 122.084 Q562.818 118.589 560.897 116.505 Q558.999 114.422 555.851 114.422 Q552.286 114.422 550.133 116.436 Q548.004 118.45 547.679 122.107 L562.865 122.084 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M578.327 104.075 L578.327 111.436 L587.101 111.436 L587.101 114.746 L578.327 114.746 L578.327 128.82 Q578.327 131.991 579.184 132.894 Q580.064 133.797 582.726 133.797 L587.101 133.797 L587.101 137.362 L582.726 137.362 Q577.795 137.362 575.92 135.533 Q574.045 133.681 574.045 128.82 L574.045 114.746 L570.92 114.746 L570.92 111.436 L574.045 111.436 L574.045 104.075 L578.327 104.075 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M602.749 114.422 Q599.323 114.422 597.332 117.107 Q595.341 119.769 595.341 124.422 Q595.341 129.075 597.309 131.76 Q599.3 134.422 602.749 134.422 Q606.151 134.422 608.142 131.737 Q610.133 129.051 610.133 124.422 Q610.133 119.815 608.142 117.13 Q606.151 114.422 602.749 114.422 M602.749 110.811 Q608.304 110.811 611.475 114.422 Q614.647 118.033 614.647 124.422 Q614.647 130.788 611.475 134.422 Q608.304 138.033 602.749 138.033 Q597.17 138.033 593.999 134.422 Q590.851 130.788 590.851 124.422 Q590.851 118.033 593.999 114.422 Q597.17 110.811 602.749 110.811 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M631.938 101.39 Q628.836 106.714 627.332 111.922 Q625.827 117.13 625.827 122.477 Q625.827 127.825 627.332 133.079 Q628.86 138.311 631.938 143.612 L628.235 143.612 Q624.762 138.172 623.026 132.917 Q621.313 127.663 621.313 122.477 Q621.313 117.315 623.026 112.084 Q624.739 106.852 628.235 101.39 L631.938 101.39 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M641.614 133.426 L649.253 133.426 L649.253 107.061 L640.943 108.727 L640.943 104.468 L649.207 102.802 L653.883 102.802 L653.883 133.426 L661.521 133.426 L661.521 137.362 L641.614 137.362 L641.614 133.426 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M671.452 131.482 L676.336 131.482 L676.336 135.463 L672.54 142.871 L669.554 142.871 L671.452 135.463 L671.452 131.482 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M686.845 133.426 L694.484 133.426 L694.484 107.061 L686.174 108.727 L686.174 104.468 L694.438 102.802 L699.114 102.802 L699.114 133.426 L706.753 133.426 L706.753 137.362 L686.845 137.362 L686.845 133.426 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M714.924 101.39 L718.628 101.39 Q722.1 106.852 723.813 112.084 Q725.549 117.315 725.549 122.477 Q725.549 127.663 723.813 132.917 Q722.1 138.172 718.628 143.612 L714.924 143.612 Q718.003 138.311 719.507 133.079 Q721.035 127.825 721.035 122.477 Q721.035 117.13 719.507 111.922 Q718.003 106.714 714.924 101.39 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path></svg>
+</div>
+</div>
+</div></div><p>This assumption allows them to derive the relationship between the log-odds <span class="math inline">l</span> and search runtime (the latency formula for ACT-R) as</p>
+<p><span class="math display">
+\begin{equation}
+T(l) \propto e^{-\alpha l}
+\end{equation}
+</span></p>
+<p>They note that it is common to assume <span class="math inline">\alpha = 1</span>, so this simplifies to <span class="math inline">T(l) \propto e^{-l}</span>.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Derivation
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<p>Log-odds are a (monotonic smooth) deterministic function of odds, so, starting with the pdf for odds, <span class="math inline">f(o)</span>, we can first derive the expression for the pdf of log-odds <span class="math inline">l = \log o</span>, by transforming the pdf:</p>
+<p>To begin, note <span class="math inline">o = e^l</span>, so <span class="math inline">\frac{\dee{o(l)}}{\dee{l}} = e^l</span>, and <span class="math inline">f(o(l)) = a[e^l]^{-(\alpha + 1)} = a e^{(\alpha + 1)l}</span>.</p>
+<p>Thus, the pdf of log-odds is <span class="math display">
+\begin{equation}
+g(l) = f(o(l))\frac{\dee{o(l)}}{\dee{l}}
+= a e^{(\alpha + 1)l} e^l
+= ae^{-\alpha l}
+\end{equation}
+</span></p>
+<p>So, the proportion of items with log-odds higher than some value <span class="math inline">l_\star</span> (the log-odds of the target item) is</p>
+<p><span class="math display">
+\begin{equation}
+\Pr(\text{log-odds} &gt; l_\star) = \int_{l_\star}^\infty g(l) \dee{l}
+= \frac{a}{\alpha}e^{-\alpha l_\star}
+\end{equation}
+</span></p>
+<p>Thus, if there are <span class="math inline">C</span> items total, and each takes <span class="math inline">t</span> time to inspect, the total search runtime to find the target is <span class="math display">
+\begin{equation}
+T(l_\star)
+= \frac{aCt}{\alpha}e^{-\alpha l_\star}
+\end{equation}
+</span></p>
+</div>
+</div>
+</div>
+<p>However, we’re interested in the relationship between the <em>surprisal</em> <span class="math inline">s</span> and search runtime (a reframing of the latency formula for ACT-R). We can derive this from the above formula for runtime as a function of log-odds, simply by plugging in <span class="math inline">\text{log-odds} = -\log(e^s-1)</span>, to get</p>
+<p><span class="math display">
+\begin{equation}
+T(l) \propto e^{-\alpha l} = (e^s-1)^\alpha
+\end{equation}
+</span></p>
+<p>Assuming <span class="math inline">\alpha = 1</span>, this simplifies to <span class="math inline">T(s) \propto e^s-1</span>.</p>
+<hr>
+<p>We could have alternatively derived this from the pdf of the Pareto distribution, similar to their derivation.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Derivation
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Surprisal is a (monotonic smooth) deterministic function of odds, so, starting with the pdf for odds, <span class="math inline">f(o)</span>, we can first derive the expression for the pdf of surprisal <span class="math inline">s = \log(1+e^{-\log o})</span>, by transforming the pdf:</p>
+<p>To begin, note <span class="math inline">o = (e^s-1)^{-1}</span>, so <span class="math inline">\frac{\dee{o(s)}}{\dee{s}} = -e^s(e^s-1)^{-2}</span>, and <span class="math inline">f(o(s)) = a[(e^s-1)^{-1}]^{-(\alpha + 1)} = a(e^s-1)^{\alpha+1}</span>.</p>
+<p>Thus, the pdf of surprisal is <span class="math display">
+\begin{equation}
+g(s) = f(o(s))\left|\frac{\dee{o(s)}}{\dee{s}}\right|
+= a(e^s-1)^{\alpha+1} e^s(e^s-1)^{-2}
+= a(e^s-1)^{\alpha-1} e^s
+\end{equation}
+</span></p>
+<p>So, the proportion of items with surprisal lower than some value <span class="math inline">s_\star</span> (the surprisal of the target item) is</p>
+<p><span class="math display">
+\begin{equation}
+\Pr(\text{surprisal} &lt; s_\star) = \int_0^{l_\star} g(s) \dee{s}
+= \frac{a}{\alpha}(e^{s_\star}-1)^{\alpha}
+\end{equation}
+</span></p>
+<p>Thus, if there are <span class="math inline">C</span> items total, and each takes <span class="math inline">t</span> time to inspect, the total search runtime to find the target is <span class="math display">
+\begin{equation}
+T(s_\star)
+= \frac{aCt}{\alpha}(e^{s_\star}-1)^{\alpha}
+\end{equation}
+</span></p>
+</div>
+</div>
+</div>
+<p>Now if, instead of assuming <em>log-odds</em> were Pareto-distributed, we assume item <em>weights</em> are Pareto distributed (where weights represent unnormalized probabilities), then we can derive a similar relationship. To start with, write the density of weights as</p>
+<p><span class="math display">
+\begin{equation}
+f(w)= aw^{-(\alpha + 1)}
+\end{equation}
+</span> where the probability of an item with <span class="math inline">w</span> is <span class="math inline">\frac{w}{Z}</span>, for some global normalizing constant <span class="math inline">Z</span>.</p>
+<p>This assumption allows us to derive the relationship between the surprisal <span class="math inline">s</span> and search runtime as</p>
+<p><span class="math display">
+\begin{equation}
+T(l) \propto e^{-\alpha s} - 1
+\end{equation}
+</span></p>
+<p>With the assumption that <span class="math inline">\alpha = 1</span>, this simplifies to <span class="math inline">T(s) \propto e^{-s} - 1</span>, just as above.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Derivation
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<p>Surprisal is a (monotonic smooth) deterministic function of item weight, so, starting with the pdf for weights, <span class="math inline">f(w)</span>, we can first derive the expression for the pdf of surprisal <span class="math inline">s = -\log \frac{w}{Z}</span>, by transforming the pdf:</p>
+<p>To begin, note <span class="math inline">w = Ze^{-s}</span>, so <span class="math inline">\frac{\dee{w(s)}}{\dee{s}} = -Ze^{-s}</span>, and <span class="math inline">f(w(s)) = a[Ze^{-s}]^{-(\alpha + 1)} = \frac{a}{Z^{\alpha+1}}e^{(\alpha+1)s}</span>.</p>
+<p>Thus, the pdf of surprisal is <span class="math display">
+\begin{equation}
+h(s) = f(w(s))\left|\frac{\dee{w(s)}}{\dee{s}}\right|
+= \frac{a}{Z^{\alpha+1}}e^{(\alpha+1)s} Ze^{-s}
+= \frac{a}{Z^\alpha}e^{\alpha s}
+\end{equation}
+</span></p>
+<p>So, the proportion of items with surprisal lower than some value <span class="math inline">s_\star</span> (the surprisal of the target item) is</p>
+<p><span class="math display">
+\begin{equation}
+\Pr(\text{surprisal} &lt; s_\star) = \int_0^{s_\star} h(s) \dee{s}
+= \frac{a}{\alpha Z^\alpha}(e^{\alpha s_\star} -1)
+\end{equation}
+</span></p>
+<p>Thus, if there are <span class="math inline">C</span> items total, and each takes <span class="math inline">t</span> time to inspect, the total search runtime to find the target is <span class="math display">
+\begin{equation}
+T(s_\star)
+= \frac{aCt}{\alpha Z^\alpha}(e^{\alpha s_\star} -1)
+\end{equation}
+</span></p>
+</div>
+</div>
+</div>
+
+
+
 </section>
 
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
 <div id="ref-agapiou.s:2017" class="csl-entry" role="listitem">
 Agapiou, S., Papaspiliopoulos, O., Sanz-Alonso, D., &amp; Stuart, A. M. (2017). Importance sampling: Intrinsic dimension and computational cost. <em>Statistical Science</em>, <em>32</em>(3). <a href="https://doi.org/10.1214/17-STS611">https://doi.org/10.1214/17-STS611</a>
+</div>
+<div id="ref-anderson.j:1998atomic" class="csl-entry" role="listitem">
+Anderson, J. R., &amp; Lebiere, C. (1998). <em>The atomic components of thought</em>. Psychology Press. <a href="https://doi.org/10.4324/9781315805696">https://doi.org/10.4324/9781315805696</a>
 </div>
 <div id="ref-baldi.p:2002" class="csl-entry" role="listitem">
 Baldi, P. (2002). A computational theory of surprise. In M. Blaum, P. G. Farrell, &amp; H. C. A. van Tilborg (Eds.), <em>Information, <span>Coding</span> and <span>Mathematics</span>: <span>Proceedings</span> of <span>Workshop</span> honoring <span>Prof</span>. <span>Bob McEliece</span> on his 60th birthday</em> (pp. 1–25). Springer US. <a href="https://doi.org/10.1007/978-1-4757-3585-7_1">https://doi.org/10.1007/978-1-4757-3585-7_1</a>

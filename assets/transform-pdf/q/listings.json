@@ -2,14 +2,14 @@
   {
     "listing": "/index.html",
     "items": [
-      "/notebooks/difficulty-surprisal-summary.html",
-      "/notebooks/bayesian_parsing.html",
       "/notebooks/transform-pdf.html",
+      "/notebooks/difficulty-surprisal-summary.html",
       "/notebooks/lit_review.html",
       "/notebooks/simulation_biased_coin.html",
       "/notebooks/kl-surp-R-study.html",
       "/notebooks/kl-pq-study.html",
       "/notebooks/interactive-kl-and-surprisal.html",
+      "/notebooks/bayesian_parsing.html",
       "/notebooks/rejection-sampling-expo.html",
       "/notebooks/noisy-channel-lm.html",
       "/notebooks/particles.html",
