@@ -6,9 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Jacob Louis Hoover">
 
-<title>📓 – Difficulty and surprisal</title>
+<title>📓 – Bayesian incremental parsing</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -179,7 +178,9 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">📓</span>
+    </a>
   </div>
         <div class="quarto-navbar-tools tools-end">
   <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
@@ -189,7 +190,7 @@ window.Quarto = {
   </div>
 </a>
 </div>
-          
+          <div id="quarto-search" class="" title="Search"></div>
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -213,8 +214,13 @@ window.Quarto = {
   <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes</a>
   <ul class="collapse">
   <li><a href="#requirements-of-a-parametric-relationship" id="toc-requirements-of-a-parametric-relationship" class="nav-link" data-scroll-target="#requirements-of-a-parametric-relationship">Requirements of a parametric relationship</a></li>
+  <li><a href="#optimal-code-length" id="toc-optimal-code-length" class="nav-link" data-scroll-target="#optimal-code-length">Optimal code-length</a></li>
   </ul></li>
-  <li><a href="#ordered-search-runtime" id="toc-ordered-search-runtime" class="nav-link" data-scroll-target="#ordered-search-runtime">Ordered search runtime</a></li>
+  <li><a href="#ordered-search-runtime" id="toc-ordered-search-runtime" class="nav-link" data-scroll-target="#ordered-search-runtime">Ordered search runtime</a>
+  <ul class="collapse">
+  <li><a href="#probability-ordered-search-pareto-weights" id="toc-probability-ordered-search-pareto-weights" class="nav-link" data-scroll-target="#probability-ordered-search-pareto-weights">Probability-ordered search (Pareto weights)</a></li>
+  <li><a href="#probability-ordered-search-pareto-odds" id="toc-probability-ordered-search-pareto-odds" class="nav-link" data-scroll-target="#probability-ordered-search-pareto-odds">Probability-ordered search (Pareto odds)</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -237,37 +243,7 @@ window.Quarto = {
 </div>
 <div class="hidden">
 <p><span class="math display">
-% Moved below, for vscode
-</span></p>
-</div>
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Difficulty and surprisal</h1>
-</div>
-
-
-
-<div class="quarto-title-meta">
-
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Jacob Louis Hoover </p>
-          </div>
-  </div>
-    
-  
-    
-  </div>
-  
-
-
-</header>
-
-
-<p><span class="math display">
-% included just for quarto VSCode to display nicely
+\global\def\fade#1{{\color{gray}{#1}}}
 \global\def\uu{\breve u}
 \global\def\R{\operatorname{R}_{\pZu}(\uu)}
 \global\def\Rs#1{\operatorname{R}_{#1}(\uu)}
@@ -299,6 +275,28 @@ window.Quarto = {
 \global\def\posteriorn{{{p_\mathrm{LM}}(u_{i+1}\mid \mathbf\uu_{\le i})}}
 \global\def\dpdq{\frac{\dee p}{\dee q}}
 </span></p>
+</div>
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Bayesian incremental parsing</h1>
+<p class="subtitle lead">Making a formal framework</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
 <section id="difficulty-as-kl" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="difficulty-as-kl">Difficulty as KL</h2>
 <p>Say we want to approximate some target distribution <span class="math inline">p</span> using samples from some other distribution <span class="math inline">q</span>.</p>
@@ -306,7 +304,7 @@ window.Quarto = {
 <p><span class="math display">
 \#\text{samples}_{\mathrm{IS}(p\leftarrow q)} \approx e^{\KL p q}
 </span></p>
-<p>For proof, see <span class="citation" data-cites="chatterjee.s:2018">Chatterjee &amp; Diaconis (<a href="#ref-chatterjee.s:2018" role="doc-biblioref">2018</a>)</span>, who show that taking <span class="math inline">e^{\KL p q}</span> samples from <span class="math inline">q</span> is a necessary and sufficient condition for the absolute value of the error to be close to zero with high probability.</p>
+<p>For proof, see <span class="citation" data-cites="chatterjee.s:2018">Chatterjee and Diaconis (<a href="#ref-chatterjee.s:2018" role="doc-biblioref">2018</a>)</span>, who show that taking <span class="math inline">e^{\KL p q}</span> samples from <span class="math inline">q</span> is a necessary and sufficient condition for the absolute value of the error to be close to zero with high probability.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -331,7 +329,7 @@ Conditions for Chatterjee result
 <p><span class="math display">
 \mathrm{cost} \coloneqq e^{\KL p q}
 </span></p>
-<p>also note, many empirical studies of human reading time as a function of surprisal log transform the response variable, which in fact implies an exponential relationship like this. this is acknowledged, if only rarely <span class="citation" data-cites="oh.b:2024arxiv">(for example, in <a href="#ref-oh.b:2024arxiv" role="doc-biblioref">Oh et al., 2024</a>)</span></p>
+<p>also note, many empirical studies of human reading time as a function of surprisal log transform the response variable, which in fact implies an exponential relationship like this. this is acknowledged, if only rarely <span class="citation" data-cites="oh.b:2024arxiv">(for example, in <a href="#ref-oh.b:2024arxiv" role="doc-biblioref">Oh, Yue, and Schuler 2024</a>)</span></p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="true" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -367,7 +365,7 @@ Or… choose your fave divergence:
 <li>exponentially in KL, since <span class="math inline">\KL p q= \E_q{(\dpdq\log\dpdq)} =\E_p{(\log\dpdq)}\le\log\E_p{(\dpdq)} = \log \E_q{((\dpdq)^2)}=\log \rho</span>, by Jensen’s ineq. so <span class="math inline">e^{\KL p q} \le \rho</span></li>
 </ul></li>
 </ul>
-<p>There are many references for the relationships between KL and <span class="math inline">\chi^2</span> and other probability metrics/divergences <span class="citation" data-cites="gibbs.a:2002 sanz-alonso.d:2018">(see <a href="#ref-gibbs.a:2002" role="doc-biblioref">Gibbs &amp; Su, 2002</a>; <a href="#ref-sanz-alonso.d:2018" role="doc-biblioref">Sanz-Alonso, 2018</a>)</span>.</p>
+<p>There are many references for the relationships between KL and <span class="math inline">\chi^2</span> and other probability metrics/divergences <span class="citation" data-cites="gibbs.a:2002 sanz-alonso.d:2018">(see <a href="#ref-gibbs.a:2002" role="doc-biblioref">Gibbs and Su 2002</a>; <a href="#ref-sanz-alonso.d:2018" role="doc-biblioref">Sanz-Alonso 2018</a>)</span>.</p>
 <p><span class="math inline">\implies</span> For us, the point is: we could alternatively say <span class="math inline">\mathrm{cost} \coloneqq \DIV{\chi^2}\| p q</span>, and it would amount to something roughly similar as <span class="math inline">\mathrm{cost} \coloneqq e^{\KL p q}</span>.</p>
 </div>
 </div>
@@ -418,14 +416,14 @@ Assume <span class="math inline">\pZu\ll p_Z</span>, that is <span class="math i
 <p>where <span class="math inline">q</span> is any distribution over the latent variable <span class="math inline">Z</span> (such as a proposal, or variational approximation to the posterior), and <span class="math inline">\uu</span> is a fixed observed outcome of <span class="math inline">U</span>. Both the probability and the proposal may optionally depend on context <span class="math inline">\breve c</span>.</p>
 </div>
 <ul>
-<li><span class="math inline">\mathrm{R}_{\qZu}(\uu)</span> (for <span class="math inline">\qZu</span> an approximation to the posterior <span class="math inline">\pZu</span>) is sometimes called the <em>(negative) reconstruction error</em> in variational inference literature <span class="citation" data-cites="liang.d:2018 dehaene.d:2019">(<a href="#ref-dehaene.d:2019" role="doc-biblioref">Dehaene et al., 2019</a>; <a href="#ref-liang.d:2018" role="doc-biblioref">Liang et al., 2018</a>)</span> or original autoencoders literature <span class="citation" data-cites="vincent.p:2010">(such as <a href="#ref-vincent.p:2010" role="doc-biblioref">Vincent et al., 2010</a>)</span>.</li>
-<li>in a bounded-rational decision-making framework <span class="citation" data-cites="ortega.p:2013 genewein.t:2015">(<a href="#ref-genewein.t:2015" role="doc-biblioref">Genewein et al., 2015</a>; as in <a href="#ref-ortega.p:2013" role="doc-biblioref">Ortega &amp; Braun, 2013</a>)</span>, the negative of this quantity is the <em>expected utility</em>.</li>
+<li><span class="math inline">\mathrm{R}_{\qZu}(\uu)</span> (for <span class="math inline">\qZu</span> an approximation to the posterior <span class="math inline">\pZu</span>) is sometimes called the <em>(negative) reconstruction error</em> in variational inference literature <span class="citation" data-cites="liang.d:2018 dehaene.d:2019">(<a href="#ref-liang.d:2018" role="doc-biblioref">Liang et al. 2018</a>; <a href="#ref-dehaene.d:2019" role="doc-biblioref">Dehaene et al. 2019</a>)</span> or original autoencoders literature <span class="citation" data-cites="vincent.p:2010">(such as <a href="#ref-vincent.p:2010" role="doc-biblioref">Vincent et al. 2010</a>)</span>.</li>
+<li>in a bounded-rational decision-making framework <span class="citation" data-cites="ortega.p:2013 genewein.t:2015">(as in <a href="#ref-ortega.p:2013" role="doc-biblioref">Ortega and Braun 2013</a>; <a href="#ref-genewein.t:2015" role="doc-biblioref">Genewein et al. 2015</a>)</span>, the negative of this quantity is the <em>expected utility</em>.</li>
 </ul>
 </div></div><p>Note <span class="math inline">\R=0</span> is a necessary and sufficient condition for the relative entropy between prior and posterior equalling surprisal:</p>
 <p><span class="math display">
 \KL{\pZu}{p_Z}=-\log p(\uu) \quad\iff\quad \R=0
 </span></p>
-<p><span class="math inline">U</span> being a deterministic function of <span class="math inline">Z</span> is a sufficient condition for this to hold <span class="citation" data-cites="levy.r:2008">(this is the assumption made in the proofs of the equivalence of KL and surprisal, such as in <a href="#ref-levy.r:2008" role="doc-biblioref">Levy, 2008</a>)</span>.</p>
+<p><span class="math inline">U</span> being a deterministic function of <span class="math inline">Z</span> is a sufficient condition for this to hold <span class="citation" data-cites="levy.r:2008">(this is the assumption made in the proofs of the equivalence of KL and surprisal, such as in <a href="#ref-levy.r:2008" role="doc-biblioref">Levy 2008</a>)</span>.</p>
 </section>
 <section id="decomposing-kl-between-proposal-and-posterior" class="level3">
 <h3 class="anchored" data-anchor-id="decomposing-kl-between-proposal-and-posterior">Decomposing KL between <em>proposal</em> and posterior</h3>
@@ -506,13 +504,13 @@ Comparison with VAE and ‘Bayesian Surprise’
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>The expectation here looks a lot like <span class="math inline">\operatorname{ELBO}(\uu)\coloneqq\E_{\qZu}\left[\log\frac{p(z, \uu)}{\qzu}\right]</span> in variational inference (aka negative variational free energy), but they differ in what the expectation is taken with respect to.</p>
-<p>For comparison, using the same notation, the usual derivation in VAE looks like this. See, e.g., <span class="citation" data-cites="kingma.d:2017 dayan.p:1995">(<a href="#ref-kingma.d:2017" role="doc-biblioref">Kingma, 2017</a>; though this math goes back before VAEs at least to <a href="#ref-dayan.p:1995" role="doc-biblioref">Dayan et al., 1995</a>, eq 2.5)</span>:</p>
+<p>The expectation here looks a lot like <span class="math inline">\operatorname{ELBO}_\qZu(\uu)\coloneqq\E_{\qZu}\left[\log\frac{p(z, \uu)}{\qzu}\right]</span> in variational inference (aka negative variational free energy), but they differ in what the expectation is taken with respect to.</p>
+<p>For comparison, using the same notation, the usual derivation in VAE looks like this. See, e.g., <span class="citation" data-cites="kingma.d:2017 dayan.p:1995">(<a href="#ref-kingma.d:2017" role="doc-biblioref">Kingma 2017</a>; though this math goes back before VAEs at least to <a href="#ref-dayan.p:1995" role="doc-biblioref">Dayan et al. 1995</a>, eq 2.5)</span>:</p>
 <p><span class="math display">
 \begin{aligned}
 \log p(\uu)
     &amp;= \KL{\qZu}{\pZu}
-    + \overbrace{\E_{\qZu}{\log\frac{p(z, \uu)}{\qzu}}}^{\operatorname{ELBO}(\uu)}\\
+    + \overbrace{\E_{\qZu}{\log\frac{p(z, \uu)}{\qzu}}}^{\operatorname{ELBO}_\qZu(\uu)}\\
 \end{aligned}
 </span></p>
 <p>So, we get a very similar equation to the above for a KL in the opposite direction:</p>
@@ -540,12 +538,12 @@ Comparison with VAE and ‘Bayesian Surprise’
 <p>In this setup, <span class="math inline">\qZu</span> is chosen in order to maximize the ELBO. The ELBO consists of two components, the reconstruction error (which is a negative-log-likelihood term, to be maximized) minus the KL between <span class="math inline">\qZu</span> and the prior (which can be seen as a regularization term, to be minimized).</p>
 <p>These equations look very similar, but it is very different from the case we are interested in, where expectations are taken with respect to the true unknown posterior.</p>
 <hr>
-<p>While this direction of KL (with expectation over <span class="math inline">\qZu</span>) may be the “backward” direction from the point of view of the connection with sampling, it might be important to understand whether/how it relates to processing effort in some way, since when <span class="math inline">\qZu=p_Z</span>, this is precisely the divergence used as “Bayesian Surprise” <span class="citation" data-cites="baldi.p:2002 baldi.p:2010">(<a href="#ref-baldi.p:2002" role="doc-biblioref">Baldi, 2002</a>; <a href="#ref-baldi.p:2010" role="doc-biblioref">Baldi &amp; Itti, 2010</a>)</span> (see lit review). Might be that this was chosen purely for computational convenience, but even so, worth understanding what it implies.</p>
+<p>While this direction of KL (with expectation over <span class="math inline">\qZu</span>) may be the “backward” direction from the point of view of the connection with sampling, it might be important to understand whether/how it relates to processing effort in some way, since when <span class="math inline">\qZu=p_Z</span>, this is precisely the divergence used as “Bayesian Surprise” <span class="citation" data-cites="baldi.p:2002 baldi.p:2010">(<a href="#ref-baldi.p:2002" role="doc-biblioref">Baldi 2002</a>; <a href="#ref-baldi.p:2010" role="doc-biblioref">Baldi and Itti 2010</a>)</span> (see lit review). Might be that this was chosen purely for computational convenience, but even so, worth understanding what it implies.</p>
 <p>Depending on which direction of KL we choose to use we have two ways of expressing the surprisal:</p>
 <p><span class="math display">
 \begin{aligned}
 \surp{\uu}
-    &amp;= \overbrace{\E_{\qZu}{\log\frac{\qzu}{p(\uu\mid z)p(z)}}}^{-\operatorname{ELBO}(\uu)}
+    &amp;= \overbrace{\E_{\qZu}{\log\frac{\qzu}{p(\uu\mid z)p(z)}}}^{-\operatorname{ELBO}_\qZu(\uu)}
     - \KL{\qZu}{\pZu}\\
 \surp{\uu}
     &amp;= \underbrace{\E_{\pZu}{\log \frac{\qzu}{p(\uu\mid z)p(z)}}}_{\R+\Dq}
@@ -554,19 +552,21 @@ Comparison with VAE and ‘Bayesian Surprise’
 </span></p>
 <p>or, put another way, with R, D, and the ELBO we can express the sum of the KL and reverse-KL <span class="math inline">\DIV{J},pq\coloneqq \KL pq  + \KL qp = \E_q{(\dpdq-1)\log\dpdq} = \DIV{\lambda t.(t-1)\log t}\|pq</span> (this symmetric <span class="math inline">f</span>-divergence is actually the one originally proposed by K&amp;L, and earlier defined by Jeffreys):</p>
 <p><span class="math display">
-\overbrace{\E_{\qZu}{\log\frac{\qzu}{p(\uu\mid z)p(z)}}}^{-\operatorname{ELBO}(\uu)}
-- \overbrace{\E_{\pZu}{\log \frac{\qzu}{p(\uu\mid z)p(z)}}}^{\R+\Dq}\ge0
-= {\DIV{J},{\pZu}{\qZu}}
+0\le
+{\DIV{J},{\pZu}{\qZu}} =
+\overbrace{\E_{\qZu}{\log\frac{\qzu}{p(\uu\mid z)p(z)}}}^{-\operatorname{ELBO}_\qZu(\uu)}
+- \overbrace{\E_{\pZu}{\log \frac{\qzu}{p(\uu\mid z)p(z)}}}^{\R+\Dq}
 </span></p>
 <p>This is a bit pointless in the abstract, since,<span class="math inline">\Dq</span> can be positive or negative, hence no bounds are implied. Yet, when we just consider the case where <span class="math inline">\qZu=p_Z</span>, then <span class="math inline">D = 0</span>, and we have</p>
 <p><span class="math display">
-\overbrace{\E_{p_Z}{\log\frac{1}{p(\uu\mid z)}}}^{-\operatorname{ELBO}(\uu)=\operatorname{R}_{p_Z}(\uu)}
+0\le
+\DIV{J},{\pZu}{p_Z} =
+\overbrace{\E_{p_Z}{\log\frac{1}{p(\uu\mid z)}}}^{-\operatorname{ELBO}_{p_Z}(\uu)=\operatorname{R}_{p_Z}(\uu)}
 - \overbrace{\E_{\pZu}{\log \frac{1}{p(\uu\mid z)}}}^{\R}
-= \DIV{J},{\pZu}{p_Z}\ge0
 </span></p>
 <p>where all the terms are nonnegative, so then we can say the magnitude of the ELBO (or, free energy, I guess) is in fact a upper bound on the magnitude of surprisal, which is an upper bound on R.</p>
 <p><span class="math display">
-0\le\R\le\surp{\uu}\le-\operatorname{ELBO}(\uu)=\operatorname{R}_{p_Z}(\uu)
+0\le\R\le\surp{\uu}\le-\operatorname{ELBO}_{p_Z}(\uu)=\operatorname{R}_{p_Z}(\uu)
 </span></p>
 <p>Is it useful to say that surprisal is bounded between R below and prior-reconstruction error/free energy above?</p>
 </div>
@@ -684,7 +684,7 @@ Comparison with VAE and ‘Bayesian Surprise’
 \le \E_{\priorZ}{ -\log p(\uu_i\mid {\cPRIO z},\mathbf\uu_{&lt; i})}\\
 %= \E_{\priorZ}{ -\log p(\uu_i\mid {\cPRIO z})}\quad\text{if }U_i\indep U_{\le i} \mid {\cPRIO Z}\\
 </span></p>
-<p>If we interpret the latent variable <span class="math inline">\cPRIO z \sim \priorZ</span> as a lossy/noised version of the context, and make an independence assumption, <span class="math inline">U_i\indep U_{\le i} \mid {\cPRIO Z}</span>, then surprisal is upperbounded by lossy-context surprisal <span class="math inline">\E_{\priorZ}{ -\log p(\uu_i\mid {\cPRIO z})}</span>, as defined in <span class="citation" data-cites="futrell.r:2020">Futrell et al. (<a href="#ref-futrell.r:2020" role="doc-biblioref">2020</a>)</span>. <!-- ^[See below: @sec-lossy-context-surprisal.] --></p>
+<p>If we interpret the latent variable <span class="math inline">\cPRIO z \sim \priorZ</span> as a lossy/noised version of the context, and make an independence assumption, <span class="math inline">U_i\indep U_{\le i} \mid {\cPRIO Z}</span>, then surprisal is upperbounded by lossy-context surprisal <span class="math inline">\E_{\priorZ}{ -\log p(\uu_i\mid {\cPRIO z})}</span>, as defined in <span class="citation" data-cites="futrell.r:2020">Futrell, Gibson, and Levy (<a href="#ref-futrell.r:2020" role="doc-biblioref">2020</a>)</span>.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -711,215 +711,6 @@ R_{\posteriorZ}(\uu) = \E_{\posteriorZ}{\log\frac1{p(\uu_i\mid {\cPOST z})}}
 </div>
 </div>
 </div>
-<!-- 
-### Estimation
-
-Estimate surprisal with a causal LM (like GPT-2/3) simply as
-
-$$
-\operatorname{surp}(\uu_i) 
-\approx \operatorname{surp}_{p_\mathrm{LM}}(\uu_i) 
-:= -\log p_\mathrm{LM}(\uu_i\mid \mathbf \uu_{<i})
-$$
-
-To estimate the other term(s), we need something else.
-
-#### Letting $Z$ be string continuations
-
-If we use $\mathbf U_{>i}$ as $Z$
-
-Then, we can estimate $S-R$ as
-
-$$
-\begin{aligned}
-\KL{\posteriorZ}{\priorZ}
-=&\E_\posteriorZ\log\frac{\posteriorZ}{\priorZ}\\
-\approx&\E_\posteriorU\log\frac
-    {p_\mathrm{LM}(\uu_i \mid \mathbf\uu_{< i}, \mathbf u_{>i})}
-    {p_\mathrm{LM}(\uu_i \mid \mathbf\uu_{< i})}\\
-&=\operatorname{surp}_{p_\mathrm{LM}}(\uu_i)
-- 
-\underbrace{
-    \E_\posteriorU\log\frac1{p_\mathrm{LM}(\uu_i \mid \mathbf\uu_{< i}, \mathbf u_{>i})}
-}_R
-    \\
-\end{aligned}
-$$
-
-This is, the causal-LM-surprisal of the word (given previous context), minus the expected masked-LM-surprisal of the word (given previous context and following completion) expectation over predicted completions (by the causal LM).
-
-Let $r_{\mathbf\uu_{\le i}}(\mathbf u_{>i}):=\operatorname{surp_{masked}}(\uu_i\mid\mathbf \uu_{<i},\mathbf u_{>i}) \overset{\mathrm{MLM}}\approx \log\frac1{p_\mathrm{MLM}(\uu_i \mid \mathbf\uu_{< i}, \mathbf u_{>i})}$, (this is precisely the loss that the masked-LM objective minimizes) and sample continuations from causal LM, $p_{\mathrm{LM}}$, for a Monte-Carlo approximation of $R$:
-
-$$
-\begin{aligned}
-R(\uu_i) &= \E_\posterioru{r_{\mathbf\uu_{\le i}}(\mathbf u_{>i})} \\
-&\overset{MC}{\approx}
-\frac1K\sum_{k=1}^{K}{r_{\mathbf\uu_{\le i}}(\mathbf u_{>i}^{(k)})} , \qquad\mathbf u_{>i}^{(k)}\sim p_\mathrm{LM}(\cdot|\mathbf \uu_{\le i})
-\end{aligned}
-$$
-
-Requires $\mathrm{LM}$ to be trained for
-
--   $p_{\mathrm{LM}}(\mathbf U_{>j}\mid \mathbf \uu_{<j})$ --- causal/prefix-LM task (GPT-like)
--   $p_{\mathrm{LM}}(U_j\mid \mathbf \uu_{<j},{\color{gray}u_j=\mathtt{[MASK]},}\mathbf u_{>j})$ --- masked/infilling LM (BERT-like)
-
-An appropriate choice would be UL2 [@tay.y:2023UL2].[^5]
-
-[^5]: See [notes: LM objectives](lit_review.qmd#the-differing-lm-objectives).
-
-A priori predictions (can use surp=LCsurp here):
-
--   **same as surprisal theory**: R negligible (so KL $\approx$ surp) when the current word is (generally nearly) deterministically predictable from continuations when masked.
--   **easier than surprisal theory** R large (so KL small) when current word is hard to predict from continuations when masked. Maybe: resumptive pronouns. Typos (added/repeated uninformative word). Agreement mismatched things.
-
-::: {.callout-note collapse="true"}
-#### Not useful for S-R-D
-
-We could also try to estimate the full $S-R-D$ as
-
-$$
-\begin{aligned}
-\KL{\posteriorZ}{\proposalZ}
-=&\E_\posteriorZ\log\frac{\posteriorZ}{\proposalZ}\\
-\approx&\E_\posteriorU\log\frac{\posterioru}{\proposalu}\\
-&=
-\E_\posterioru\sum_{j>i}
-\left[
-    \operatorname{surp}_{q_\mathrm{LM}}(u_j)-\operatorname{surp}_{p_\mathrm{LM}}(u_j)
-\right]
-\end{aligned}
-$$
-
-Then we this just becomes a comparison of surprisal under the LMs for p and for q. \[If we choose $q_\mathrm{LM}=p_\mathrm{LM}$, then this just trivially cancels so KL = 0, of course\].
-
-For the expectation we could estimate with Monte-Carlo: sample $K$ times from from $p_\mathrm{LM}$ and average.
-
-However, this isn't relevant, since we *don't* have plausible models for p and q to compare.
-
-------------------------------------------------------------------------
-
-The calculation for the R+D term is as follows:
-
-$$
-\begin{aligned}
-R(\uu_i)+D(\uu_i)
-&=
-\E_\posterioru
-    \log
-     \frac{q(\mathbf u_{>i};\mathbf \uu_{\le i})}
-          {p(\mathbf u_{>i},\uu_i|\mathbf \uu_{<i})}\\
-&\approx
-\E_\posterioru
-    \log
-     \frac{\proposalu}
-          {p_\mathrm{LM}(\mathbf u_{\ge i} \mid \mathbf \uu_{<i})}\\
-&\phantom{\approx}= 
-\E_\posterioru
-    \log
-     \frac{\prod_{j>i}q_\mathrm{LM}(u_j\mid \mathbf u_{<j})}
-          {p_\mathrm{LM}(\uu_i\mid \mathbf \uu_{<i})
-           \prod_{j>i}p_\mathrm{LM}(u_j\mid \mathbf \uu_{<i})}\\
-&\phantom{\approx}= 
-\operatorname{surp}_{p_\mathrm{LM}}(\uu_i)
-+ \E_\posterioru{
-    \sum_{j>i}\left( \operatorname{surp}_{p_\mathrm{LM}}(u_j)
-                   - \operatorname{surp}_{q_\mathrm{LM}}(u_j) \right)}
-\end{aligned}
-$$
-:::
-
-#### Letting $Z$ be just the next (sub)word?
-
-If we use $U_{i+1}$ as $Z$
-
-Then, we can estimate $S-R$ as
-
-$$
-\begin{aligned}
-\KL\posteriorZ\priorZ
-% =&\E_\posteriorZ\log\frac{\posteriorZ}{\priorZ}\\
-\approx&
-% \E_\posteriorN\log\frac
-%     {p_\mathrm{LM}(\uu_i \mid \mathbf\uu_{< i}, u_{i+1})}
-%     {p_\mathrm{LM}(\uu_i \mid \mathbf\uu_{< i})}\\
-% &=
-\operatorname{surp}_{p_\mathrm{LM}}(\uu_i)
--
-\underbrace{
-    \E_{u_{i+1}\sim\posteriorN}{
-        \log\frac1{p_\mathrm{LM}(\uu_i\mid\mathbf\uu_{< i}, u_{i+1})}
-    }
-}_R
-    \\
-\end{aligned}
-$$
-
-That is, the causal-LM-surprisal of the token (given previous context), minus the expected masked-LM-surprisal of the token (given previous context and next token), expectation over predicted next tokens (by the causal LM).
-
-This is just as above, but with only one token of completion, we can calculate expectation exactly by looping over vocab, to get an exact value for R (assuming a deterministic tokenizer). Let $r_{\mathbf\uu_{\le i}}(u_{i+1}):=\operatorname{surp_{masked}}(\uu_i\mid\mathbf \uu_{<i},u_{i+1}) \overset{\mathrm{MLM}}\approx \log\frac1{p_\mathrm{MLM}(\uu_i \mid \mathbf\uu_{< i}, u_{i+1})}$, (this is precisely the loss that the masked-LM objective minimizes) and **loop over all possible next tokens**, scoring according to the causal LM, $p_{\mathrm{LM}}$ for an exact computation of $R$:
-
-$$
-\begin{aligned}
-R(\uu_i) &= \E_{\posteriorn}{r_{\mathbf\uu_{\le i}}(u_{i+1})} 
-\\
-% &\overset{MC}{\approx}
-% \frac1K\sum_{k=1}^{K}{r_{\mathbf\uu_{\le i}}(u_{i+1}^{(k)})} , \qquad u_{i+1}^{(k)}\sim p_\mathrm{LM}(\cdot|\mathbf \uu_{\le i})
-&= \sum_{u_{i+1}\in V} \posteriorn r_{\mathbf\uu_{\le i}}(u_{i+1})
-\\
-&= \sum_{u_{i+1}\in V} 
-p_{\mathrm {LM}}(\uu_{i+1} \mid \mathbf\uu_{1\ldots i}) 
-\operatorname{surp_{masked}}(u_i\mid \mathbf\uu_{1\ldots i-1},{\color{gray}u_i=\mathtt{[MASK]},}u_{i+1}) 
-\end{aligned}
-$$
-
-Requires $\mathrm{LM}$ to be trained for
-
--   $p_{\mathrm{LM}}(U_{j+1}\mid \mathbf \uu_{<j})$ --- causal/prefix-LM next-word prediction task (GPT-like)
--   $p_{\mathrm{LM}}(U_j\mid \mathbf \uu_{<j},{\color{gray}u_j=\mathtt{[MASK]},}u_{j+1})$ --- reconstructing penultimate token *in incomplete sentences* (not quite the usual BERT-like masked/infilling LM task)
-
-::: {.callout-note collapse="true"}
-but with such an LM (assuming deterministic tokenizer), can calculate exact value for KL:
-
-``` python
-def get_masked_surprisals(target=CURR_W, prefix=PREFIX):
-    """
-    Get masked surprisal of target coming between prefix and nexttok:
-    $$-\log p(u_{i...i+N}=target \mid u_{1...i-1}=prefix, u_{i+N+1}=nexttok)$$
-    for all nexttok in the vocabulary.
-    """
-    
-    masked_surprisals = - F.log_softmax(masked_logits, dim=-1)
-    return masked_surprisals
-
-
-# Constants (observed)
-PREFIX # sequence of tokens up to and not including current word
-CURR_W # current word (possibly multitoken)
-
-# nexttok logits requires just one forward pass
-next_tok_logits = LM.get_nexttok_logits(PREFIX + CURR_W) # a vector with vocabsize elements (per next token)
-masked_surprisals = get_masked_surprisals(target=CURR_W, prefix=PREFIX) # a vector with vocabsize elements (per next token)
-
-nexttok_probabilities = F.softmax(nexttok_logits, dim=-1)
-R = (next_tok_probabilities * reconstruction_surps).sum(-1)
-
-
-
-############## Below is just a sketch...
-def get_R(nexttok_logits, reconstruction_surps):
-    """r is masked_logits
-    """
-    nexttok_probabilities = F.softmax(nexttok_logits, dim=-1)
-    R = (nexttok_probabilities * reconstruction_surps).sum(-1)
-
-    return R.view(-1)
-```
-:::
-
-#### Letting $Z$ be *distributions* over continuations?
-
-Todo maybe. For this estimation, we need a way to represent (sample *and* score) distributions over continuations. Not sure how to do this.
- -->
 </section>
 </section>
 <section id="kl-theory-vs-lc-surprisal-theory" class="level3">
@@ -941,186 +732,6 @@ Todo maybe. For this estimation, we need a way to represent (sample *and* score)
 <li><p>Assume R is negligible. We get low KL when <span class="math inline">\proposalZ</span> is much better than <span class="math inline">\priorZ</span>. That is, when your smart proposal gives a large reduction in excess surprise.</p></li>
 <li><p>When both of the above happen simultaneously.</p></li>
 </ul>
-<!-- 
-### Lossy-context surprisal {#sec-lossy-context-surprisal}
-
-Define noisy-channel/"lossy-context" surprisal [@futrell.r:2017; @futrell.r:2020; @hahn.m:2022PNAS]:
-
-$$
-S_\mathrm{lc}(\uu) := \E_{p_M(z_{<i}\mid \uu_{<i})}{-\log{p(\uu_i\mid z_{<i})}}
-$$
-
-where $z_{<i}$ is the lossy version of the context $\uu_{<i}$ (such as, a string with some words deleted/replaced).
-
-::: {.callout-note collapse="true"}
-### Lossy surprisal $\ge$ non-lossy surprisal
-
-It's simple to see that lossy surprisal is lower-bounded by non-lossy surprisal:
-
-$$
-\begin{aligned}
-S_\mathrm{lc}(\uu)
-&\coloneqq \E_{\priorZ}{-\log{p(\uu_i\mid {\cPRIO z})}}&\\
-&=         \E_{\priorZ}{-\log{p(\uu_i\mid {\cPRIO z}, \uu_{< i})}}&\text{if }U_i\indep U_{\le i} \mid {\cPRIO Z}\\
-&\ge -\log{\E_{\priorZ}{{p(\uu_i\mid {\cPRIO z}, \uu_{< i})}}}&\\
-&=   -\log{\int{\priorz}{p(\uu_i\mid {\cPRIO z}, \uu_{< i})}\dee{\cPRIO z}}&\\
-% &=  -\log{\int{p(\uu_i,{\cPRIO z}\mid \uu_{< i})}\dee{z}}\\
-&=   -\log{{p(\uu_i\mid \uu_{< i})}} &= \surp{\uu} \\
-\end{aligned}
-$$
-
-Where the bound is due to Jensen's inequality, since negative log is concave-up, and the integral disappears by the definition of conditioning.
-
-**Note: There may be something odd about this Markov assumption for the true generative model (the latent Z is not actually D-separating past from present... right?)** but it is reasonable from the comprehender's perpsective, if Z is the compressed/noised memory of the context.
-:::
-
-The predictions of noisy channel-surprisal are things like:
-
--   Two predictions in @futrell.r:2020 [section 3.4].
-    1.  Less probable context $\implies$ less accurate predictions [@futrell.r:2020, Supplement A, Proposition 1]. Thus, on average, higher surprisal than with more probable contexts (this predicts more difficulty predicting the last verb in a multiple-embedding construction: "structural forgetting").
-
-        "Less accurate predictions" is quantified as higher "memory distortion" ($\mathrm{dist}_{p_M} = S_\mathrm{lc}-S$), which has the following upper bounds
-
-        $$
-        \mathrm{dist}_{p_M}=\E_{p_M}{\frac{p(\uu_i\mid\uu_{<i})}{p(\uu_i\mid z_{<i})}} \le \E_{p_M} \log \frac1{p(\uu_{<i}\mid z_{<i})} \le \log \frac1{p(\uu_{<i})}
-        $$
-
-        (This says more probable context $\implies$ lower upper bound on distortion.)
-
-    2.  With more noise, expectations about next word will regress to a naive prior (disregarding the context) [@futrell.r:2020, Supplemet A, Proposition 2].
-
-::: {.callout-note collapse="true"}
-### Entropy bounds
-
-They bound the *expected* lossy-context surrpisal between expected veridical-context surprisal and expected no-context (unigram) surprisal.
-
-$$
-\begin{aligned}
-\E_{p(U_{\le i})}{S(\uu_i) } 
-    &&\le&& \E_{p(U_{\le i})}{S_\mathrm{lc}(\uu_i) } 
-    &&\le&& \E_{p(U_{\le i})}{S_\mathrm{unig}(\uu_i) }\\
-\E_{p(U_{\le i})}{\log \frac1{p(\uu_i\mid\uu_{<i})}} 
-    &&\le&& \E_{p(U_{\le i})}{\E_{p_M}\log{\frac1{p(\uu_i\mid z_{<i})}}} 
-    &&\le&& \E_{p(U_{\le i})}{\log \frac1{p(\uu_i)}}\\
-\E_{p(U_{\le i})}{\log \frac1{p(\uu_i\mid\uu_{<i})}} 
-    &&\le&& \E_{p(U_{\le i})p(Z<i\mid U_{<i})}{\log{\frac1{p(\uu_i\mid z_{<i})}}} 
-    &&\le&& \E_{p(U_{\le i})}{\log \frac1{p(\uu_i)}}
-\end{aligned}
-$$
-
-Since $\H{U_i\mid U_{<i}} = \H{U_i\mid U_{<i}, Z_{<i}} \le \H{U_i\mid Z_{<i}}\le \H{U_i}$.
-:::
-
--   Prediction 1 above is exemplified with predicting the "structural forgetting" effect. In multiple embeddings, LCsurp theory predicts lowered surprisal for ungrammatical continuations which can be predicted with nonveridical context.
-
-    > \[~1~ The $N_1$ \[~2~ C the $N_2$ \[~3~ C the $N_3$ $V_3$\] $V_2$\] $V_1$\].
-
-    -   [@futrell.r:2020]
-
-        $N_1$=apartment, $N_2$=maid, $N_3$=cleaning service
-
-        $V_3$=sent over, $V_2$=cleaned, $V_1$=was well-decorated
-
-        ==\> Empirical observation: Compared to what would be predicted by veridical-surprisal theory, following V3, the grammatical V2V1 is more difficult, and ungrammatical just V1 is less difficult (sentence-grammaticality judgements).
-
-    > \[~1~ The $N_1$ \[~2~ C the $N_2$ \[~3~ C the $N_3$ $V_3$\] $V_2$ the patient\] $V_1$\].
-
-    -   [@hahn.m:2022PNAS]
-
-        $N_1$=report, $N_2$=doctor, $N_3$=lawyer
-
-        $V_3$=distrusted, $V_2$=annoyed, $V_1$=was surprising
-
-        ==\> Empirical observation: the difficulty at grammatical V1 is higher when "embedding bias" is lower (when it's easier to assume nonveridical context like "report about" rather than "report that").
-
-    What does KL theory say here? Intuitively: we could make the same predictions.
-
-    -   Compared to non-lossy-surprisal which predicts very high difficulty for nonveridical continuations, I think we expect *lowered difficulty for ungrammatical continuations which can be predicted with nonveridical context*, because the surprisal of the veridical next item can be high, if the overwhelmingly most likely $z_i | \uu_{1:}$ disregards/'corrects' it.
-
-    -   When a context could be easily modified to make a grammatical continuation surprising (low embedding bias verb followed by embedded clause) we could expect $\Dqi < 0$: that is, that $\proposalZ$ is worse than the prior $\priorZ$ at predicting the veridically grammatical final verb.
-
-    We also have other predictions: could explain why typos are not super difficult to process (assuming this is true): that is, for words where the rational thing to do is ignore them/modify them, even given veridical access to them.
-
-::: callout-important
-Experiments to do:
-
--   1: look at classic predictions of (LC-)surprisal theory and see whether KL-theory makes the same predictions
-    -   like 'structural forgetting'
--   2: look at places where KL-theory makes new predictions
-    -   run a mechanical turk experiment
-
-For either, we require **a way to estimate this divergene** to compare with empirical data.
-
--   idea: adapt what @hahn.m:2022PNAS did for LCSurp.
-:::
-
--   also TODO [see @futrell.r:2020, section 6.4]:
-
-    -   information-theoretic explanation of adjective ordering [@hahn.m:2018cogsci].
-
-    -   similarity-based interference effects:
-
-        > The phenomena of similarity-based interference in agreement and anaphora interpretation remain unexplored from this perspective [@jager.l:2017].
-
--   you'll see increased difficulty (over what would be predicted by nonlossy surprisal theory) if the observation is unlikely given expected noisy representation of the past when it wouldn't be surprising given the true unnoisy representation.
-
-::: {.callout-caution collapse="true"}
-### TODO
-
-Note the expectation taken for our noise term conditions on the observed word: $\E_{\posteriorZ}\left[-\log{p(\uu_i\mid z_i,\uu_{< i})}\right]$ whereas the similar expectation defined in the lossy-context-surprisal literature is defined as something like $S_\mathrm{lc}(\uu) = \E_{\priorZ}\left[-\log{p(\uu_i\mid z_i,\uu_{< i})}\right]$ in our notation. (Note with a Markov assumption we can drop the previous observations $\uu_{< i}$ from these two expressions, which looks more like how lossy-context surprisal is defined anyway).
-
-This means that formally (with the Markov assumption), we can relate $\Rs{\posteriorZ}$ to $S_\mathrm{lc}(\uu)$ as:
-
-$$
-\begin{aligned}
-S_\mathrm{lc}(\uu) 
-&\coloneqq \E_{\priorZ}\left[\log\frac1{p(\uu_i\mid z_i)}\right] = \Rs{\priorZ}\\
-&= \E_{\posteriorZ}\left[\frac{\dee{\priorZ}}{\dee{\posteriorZ}}\log\frac1{p(\uu_i\mid z_i)}\right] \\
-\Rs{\posteriorZ} &\coloneqq \E_{\posteriorZ}\left[\log\frac1{p(\uu_i\mid z_i)}\right]\\
-&= \E_{\priorZ}\left[\frac{\dee{\posteriorZ}}{\dee{\priorZ}}\log\frac1{p(\uu_i\mid z_i)}\right] 
-\end{aligned}
-$$
-
-with some absolute continuity requirements.
-:::
- -->
-<!-- 
-## What sentences to look at:
-
-Context: there are keys on the table
-
-::: column-page
-| $\uu_{<i}$          | ${\cPOST Z\mid \uu_{<i}}$ | ${Z^+|\cPOST z}$      | $\uu_{i}$ | $\operatorname{S}$ | ${\cPRIO Z\mid \uu_{\le i}}$     | $R$  | $\operatorname{D_{KL}}$ |
-|---------|---------|---------|---------|---------|---------|---------|---------|
-| Find my keys on the | $1_{[\text{(as is)}]}$    | $1_{[\text{+table}]}$ | table     | LOW                | $1_{[\text{(as is)}]}$           | LOW  | LOW                     |
-| ''                  | ''                        | ''                    | the       | HIGH               | $1$<sub>\[... the ~~the~~\]<sub> | LOW  | HIGH                    |
-| ''                  | ''                        | ''                    | share     | HIGH               | ?                                | HIGH | LOW                     |
-| ''                  | ''                        | ''                    | fable     | MID                | $1$<sub>\[... the table\]<sub>   | MID  | LOW                     |
-
-: Sketchy predictions
-:::
-
-| $\uu_{<i}$          | $\uu_{i}$ | $\operatorname{S}$ | $R$  | $\operatorname{D_{KL}} = S - R$ |
-|---------------|---------------|---------------|---------------|---------------|
-| Find my keys on the | table     | LOW                | LOW  | LOW                             |
-| ''                  | double    | HIGH               | LOW  | HIGH                            |
-| ''                  | share     | HIGH               | HIGH | LOW                             |
-| ''                  | fable     | MID                | MID  | LOW                             |
-
-: Simple predictions
-
-Some suggestions from CPG:
-
--   "My grandfather just left us. He kicked the rattlesnake." (Michaela) Intuition: "rattlesnake" is surprising given previous context (high S), but easy to reconstruct (low R). So KL theory predicts high difficulty at this word.\
--   "Agreement attraction" [aka "Broken agreement", @bock.k:1991]
-    -   *The key to the cabinets are on the table*
-    -   *The cost of the improvements have not yet been estimated*
-    -   see reading time study @wagers.m:2009
--   Grammatical illusions, eg "negative polarity illusions" [@muller.h:2020]
-    -   *The bills that no senator voted for will ever become law.*
-
-See Colin Phillips or Hanna Muller's work [like @kelley.p:2018; @muller.h:2020; @parker.d:2016]. 
--->
 </section>
 </section>
 <section id="notes" class="level2 page-columns page-full">
@@ -1129,7 +740,7 @@ See Colin Phillips or Hanna Muller's work [like @kelley.p:2018; @muller.h:2020; 
 <li><p>The number of samples from <span class="math inline">p_Z</span> for an IS estimate of <span class="math inline">\pZu</span> is <span class="math inline">e^{\KL{\pZu}{p_Z}}</span>.</p></li>
 <li><p>The number of samples from <span class="math inline">\qZu</span> for an IS estimate of <span class="math inline">\pZu</span> is <span class="math inline">e^{\KL{\pZu}{\qZu}}</span>.</p></li>
 </ol>
-<p>If the observable <span class="math inline">U</span> is assumed to be a deterministic function of the latent <span class="math inline">Z</span> (as in <span class="citation" data-cites="levy.r:2008">Levy (<a href="#ref-levy.r:2008" role="doc-biblioref">2008</a>)</span>, where latent state consists partially of the observable string), then <span class="math inline">\R=0</span>, and thus <span class="math inline">\KL{\pZu}{p_Z}=-\log p(\uu)</span>. Thus, IS <span class="citation" data-cites="chen.y:2005">(which, with a binary likelihood function becomes simply rejection sampling, see <a href="#ref-chen.y:2005" role="doc-biblioref">Chen, 2005</a>)</span>, will require <span class="math inline">e^{-\log p(\uu)}=\frac1{p(\uu)}</span> samples.</p>
+<p>If the observable <span class="math inline">U</span> is assumed to be a deterministic function of the latent <span class="math inline">Z</span> (as in <span class="citation" data-cites="levy.r:2008">Levy (<a href="#ref-levy.r:2008" role="doc-biblioref">2008</a>)</span>, where latent state consists partially of the observable string), then <span class="math inline">\R=0</span>, and thus <span class="math inline">\KL{\pZu}{p_Z}=-\log p(\uu)</span>. Thus, IS <span class="citation" data-cites="chen.y:2005">(which, with a binary likelihood function becomes simply rejection sampling, see <a href="#ref-chen.y:2005" role="doc-biblioref">Chen 2005</a>)</span>, will require <span class="math inline">e^{-\log p(\uu)}=\frac1{p(\uu)}</span> samples.</p>
 <p>This gives us a clear prediction for runtime being an exponential function of surprisal.</p>
 <p>However, there are two issues with this:</p>
 <ul>
@@ -1177,33 +788,31 @@ e^{\R + \Dq}
 <p><span class="math display">
 G(s) = s - \log f_\mathrm{GAM}(s)
 </span></p>
-<!-- 
-### Optimal code-length
-
-We're interested in the question: How many bits of information are required to transform prior $p_Z$ into posterior $\pZu$?
-
-Just using bayes rule, we can break this down into three parts
-
-$$
--\log \pzu 
+</section>
+<section id="optimal-code-length" class="level3">
+<h3 class="anchored" data-anchor-id="optimal-code-length">Optimal code-length</h3>
+<p>We’re interested in the question: How many bits of information are required to transform prior <span class="math inline">p_Z</span> into posterior <span class="math inline">\pZu</span>?</p>
+<p>Just using bayes rule, we can break this down into three parts</p>
+<p><span class="math display">
+-\log \pzu
 = -\log p(z) - \log \frac{p(\uu\mid z)}{p(\uu)}
 = \log p(\uu) -\log p(z) - \log p(\uu\mid z)
-$$
-
-TBC -->
+</span></p>
+<p>TBC</p>
 </section>
 </section>
 <section id="ordered-search-runtime" class="level1 page-columns page-full">
 <h1>Ordered search runtime</h1>
-<p>Putting aside probabilistic algorithms, one <em>deterministic</em> algorithm whose runtime clearly increases with surprisal is simple probability-ordered search. Assuming the items to be searched are examined in order of decreasing probability, the time to find a given item is determined by the number of items which have higher probability.</p>
-<p>To say anything about the expected runtime requires making some assumption about how item probabilities are distributed. <span class="citation" data-cites="anderson.j:1998atomic">Anderson &amp; Lebiere (<a href="#ref-anderson.j:1998atomic" role="doc-biblioref">1998</a>)</span> assume <em>need odds</em> are Pareto distributed. Thus they have the following pdf<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
-<div class="no-row-height column-margin column-container"><div id="fn4"><p><sup>4</sup>&nbsp;The density of <span class="math inline">X \sim \operatorname{Pareto}(\alpha,\theta)</span> is <span class="math inline">f(x) = \alpha\theta^\alpha x^{-(\alpha+1)}</span> (for <span class="math inline">x \ge \theta</span>), with parameters <span class="math inline">\alpha&gt;0,\theta&gt;0</span>. Here we abbreviate with <span class="math inline">a = \alpha\theta^\alpha</span>.</p></div></div><p><span class="math display">
-\begin{equation}
-f(o)= ao^{-(\alpha + 1)}
-\end{equation}
-</span></p>
-
-<div class="no-row-height column-margin column-container"><div class="">
+<p>For deterministic ranked search, if items are sorted in order of decreasing probability, runtime is simply the number of items with higher probability (assuming no two items have the same probability, in which case the sorting is not well defined). To say anything about the expected runtime requires making some assumption about how item probabilities are distributed. I’ll assume probabilities are distributed proportional to a Pareto distribution, and derive that the runtime is exponential in surprisal. A similar derivation results from assuming the item <em>odds</em> are Pareto-distributed <span class="citation" data-cites="anderson.j:1998atomic">(which is the assumption made in <a href="#ref-anderson.j:1998atomic" role="doc-biblioref">Anderson and Lebiere 1998</a>)</span>. Here are both those derivations.</p>
+<section id="probability-ordered-search-pareto-weights" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="probability-ordered-search-pareto-weights">Probability-ordered search (Pareto weights)</h3>
+<p><em>Runtime = number of items with higher probability.</em></p>
+<p>Assume: weights <span class="math inline">\mathsf{w}\sim</span> Pareto distribution</p>
+<p>By weights here I just mean unnormalized probabilities. So the probability of an item with weight <span class="math inline">w</span> is <span class="math inline">\frac{w}{Z}</span>, for global normalizing constant <span class="math inline">Z</span>.</p>
+<section id="search-runtime-for-pareto-distributed-weights" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="search-runtime-for-pareto-distributed-weights">Search runtime for Pareto-distributed weights</h4>
+<p>If item weights have density <span class="math inline">\operatorname{pdf}(\mathsf{w})= \fade{a}\mathsf{w}^{-(\alpha + 1)}</span> then item <em>surprisal</em>, <span class="math inline">\mathsf{s} (= -\log\frac{\mathsf{w}}{\fade{Z}})</span>, has density:<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
+<div class="no-row-height column-margin column-container"><div id="fn4"><p><sup>4</sup>&nbsp;The density of <span class="math inline">X \sim \operatorname{Pareto}(\alpha,\theta)</span> is <span class="math inline">f(x) = \alpha\theta^\alpha x^{-(\alpha+1)}</span> (for <span class="math inline">x \ge \theta</span>), with parameters <span class="math inline">\alpha&gt;0,\theta&gt;0</span>. Abbreviate with constant <span class="math inline">a = \alpha\theta^\alpha</span>.</p></div><div class="">
 <div id="5a91a612" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
@@ -1262,206 +871,158 @@ f(o)= ao^{-(\alpha + 1)}
 <path clip-path="url(#clip530)" d="M322.403 133.473 L322.403 147.223 L318.121 147.223 L318.121 111.436 L322.403 111.436 L322.403 115.371 Q323.745 113.056 325.783 111.945 Q327.843 110.811 330.69 110.811 Q335.412 110.811 338.352 114.561 Q341.315 118.311 341.315 124.422 Q341.315 130.533 338.352 134.283 Q335.412 138.033 330.69 138.033 Q327.843 138.033 325.783 136.922 Q323.745 135.787 322.403 133.473 M336.894 124.422 Q336.894 119.723 334.949 117.061 Q333.028 114.376 329.648 114.376 Q326.269 114.376 324.324 117.061 Q322.403 119.723 322.403 124.422 Q322.403 129.121 324.324 131.806 Q326.269 134.468 329.648 134.468 Q333.028 134.468 334.949 131.806 Q336.894 129.121 336.894 124.422 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M365.435 115.371 L365.435 101.343 L369.694 101.343 L369.694 137.362 L365.435 137.362 L365.435 133.473 Q364.093 135.787 362.032 136.922 Q359.995 138.033 357.125 138.033 Q352.426 138.033 349.463 134.283 Q346.523 130.533 346.523 124.422 Q346.523 118.311 349.463 114.561 Q352.426 110.811 357.125 110.811 Q359.995 110.811 362.032 111.945 Q364.093 113.056 365.435 115.371 M350.921 124.422 Q350.921 129.121 352.843 131.806 Q354.787 134.468 358.167 134.468 Q361.546 134.468 363.491 131.806 Q365.435 129.121 365.435 124.422 Q365.435 119.723 363.491 117.061 Q361.546 114.376 358.167 114.376 Q354.787 114.376 352.843 117.061 Q350.921 119.723 350.921 124.422 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M391.592 101.343 L391.592 104.885 L387.518 104.885 Q385.227 104.885 384.324 105.811 Q383.444 106.737 383.444 109.144 L383.444 111.436 L390.458 111.436 L390.458 114.746 L383.444 114.746 L383.444 137.362 L379.162 137.362 L379.162 114.746 L375.088 114.746 L375.088 111.436 L379.162 111.436 L379.162 109.63 Q379.162 105.302 381.176 103.334 Q383.19 101.343 387.565 101.343 L391.592 101.343 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M420.273 114.422 Q416.847 114.422 414.856 117.107 Q412.865 119.769 412.865 124.422 Q412.865 129.075 414.833 131.76 Q416.824 134.422 420.273 134.422 Q423.676 134.422 425.666 131.737 Q427.657 129.051 427.657 124.422 Q427.657 119.815 425.666 117.13 Q423.676 114.422 420.273 114.422 M420.273 110.811 Q425.828 110.811 429 114.422 Q432.171 118.033 432.171 124.422 Q432.171 130.788 429 134.422 Q425.828 138.033 420.273 138.033 Q414.694 138.033 411.523 134.422 Q408.375 130.788 408.375 124.422 Q408.375 118.033 411.523 114.422 Q414.694 110.811 420.273 110.811 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M452.356 101.343 L452.356 104.885 L448.282 104.885 Q445.99 104.885 445.087 105.811 Q444.208 106.737 444.208 109.144 L444.208 111.436 L451.222 111.436 L451.222 114.746 L444.208 114.746 L444.208 137.362 L439.925 137.362 L439.925 114.746 L435.851 114.746 L435.851 111.436 L439.925 111.436 L439.925 109.63 Q439.925 105.302 441.939 103.334 Q443.953 101.343 448.328 101.343 L452.356 101.343 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M475.851 106.644 L475.851 119.63 L481.731 119.63 Q484.995 119.63 486.777 117.94 Q488.559 116.251 488.559 113.126 Q488.559 110.024 486.777 108.334 Q484.995 106.644 481.731 106.644 L475.851 106.644 M471.175 102.802 L481.731 102.802 Q487.541 102.802 490.504 105.44 Q493.49 108.056 493.49 113.126 Q493.49 118.241 490.504 120.857 Q487.541 123.473 481.731 123.473 L475.851 123.473 L475.851 137.362 L471.175 137.362 L471.175 102.802 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M509.231 124.329 Q504.069 124.329 502.078 125.51 Q500.087 126.69 500.087 129.538 Q500.087 131.806 501.569 133.149 Q503.073 134.468 505.643 134.468 Q509.184 134.468 511.314 131.968 Q513.467 129.445 513.467 125.278 L513.467 124.329 L509.231 124.329 M517.726 122.57 L517.726 137.362 L513.467 137.362 L513.467 133.426 Q512.008 135.787 509.832 136.922 Q507.657 138.033 504.508 138.033 Q500.527 138.033 498.166 135.811 Q495.828 133.565 495.828 129.815 Q495.828 125.44 498.745 123.218 Q501.684 120.996 507.495 120.996 L513.467 120.996 L513.467 120.579 Q513.467 117.639 511.522 116.042 Q509.601 114.422 506.106 114.422 Q503.883 114.422 501.777 114.954 Q499.67 115.487 497.726 116.551 L497.726 112.616 Q500.064 111.714 502.263 111.274 Q504.462 110.811 506.545 110.811 Q512.17 110.811 514.948 113.727 Q517.726 116.644 517.726 122.57 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M541.522 115.417 Q540.805 115.001 539.948 114.815 Q539.115 114.607 538.096 114.607 Q534.485 114.607 532.541 116.968 Q530.619 119.306 530.619 123.704 L530.619 137.362 L526.337 137.362 L526.337 111.436 L530.619 111.436 L530.619 115.464 Q531.962 113.102 534.115 111.968 Q536.268 110.811 539.346 110.811 Q539.786 110.811 540.318 110.88 Q540.851 110.927 541.499 111.042 L541.522 115.417 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M567.124 123.334 L567.124 125.417 L547.541 125.417 Q547.818 129.815 550.179 132.13 Q552.564 134.422 556.8 134.422 Q559.253 134.422 561.545 133.82 Q563.86 133.218 566.128 132.014 L566.128 136.042 Q563.837 137.014 561.429 137.524 Q559.022 138.033 556.545 138.033 Q550.342 138.033 546.707 134.422 Q543.096 130.811 543.096 124.653 Q543.096 118.288 546.522 114.561 Q549.971 110.811 555.804 110.811 Q561.036 110.811 564.068 114.19 Q567.124 117.547 567.124 123.334 M562.865 122.084 Q562.818 118.589 560.897 116.505 Q558.999 114.422 555.851 114.422 Q552.286 114.422 550.133 116.436 Q548.004 118.45 547.679 122.107 L562.865 122.084 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M578.327 104.075 L578.327 111.436 L587.101 111.436 L587.101 114.746 L578.327 114.746 L578.327 128.82 Q578.327 131.991 579.184 132.894 Q580.064 133.797 582.726 133.797 L587.101 133.797 L587.101 137.362 L582.726 137.362 Q577.795 137.362 575.92 135.533 Q574.045 133.681 574.045 128.82 L574.045 114.746 L570.92 114.746 L570.92 111.436 L574.045 111.436 L574.045 104.075 L578.327 104.075 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M602.749 114.422 Q599.323 114.422 597.332 117.107 Q595.341 119.769 595.341 124.422 Q595.341 129.075 597.309 131.76 Q599.3 134.422 602.749 134.422 Q606.151 134.422 608.142 131.737 Q610.133 129.051 610.133 124.422 Q610.133 119.815 608.142 117.13 Q606.151 114.422 602.749 114.422 M602.749 110.811 Q608.304 110.811 611.475 114.422 Q614.647 118.033 614.647 124.422 Q614.647 130.788 611.475 134.422 Q608.304 138.033 602.749 138.033 Q597.17 138.033 593.999 134.422 Q590.851 130.788 590.851 124.422 Q590.851 118.033 593.999 114.422 Q597.17 110.811 602.749 110.811 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M631.938 101.39 Q628.836 106.714 627.332 111.922 Q625.827 117.13 625.827 122.477 Q625.827 127.825 627.332 133.079 Q628.86 138.311 631.938 143.612 L628.235 143.612 Q624.762 138.172 623.026 132.917 Q621.313 127.663 621.313 122.477 Q621.313 117.315 623.026 112.084 Q624.739 106.852 628.235 101.39 L631.938 101.39 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M641.614 133.426 L649.253 133.426 L649.253 107.061 L640.943 108.727 L640.943 104.468 L649.207 102.802 L653.883 102.802 L653.883 133.426 L661.521 133.426 L661.521 137.362 L641.614 137.362 L641.614 133.426 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M671.452 131.482 L676.336 131.482 L676.336 135.463 L672.54 142.871 L669.554 142.871 L671.452 135.463 L671.452 131.482 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M686.845 133.426 L694.484 133.426 L694.484 107.061 L686.174 108.727 L686.174 104.468 L694.438 102.802 L699.114 102.802 L699.114 133.426 L706.753 133.426 L706.753 137.362 L686.845 137.362 L686.845 133.426 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path><path clip-path="url(#clip530)" d="M714.924 101.39 L718.628 101.39 Q722.1 106.852 723.813 112.084 Q725.549 117.315 725.549 122.477 Q725.549 127.663 723.813 132.917 Q722.1 138.172 718.628 143.612 L714.924 143.612 Q718.003 138.311 719.507 133.079 Q721.035 127.825 721.035 122.477 Q721.035 117.13 719.507 111.922 Q718.003 106.714 714.924 101.39 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1"></path></svg>
 </div>
 </div>
-</div></div><p>This assumption allows them to derive the relationship between the log-odds <span class="math inline">l</span> and search runtime (the latency formula for ACT-R) as</p>
+</div></div>
 <p><span class="math display">
 \begin{equation}
-T(l) \propto e^{-\alpha l}
+\operatorname{pdf}(\mathsf{s}) = \fade{\frac{a}{Z^\alpha}}e^{\fade{\alpha} \;\!\mathsf{s}}
 \end{equation}
 </span></p>
-<p>They note that it is common to assume <span class="math inline">\alpha = 1</span>, so this simplifies to <span class="math inline">T(l) \propto e^{-l}</span>.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Derivation
+Derivation (transformation)
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-6" class="callout-6-contents callout-collapse collapse show">
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>Log-odds are a (monotonic smooth) deterministic function of odds, so, starting with the pdf for odds, <span class="math inline">f(o)</span>, we can first derive the expression for the pdf of log-odds <span class="math inline">l = \log o</span>, by transforming the pdf:</p>
-<p>To begin, note <span class="math inline">o = e^l</span>, so <span class="math inline">\frac{\dee{o(l)}}{\dee{l}} = e^l</span>, and <span class="math inline">f(o(l)) = a[e^l]^{-(\alpha + 1)} = a e^{(\alpha + 1)l}</span>.</p>
-<p>Thus, the pdf of log-odds is <span class="math display">
-\begin{equation}
-g(l) = f(o(l))\frac{\dee{o(l)}}{\dee{l}}
-= a e^{(\alpha + 1)l} e^l
-= ae^{-\alpha l}
-\end{equation}
+<p>Surprisal is a (monotonic smooth) deterministic function of item weight, so, starting with the pdf for weights <span class="math inline">f(\mathsf{w})</span>, we can derive the expression for the pdf of surprisal <span class="math inline">h(\mathsf{s})</span> as follows.</p>
+<p>With <span class="math inline">\mathsf{w}=\fade{Z}e^{-\mathsf{s}}</span>, we have</p>
+<ul>
+<li><span class="math inline">f(\mathsf{w}(\mathsf{s})) = \fade{a}[\fade{Z}e^{-\mathsf{s}}]^{-(\fade{\alpha} + 1)} = \frac{\fade{a}}{\fade{Z}^{\fade{\alpha}+1}}e^{(\fade{\alpha}+1)\mathsf{s}}</span>, and</li>
+<li><span class="math inline">\frac{\dee{\mathsf{w}(\mathsf{s})}}{\dee{\mathsf{s}}} = -\fade{Z}e^{-\mathsf{s}}</span></li>
+</ul>
+<p>So by the transformed pdf is</p>
+<p><span class="math display">
+\begin{aligned}
+h(\mathsf{s})
+&amp;= f(\mathsf{w}(\mathsf{s}))
+  \cdot
+  \left|\frac{\dee{}}{\dee{\mathsf{s}}}\mathsf{w}(\mathsf{s})\right|\\
+&amp;= \frac{\fade{a}}{\fade{Z}^{\fade{\alpha}+1}}e^{(\fade{\alpha}+1)\mathsf{s}}
+  \cdot
+  \fade{Z}e^{-\mathsf{s}}
+= \frac{\fade{a}}{\fade{Z}^{\fade{\alpha}}}e^{\fade{\alpha}\mathsf{s}}
+\end{aligned}
 </span></p>
-<p>So, the proportion of items with log-odds higher than some value <span class="math inline">l_\star</span> (the log-odds of the target item) is</p>
+</div>
+</div>
+</div>
+<p>For target item <span class="math inline">i</span>, the proportion of items with surprisal lower than <span class="math inline">\surp{i}</span> is</p>
 <p><span class="math display">
 \begin{equation}
-\Pr(\text{log-odds} &gt; l_\star) = \int_{l_\star}^\infty g(l) \dee{l}
-= \frac{a}{\alpha}e^{-\alpha l_\star}
+\Pr(\mathsf{s} &lt; \surp{i}) = \int_0^{\surp{i}} \operatorname{pdf}(\mathsf{s}) \dee{\mathsf{s}}
+= \fade{\frac{a}{\alpha Z^\alpha}}\fade{(}e^{\alpha \surp{i}} -1\fade{)}
 \end{equation}
 </span></p>
-<p>Thus, if there are <span class="math inline">C</span> items total, and each takes <span class="math inline">t</span> time to inspect, the total search runtime to find the target is <span class="math display">
+<p>so, collecting contants, the total search runtime to find <span class="math inline">i</span> is <span class="math display">
 \begin{equation}
-T(l_\star)
-= \frac{aCt}{\alpha}e^{-\alpha l_\star}
+\operatorname{Time}(i) = \fade{K}\fade{(}e^{\alpha\;\!\surp{i}} - 1\fade{)}
 \end{equation}
 </span></p>
-</div>
-</div>
-</div>
-<p>However, we’re interested in the relationship between the <em>surprisal</em> <span class="math inline">s</span> and search runtime (a reframing of the latency formula for ACT-R). We can derive this from the above formula for runtime as a function of log-odds, simply by plugging in <span class="math inline">\text{log-odds} = -\log(e^s-1)</span>, to get</p>
+<p><span class="math inline">\implies</span> search runtime increases exponentially with surprisal.</p>
+</section>
+</section>
+<section id="probability-ordered-search-pareto-odds" class="level3">
+<h3 class="anchored" data-anchor-id="probability-ordered-search-pareto-odds">Probability-ordered search (Pareto odds)</h3>
+<p>Very similar to above, <span class="citation" data-cites="anderson.j:1998atomic">Anderson and Lebiere (<a href="#ref-anderson.j:1998atomic" role="doc-biblioref">1998</a>)</span> start by assuming <em>odds</em> (rather than unnormalized probabilities) are Pareto distributed, and give a similar derivation,</p>
+<blockquote class="blockquote">
+<p>In ACT-R, assume: need odds <span class="math inline">\sim</span> Pareto.</p>
+<p><span class="math inline">\implies</span> seach runtime increases exponentially with (negative) log-odds.</p>
+</blockquote>
+<p>which can be restated in terms of suprisal as below.</p>
+<section id="search-runtime" class="level4">
+<h4 class="anchored" data-anchor-id="search-runtime">Search runtime</h4>
+<p>If odds have density <span class="math inline">\operatorname{pdf}(\mathsf{o})= \fade{a}\mathsf{o}^{-(\alpha + 1)}</span> then log odds, <span class="math inline">\mathsf{r} (= \log \mathsf{o})</span>, have density</p>
 <p><span class="math display">
 \begin{equation}
-T(l) \propto e^{-\alpha l} = (e^s-1)^\alpha
+\operatorname{pdf}(\mathsf{r})
+= \fade{a}e^{-\fade{\alpha}\;\!\mathsf{r}}
 \end{equation}
 </span></p>
-<p>Assuming <span class="math inline">\alpha = 1</span>, this simplifies to <span class="math inline">T(s) \propto e^s-1</span>.</p>
-<hr>
-<p>We could have alternatively derived this from the pdf of the Pareto distribution, similar to their derivation.</p>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Derivation
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-7" class="callout-7-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>Surprisal is a (monotonic smooth) deterministic function of odds, so, starting with the pdf for odds, <span class="math inline">f(o)</span>, we can first derive the expression for the pdf of surprisal <span class="math inline">s = \log(1+e^{-\log o})</span>, by transforming the pdf:</p>
-<p>To begin, note <span class="math inline">o = (e^s-1)^{-1}</span>, so <span class="math inline">\frac{\dee{o(s)}}{\dee{s}} = -e^s(e^s-1)^{-2}</span>, and <span class="math inline">f(o(s)) = a[(e^s-1)^{-1}]^{-(\alpha + 1)} = a(e^s-1)^{\alpha+1}</span>.</p>
-<p>Thus, the pdf of surprisal is <span class="math display">
-\begin{equation}
-g(s) = f(o(s))\left|\frac{\dee{o(s)}}{\dee{s}}\right|
-= a(e^s-1)^{\alpha+1} e^s(e^s-1)^{-2}
-= a(e^s-1)^{\alpha-1} e^s
-\end{equation}
-</span></p>
-<p>So, the proportion of items with surprisal lower than some value <span class="math inline">s_\star</span> (the surprisal of the target item) is</p>
+<p>by transformation, similar to above.</p>
+<p>Then as above, for target item <span class="math inline">i</span> one can derive relationship between log-odds and search runtime as the proportion of items with <em>higher</em> log odds:</p>
 <p><span class="math display">
 \begin{equation}
-\Pr(\text{surprisal} &lt; s_\star) = \int_0^{l_\star} g(s) \dee{s}
-= \frac{a}{\alpha}(e^{s_\star}-1)^{\alpha}
+\Pr(\mathsf{r} &gt; \mathrm{logodds}(i)) = \int_{\mathrm{logodds}(i)}^\infty \operatorname{pdf}(\mathsf{r}) \dee{\mathsf{r}}
+= \fade{\frac a\alpha}e^{-\fade{\alpha}\mathrm{logodds}(i)}
 \end{equation}
 </span></p>
-<p>Thus, if there are <span class="math inline">C</span> items total, and each takes <span class="math inline">t</span> time to inspect, the total search runtime to find the target is <span class="math display">
-\begin{equation}
-T(s_\star)
-= \frac{aCt}{\alpha}(e^{s_\star}-1)^{\alpha}
-\end{equation}
-</span></p>
-</div>
-</div>
-</div>
-<p>Now if, instead of assuming <em>log-odds</em> were Pareto-distributed, we assume item <em>weights</em> are Pareto distributed (where weights represent unnormalized probabilities), then we can derive a similar relationship. To start with, write the density of weights as</p>
+<p>letting constant <span class="math inline">\fade{K}=\fade{a/\alpha}</span>, this is the usual form of what is called the ‘latency formula’ in ACT-R, usually stated in terms of log odds, but which we can translate into a function of surprisal:</p>
 <p><span class="math display">
 \begin{equation}
-f(w)= aw^{-(\alpha + 1)}
-\end{equation}
-</span> where the probability of an item with <span class="math inline">w</span> is <span class="math inline">\frac{w}{Z}</span>, for some global normalizing constant <span class="math inline">Z</span>.</p>
-<p>This assumption allows us to derive the relationship between the surprisal <span class="math inline">s</span> and search runtime as</p>
-<p><span class="math display">
-\begin{equation}
-T(l) \propto e^{-\alpha s} - 1
+% \tag{\fade{\text{ACT-R latency}}}
+\qquad \operatorname{Time}(i) = \fade{K} e^{-\fade{\alpha}\;\!\mathrm{logodds}(i)} = \fade{K} (e^{\surp{i}}-1)^\alpha
 \end{equation}
 </span></p>
-<p>With the assumption that <span class="math inline">\alpha = 1</span>, this simplifies to <span class="math inline">T(s) \propto e^{-s} - 1</span>, just as above.</p>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="true" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Derivation
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-8" class="callout-8-contents callout-collapse collapse show">
-<div class="callout-body-container callout-body">
-<p>Surprisal is a (monotonic smooth) deterministic function of item weight, so, starting with the pdf for weights, <span class="math inline">f(w)</span>, we can first derive the expression for the pdf of surprisal <span class="math inline">s = -\log \frac{w}{Z}</span>, by transforming the pdf:</p>
-<p>To begin, note <span class="math inline">w = Ze^{-s}</span>, so <span class="math inline">\frac{\dee{w(s)}}{\dee{s}} = -Ze^{-s}</span>, and <span class="math inline">f(w(s)) = a[Ze^{-s}]^{-(\alpha + 1)} = \frac{a}{Z^{\alpha+1}}e^{(\alpha+1)s}</span>.</p>
-<p>Thus, the pdf of surprisal is <span class="math display">
-\begin{equation}
-h(s) = f(w(s))\left|\frac{\dee{w(s)}}{\dee{s}}\right|
-= \frac{a}{Z^{\alpha+1}}e^{(\alpha+1)s} Ze^{-s}
-= \frac{a}{Z^\alpha}e^{\alpha s}
-\end{equation}
-</span></p>
-<p>So, the proportion of items with surprisal lower than some value <span class="math inline">s_\star</span> (the surprisal of the target item) is</p>
-<p><span class="math display">
-\begin{equation}
-\Pr(\text{surprisal} &lt; s_\star) = \int_0^{s_\star} h(s) \dee{s}
-= \frac{a}{\alpha Z^\alpha}(e^{\alpha s_\star} -1)
-\end{equation}
-</span></p>
-<p>Thus, if there are <span class="math inline">C</span> items total, and each takes <span class="math inline">t</span> time to inspect, the total search runtime to find the target is <span class="math display">
-\begin{equation}
-T(s_\star)
-= \frac{aCt}{\alpha Z^\alpha}(e^{\alpha s_\star} -1)
-\end{equation}
-</span></p>
-</div>
-</div>
-</div>
+<p>by the identity <span class="math inline">\mathrm{logodds}(\cdot) = -\log(e^{\surp{\cdot}}-1)</span>.</p>
+<p><span class="math inline">\implies</span> search runtime increases exponentially with surprisal.</p>
+<p>Worth noting: In the ACT-R literature, it is often assumed that the parameter <span class="math inline">\alpha = 1</span>, so this simplifies to <span class="math inline">\operatorname{Time}(i) \propto e^{\surp{i}} - 1</span>.</p>
 
 
 
 </section>
+</section>
+</section>
 
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-agapiou.s:2017" class="csl-entry" role="listitem">
-Agapiou, S., Papaspiliopoulos, O., Sanz-Alonso, D., &amp; Stuart, A. M. (2017). Importance sampling: Intrinsic dimension and computational cost. <em>Statistical Science</em>, <em>32</em>(3). <a href="https://doi.org/10.1214/17-STS611">https://doi.org/10.1214/17-STS611</a>
+Agapiou, S., O. Papaspiliopoulos, D. Sanz-Alonso, and A. M. Stuart. 2017. <span>“Importance Sampling: Intrinsic Dimension and Computational Cost.”</span> <em>Statistical Science</em> 32 (3). <a href="https://doi.org/10.1214/17-STS611">https://doi.org/10.1214/17-STS611</a>.
 </div>
 <div id="ref-anderson.j:1998atomic" class="csl-entry" role="listitem">
-Anderson, J. R., &amp; Lebiere, C. (1998). <em>The atomic components of thought</em>. Psychology Press. <a href="https://doi.org/10.4324/9781315805696">https://doi.org/10.4324/9781315805696</a>
+Anderson, John R., and Christian Lebiere. 1998. <em>The Atomic Components of Thought</em>. New York: Psychology Press. <a href="https://doi.org/10.4324/9781315805696">https://doi.org/10.4324/9781315805696</a>.
 </div>
 <div id="ref-baldi.p:2002" class="csl-entry" role="listitem">
-Baldi, P. (2002). A computational theory of surprise. In M. Blaum, P. G. Farrell, &amp; H. C. A. van Tilborg (Eds.), <em>Information, <span>Coding</span> and <span>Mathematics</span>: <span>Proceedings</span> of <span>Workshop</span> honoring <span>Prof</span>. <span>Bob McEliece</span> on his 60th birthday</em> (pp. 1–25). Springer US. <a href="https://doi.org/10.1007/978-1-4757-3585-7_1">https://doi.org/10.1007/978-1-4757-3585-7_1</a>
+Baldi, Pierre. 2002. <span>“A Computational Theory of Surprise.”</span> In <em>Information, <span>Coding</span> and <span>Mathematics</span>: <span>Proceedings</span> of <span>Workshop</span> Honoring <span>Prof</span>. <span>Bob McEliece</span> on His 60th Birthday</em>, edited by Mario Blaum, Patrick G. Farrell, and Henk C. A. van Tilborg, 1–25. The <span>Springer International Series</span> in <span>Engineering</span> and <span>Computer Science</span>. Boston, MA: Springer US. <a href="https://doi.org/10.1007/978-1-4757-3585-7_1">https://doi.org/10.1007/978-1-4757-3585-7_1</a>.
 </div>
 <div id="ref-baldi.p:2010" class="csl-entry" role="listitem">
-Baldi, P., &amp; Itti, L. (2010). Of bits and wows: <span>A Bayesian</span> theory of surprise with applications to attention. <em>Neural Networks</em>, <em>23</em>(5), 649–666. <a href="https://doi.org/10.1016/j.neunet.2009.12.007">https://doi.org/10.1016/j.neunet.2009.12.007</a>
+Baldi, Pierre, and Laurent Itti. 2010. <span>“Of Bits and Wows: <span>A Bayesian</span> Theory of Surprise with Applications to Attention.”</span> <em>Neural Networks</em> 23 (5): 649–66. <a href="https://doi.org/10.1016/j.neunet.2009.12.007">https://doi.org/10.1016/j.neunet.2009.12.007</a>.
 </div>
 <div id="ref-chatterjee.s:2018" class="csl-entry" role="listitem">
-Chatterjee, S., &amp; Diaconis, P. (2018). The sample size required in importance sampling. <em>The Annals of Applied Probability</em>, <em>28</em>(2). <a href="https://doi.org/10.1214/17-aap1326">https://doi.org/10.1214/17-aap1326</a>
+Chatterjee, Sourav, and Persi Diaconis. 2018. <span>“The Sample Size Required in Importance Sampling.”</span> <em>The Annals of Applied Probability</em> 28 (2). <a href="https://doi.org/10.1214/17-aap1326">https://doi.org/10.1214/17-aap1326</a>.
 </div>
 <div id="ref-chen.y:2005" class="csl-entry" role="listitem">
-Chen, Y. (2005). Another look at rejection sampling through importance sampling. <em>Statistics &amp; Probability Letters</em>, <em>72</em>(4), 277–283. <a href="https://doi.org/10.1016/j.spl.2005.01.002">https://doi.org/10.1016/j.spl.2005.01.002</a>
+Chen, Yuguo. 2005. <span>“Another Look at Rejection Sampling Through Importance Sampling.”</span> <em>Statistics &amp; Probability Letters</em> 72 (4): 277–83. <a href="https://doi.org/10.1016/j.spl.2005.01.002">https://doi.org/10.1016/j.spl.2005.01.002</a>.
 </div>
 <div id="ref-dayan.p:1995" class="csl-entry" role="listitem">
-Dayan, P., Hinton, G. E., Neal, R. M., &amp; Zemel, R. S. (1995). The <span>Helmholtz</span> machine. <em>Neural Computation</em>, <em>7</em>(5), 889–904. <a href="https://doi.org/10.1162/neco.1995.7.5.889">https://doi.org/10.1162/neco.1995.7.5.889</a>
+Dayan, Peter, Geoffrey E. Hinton, Radford M. Neal, and Richard S. Zemel. 1995. <span>“The <span>Helmholtz</span> Machine.”</span> <em>Neural Computation</em> 7 (5): 889–904. <a href="https://doi.org/10.1162/neco.1995.7.5.889">https://doi.org/10.1162/neco.1995.7.5.889</a>.
 </div>
 <div id="ref-dehaene.d:2019" class="csl-entry" role="listitem">
-Dehaene, D., Frigo, O., Combrexelle, S., &amp; Eline, P. (2019, September 25). <em>Iterative energy-based projection on a normal data manifold for anomaly localization</em>. International <span>Conference</span> on <span>Learning Representations</span>, 2020. <a href="https://openreview.net/forum?id=HJx81ySKwr">https://openreview.net/forum?id=HJx81ySKwr</a>
+Dehaene, David, Oriel Frigo, Sébastien Combrexelle, and Pierre Eline. 2019. <span>“Iterative Energy-Based Projection on a Normal Data Manifold for Anomaly Localization.”</span> In. <a href="https://openreview.net/forum?id=HJx81ySKwr">https://openreview.net/forum?id=HJx81ySKwr</a>.
 </div>
 <div id="ref-futrell.r:2020" class="csl-entry" role="listitem">
-Futrell, R., Gibson, E., &amp; Levy, R. (2020). Lossy-context surprisal: <span>An</span> information-theoretic model of memory effects in sentence processing. <em>Cognitive Science</em>, <em>44</em>(3), e12814. <a href="https://doi.org/10.1111/cogs.12814">https://doi.org/10.1111/cogs.12814</a>
+Futrell, Richard, Edward Gibson, and Roger Levy. 2020. <span>“Lossy-Context Surprisal: <span>An</span> Information-Theoretic Model of Memory Effects in Sentence Processing.”</span> <em>Cognitive Science</em> 44 (3): e12814. <a href="https://doi.org/10.1111/cogs.12814">https://doi.org/10.1111/cogs.12814</a>.
 </div>
 <div id="ref-genewein.t:2015" class="csl-entry" role="listitem">
-Genewein, T., Leibfried, F., Grau-Moya, J., &amp; Braun, D. A. (2015). Bounded rationality, abstraction, and hierarchical decision-making: An information-theoretic optimality principle. <em>Frontiers in Robotics and AI</em>, <em>2</em>. <a href="https://www.frontiersin.org/article/10.3389/frobt.2015.00027">https://www.frontiersin.org/article/10.3389/frobt.2015.00027</a>
+Genewein, Tim, Felix Leibfried, Jordi Grau-Moya, and Daniel Alexander Braun. 2015. <span>“Bounded Rationality, Abstraction, and Hierarchical Decision-Making: An Information-Theoretic Optimality Principle.”</span> <em>Frontiers in Robotics and AI</em> 2. <a href="https://www.frontiersin.org/article/10.3389/frobt.2015.00027">https://www.frontiersin.org/article/10.3389/frobt.2015.00027</a>.
 </div>
 <div id="ref-gibbs.a:2002" class="csl-entry" role="listitem">
-Gibbs, A. L., &amp; Su, F. E. (2002). On choosing and bounding probability metrics. <em>International Statistical Review</em>, <em>70</em>(3), 419–435. <a href="https://doi.org/10.1111/j.1751-5823.2002.tb00178.x">https://doi.org/10.1111/j.1751-5823.2002.tb00178.x</a>
+Gibbs, Alison L., and Francis Edward Su. 2002. <span>“On Choosing and Bounding Probability Metrics.”</span> <em>International Statistical Review</em> 70 (3): 419–35. <a href="https://doi.org/10.1111/j.1751-5823.2002.tb00178.x">https://doi.org/10.1111/j.1751-5823.2002.tb00178.x</a>.
 </div>
 <div id="ref-kingma.d:2017" class="csl-entry" role="listitem">
-Kingma, D. P. (2017). <em>Variational inference &amp; deep learning: <span>A</span> new synthesis</em> [PhD thesis, University of Amsterdam]. <a href="https://pure.uva.nl/ws/files/17891313/Thesis.pdf">https://pure.uva.nl/ws/files/17891313/Thesis.pdf</a>
+Kingma, Diederik P. 2017. <span>“Variational Inference &amp; Deep Learning: <span>A</span> New Synthesis.”</span> PhD thesis, University of Amsterdam. <a href="https://pure.uva.nl/ws/files/17891313/Thesis.pdf">https://pure.uva.nl/ws/files/17891313/Thesis.pdf</a>.
 </div>
 <div id="ref-levy.r:2008" class="csl-entry" role="listitem">
-Levy, R. (2008). Expectation-based syntactic comprehension. <em>Cognition</em>, <em>106</em>(3), 1126–1177. <a href="https://doi.org/10.1016/j.cognition.2007.05.006">https://doi.org/10.1016/j.cognition.2007.05.006</a>
+Levy, Roger. 2008. <span>“Expectation-Based Syntactic Comprehension.”</span> <em>Cognition</em> 106 (3): 1126–77. <a href="https://doi.org/10.1016/j.cognition.2007.05.006">https://doi.org/10.1016/j.cognition.2007.05.006</a>.
 </div>
 <div id="ref-liang.d:2018" class="csl-entry" role="listitem">
-Liang, D., Krishnan, R. G., Hoffman, M. D., &amp; Jebara, T. (2018). Variational autoencoders for collaborative filtering. <em>Proceedings of the 2018 <span>World Wide Web Conference</span></em>, 689–698. <a href="https://doi.org/10.1145/3178876.3186150">https://doi.org/10.1145/3178876.3186150</a>
+Liang, Dawen, Rahul G. Krishnan, Matthew D. Hoffman, and Tony Jebara. 2018. <span>“Variational Autoencoders for Collaborative Filtering.”</span> In <em>Proceedings of the 2018 <span>World Wide Web Conference</span></em>, 689–98. <span>WWW</span> ’18. Republic; Canton of Geneva, CHE: International World Wide Web Conferences Steering Committee. <a href="https://doi.org/10.1145/3178876.3186150">https://doi.org/10.1145/3178876.3186150</a>.
 </div>
 <div id="ref-oh.b:2024arxiv" class="csl-entry" role="listitem">
-Oh, B.-D., Yue, S., &amp; Schuler, W. (2024, February 3). <em>Frequency explains the inverse correlation of large language models’ size, training data amount, and surprisal’s fit to reading times</em>. <a href="https://doi.org/10.48550/arXiv.2402.02255">https://doi.org/10.48550/arXiv.2402.02255</a>
+Oh, Byung-Doh, Shisen Yue, and William Schuler. 2024. <span>“Frequency Explains the Inverse Correlation of Large Language Models’ Size, Training Data Amount, and Surprisal’s Fit to Reading Times.”</span> February 3, 2024. <a href="https://doi.org/10.48550/arXiv.2402.02255">https://doi.org/10.48550/arXiv.2402.02255</a>.
 </div>
 <div id="ref-ortega.p:2013" class="csl-entry" role="listitem">
-Ortega, P. A., &amp; Braun, D. A. (2013). Thermodynamics as a theory of decision-making with information-processing costs. <em>Proceedings of the Royal Society A: Mathematical, Physical and Engineering Sciences</em>, <em>469</em>(2153), 20120683. <a href="https://doi.org/10.1098/rspa.2012.0683">https://doi.org/10.1098/rspa.2012.0683</a>
+Ortega, Pedro A., and Daniel A. Braun. 2013. <span>“Thermodynamics as a Theory of Decision-Making with Information-Processing Costs.”</span> <em>Proceedings of the Royal Society A: Mathematical, Physical and Engineering Sciences</em> 469 (2153): 20120683. <a href="https://doi.org/10.1098/rspa.2012.0683">https://doi.org/10.1098/rspa.2012.0683</a>.
 </div>
 <div id="ref-sanz-alonso.d:2018" class="csl-entry" role="listitem">
-Sanz-Alonso, D. (2018). Importance sampling and necessary sample size: An information theory approach. <em>SIAM/ASA Journal on Uncertainty Quantification</em>, <em>6</em>(2), 867–879. <a href="https://doi.org/10.1137/16M1093549">https://doi.org/10.1137/16M1093549</a>
+Sanz-Alonso, Daniel. 2018. <span>“Importance Sampling and Necessary Sample Size: An Information Theory Approach.”</span> <em>SIAM/ASA Journal on Uncertainty Quantification</em> 6 (2): 867–79. <a href="https://doi.org/10.1137/16M1093549">https://doi.org/10.1137/16M1093549</a>.
 </div>
 <div id="ref-vincent.p:2010" class="csl-entry" role="listitem">
-Vincent, P., Larochelle, H., Lajoie, I., Bengio, Y., &amp; Manzagol, P.-A. (2010). Stacked denoising autoencoders: <span>Learning</span> useful representations in a deep network with a local denoising criterion. <em>Journal of Machine Learning Research</em>, <em>11</em>, 3371–3408.
+Vincent, Pascal, Hugo Larochelle, Isabelle Lajoie, Yoshua Bengio, and Pierre-Antoine Manzagol. 2010. <span>“Stacked Denoising Autoencoders: <span>Learning</span> Useful Representations in a Deep Network with a Local Denoising Criterion.”</span> <em>Journal of Machine Learning Research</em> 11 (December): 3371–3408.
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -1643,18 +1204,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -1686,7 +1236,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
       var filterRegex = new RegExp('/' + window.location.host + '/');
