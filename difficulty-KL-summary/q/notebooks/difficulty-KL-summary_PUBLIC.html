@@ -214,7 +214,6 @@ window.Quarto = {
   <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes</a>
   <ul class="collapse">
   <li><a href="#requirements-of-a-parametric-relationship" id="toc-requirements-of-a-parametric-relationship" class="nav-link" data-scroll-target="#requirements-of-a-parametric-relationship">Requirements of a parametric relationship</a></li>
-  <li><a href="#optimal-code-length" id="toc-optimal-code-length" class="nav-link" data-scroll-target="#optimal-code-length">Optimal code-length</a></li>
   </ul></li>
   <li><a href="#ordered-search-runtime" id="toc-ordered-search-runtime" class="nav-link" data-scroll-target="#ordered-search-runtime">Ordered search runtime</a>
   <ul class="collapse">
@@ -788,17 +787,6 @@ e^{\R + \Dq}
 <p><span class="math display">
 G(s) = s - \log f_\mathrm{GAM}(s)
 </span></p>
-</section>
-<section id="optimal-code-length" class="level3">
-<h3 class="anchored" data-anchor-id="optimal-code-length">Optimal code-length</h3>
-<p>We’re interested in the question: How many bits of information are required to transform prior <span class="math inline">p_Z</span> into posterior <span class="math inline">\pZu</span>?</p>
-<p>Just using bayes rule, we can break this down into three parts</p>
-<p><span class="math display">
--\log \pzu
-= -\log p(z) - \log \frac{p(\uu\mid z)}{p(\uu)}
-= \log p(\uu) -\log p(z) - \log p(\uu\mid z)
-</span></p>
-<p>TBC</p>
 </section>
 </section>
 <section id="ordered-search-runtime" class="level1 page-columns page-full">
