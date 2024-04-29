@@ -50,7 +50,9 @@ url=false,%isbn=false,doi=false
 \renewcommand*\plmarginyear[1]{%
   \raggedleft\normalfont{#1}%
 }
+% handle multiple variants of name by adding each
 \plauthorname[Jacob Louis]{Hoover}
+\plauthorname[Jacob]{Hoover}
 \addbibresource{/Users/j/Library/texmf/bibtex/bib/all-biblatex.bib}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -319,9 +321,9 @@ url=false,%isbn=false,doi=false
   % Print bibliography, manual order
   \vspace{5pt}
   \nocite{%
-    % hoover.j:2022psyarxiv,%
+    rahimi.h:2024,%
     hoover.j:2023,%
-    socolof.m:2022coling,% 
+    socolof.m:2022coling,%
     hoover.j:2022amlap,%
     hoover.j:2021emnlp,%
     hoover.j:2021wccfl%
