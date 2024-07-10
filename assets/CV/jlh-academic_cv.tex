@@ -44,7 +44,7 @@ url=false,%isbn=false,doi=false
 	{\setlength{\topsep}{0pt}%
 	 \setlength{\itemsep}{\bibitemsep}%
 	 \leftmargin\labelwidth%
-	 \advance\leftmargin\labelsep}}%
+	 \advance\leftmargin\labelsep}}% chktex 41
 {\endlist}
 {\item}
 \renewcommand*\plmarginyear[1]{%
@@ -53,6 +53,10 @@ url=false,%isbn=false,doi=false
 % handle multiple variants of name by adding each
 \plauthorname[Jacob Louis]{Hoover}
 \plauthorname[Jacob]{Hoover}
+\plauthorname[Jacob Louis Hoover]{Vigly}
+\plauthorname[Jacob Louis]{Vigly}
+\plauthorname[Jacob Louis]{Vigly}
+\plauthorname[Jacob]{Vigly}
 \addbibresource{/Users/j/Library/texmf/bibtex/bib/all-biblatex.bib}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -111,6 +115,7 @@ url=false,%isbn=false,doi=false
 %--------------------TITLE-------------------------------
 % \vspace*{-35pt}
 \Huge{Jacob Louis \scshape{Hoover}}
+% \Huge{Jacob Louis Hoover \scshape{Vigly}}
 \small\textit{\hfill{} updated: \today}
 %--------------------SECTIONS----------------------------
 
@@ -298,9 +303,9 @@ url=false,%isbn=false,doi=false
   \begin{longtable}[l]{ll}
     Reviewer for:
     &%
-    \href{https://transacl.org/}{TACL}, % 2022
-    \href{https://cognitivesciencesociety.org/}{CogSci}, % 2021
-    \href{https://www.conll.org/}{CoNLL} % 2020, 2023
+    \href{https://transacl.org/}{TACL}, 2022;
+    \href{https://cognitivesciencesociety.org/}{CogSci}, 2021;
+    \href{https://www.conll.org/}{CoNLL} 2020, 2023, 2024
   \end{longtable}
 
 
@@ -350,25 +355,26 @@ url=false,%isbn=false,doi=false
   \section{Awards}
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \begin{longtable}{p{1.7cm}|p{15cm}}
+    \textsc{2024}&%
+      \textbf{National Science Foundation SBE Postdoctoral Research Fellowship}.
+      Sponsor Roger Levy at MIT. ``Algorithmic models of incremental human language
+      comprehension.''
+       US\$160k.\\
+      % 2024-09 through 2026-08
     \textsc{2023}&%
       \textbf{McGill International Graduate Mobility Award},
-      for research visit with Prof.\ Roger Levy at MIT. \$6k.\\
-      % Amount: 6000 CAD
+      for research visit with Roger Levy, MIT\@. CA\$6k.\\
       % 2023-09 through 2023-12
-    \textsc{2020}&%
-      \textbf{Microsoft Research-Mila Collaboration Grant}, for project
-      supervised by Alessandro Sordoni (MSR Montreal) and Prof.\ Timothy
-      O'Donnell (Mila). ``Towards characterizing compositionality and systematic
-      generalization for natural language representations.'' \$27k.\\
-      % Title:
-      %   Towards characterizing compositionality and systematic generalization
-      %   for natural language representations
-      % Amount: 27000 CAD
-      % 2020-03 through 2020-12
+    % \textsc{2020}&%
+    %   \textbf{Microsoft Research-Mila Collaboration Grant}, for project
+    %   supervised by Alessandro Sordoni (MSR Montreal) and Prof.\ Timothy
+    %   O'Donnell (Mila). ``Towards characterizing compositionality and systematic
+    %   generalization for natural language representations.'' CA\$27k.\\
+    %   % 2020-03 through 2020-12
     \textsc{2019}&%
-      \textbf{CRBLM Graduate Scholar} Stipend, Centre for Research on Brain, Language
+      \textbf{CRBLM Graduate Scholar Stipend}, Centre for Research on Brain, Language
       and Music (\href{https://crblm.ca/}{CRBLM}). ``What neural network models
-      can tell us about linguistic structure.'' \$3k.\\
+      can tell us about linguistic structure.'' CA\$3k.\\
       % Dec 13 2019: amount 3000 CAD
   \end{longtable}
 
