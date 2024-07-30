@@ -53,6 +53,8 @@ url=false,%isbn=false,doi=false
 % handle multiple variants of name by adding each
 \plauthorname[Jacob Louis]{Hoover}
 \plauthorname[Jacob]{Hoover}
+\plauthorname[Jacob]{Hoover Vigly}
+\plauthorname[Jacob Louis]{Hoover Vigly}
 \plauthorname[Jacob Louis Hoover]{Vigly}
 \plauthorname[Jacob Louis]{Vigly}
 \plauthorname[Jacob Louis]{Vigly}
@@ -68,6 +70,8 @@ url=false,%isbn=false,doi=false
 \usepackage{mathtools} % imports amsmath
 \usepackage{cleveref} % must come after importing hyperref and amsmath
 \hypersetup{%
+  pdftitle={Jacob Louis Hoover Vigly},
+  pdfauthor={Jacob Louis Hoover Vigly},
   linkcolor=BrickRed,%
   citecolor=PineGreen,%
   filecolor=Mulberry,%
@@ -114,15 +118,15 @@ url=false,%isbn=false,doi=false
 \pagestyle{empty}
 %--------------------TITLE-------------------------------
 % \vspace*{-35pt}
-\Huge{Jacob Louis \scshape{Hoover}}
-% \Huge{Jacob Louis Hoover \scshape{Vigly}}
+% \Huge{Jacob Louis \scshape{Hoover}}
+\Huge{Jacob Louis \scshape{Hoover Vigly}}
 \small\textit{\hfill{} updated: \today}
 %--------------------SECTIONS----------------------------
 
 \begin{tabular}{p{\textwidth-12pt}}
   % \textsc{DOB:}   & 03 Jan 1989 \\
   %\textsc{Address:}   &
-  1085 av du Dr-Penfield, Montréal, Québec H3A 1A7, Canada\\
+  % 1085 av du Dr-Penfield, Montréal, Québec H3A 1A7, Canada\\
   \href{http://jahoo.github.io}{jahoo.github.io}\\
   %\textsc{Phone:}     &
   % +1 508 808 1033\\
@@ -135,28 +139,39 @@ url=false,%isbn=false,doi=false
 
 \vspace*{10pt}
 
+\section{Position}
+
+\begin{longtable}{p{1.7cm}|p{15cm}}
+  2024--pres.%
+    &Postdoctoral Fellow,
+    \textbf{Massachusetts Institute of Technology}, Dept.\ of Brain and Cognitive Sciences\\
+    &\href{https://cpl.mit.edu}{Computational Psycholinguistics Lab} | PI: Roger Levy\\
+  \end{longtable}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Education}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % \subsection{Degree study}
 
 \begin{longtable}{p{1.7cm}|p{15cm}}
-  2018--(24)%
-    &\textsc{PhD},
-     \textbf{\href{https://www.mcgill.ca/linguistics/graduate}{McGill} University},
-     Department of Linguistics, and
-     \href{http://mila.quebec}{\textbf{Mila}} -- Québec AI Institute\\
+  2018--24%
+    &\textsc{Ph.D.},
+     \textbf{McGill University},
+     Department of \href{https://www.mcgill.ca/linguistics/graduate}{Linguistics}, and
+     \href{https://mila.quebec}{\textbf{Mila} -- Québec AI Institute}\\
+    &dissertation: ``The Cost of Information: Looking beyond Predictability in Language Processing''\\
+    % \citetitle*{hoovervigly.j:2024phd}
     &advisor: Timothy J.\ O'Donnell\\
   %   &[Fast-tracked from MA program in 2019]\\
-    % \multicolumn{2}{c}{}\\
-  \textsc{Fall '23}%
-    &Visiting PhD student,
-    \textbf{Massachusetts Institute of Technology}, Computational
-    Psycholinguistics Lab\\
-    &PI: Roger Levy\\
-    \multicolumn{2}{c}{}\\
+  \multicolumn{2}{c}{}\\
+  % \textsc{Fall '23}%
+  %   &Visiting Ph.D.\ student,
+  %   \textbf{Massachusetts Institute of Technology}\\
+  %   &Department of Brain and Cognitive Sciences, Computational Psycholinguistics Lab\\
+  %   &PI: Roger Levy\\
+  %   \multicolumn{2}{c}{}\\
   2006--12%
-    &\textsc{Bachelor of Liberal Arts (ALB)}, \emph{cum laude},
+    &\textsc{A.L.B.\ (Bachelor of Liberal Arts)}, \emph{cum laude},
      \textbf{Harvard University \href{https://extension.harvard.edu/}{Extension School}}\\
     &Field of Study: Mathematics | Minor: Linguistics
   \end{longtable}
@@ -297,15 +312,15 @@ url=false,%isbn=false,doi=false
     environmental working group\\
     \textsc{2018--}pres.
     &%
-    Graduate student member, webmaster, Montréal Computational and Quantitative
-    Linguistics Lab (\href{http://mcqll.org}{\textbf{MCQLL}})\\
+    Graduate student member, webmaster, \href{http://mcqll.org}{\textbf{MCQLL}} (Montréal Computational and Quantitative
+    Linguistics Lab)\\
   \end{longtable}
   \begin{longtable}[l]{ll}
     Reviewer for:
     &%
     \href{https://transacl.org/}{TACL}, 2022;
     \href{https://cognitivesciencesociety.org/}{CogSci}, 2021;
-    \href{https://www.conll.org/}{CoNLL} 2020, 2023, 2024
+    \href{https://www.conll.org/}{CoNLL} 2020, 2023
   \end{longtable}
 
 
@@ -326,6 +341,7 @@ url=false,%isbn=false,doi=false
   % Print bibliography, manual order
   \vspace{5pt}
   \nocite{%
+    hoovervigly.j:2024phd,%
     rahimi.h:2024,%
     hoover.j:2023,%
     socolof.m:2022coling,%
@@ -357,7 +373,7 @@ url=false,%isbn=false,doi=false
   \begin{longtable}{p{1.7cm}|p{15cm}}
     \textsc{2024}&%
       \textbf{National Science Foundation SBE Postdoctoral Research Fellowship}.
-      Sponsor Roger Levy at MIT. ``Algorithmic models of incremental human language
+      Sponsor: Roger Levy at MIT. ``Algorithmic models of incremental human language
       comprehension.''
        US\$160k.\\
       % 2024-09 through 2026-08
@@ -395,7 +411,7 @@ url=false,%isbn=false,doi=false
       Intermediate (\textasciitilde\ B2)\\
     Japanese
     &%
-      Novice (two years' university study, at this point rather atrophied)\\
+      Novice (two years' undergraduate study, rather atrophied)\\
     Russian, Spanish%
     &%
       Basic knowledge\\
