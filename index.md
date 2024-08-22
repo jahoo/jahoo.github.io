@@ -7,6 +7,6 @@ Hi. [I](/assets/j.png)’m a PhD student in [linguistics at McGill University](h
 
 I just noticed there's a typo in the above paragraph. That illustrates another question I am currently interested in: How come typos and more generally production errors/imprecision don't hinder understanding more than they do?
 
-I'm also a professional ballet dancer, formerly with [Festival Ballet Providence](http://www.festivalballetprovidence.org) in Rhode Island, The [Vanemuine Theatre](https://www.vanemuine.ee/people/jacob-hoover/?lang=en) in Tartu, Estonia, and José Mateo Ballet Theatre in Cambridge, Massachusetts.  I still try to dance as much as I can.
+I'm also a professional ballet dancer, formerly with [Festival Ballet Providence](http://www.festivalballetprovidence.org) (now Ballet RI) in Rhode Island, The [Vanemuine Theatre](https://www.vanemuine.ee) in Tartu, Estonia, and José Mateo Ballet Theatre in Cambridge, Massachusetts.  I still try to dance as much as I can.
 
 <!-- CV moved to navbar. See _includes/header.html -->
