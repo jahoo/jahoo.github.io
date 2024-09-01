@@ -4,7 +4,6 @@ title: research
 published: true
 ---
 
-
 <ul class="social-media-list">
   {% if site.github_username %}
   <li>
@@ -24,6 +23,13 @@ published: true
   </li>
   {% endif %}
 </ul>
+
+-------
+
+_Name update:_ \
+As of September 2024, I will publish using my new surname, Vigly (that is, "Vigly, Jacob Hoover"). Before this date I used the surname Hoover.
+
+### Selected publications
 
 <!-- {% bibliography_count -f pubs %} -->
 
