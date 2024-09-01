@@ -6,10 +6,10 @@
 # 'jekyll serve'. If you change this file, please restart the server process.
 
 # Site settings
-title: jacob louis hoover
+title: jacob hoover vigly
 email: jacob.hoover@mail.mcgill.ca
 description: > # this means to ignore newlines until "baseurl:"
-  PhD student in linguistics at McGill University and Mila Québec AI Institute, Montréal.
+  Postdoc at MIT, Department of Brain and Cognitive Sciences.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://jahoo.github.io" # the base hostname & protocol for your site
 # twitter_username: postylem
