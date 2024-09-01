@@ -18,4 +18,5 @@ I'm also a professional ballet dancer, formerly with [Festival Ballet Providence
 ----
 
 _Name update:_ \
-As of September 2024, I will publish using my new surname, Vigly (that is, "Vigly, Jacob Hoover"). Before this date I used the surname Hoover.
+As of September 2024, I will be using my new surname, Vigly (that is, "Vigly, Jacob Hoover"). \
+Before this date I published under the surname Hoover.
