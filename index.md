@@ -3,7 +3,7 @@ layout: page
 title: about
 ---
 
-Hi. [I](/assets/j.png)’m Jacob. I recently finished my PhD at McGill University in [ Linguistics](https://mcgill.ca/linguistics/), under the supervision of [Tim O'Donnell](https://todonnell.github.io/), where I was a member of the [Montreal Computational & Quantitative Linguistics Lab](https://mcqll.org/) and [Mila](https://mila.quebec/) – Quebec AI Institute.
+Hi. [I](/assets/j2024.jpeg)’m Jacob. I recently finished my PhD at McGill University in [ Linguistics](https://mcgill.ca/linguistics/), under the supervision of [Tim O'Donnell](https://todonnell.github.io/), where I was a member of the [Montreal Computational & Quantitative Linguistics Lab](https://mcqll.org/) and [Mila](https://mila.quebec/) – Quebec AI Institute.
 
 Starting Fall 2024 I'll be a postdoctoral fellow at MIT's Department of Brain and Cognitive Sciences, working with [Roger Levy](https://www.mit.edu/~rplevy/), in the [Computational Psycholinguistics Laboratory](http://cpl.mit.edu/). 
 
