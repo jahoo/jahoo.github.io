@@ -11,7 +11,7 @@ title: posts
     <li>
       <h3 id="no-pad">
         <a
-          {% if post.tags contains "paper" %}
+          {% if post.tags contains "paper" or post.tags contains "dissertation" %}
           class="post-link-highlighted"
           {% else %}
           class="post-link"

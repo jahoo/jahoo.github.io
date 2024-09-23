@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Sampling for processing
+title: Plausibility of Sampling for Processing
 published: true 
 tags:
     - note

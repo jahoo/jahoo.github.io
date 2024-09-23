@@ -26,9 +26,9 @@ published: true
 
 -------
 
-_Name update:_ \
-As of September 2024, I will be using my new surname, Vigly (that is, "Vigly, Jacob Hoover"). \
-Before this date I published under the surname Hoover.
+_Name update, September 2024:_ \
+I will now be using my new surname, Vigly. My old surname is now a middle name (that is, I am "Vigly, Jacob Hoover"). \
+Previously I published under the surname Hoover.
 
 ### Selected publications
 
