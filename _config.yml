@@ -27,7 +27,7 @@ scholar:
   order: descending
   # group_by: year
   # group_order: descending
-  bibtex_skip_fields: [ "abstract", "month_numeric", "poster", "handout", "pdf", "code", "slides" ]
+  bibtex_skip_fields: ["abstract", "code", "handout", "month_numeric", "myurl", "myurltitle", "openaccess", "pdf", "poster", "preprint", "slides"]
   # type_names: { article: Papers }
   # linebreaks: true # 
   source: /_bibliography
