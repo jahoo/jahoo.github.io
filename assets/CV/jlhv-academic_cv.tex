@@ -11,7 +11,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % \newcommand*\publistbasestyle{apa6}%default authoryear
 \usepackage[%
-natbib=true,
+% natbib=true,
 backend=biber,
 maxnames=9,
 % giveninits=true,
@@ -19,9 +19,9 @@ style=publist,
 plauthorhandling=highlight,
 nameorder=given-family,
 plsorting=ddt,
-% oainfo=simple,
-% marginyear=true,
-hlyear=false,
+oainfo=none,
+marginyear=false,
+hlyear=true,
 plnumbering=none,%global-descending,
 prinfo=false,
 linktitles=url,
@@ -30,7 +30,7 @@ url=false,%isbn=false,doi=false
 
 \usepackage[symbol]{footmisc}
 
-% Redefine to make year in margin and not in bibentry
+% Redefine to make year in margin and not in bibentry (use with marginyear=false)
 % https://github.com/jspitz/biblatex-publist/issues/20
 \renewbibmacro*{date}{}
 \renewbibmacro*{date+extradate}{}
@@ -165,8 +165,8 @@ url=false,%isbn=false,doi=false
      \href{https://mila.quebec}{\textbf{Mila} -- Québec AI Institute}\\
     &\quad{}advisor: Timothy J.\ O'Donnell\\
     &\quad{}dissertation:
-      ``\href{https://jahoo.github.io/2024/08/02/dissertation.html}{The Cost of Information:
-       Looking beyond Predictability in Language Processing}''\\
+      ``The Cost of Information:
+       Looking beyond Predictability in Language Processing''\\
     % &\quad(dissertation final submission approved Aug. 7, 2024)\\
     % \citetitle*{hoover.j:2024phd}
   %   &[Fast-tracked from MA program in 2019]\\
