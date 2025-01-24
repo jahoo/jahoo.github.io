@@ -1,0 +1,33 @@
+[
+  {
+    "listing": "/index.html",
+    "items": [
+      "/notebooks/rejection-sampling-expo.html",
+      "/notebooks/lit_review.html",
+      "/notebooks/simulation_biased_coin.html",
+      "/notebooks/difficulty-surprisal-summary.html",
+      "/notebooks/transform-pdf.html",
+      "/notebooks/interactive-kl-and-surprisal.html",
+      "/notes/hahn.m.2022PNAS-notes.html",
+      "/notes/lew.a.2023LLaMPPL-notes.html",
+      "/notes/harmonicmean.html",
+      "/notes/yang.k.2020-notes.html",
+      "/logs/2-beyond-surprisal.html",
+      "/logs/1-plausibility-sampling.html",
+      "/slides/2023-11-17.html",
+      "/slides/2023-08-03.html",
+      "/slides/KL-demo-example.html",
+      "/slides/2024-01-17-update.html",
+      "/slides/KL-demo.html",
+      "/slides/2023-12-01-CPL.html",
+      "/slides/2023-11-21-MCQLL.html",
+      "/notebooks_retired/bayesian_parsing.html",
+      "/diss-proposal/diss-proposal.html",
+      "/notebooks_retired/noisy-channel-lm.html",
+      "/notebooks_retired/kl-pq-study.html",
+      "/notebooks_retired/kl-surp-R-study.html",
+      "/notebooks_retired/RAVI.html",
+      "/notebooks_retired/particles-parsing.html"
+    ]
+  }
+]
