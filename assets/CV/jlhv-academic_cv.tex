@@ -2,7 +2,9 @@
 \documentclass[11pt,a4paper]{article}
 
 \usepackage{fontspec}
-\defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+\defaultfontfeatures{Mapping=tex-text,Numbers=OldStyle
+%, Scale=MatchLowercase
+}
 \setmainfont{Linux Biolinum}
 \setsansfont{Linux Biolinum}
 
@@ -121,24 +123,26 @@ url=false,%isbn=false,doi=false
 %--------------------TITLE-------------------------------
 % \vspace*{-35pt}
 % \Huge{Jacob Louis \scshape{Hoover}}
-\Huge{Jacob Louis Hoover \scshape{Vigly}}\footnote{Note: As of Sept.\ 2024, I use the surname Vigly (i.e., ``Vigly, Jacob Hoover''). Previously I published under the surname Hoover.}
+\Huge{Jacob Hoover \scshape{Vigly}}\footnote{Note: As of Sept.\ 2024, I use the surname Vigly (i.e., ``Vigly, Jacob Hoover''). Previously I published under the surname Hoover.}
 \small\textit{\hfill{} updated: \today}
 %--------------------SECTIONS----------------------------
 
-\begin{tabular}{p{\textwidth-12pt}}
-  % \textsc{DOB:}   & 03 Jan 1989 \\
-  %\textsc{Address:}   &
-  % 1085 av du Dr-Penfield, Montréal, Québec H3A 1A7, Canada\\
-  \href{http://jahoo.github.io}{jahoo.github.io}\\
-  %\textsc{Phone:}     &
+\begin{tabular}{%
+  % p{1.7cm}
+  p{\textwidth-1.7cm}
+}
+  %\textsc{DOB:}       &
+  % 03 Jan 1989 \\
+  % \textsc{website:}   &
+  \href{https://jahoo.github.io}{jahoo.github.io}\\
+  % \textsc{Phone:}     &
   % +1 508 808 1033\\
-  %\textsc{email:}     &
-  % jacob.hoover [at] mail.mcgill.ca\\
-  % postylem [at] gmail.com\\
+  % \textsc{email:}     &
   jahoo [at] mit.edu\\
-  % \orcidlink{0000-0001-8651-5395}: 0000-0001-8651-5395\\
-  %, hooverjac at mila.quebec\\
-  %\textsc{website:}   &
+  % \orcidlink{0000-0001-8651-5395}: & 0000-0001-8651-5395\\
+  \noalign{\vspace{6pt}}
+  % \textsc{address:}     &
+  46-3027 MIT, 77 Massachusetts Ave, Cambridge MA 02139, USA\\
 \end{tabular}
 
 \vspace*{10pt}
@@ -146,7 +150,7 @@ url=false,%isbn=false,doi=false
 % \section{Position}
 
 \begin{longtable}{p{1.7cm}|p{15cm}}
-  2024--pres.%
+  \textsc{2024--pres.}%
     &Postdoctoral Fellow,
     \textbf{Massachusetts Institute of Technology}\\
     &\quad{}Department of Brain and Cognitive Sciences\\
@@ -160,7 +164,7 @@ url=false,%isbn=false,doi=false
 
 \begin{longtable}{p{1.7cm}|p{15cm}}
   2018--24%
-    &\textsc{PhD},
+    &PhD,
      \textbf{McGill University},
      Department of \href{https://www.mcgill.ca/linguistics/graduate}{Linguistics}, and
      \href{https://mila.quebec}{\textbf{Mila} -- Québec AI Institute}\\
@@ -179,7 +183,7 @@ url=false,%isbn=false,doi=false
   %   &PI: Roger Levy\\
   %   \multicolumn{2}{c}{}\\
   2006--12%
-    &\textsc{ALB\ (Bachelor of Liberal Arts)}, \emph{cum laude},
+      &ALB, \emph{cum laude},
      \textbf{Harvard University \href{https://extension.harvard.edu/}{Extension
      School}}\\
     &\quad{}Field of Study: Mathematics | Minor: Linguistics
@@ -309,7 +313,7 @@ url=false,%isbn=false,doi=false
     \textsc{2020--22}
     &%
     Graduate student representative, McGill Linguistics Department\\
-    2020
+    \textsc{2020}
     &%
     Graduate Program changes Committee, student member\\
     \textsc{2019--22}
@@ -432,7 +436,7 @@ url=false,%isbn=false,doi=false
 
   \section{Ballet career}
   \begin{longtable}{p{1.7cm}|p{15cm}}
-    2018--pres.
+    \textsc{2018--pres.}
     &%
     I retired from full-time dancing in 2018, when I began my graduate study at
     McGill. I have continued with occasional appearances as an independent
