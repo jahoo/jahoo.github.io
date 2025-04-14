@@ -15,6 +15,7 @@ I'm also a (mostly retired) professional ballet dancer, formerly with Festival B
 
 ----
 
-_Name update, September 2024:_ \
-I will now be using my new surname, Vigly. My old surname is now a middle name (that is, I am "Vigly, Jacob Hoover"). \
-Previously I published under the surname Hoover.
+<span class="post-meta">
+_Note on my name:_  
+My surname is Vigly. Prior to September 2024, my surname was Hoover, which is now a middle name.
+</span>

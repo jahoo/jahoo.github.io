@@ -24,14 +24,16 @@ published: true
   {% endif %}
 </ul>
 
--------
-
-_Name update, September 2024:_ \
-I will now be using my new surname, Vigly. My old surname is now a middle name (that is, I am "Vigly, Jacob Hoover"). \
-Previously I published under the surname Hoover.
 
 ### Selected publications
 
 <!-- {% bibliography_count -f pubs %} -->
 
 {% bibliography --file pubs %}
+
+-------
+
+<span class="post-meta">
+_Note on my name:_  
+My surname is Vigly. Prior to September 2024, my surname was Hoover, which is now a middle name.
+</span>

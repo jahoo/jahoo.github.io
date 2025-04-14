@@ -11,49 +11,51 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%% Publications using biblatex-publist %%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\providecommand*\plmarginyear[1]{%
+  \raggedleft\small{\textcolor{lightgray}{#1}}%
+}
 % \newcommand*\publistbasestyle{apa6}%default authoryear
 \usepackage[%
 % natbib=true,
 backend=biber,
-maxnames=9,
-% giveninits=true,
+maxnames=13,
 style=publist,
 plauthorhandling=highlight,
+giveninits=true,
 nameorder=given-family,
 plsorting=ddt,
 oainfo=none,
-marginyear=false,
-hlyear=true,
-plnumbering=none,%global-descending,
+% fixyear=false,
+marginyear=true,
+hlyear=false,
+plnumbering=none,
 prinfo=false,
-linktitles=url,
-url=false,%isbn=false,doi=false
+linktitles=all,
+url=false,%isbn=false,eprint=false%don't print the arxiv eprint info, since I'll assume DOI covers this
 ]{biblatex}
 
 \usepackage[symbol]{footmisc}
 
-% Redefine to make year in margin and not in bibentry (use with marginyear=false)
-% https://github.com/jspitz/biblatex-publist/issues/20
-\renewbibmacro*{date}{}
-\renewbibmacro*{date+extradate}{}
-\renewbibmacro*{issue+date}{}
-\renewbibmacro*{bpl:year+labelyear}{\nopunct\ignorespaces}
-\newcommand*{\bibyear}{}
-\defbibenvironment{bibliography}
-{\list%
-	{\iffieldequals{year}{\bibyear}
-                {}
-		{\printfield{year}%
-		 \savefield{year}{\bibyear}}}
-	{\setlength{\topsep}{0pt}%
-	 \setlength{\itemsep}{\bibitemsep}%
-	 \leftmargin\labelwidth%
-	 \advance\leftmargin\labelsep}}% chktex 41
-{\endlist}
-{\item}
-\renewcommand*\plmarginyear[1]{%
-  \raggedleft\normalfont{#1}%
-}
+% % Redefine to make year in margin and not in bibentry (use with marginyear=false)
+% % https://github.com/jspitz/biblatex-publist/issues/20
+% \renewbibmacro*{date}{}
+% \renewbibmacro*{date+extradate}{}
+% \renewbibmacro*{issue+date}{}
+% \renewbibmacro*{bpl:year+labelyear}{\nopunct\ignorespaces}
+% \newcommand*{\bibyear}{}
+% \defbibenvironment{bibliography}
+% {\list%
+% 	{\iffieldequals{year}{\bibyear}
+%                 {}
+% 		{\printfield{year}%
+% 		 \savefield{year}{\bibyear}}}
+% 	{\setlength{\topsep}{0pt}%
+% 	 \setlength{\itemsep}{\bibitemsep}%
+% 	 \leftmargin\labelwidth%
+% 	 \advance\leftmargin\labelsep}}% chktex 41
+% {\endlist}
+% {\item}
+
 % handle multiple variants of name by adding each
 \plauthorname[Jacob Louis]{Hoover}
 \plauthorname[Jacob]{Hoover}
@@ -120,8 +122,7 @@ url=false,%isbn=false,doi=false
 % \vspace*{-35pt}
 % \Huge{Jacob Louis \scshape{Hoover}}
 \Huge{Jacob Hoover \scshape{Vigly}}\footnote{%
-Note: As of Sept.\ 2024, my surname is Vigly (i.e., ``Vigly, Jacob Hoover'').
-Previously I published under the surname Hoover.%
+Note: my surname is Vigly. Prior to Sept.\ 2024, I published under the surname Hoover, which is now a middle name.%
 }
 \small\textit{\hfill{} updated: \today}
 %--------------------SECTIONS----------------------------
@@ -150,10 +151,10 @@ Previously I published under the surname Hoover.%
 
 \begin{longtable}{p{1.7cm}|p{15cm}}
   \textsc{2024--pres.}%
-    &Postdoctoral Fellow,
+    &Postdoctoral Fellow (NSF SPRF),
     \textbf{Massachusetts Institute of Technology}\\
     &\quad{}Department of Brain and Cognitive Sciences\\
-    &\quad{}\href{https://cpl.mit.edu}{Computational Psycholinguistics Lab} | PI: Roger Levy\\
+    &\quad{}\href{https://cpl.mit.edu}{Computational Psycholinguistics Laboratory} | PI: Roger Levy\\
   \end{longtable}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -171,16 +172,14 @@ Previously I published under the surname Hoover.%
     &\quad{}dissertation:
       ``The Cost of Information:
        Looking beyond Predictability in Language Processing''\\
-    % &\quad(dissertation final submission approved Aug. 7, 2024)\\
-    % \citetitle*{hoover.j:2024phd}
-  %   &[Fast-tracked from MA program in 2019]\\
-  % \multicolumn{2}{c}{}\\
-  % \textsc{Fall '23}%
-  %   &Visiting Ph.D.\ student,
-  %   \textbf{Massachusetts Institute of Technology}\\
-  %   &Department of Brain and Cognitive Sciences, Computational Psycholinguistics Lab\\
-  %   &PI: Roger Levy\\
-  %   \multicolumn{2}{c}{}\\
+    &[Fast-tracked from MA program in 2019]\\
+  \multicolumn{2}{c}{}\\
+  \textsc{Fall '23}%
+    &Visiting PhD student,
+    \textbf{Massachusetts Institute of Technology}\\
+    &\quad{}Department of Brain and Cognitive Sciences\\
+    &\quad{}\href{https://cpl.mit.edu}{Computational Psycholinguistics Laboratory} | PI: Roger Levy\\
+    \multicolumn{2}{c}{}\\
   2006--12%
       &ALB, \emph{cum laude},
      \textbf{Harvard University \href{https://extension.harvard.edu/}{Extension
@@ -324,15 +323,15 @@ Previously I published under the surname Hoover.%
     environmental working group\\
     \textsc{2018--24}
     &%
-    Graduate student member, webmaster, \href{http://mcqll.org}{\textbf{MCQLL}} (Montréal Computational and Quantitative
+    Student member, webmaster, \href{http://mcqll.org}{\textbf{MCQLL}} (Montréal Computational \& Quantitative
     Linguistics Lab)\\
   \end{longtable}
   \begin{longtable}[l]{ll}
     Reviewer for:
     &%
+    \href{https://cognitivesciencesociety.org/}{CogSci}, 2021; %2025;
+    \href{https://www.conll.org/}{CoNLL} 2020, 2023, 2025;
     \href{https://transacl.org/}{TACL}, 2022;
-    \href{https://cognitivesciencesociety.org/}{CogSci}, 2021;
-    \href{https://www.conll.org/}{CoNLL} 2020, 2023%, 2025
   \end{longtable}
 
 
@@ -352,6 +351,7 @@ Previously I published under the surname Hoover.%
   % Print bibliography, manual order
   \vspace{5pt}
   \nocite{%
+    lipkin.b:2025arxiv,%
     vigly.j:2025HSP,%
     clark.t:2025HSP,%
     hoover.j:2024phd,%
@@ -365,6 +365,9 @@ Previously I published under the surname Hoover.%
   }
   \AtNextBibliography{\small}
   \printbibliography[heading=none]{}
+  % \subsection{unpublished} 
+  % \AtNextBibliography{\small}
+  % \printbibliography[heading=none,type=unpublished]{}
   \vspace{5pt}
 
   % \subsection{Works in progress}
@@ -387,13 +390,17 @@ Previously I published under the surname Hoover.%
     \textsc{2024--26}&%
       \textbf{National Science Foundation SBE Postdoctoral Research Fellowship} (\href{https://new.nsf.gov/funding/opportunities/sbe-postdoctoral-research-fellowships-sprf}{SPRF}): ``Algorithmic models of incremental human language comprehension''
       (SMA \href{https://www.nsf.gov/awardsearch/showAward?AWD_ID=2404644&}{2404644}). 
+      (SMA \href{https://www.nsf.gov/awardsearch/showAward?AWD_ID=2404644&}{2404644}). 
+      With sponsor Roger Levy, at MIT\@.
+      (SMA \href{https://www.nsf.gov/awardsearch/showAward?AWD_ID=2404644&}{2404644}).
       With sponsor Roger Levy, at MIT\@.
       Co-funded by NSF's Perception, Action and Cognition (\href{https://new.nsf.gov/funding/opportunities/perception-action-cognition-pac}{PAC}) program.
+      Faculty sponsor: Roger Levy, MIT\@.
       US\$160k.\\
       % 2024-09 through 2026-08
     \textsc{2023}&%
       \textbf{McGill International Graduate Mobility Award},
-      for research visit with Roger Levy, MIT\@. CA\$6k.\\
+      for research visit at MIT\@. CA\$6k.\\
       % 2023-09 through 2023-12
     % \textsc{2020}&%
     %   \textbf{Microsoft Research-Mila Collaboration Grant}, for project
