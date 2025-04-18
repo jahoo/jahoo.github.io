@@ -26,7 +26,7 @@ nameorder=given-family,
 plsorting=ddt,
 oainfo=none,
 % fixyear=false,
-marginyear=true,
+% marginyear=true,
 hlyear=false,
 plnumbering=none,
 prinfo=false,
@@ -42,20 +42,19 @@ url=false,%isbn=false,eprint=false%don't print the arxiv eprint info, since I'll
 % \renewbibmacro*{date+extradate}{}
 % \renewbibmacro*{issue+date}{}
 % \renewbibmacro*{bpl:year+labelyear}{\nopunct\ignorespaces}
-% \newcommand*{\bibyear}{}
-% \defbibenvironment{bibliography}
-% {\list%
-% 	{\iffieldequals{year}{\bibyear}
-%                 {}
-% 		{\printfield{year}%
-% 		 \savefield{year}{\bibyear}}}
-% 	{\setlength{\topsep}{0pt}%
-% 	 \setlength{\itemsep}{\bibitemsep}%
-% 	 \leftmargin\labelwidth%
-% 	 \advance\leftmargin\labelsep}}% chktex 41
-% {\endlist}
-% {\item}
-
+\newcommand*{\bibyear}{}
+\defbibenvironment{bibliography}
+{\list
+  {\iffieldequals{year}{\bibyear}
+    {}
+    {\textcolor{lightgray}{\printfield{year}}%
+     \savefield{year}{\bibyear}}}
+  {\setlength{\topsep}{0pt}%
+   \setlength{\itemsep}{\bibitemsep}%
+   \leftmargin\labelwidth%
+   \advance\leftmargin1.5\labelsep}}% chktex 41
+{\endlist}
+{\item}
 % handle multiple variants of name by adding each
 \plauthorname[Jacob Louis]{Hoover}
 \plauthorname[Jacob]{Hoover}
@@ -390,10 +389,6 @@ Note: my surname is Vigly. Prior to Sept.\ 2024, I published under the surname H
     \textsc{2024--26}&%
       \textbf{National Science Foundation SBE Postdoctoral Research Fellowship} (\href{https://new.nsf.gov/funding/opportunities/sbe-postdoctoral-research-fellowships-sprf}{SPRF}): ``Algorithmic models of incremental human language comprehension''
       (SMA \href{https://www.nsf.gov/awardsearch/showAward?AWD_ID=2404644&}{2404644}). 
-      (SMA \href{https://www.nsf.gov/awardsearch/showAward?AWD_ID=2404644&}{2404644}). 
-      With sponsor Roger Levy, at MIT\@.
-      (SMA \href{https://www.nsf.gov/awardsearch/showAward?AWD_ID=2404644&}{2404644}).
-      With sponsor Roger Levy, at MIT\@.
       Co-funded by NSF's Perception, Action and Cognition (\href{https://new.nsf.gov/funding/opportunities/perception-action-cognition-pac}{PAC}) program.
       Faculty sponsor: Roger Levy, MIT\@.
       US\$160k.\\
