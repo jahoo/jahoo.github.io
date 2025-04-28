@@ -2,9 +2,7 @@
 \documentclass[11pt,a4paper]{article}
 
 \usepackage{fontspec}
-\defaultfontfeatures{Mapping=tex-text,Numbers=OldStyle
-%, Scale=MatchLowercase
-}
+\defaultfontfeatures{Mapping=tex-text,Numbers=OldStyle,Scale=MatchLowercase}
 \setmainfont{Linux Biolinum}
 \setsansfont{Linux Biolinum}
 
@@ -14,6 +12,11 @@
 \providecommand*\plmarginyear[1]{%
   \raggedleft\small{\textcolor{lightgray}{#1}}%
 }
+
+\usepackage{datetime}
+\newdateformat{monthyeardate}{%
+  \monthname[\THEMONTH], \THEYEAR}
+
 % \newcommand*\publistbasestyle{apa6}%default authoryear
 \usepackage[%
 % natbib=true,
@@ -120,15 +123,15 @@ url=false,%isbn=false,eprint=false%don't print the arxiv eprint info, since I'll
 %--------------------TITLE-------------------------------
 % \vspace*{-35pt}
 % \Huge{Jacob Louis \scshape{Hoover}}
-\Huge{Jacob Hoover \scshape{Vigly}}\footnote{%
+{\Huge{Jacob Hoover \scshape{Vigly}}\footnote{%
 Note: my surname is Vigly. Prior to Sept.\ 2024, I published under the surname Hoover, which is now a middle name.%
-}
-\small\textit{\hfill{} updated: \today}
+}}
+\hfill{}{\small\color{lightgray}\itshape last updated \monthyeardate\today}
 %--------------------SECTIONS----------------------------
 
 \begin{tabular}{%
-  % p{1.7cm}
-  p{\textwidth-1.7cm}
+  % p{\textwidth-1.7cm}
+  l
 }
   %\textsc{DOB:}       &
   % 03 Jan 1989 \\
@@ -139,12 +142,11 @@ Note: my surname is Vigly. Prior to Sept.\ 2024, I published under the surname H
   % \textsc{email:}     &
   jahoo [at] mit.edu\\
   % \orcidlink{0000-0001-8651-5395}: & 0000-0001-8651-5395\\
-  \noalign{\vspace{6pt}}
   % \textsc{address:}     &
   46-3027 MIT, 77 Massachusetts Ave, Cambridge MA 02139, USA\\
 \end{tabular}
 
-\vspace*{10pt}
+\vspace*{5pt}
 
 % \section{Position}
 
@@ -172,12 +174,12 @@ Note: my surname is Vigly. Prior to Sept.\ 2024, I published under the surname H
       ``The Cost of Information:
        Looking beyond Predictability in Language Processing''\\
     &[Fast-tracked from MA program in 2019]\\
-  \multicolumn{2}{c}{}\\
-  \textsc{Fall '23}%
-    &Visiting PhD student,
-    \textbf{Massachusetts Institute of Technology}\\
-    &\quad{}Department of Brain and Cognitive Sciences\\
-    &\quad{}\href{https://cpl.mit.edu}{Computational Psycholinguistics Laboratory} | PI: Roger Levy\\
+  % \multicolumn{2}{c}{}\\
+  % \textsc{Fall '23}%
+  %   &Visiting PhD student,
+  %   \textbf{Massachusetts Institute of Technology}\\
+  %   &\quad{}Department of Brain and Cognitive Sciences\\
+  %   &\quad{}\href{https://cpl.mit.edu}{Computational Psycholinguistics Laboratory} | PI: Roger Levy\\
     \multicolumn{2}{c}{}\\
   2006--12%
       &ALB, \emph{cum laude},
@@ -328,7 +330,7 @@ Note: my surname is Vigly. Prior to Sept.\ 2024, I published under the surname H
   \begin{longtable}[l]{ll}
     Reviewer for:
     &%
-    \href{https://cognitivesciencesociety.org/}{CogSci}, 2021; %2025;
+    \href{https://cognitivesciencesociety.org/}{CogSci}, 2021; 2025;
     \href{https://www.conll.org/}{CoNLL} 2020, 2023, 2025;
     \href{https://transacl.org/}{TACL}, 2022;
   \end{longtable}
@@ -439,13 +441,6 @@ Note: my surname is Vigly. Prior to Sept.\ 2024, I published under the surname H
 
   \section{Ballet career}
   \begin{longtable}{p{1.7cm}|p{15cm}}
-    \textsc{2018--pres.}
-    &%
-    I retired from full-time dancing in 2018, when I began my graduate study at
-    McGill. I have continued with occasional appearances as an independent
-    artist including with Festival Ballet Providence,  Rhode Island Women's
-    Choreography Project,  Revolve Dance Project in Providence, RI,
-    and Robinson Ballet in Bangor, ME.\\
     \textsc{2008--18}
     &%
     I worked full-time as professional dancer from 2008 until 2018. Trained as a
@@ -455,6 +450,13 @@ Note: my surname is Vigly. Prior to Sept.\ 2024, I published under the surname H
     Tartu, Estonia (2013--15), and was a company dancer for
     \href{http://festivalballetprovidence.org}{\textbf{Festival Ballet
     Providence}}, now Ballet RI (2015--18).\\
+    \textsc{2018--pres.}
+    &%
+    I retired from full-time dancing in 2018, when I began my graduate study at
+    McGill. I have continued with occasional appearances as an independent
+    artist including with Festival Ballet Providence,  Rhode Island Women's
+    Choreography Project,  Revolve Dance Project in Providence, RI,
+    and Robinson Ballet in Bangor, ME.\\
   \end{longtable}
 
   \end{document}
