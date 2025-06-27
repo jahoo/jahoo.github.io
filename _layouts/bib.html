@@ -38,6 +38,8 @@
       {% endif %}
     {% elsif entry.howpublished %}
       {{entry.howpublished}}.
+    {% elsif entry.eprinttype %}
+      {{entry.eprinttype}}{% if entry.eprint %} {{entry.eprint}}{% endif %}.
     {% endif %}
     {% if entry.pages %}
       {{entry.pages}}.

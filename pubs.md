@@ -24,6 +24,9 @@ published: true
   {% endif %}
 </ul>
 
+### Preprints
+
+{% bibliography --file preprints %}
 
 ### Selected publications
 

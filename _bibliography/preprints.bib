@@ -1,0 +1,23 @@
+@online{lipkin.b:2025arxiv,
+  title = {Fast Controlled Generation from Language Models with Adaptive Weighted Rejection Sampling},
+  author = {Lipkin, Benjamin and LeBrun, Benjamin and Vigly, Jacob Hoover and Loula, João and MacIver, David R. and Du, Li and Eisner, Jason and Cotterell, Ryan and Mansinghka, Vikash and O'Donnell, Timothy J. and Lew, Alexander K. and Vieira, Tim},
+  year = {2025},
+  month = {04},
+  day = {07},
+  eprint = {2504.05410},
+  eprinttype = {arXiv},
+  eprintclass = {cs},
+  url = {https://doi.org/10.48550/arXiv.2504.05410},
+  abstract = {The dominant approach to generating from language models subject to some constraint is locally constrained decoding (LCD), incrementally sampling tokens at each time step such that the constraint is never violated. Typically, this is achieved through token masking: looping over the vocabulary and excluding non-conforming tokens. There are two important problems with this approach. (i) Evaluating the constraint on every token can be prohibitively expensive -- LM vocabularies often exceed \$100,000\$ tokens. (ii) LCD can distort the global distribution over strings, sampling tokens based only on local information, even if they lead down dead-end paths. This work introduces a new algorithm that addresses both these problems. First, to avoid evaluating a constraint on the full vocabulary at each step of generation, we propose an adaptive rejection sampling algorithm that typically requires orders of magnitude fewer constraint evaluations. Second, we show how this algorithm can be extended to produce low-variance, unbiased estimates of importance weights at a very small additional cost -- estimates that can be soundly used within previously proposed sequential Monte Carlo algorithms to correct for the myopic behavior of local constraint enforcement. Through extensive empirical evaluation in text-to-SQL, molecular synthesis, goal inference, pattern matching, and JSON domains, we show that our approach is superior to state-of-the-art baselines, supporting a broader class of constraints and improving both runtime and performance. Additional theoretical and empirical analyses show that our method's runtime efficiency is driven by its dynamic use of computation, scaling with the divergence between the unconstrained and constrained LM, and as a consequence, runtime improvements are greater for better models.},
+}
+
+@online{vigly.j:2025psyarxiv,
+  title = {Comprehension Effort as the Cost of Inference},
+  author = {Vigly, Jacob Hoover and Qian, Peng and Sonderegger, Morgan and O'Donnell, Timothy J.},
+  year = {2025},
+  month = {06},
+  day = {18},
+  url = {https://osf.io/2498w},
+  eprinttype = {psyArXiv},
+  abstract = {As you read this text, word by word, you build an understanding of its meaning. What cognitive mechanisms underlie this ability?  An influential approach to answering this question comes from viewing comprehension as probabilistic inference over potential interpretations given linguistic input. Motivated within this perspective, a wealth of previous literature in psycholinguistics has focused on an important empirical relationship made precise by surprisal theory (Hale, 2001; Levy, 2008a), the hypothesis that the effort required to process a word scales in its negative log probability, in context. However, the standard derivation of surprisal within the inference framework relies on a crucial assumption: that there is a deterministic relationship between the latent interpretations targeted by inference and the observable input. In this work we propose relaxing this assumption and formalize inference cost directly as the amount of change in probabilistic beliefs. This proposal forms a nontrivial generalization of standard surprisal theory, which provides a more direct connection to algorithmic theories, and naturally explains phenomena where unpredictable input requires little processing effort. To test this framework against surprisal theory, we conduct a self-paced reading time study targeting words with orthographic errors, a specific setting where our approach predicts substantially different patterns. We find that processing effort follows the predictions of belief-update rather than surprisal, in a noisy-channel model of comprehension as inference about intended words. These results demonstrate a clear case where surface surprisal cannot explain human processing cost, and provide further support for models of language comprehension as rational inference.}
+}
