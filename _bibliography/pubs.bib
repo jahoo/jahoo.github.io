@@ -1,33 +1,64 @@
-@inproceedings{socolof.m:2022coling,
-  title = {Measuring Morphological Fusion Using Partial Information Decomposition},
-  booktitle = {Proceedings of the 29th {{International Conference}} on {{Computational Linguistics}} ({{COLING}})},
-  author = {Socolof, Michaela and Hoover, Jacob Louis and Futrell, Richard and Sordoni, Alessandro and O'Donnell, Timothy J.},
-  year = {2022},
-  month = {10},
-  day = {12},
-  pages = {44--54},
-  publisher = {International Committee on Computational Linguistics},
-  location = {Gyeongju, Republic of Korea},
-  url = {https://aclanthology.org/2022.coling-1.5},
-  abstract = {Morphological systems across languages vary when it comes to the relation between form and meaning. In some languages, a single meaning feature corresponds to a single morpheme, whereas in other languages, multiple meaning features are bundled together into one morpheme. The two types of languages have been called agglutinative and fusional, respectively, but this distinction does not capture the graded nature of the phenomenon. We provide a mathematically precise way of characterizing morphological systems using partial information decomposition, a framework for decomposing mutual information into three components: unique, redundant, and synergistic information. We show that highly fusional languages are characterized by high levels of synergy.},
-  eventtitle = {{{COLING}} 2022},
+@inproceedings{hoover.j:2021wccfl,
+  abstract  = {Icelandic dative-nominative constructions exhibit a syntactic hierarchy effect known as the Person Restriction: only third person nominatives may control agreement. In these constructions, there is variation between speakers in the extent to which the verb agrees with the nominative for number. <a href="https://ling.auf.net/lingbuzz/000371">Sigurðsson & Holmberg (2008)</a> explain this variation as arising due to differences between varieties in the timing of subject raising, using a split phi-probe. This paper revises their approach, using the feature gluttony mechanism for Agree developed in <a href="https://ling.auf.net/lingbuzz/004224">Coon & Keine (2020)</a>, and a split phi-probe in which person probing precedes number probing.  Within this framework, the observed variation can be captured by allowing variability two independent parameters: the timing of EPP subject raising, and the visibility of a number feature on dative DPs.  The proposed mechanism describes the variation, including predicting the observed optional agreement in certain cases that previous literature had struggled to account for, and makes additional predictions about the differences between varieties in cases of syncretism within the verbal paradigm. An investigation into these predictions should allow this already well-studied area of Icelandic grammar to continue to be a useful test-case for crosslinguistic assumptions about the mechanism of Agree, and the status of dative arguments.},
+  address   = {Somerville, Mass., USA},
+  author    = {Jacob Louis Hoover},
+  booktitle = {Proceedings of the 38th West Coast Conference on Formal Linguistics},
+  editor    = {Rachel Soo, Una Y. Chow, Sander Nederveen},
+  handout   = {assets/pdfs/wccfl2020-handout.pdf},
+  month     = {October},
+  pages     = {231--241},
+  pdf       = {wccfl2020-cascadilla-paper3568-proof.pdf},
+  publisher = {Cascadilla Proceedings Project},
+  title     = {Accounting for Variation in Number Agreement in Icelandic Dative-Nominative Constructions},
+  url       = {http://www.lingref.com/cpp/wccfl/38/abstract3568.html},
+  year      = {2021}
 }
 
+@inproceedings{hoover.j:2021emnlp,
+  abstract  = {Are pairs of words that tend to occur together also likely to stand in a linguistic dependency? This empirical question is motivated by a long history of literature in cognitive science, psycholinguistics, and NLP. In this work we contribute an extensive analysis of the relationship between linguistic dependencies and statistical dependence between words. Improving on previous work, we introduce the use of large pretrained language models to compute contextualized estimates of the pointwise mutual information between words (CPMI). For multiple models and languages, we extract dependency trees which maximize CPMI, and compare to gold standard linguistic dependencies. Overall, we find that CPMI dependencies achieve an unlabelled undirected attachment score of at most $\approx 0.5$. While far above chance, and consistently above a non-contextualized PMI baseline, this score is generally comparable to a simple baseline formed by connecting adjacent words. We analyze which kinds of linguistic dependencies are best captured in CPMI dependencies, and also find marked differences between the estimates of the large pretrained language models, illustrating how their different training schemes affect the type of dependencies they capture.},
+  address   = {Online and Punta Cana, Dominican Republic},
+  author    = {Hoover, Jacob Louis and Du, Wenyu and Sordoni, Alessandro and O{'}Donnell, Timothy J.},
+  booktitle = {Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing},
+  code      = {https://github.com/mcqll/cpmi-dependencies},
+  month     = {November},
+  pages     = {2941--2963},
+  poster    = {2021.10.11.EMNLP.poster.pdf},
+  publisher = {Association for Computational Linguistics},
+  slides    = {2021.10.11.EMNLP.talk-slides.pdf},
+  title     = {Linguistic Dependencies and Statistical Dependence},
+  url       = {https://aclanthology.org/2021.emnlp-main.234},
+  year      = {2021}
+}
 
-@misc{hoover-etal-2022-amlap,
+@misc{hoover.j:2022amlap,
   type         = {Poster},
   title        = {With Better Language Models, Processing Time Is Superlinear in Surprisal},
   author       = {Hoover, Jacob Louis and Sonderegger, Morgan and Piantadosi, Steven T. and O'Donnell, Timothy J.},
   year         = {2022},
+  month        = {09},
+  day          = {06},
   howpublished = {Poster at Architectures and  Mechanisms for Language Processing (AMLaP 28)},
-  day          = {6},
-  month        = {September},
   address      = {{York, England}},
   url          = {https://virtual.oxfordabstracts.com/#/event/3067/submission/297},
   poster       = {https://d3ijlhudpq9yjw.cloudfront.net/cdd9fcfe-abaa-4d50-b0a0-9723ab9e9bc9.pdf}
 }
 
-@article{hoover-etal-2023-plausibility,
+@inproceedings{socolof.m:2022coling,
+  title      = {Measuring Morphological Fusion Using Partial Information Decomposition},
+  booktitle  = {Proceedings of the 29th {{International Conference}} on {{Computational Linguistics}} ({{COLING}})},
+  author     = {Socolof, Michaela and Hoover, Jacob Louis and Futrell, Richard and Sordoni, Alessandro and O'Donnell, Timothy J.},
+  year       = {2022},
+  month      = {10},
+  day        = {12},
+  pages      = {44--54},
+  publisher  = {International Committee on Computational Linguistics},
+  location   = {Gyeongju, Republic of Korea},
+  url        = {https://aclanthology.org/2022.coling-1.5},
+  abstract   = {Morphological systems across languages vary when it comes to the relation between form and meaning. In some languages, a single meaning feature corresponds to a single morpheme, whereas in other languages, multiple meaning features are bundled together into one morpheme. The two types of languages have been called agglutinative and fusional, respectively, but this distinction does not capture the graded nature of the phenomenon. We provide a mathematically precise way of characterizing morphological systems using partial information decomposition, a framework for decomposing mutual information into three components: unique, redundant, and synergistic information. We show that highly fusional languages are characterized by high levels of synergy.},
+  eventtitle = {{{COLING}} 2022}
+}
+
+@article{hoover.j:2023,
   title      = {The Plausibility of Sampling as an Algorithmic Theory of Sentence Processing},
   author     = {Hoover, Jacob Louis and Sonderegger, Morgan and Piantadosi, Steven T. and O'Donnell, Timothy J.},
   year       = {2023},
@@ -46,39 +77,6 @@
   myurltitle = {surprisal explorer},
   preprint   = {https://doi.org/10.31234/osf.io/qjnpv},
   code       = {https://github.com/mcqll/plausibility-sampling-processing/}
-}
-
-
-@inproceedings{hoover-2020-icelandic,
-  abstract      = {Icelandic dative-nominative constructions exhibit a syntactic hierarchy effect known as the Person Restriction: only third person nominatives may control agreement. In these constructions, there is variation between speakers in the extent to which the verb agrees with the nominative for number. <a href="https://ling.auf.net/lingbuzz/000371">Sigurðsson & Holmberg (2008)</a> explain this variation as arising due to differences between varieties in the timing of subject raising, using a split phi-probe. This paper revises their approach, using the feature gluttony mechanism for Agree developed in <a href="https://ling.auf.net/lingbuzz/004224">Coon & Keine (2020)</a>, and a split phi-probe in which person probing precedes number probing.  Within this framework, the observed variation can be captured by allowing variability two independent parameters: the timing of EPP subject raising, and the visibility of a number feature on dative DPs.  The proposed mechanism describes the variation, including predicting the observed optional agreement in certain cases that previous literature had struggled to account for, and makes additional predictions about the differences between varieties in cases of syncretism within the verbal paradigm. An investigation into these predictions should allow this already well-studied area of Icelandic grammar to continue to be a useful test-case for crosslinguistic assumptions about the mechanism of Agree, and the status of dative arguments.},
-  address       = {Somerville, Mass., USA},
-  author        = {Jacob Louis Hoover},
-  booktitle     = {Proceedings of the 38th West Coast Conference on Formal Linguistics},
-  editor        = {Rachel Soo, Una Y. Chow, Sander Nederveen},
-  handout       = {assets/pdfs/wccfl2020-handout.pdf},
-  month         = {October},
-  pages         = {231--241},
-  pdf           = {wccfl2020-cascadilla-paper3568-proof.pdf},
-  publisher     = {Cascadilla Proceedings Project},
-  title         = {Accounting for Variation in Number Agreement in Icelandic Dative-Nominative Constructions},
-  url           = {http://www.lingref.com/cpp/wccfl/38/abstract3568.html},
-  year          = {2021}
-}
-
-@inproceedings{hoover-etal-2021-emnlp,
-  abstract  = {Are pairs of words that tend to occur together also likely to stand in a linguistic dependency? This empirical question is motivated by a long history of literature in cognitive science, psycholinguistics, and NLP. In this work we contribute an extensive analysis of the relationship between linguistic dependencies and statistical dependence between words. Improving on previous work, we introduce the use of large pretrained language models to compute contextualized estimates of the pointwise mutual information between words (CPMI). For multiple models and languages, we extract dependency trees which maximize CPMI, and compare to gold standard linguistic dependencies. Overall, we find that CPMI dependencies achieve an unlabelled undirected attachment score of at most $\approx 0.5$. While far above chance, and consistently above a non-contextualized PMI baseline, this score is generally comparable to a simple baseline formed by connecting adjacent words. We analyze which kinds of linguistic dependencies are best captured in CPMI dependencies, and also find marked differences between the estimates of the large pretrained language models, illustrating how their different training schemes affect the type of dependencies they capture.},
-  address   = {Online and Punta Cana, Dominican Republic},
-  author    = {Hoover, Jacob Louis and Du, Wenyu and Sordoni, Alessandro and O{'}Donnell, Timothy J.},
-  booktitle = {Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing},
-  code      = {https://github.com/mcqll/cpmi-dependencies},
-  month     = {November},
-  pages     = {2941--2963},
-  poster    = {2021.10.11.EMNLP.poster.pdf},
-  publisher = {Association for Computational Linguistics},
-  slides    = {2021.10.11.EMNLP.talk-slides.pdf},
-  title     = {Linguistic Dependencies and Statistical Dependence},
-  url       = {https://aclanthology.org/2021.emnlp-main.234},
-  year      = {2021}
 }
 
 @thesis{hoover.j:2024phd,
