@@ -6,7 +6,7 @@ Because jekyll-scholar isn't in the list of GitHub-sanctioned plugins, we need a
 - edit the site on the `source` branch locally.
 - run `bundle exec jekyll serve` to serve locally during editing.
   - Note: requires **ruby version 3**, so may need to change the current ruby
-    version (e.g. `chruby 3.1.1` or `rvm use 3.1.1`).
+    version (e.g. `chruby 3.1.7` or `rvm use 3.1.7` --- note, tested with `v3.4.5` and it didn't work. use `3.1.7`).
 
 #### 2. Push to remote
 When ready, `git push` to put the edits on the GitHub.
