@@ -135,6 +135,13 @@
     margin-left: 0;
 }
 
+.last-modified-note {
+    font-size: $small-font-size;
+    color: $grey-color-light;
+    font-family: $base-font-family;
+    font-style: normal;
+}
+
 .footer-col-wrapper {
     @include relative-font-size(0.9375);/*font-size: 15px;*/
     color: $grey-color;
