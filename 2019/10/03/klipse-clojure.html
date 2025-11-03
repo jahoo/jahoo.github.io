@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-WR9S0121FQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());gtag('config', 'G-WR9S0121FQ');
+  </script>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Interactive diagrams with Klipse+Vega</title>
+  <meta name="description" content="(ns jahoo.core  (:require [reagent.core :as r]            [reagent.dom :as rd]            [clojure.zip :as z]            ;[clojure.pprint :refer [pprint]]   ...">
+
+
+  <link rel="stylesheet" type="text/css" href="https://storage.googleapis.com/app.klipse.tech/css/codemirror.css">
+    <script>
+      window.klipse_settings = {
+        selector: '.language-eval-clojure', // css selector for the html elements you want to klipsify
+        selector_reagent: '.language-reagent', // selector for reagent snippets
+        editor_type: 'codemirror',
+        codemirror_options_in: {
+           indentUnit: 2,
+           lineWrapping: true,
+           lineNumbers: true,
+           autoCloseBrackets: true
+        },
+        codemirror_options_out: {
+           lineWrapping: true,
+           lineNumbers: false,
+           readOnly: "true" 
+        },
+        // clojure_cached_macro_ns_regexp: /reagent.*/, // the regexp for clojure macro namespaces that are cached
+        // clojure_cached_ns_regexp: /reagent.*/,       // the regexp for clojure namespaces that are cached
+      };
+    </script>
+
+  <!-- Import Vega 5 & Vega-Lite 3 (does not have to be from CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@3"></script>
+  <!-- Import vega-embed -->
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed"></script>
+  <!-- FOR KATEX (https://stackoverflow.com/a/57370526/1676393) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js" integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="https://jahoo.github.io/2019/10/03/klipse-clojure.html">
+  <link rel="alternate" type="application/rss+xml" title="jacob hoover vigly" href="https://jahoo.github.io/feed.xml">
+
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">jacob hoover vigly</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+        
+          
+          <a class="page-link" href="/">about</a>
+          
+        
+          
+        
+          
+          <a class="page-link" href="/posts.html">posts</a>
+          
+        
+          
+          <a class="page-link" href="/pubs.html">research</a>
+          
+        
+        <!-- Add CV manually -->
+        <a class="page-link" href="/assets/CV/jlhv-academic_cv.pdf" target="_blank">cv</a>
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <div class="post-title" itemprop="name headline">
+    	Interactive diagrams with Klipse+Vega
+    </div>
+    <span class="post-meta">
+    	<time datetime="2019-10-03T00:00:00-04:00" itemprop="datePublished">
+    		3 Oct 2019
+    	</time>
+    	
+	</span>
+    <span class="post-tags">
+      
+        - note
+      
+    </span>
+  </header>
+
+  <article class="post-content" itemscope itemtype="http://schema.org/BlogPosting">
+    <!-- <div itemprop="articleBody"> -->
+      <!-- The following preamble (in /_includes/) is needed for the Vega stuff -->
+<!-- hidden preamble material: 
+    stuff for reagent, pretty printing, and things from metaprob (mostly probably not necessary)  
+    seems necessary to use old version of stuff from Oz
+    https://github.com/metasoarous/oz/blob/1.6.0-alpha6/src/cljs/oz/core.cljs#L48
+-->
+
+<pre class="hidden"><code class="language-eval-clojure">
+(ns jahoo.core
+  (:require [reagent.core :as r]
+            [reagent.dom :as rd]
+            [clojure.zip :as z]
+            ;[clojure.pprint :refer [pprint]]
+            ;[clojure.string :refer [index-of]]
+            ;[clojure.string :as str]
+            ))
+
+(enable-console-print!)
+
+(defn log [a-thing]
+  (.log js/console a-thing))
+</code></pre>
+
+<pre class="hidden"><code class="language-eval-clojure">
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; hidden preamble material for Vega (in addition to Vega-Lite) rendering 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn render-vega [spec elem]
+  (when spec
+    (let [spec (clj-&gt;js spec)
+          opts {:renderer "canvas"
+                :mode "vega"
+                :actions {
+                      :export true,
+                      :source true,
+                      :compiled true,
+                      :editor true}}]
+      (-&gt; (js/vegaEmbed elem spec (clj-&gt;js opts))
+          (.then (fn [res]
+                   (. js/vegaTooltip (vega (.-view res) spec))))
+          (.catch (fn [err]
+                    (log err)))))))
+
+(defn vega
+  "Reagent component that renders vega"
+  [spec]
+  (r/create-class
+   {:display-name "vega"
+    :component-did-mount (fn [this]
+                           (render-vega spec (rd/dom-node this)))
+    :component-will-update (fn [this [_ new-spec]]
+                             (render-vega new-spec (rd/dom-node this)))
+    :reagent-render (fn [spec]
+                      [:div#vis])}))
+
+;making a histogram from a list of observations
+(defn list-to-hist-data-lite [l]
+  """ takes a list and returns a record
+  in the right format for vega data,
+  with each list element the label to a field named 'x'"""
+  (defrecord rec [category])
+  {:values (into [] (map -&gt;rec l))})
+
+(defn makehist-lite [data]
+  {
+   :$schema "https://vega.github.io/schema/vega-lite/v4.json",
+   :data data,
+   :mark "bar",
+   :encoding {
+              :x {:field "category",
+                  :type "ordinal"},
+              :y {:aggregate "count",
+                  :type "quantitative"}
+              }
+   })
+
+
+(defn list-to-hist-data [l]
+  """ takes a list and returns a record
+  in the right format for vega data,
+  with each list element the label to a field named 'x'"""
+  (defrecord rec [category])
+  [{:name "raw",
+    :values (into [] (map -&gt;rec l))}
+   {:name "aggregated"
+    :source "raw"
+    :transform 
+    [{:as ["count"]
+      :type "aggregate"
+      :groupby ["category"]}]}
+   {:name "agg-sorted"
+    :source "aggregated"
+    :transform 
+    [{:type "collect"
+      :sort {:field "category"}}]}
+  ])
+
+(defn makehist [data]
+  (let [n (count (distinct ((data 0) :values)))
+        h 200
+        pad 5
+        w (if (&lt; n 20) (* n 35) (- 700 (* 2 pad)))]
+    {
+    :$schema "https://vega.github.io/schema/vega/v5.json",
+    :width w,
+    :height h,
+    :padding pad,
+
+    :data data,
+
+    :signals [
+      {:name "tooltip",
+        :value {},
+        :on [{:events "rect:mouseover", :update "datum"},
+             {:events "rect:mouseout",  :update "{}"}]}
+    ],
+
+    :scales [
+      {:name "xscale",
+       :type "band",
+       :domain {:data "agg-sorted", :field "category"},
+       :range "width",
+       :padding 0.05,
+       :round true},
+      {:name "yscale",
+       :domain {:data "agg-sorted", :field "count"},
+       :nice true,
+       :range "height"}
+    ],
+
+    :axes [
+      { :orient "bottom", :scale "xscale" },
+      { :orient "left", :scale "yscale" }
+    ],
+
+    :marks [
+      {:type "rect",
+       :from {:data "agg-sorted"},
+       :encode {
+         :enter {
+           :x {:scale "xscale", :field "category"},
+           :width {:scale "xscale", :band 1},
+           :y {:scale "yscale", :field "count"},
+           :y2 {:scale "yscale", :value 0}
+         },
+         :update {:fill {:value "steelblue"}},
+         :hover {:fill {:value "green"}}
+       }
+      },
+      {:type "text",
+       :encode {
+         :enter {
+           :align {:value "center"},
+           :baseline {:value "bottom"},
+           :fill {:value "#333"}
+         },
+         :update {
+           :x {:scale "xscale", :signal "tooltip.category", :band 0.5},
+           :y {:scale "yscale", :signal "tooltip.count", :offset -2},
+           :text {:signal "tooltip.count"},
+           :fillOpacity [
+             {:test "isNaN(tooltip.count)", :value 0},
+             {:value 1}
+           ]
+         }
+       }
+      }
+    ]
+}))
+
+
+(defn hist [l]
+  (vega (makehist (list-to-hist-data l))))
+
+; for making bar plots
+
+(defn list-to-barplot-data-lite [l m]
+  """ takes a list and returns a record
+  in the right format for vega data,
+  with each list element the label to a field named 'x'"""
+  (defrecord rec [category amount])
+  {:values (into [] (map -&gt;rec l m))})
+
+(defn makebarplot-lite [data]
+  {
+   :$schema "https://vega.github.io/schema/vega-lite/v4.json",
+   :data data,
+   :mark "bar",
+   :encoding {
+              :x {:field "element", :type "ordinal"},
+              :y {:field "value", :type "quantitative"}
+              }
+   })
+
+(defn list-to-barplot-data [l m]
+  """ takes a list and returns a record
+  in the right format for vega data,
+  with each list element the label to a field named 'x'"""
+  (defrecord rec [category amount])
+  {:name "table",
+   :values (into [] (map -&gt;rec l m))})
+
+(defn makebarplot [data]
+  (let [n (count (data :values))
+        h 200
+        pad 5
+        w (if (&lt; n 20) (* n 35) (- 700 (* 2 pad)))]
+    {
+    :$schema "https://vega.github.io/schema/vega/v5.json",
+    :width w,
+    :height h,
+    :padding pad,
+
+    :data data,
+
+    :signals [
+      {:name "tooltip",
+        :value {},
+        :on [{:events "rect:mouseover", :update "datum"},
+             {:events "rect:mouseout",  :update "{}"}]}
+    ],
+
+    :scales [
+      {:name "xscale",
+       :type "band",
+       :domain {:data "table", :field "category"},
+       :range "width",
+       :padding 0.05,
+       :round true},
+      {:name "yscale",
+       :domain {:data "table", :field "amount"},
+       :nice true,
+       :range "height"}
+    ],
+
+    :axes [
+      { :orient "bottom", :scale "xscale" },
+      { :orient "left", :scale "yscale" }
+    ],
+
+    :marks [
+      {:type "rect",
+       :from {:data "table"},
+       :encode {
+         :enter {
+           :x {:scale "xscale", :field "category"},
+           :width {:scale "xscale", :band 1},
+           :y {:scale "yscale", :field "amount"},
+           :y2 {:scale "yscale", :value 0}
+         },
+         :update {:fill {:value "steelblue"}},
+         :hover {:fill {:value "green"}}
+       }
+      },
+      {:type "text",
+       :encode {
+         :enter {
+           :align {:value "center"},
+           :baseline {:value "bottom"},
+           :fill {:value "#333"}
+         },
+         :update {
+           :x {:scale "xscale", :signal "tooltip.category", :band 0.5},
+           :y {:scale "yscale", :signal "tooltip.amount", :offset -2},
+           :text {:signal "tooltip.amount"},
+           :fillOpacity [
+             {:test "isNaN(tooltip.amount)", :value 0},
+             {:value 1}
+           ]
+         }
+       }
+      }
+    ]
+}))
+
+(defn barplot [l m]
+  (vega (makebarplot (list-to-barplot-data l m))))
+
+
+; now, for tree making
+;(thanks to Taylor Wood's answer in this thread on stackoverflow:
+; https://stackoverflow.com/questions/57911965)
+
+(defn count-up-to-right [loc]
+  (if (z/up loc)
+    (loop [x loc, pops 0] 
+       (if (z/right x) 
+         pops 
+         (recur (z/up x) (inc pops))))
+    0))
+
+(defn list-to-tree-spec
+      "take a list and walk through it (with clojure.zip library)
+      return a tree spec record in right format to pass to vega"
+      [l]
+      (loop [loc (z/seq-zip l), next-id 0, parent-ids [], acc []]
+        (cond
+          (z/end? loc) acc
+
+          (z/end? (z/next loc))
+          (conj acc
+                  {:id     (str next-id)
+                   :name   (str (z/node loc))
+                   :parent (when (seq parent-ids)
+                                 (str (peek parent-ids)))})
+
+          (and (z/node loc) (not (z/branch? loc)))
+          (recur
+            (z/next loc)
+            (inc next-id)
+            (cond
+              (not (z/right loc))
+              (let [n (count-up-to-right loc)
+                    popn (apply comp (repeat n pop))]
+                (some-&gt; parent-ids not-empty popn))
+
+              (not (z/left loc))
+              (conj parent-ids next-id)
+
+              :else parent-ids)
+            (conj acc
+                  {:id     (str next-id)
+                   :name   (str (z/node loc))
+                   :parent (when (seq parent-ids)
+                                 (str (peek parent-ids)))}))
+
+          :else
+          (recur (z/next loc) next-id parent-ids acc))))
+
+    (defn maketree [w h tree-spec]
+    """ makes vega spec for a tree given tree-spec in the right json-like format """
+      {:$schema "https://vega.github.io/schema/vega/v5.json"
+      :data [{:name "tree"
+             :transform [{:key "id" :parentKey "parent" :type "stratify"}
+                         {:as ["x" "y" "depth" "children"]
+                          :method {:signal "layout"}
+                          :size [{:signal "width"} {:signal "height"}]
+                          :type "tree"}]
+             :values tree-spec
+             }
+            {:name "links"
+             :source "tree"
+             :transform [{:type "treelinks"}
+                         {:orient "horizontal"
+                          :shape {:signal "links"}
+                          :type "linkpath"}]}]
+      :height h
+      :marks [{:encode {:update {:path {:field "path"} :stroke {:value "#ccc"}}}
+              :from {:data "links"}
+              :type "path"}
+             {:encode {:enter {:size {:value 50} :stroke {:value "#fff"}}
+                       :update {:fill {:field "depth" :scale "color"}
+                                :x {:field "x"}
+                                :y {:field "y"}}}
+              :from {:data "tree"}
+              :type "symbol"}
+             {:encode {:enter {:baseline {:value "bottom"}
+                               :font {:value "Courier"}
+                               :fontSize {:value 14}
+                               :angle {:value 0}
+                               :text {:field "name"}}
+                       :update {:align {:signal "datum.children ? 'center' : 'center'"}
+                                :dy {:signal "datum.children ? -6 : -6"}
+                                :opacity {:signal "labels ? 1 : 0"}
+                                :x {:field "x"}
+                                :y {:field "y"}}}
+              :from {:data "tree"}
+              :type "text"}]
+      :padding 5
+      :scales [{:domain {:data "tree" :field "depth"}
+               :name "color"
+               :range {:scheme "magma"}
+               :type "linear"
+               :zero true}]
+      :signals [{:bind {:input "checkbox"} :name "labels" :value true}
+               {:bind {:input "radio" :options ["tidy" "cluster"]}
+                :name "layout"
+                :value "tidy"}
+               {:name "links"
+                :value "line"}]
+      :width w}
+    )
+
+    (defn tree-depth 
+      "get the depth of a tree (list)"
+      [list]
+      (if (seq? list)
+        (inc (apply max 0 (map tree-depth list)))
+        0))
+
+    (defn tree
+      "plot tree using vega"
+      [list]
+      (let [spec (list-to-tree-spec list)
+            h (* 30 (tree-depth list))]
+        (vega (maketree 700 h spec))))
+    </code></pre>
+
+<p>The Clojure code for rendering the visualizations (with <a href="https://vega.github.io/vega/">Vega</a>) in this post is <a href="https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html">here</a>.</p>
+
+<h2 id="using-klipse-for-code-blocks">Using Klipse for code blocks</h2>
+
+<p>Here is an html code block that will run Clojure interactively in the browser, using <a href="https://github.com/viebel/klipse">Klipse</a>:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;pre&gt;&lt;code</span> <span class="na">class=</span><span class="s">"language-eval-clojure"</span><span class="nt">&gt;</span>
+  (+ 1 1)
+<span class="nt">&lt;/code&gt;&lt;/pre&gt;</span>
+</code></pre></div></div>
+
+<p>In markdown, specify the language in a <a href="https://www.markdownguide.org/extended-syntax/#:~:text=syntax%20highlighting%20for%20fenced%20code%20blocks">fenced code block</a> as <code class="language-plaintext highlighter-rouge">eval-clojure</code> after the opening fence (the ‘selector’ name for clojure, which can be set in <code class="language-plaintext highlighter-rouge">window.klipse_settings</code> in the <a href="https://github.com/jahoo/jahoo.github.io/blob/master/_includes/head.html">head</a> of the html file), like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>```eval-clojure
+(clojure code)
+```
+</code></pre></div></div>
+
+<p>and the interpreter will make this into the same HTML as the above (note, the return of the last function call will be printed, if you want more to print you can always use <code class="language-plaintext highlighter-rouge">print</code> or <code class="language-plaintext highlighter-rouge">println</code>). Here’s an example:</p>
+
+<pre><code class="language-eval-clojure">(defn flip
+  ([]
+   (if (&lt; (rand 1) 0.5)
+     true
+     false))
+  ([p]
+   (if (&lt; (rand 1) p)
+     true
+     false)))
+(println "Result of virtual coin flip:" (if (flip) "HEADS" "TAILS"))
+
+(repeatedly 10 flip)
+</code></pre>
+
+<p>The code will be auto-evaluated with every change. Note that you also can use <kbd>⌘</kbd>+<kbd>return</kbd> / <kbd>CTRL</kbd>+<kbd>⏎</kbd> to re-run.</p>
+
+<p>It’s useful to put some definitions in a hidden preamble, so I use a class <code class="language-plaintext highlighter-rouge">&lt;pre class="hidden"&gt;...&lt;/pre&gt;</code> around the code block to make a Klipse clojure box that will be invisible, but will still run. Any definitions or side-effects made in in a hidden box will be available in later boxes.</p>
+
+<p>For visualizations, rather than <code class="language-plaintext highlighter-rouge">eval-clojure</code>, specify the language <code class="language-plaintext highlighter-rouge">reagent</code> for a given code box if you want to do some output that involves rendering html elements. This is what we have to use to render vega graphics:</p>
+
+<pre><code class="language-reagent">[:div [:button
+ {:on-click
+  (fn [e]
+    (js/alert "Now you have to close this pop-up!"))}
+ "Don't press this button."]]
+</code></pre>
+
+<h1 id="visualizations">Visualizations:</h1>
+
+<p>There’s some code in the preamble, which I have set to load, hidden, when this page is rendered (see the <a href="https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html">clojure-preamble.html</a> file used to render this page) that gets Vega to work with Klipse. It is copied from Oz (thanks for the help on that, Alex!), and defines the useful function <code class="language-plaintext highlighter-rouge">vega</code>, which will take in a vega spec vector, and output a diagram.</p>
+
+<h2 id="vega-for-plotting">Vega for plotting</h2>
+
+<p>Note the <strong>visualizations need to be in a <code class="language-plaintext highlighter-rouge">reagent</code> code box</strong> to be rendered. In an <code class="language-plaintext highlighter-rouge">eval-clojure</code> box they don’t render.</p>
+
+<h3 id="histograms">Histograms:</h3>
+
+<p>Here is <code class="language-plaintext highlighter-rouge">hist</code> called on a list of numbers (<strong>must be in a <code class="language-plaintext highlighter-rouge">reagent</code> code box</strong>).</p>
+<pre><code class="language-reagent">(hist [0 5 2 1 2 3 4 3 3 3 4 5 19 20 20 21 20 20 19 18])
+</code></pre>
+<p>or truth values</p>
+<pre><code class="language-reagent">(hist (repeatedly 100 flip))
+</code></pre>
+
+<p>or lists…</p>
+<pre><code class="language-reagent">(defn sample-kleene-ab []
+  (if (flip) '() (cons (if (flip) 'a 'b) (sample-kleene-ab))))
+
+(hist (repeatedly 2000 sample-kleene-ab))
+</code></pre>
+
+<p><code class="language-plaintext highlighter-rouge">hist</code> is defined in the <a href="https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html">preamble</a>.</p>
+
+<h2 id="vega-for-drawing-trees">Vega for drawing trees</h2>
+
+<p>You can define some tree data in clojure’s record data format like format:</p>
+
+<pre><code class="language-eval-clojure">(def example-tree-data
+  [{:id 0 :name "a"}
+   {:id 1 :name "b" :parent 0}
+   {:id 2 :name "c" :parent 0}
+   {:id 3 :name "d" :parent 2}])
+</code></pre>
+
+<p><code class="language-plaintext highlighter-rouge">(maketree w h tree-data)</code> (defined in the preamble) will take that data and make the spec for a Vega tree diagram of size <code class="language-plaintext highlighter-rouge">w</code>px-by-<code class="language-plaintext highlighter-rouge">h</code>px out of that. Then, in a reagent box you can call <code class="language-plaintext highlighter-rouge">vega</code> on the result to visualize:</p>
+
+<pre><code class="language-reagent">[:div
+  [:h4 "Here's a tree"]
+  [vega (maketree 200 100 example-tree-data)]]
+</code></pre>
+
+<p>Then here’s a function <code class="language-plaintext highlighter-rouge">list-to-tree-spec</code> which will walk through a list (using the <a href="https://clojuredocs.org/clojure.zip">clojure.zip</a> library) and output that format required:</p>
+
+<pre><code class="language-eval-clojure">(list-to-tree-spec '(a (b c)))
+</code></pre>
+
+<p>To be easier to use, there’s the function <code class="language-plaintext highlighter-rouge">tree</code>, which should be called in a <code class="language-plaintext highlighter-rouge">reagent</code> codebox, to plot a tree that will autosize a bit.</p>
+
+<div class="language-clojure highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="k">defn</span><span class="w"> </span><span class="n">tree</span><span class="w">
+  </span><span class="s">"plot tree using vega"</span><span class="w">
+  </span><span class="p">[</span><span class="nb">list</span><span class="p">]</span><span class="w">
+  </span><span class="p">(</span><span class="k">let</span><span class="w"> </span><span class="p">[</span><span class="n">spec</span><span class="w"> </span><span class="p">(</span><span class="nf">list-to-tree-spec</span><span class="w"> </span><span class="nb">list</span><span class="p">)</span><span class="w">
+        </span><span class="n">h</span><span class="w"> </span><span class="p">(</span><span class="nb">*</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="p">(</span><span class="nf">tree-depth</span><span class="w"> </span><span class="nb">list</span><span class="p">))]</span><span class="w">
+    </span><span class="p">(</span><span class="nf">vega</span><span class="w"> </span><span class="p">(</span><span class="nf">maketree</span><span class="w"> </span><span class="mi">700</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="n">spec</span><span class="p">)))))</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Pass it a nested list <code class="language-plaintext highlighter-rouge">list</code>, and you’ll get a visualization.</p>
+
+<p>For example: a clojure function computation tree</p>
+
+<pre><code class="language-eval-clojure">(def fib3-tree
+  '("(fib 3)"
+    ("(+ (fib 1) (fib 2))"
+     ("(fib 1)" "1")
+     ("(fib 2)"
+      ("(+ (fib 0) (fib 1))"
+       ("(fib 0)" "0")
+       ("(fib 1)" "1")))))
+  )
+</code></pre>
+
+<pre><code class="language-reagent">(tree fib3-tree)
+</code></pre>
+
+<p>Or a natural language syntax/derivation tree:</p>
+
+<pre><code class="language-eval-clojure">(def j-tree
+  '(CP 
+    (TP 
+     (NP_i (N (Aoi-ga "\"Aoi-NOM\"")))
+     (T' (VP 
+          (PP (NP (daidokoro "\"kitchen\"")) (P (de "\"in\""))) 
+          (VP "(t_i)" (V' 
+                       (NP (N (hon-o "\"book-ACC\"")))
+                       (V (yon- "\"read\"")))))
+         (T (da "\"PST\"")))) 
+    (C (to "\"COMP\"")))
+  )
+</code></pre>
+
+<pre><code class="language-reagent">(tree j-tree)
+</code></pre>
+
+    <!-- </div> -->
+  </article><div><p><hr></p></div>
+    <div id="disqus_thread"></div>
+<script type="text/javascript">
+  var disqus_shortname  = 'jaclouhoo';
+  var disqus_identifier = '/2019/10/03/klipse-clojure';
+  var disqus_title      = '"Interactive diagrams with Klipse+Vega"';
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+    <span class="last-modified-note">
+      Last modified: 2025-11-03 13:17:41 -0500
+    </span>
+      
+    <!-- <h2 class="footer-heading">jacob hoover vigly</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>jacob hoover vigly</li>
+          <li><a href="mailto:jacob.hoover@mail.mcgill.ca">jacob.hoover@mail.mcgill.ca</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Postdoc at MIT, Department of Brain and Cognitive Sciences.
+</p>
+      </div>
+    </div> -->
+
+  </div>
+
+</footer>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-140260727-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-140260727-1');
+</script>
+
+
+    <script src="https://storage.googleapis.com/app.klipse.tech/plugin/js/klipse_plugin.js"></script>
+  </body>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+  <!-- Load Common JS (for custom things like abstract hidden / open) -->
+  <script src="https://jahoo.github.io/assets/js/common.js"></script>
+</html>
+

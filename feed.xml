@@ -1,30 +1,243 @@
----
-layout: null
----
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>{{ site.title | xml_escape }}</title>
-    <description>{{ site.description | xml_escape }}</description>
-    <link>{{ site.url }}{{ site.baseurl }}/</link>
-    <atom:link href="{{ "/feed.xml" | prepend: site.baseurl | prepend: site.url }}" rel="self" type="application/rss+xml"/>
-    <pubDate>{{ site.time | date_to_rfc822 }}</pubDate>
-    <lastBuildDate>{{ site.time | date_to_rfc822 }}</lastBuildDate>
-    <generator>Jekyll v{{ jekyll.version }}</generator>
-    {% for post in site.posts limit:10 %}
+    <title>jacob hoover vigly</title>
+    <description>Postdoc at MIT, Department of Brain and Cognitive Sciences.
+</description>
+    <link>https://jahoo.github.io/</link>
+    <atom:link href="https://jahoo.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Mon, 03 Nov 2025 13:46:20 -0500</pubDate>
+    <lastBuildDate>Mon, 03 Nov 2025 13:46:20 -0500</lastBuildDate>
+    <generator>Jekyll v4.3.1</generator>
+    
       <item>
-        <title>{{ post.title | xml_escape }}</title>
-        <description>{{ post.content | xml_escape }}</description>
-        <pubDate>{{ post.date | date_to_rfc822 }}</pubDate>
-        <link>{{ post.url | prepend: site.baseurl | prepend: site.url }}</link>
-        <guid isPermaLink="true">{{ post.url | prepend: site.baseurl | prepend: site.url }}</guid>
-        {% for tag in post.tags %}
-        <category>{{ tag | xml_escape }}</category>
-        {% endfor %}
-        {% for cat in post.categories %}
-        <category>{{ cat | xml_escape }}</category>
-        {% endfor %}
+        <title>The Cost of Information</title>
+        <description>&lt;p&gt;I just submitted the final version of my dissertation to McGill. Here is a link to it:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;/assets/pdfs/dissertation.pdf&quot;&gt;&lt;em&gt;The Cost of Information: Looking beyond Predictability in Language Processing&lt;/em&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Fri, 02 Aug 2024 00:00:00 -0400</pubDate>
+        <link>https://jahoo.github.io/2024/08/02/dissertation.html</link>
+        <guid isPermaLink="true">https://jahoo.github.io/2024/08/02/dissertation.html</guid>
+        
+        <category>dissertation</category>
+        
+        
       </item>
-    {% endfor %}
+    
+      <item>
+        <title>surprisal and KL</title>
+        <description>\[\global\def\colorKL{\color{4fa283}}
+\global\def\colorR{\color{ec8c62}}
+\global\def\R{\colorR\mathrm{R}}\]
+
+&lt;p&gt;Consider any setting where a distribution over some latent variable \(Z\) changes when conditioning on some outcome \(\breve u\) of an observable random variable.  The change can be quantified as &lt;em&gt;KL divergence&lt;/em&gt;, \(\operatorname{\colorKL KL}(p_{Z\mid \breve u}\|p_{Z})\). This divergence can be decomposed into &lt;em&gt;surprisal&lt;/em&gt; of \(\breve u\) minus another term, which I’ll call \(\R\):&lt;/p&gt;
+
+\[\begin{aligned}
+  \operatorname{\colorKL KL}(p_{Z\mid \breve u}\|p_{Z})
+  &amp;amp;&amp;amp; = &amp;amp;&amp;amp; -\log p(\breve u) 
+  &amp;amp;&amp;amp; - &amp;amp;&amp;amp; \mathop{\mathbb{E}}_{p_{Z\mid \breve u}}[-\log p(\breve u\mid z)]\\
+  \operatorname{\colorKL KL}(\operatorname{posterior}\|\operatorname{prior}) 
+  &amp;amp;&amp;amp; = &amp;amp;&amp;amp; \operatorname{surprisal} 
+  &amp;amp;&amp;amp; - &amp;amp;&amp;amp;
+  \underbrace{\mathop{\mathbb{E}}_{\operatorname{posterior}}[-\log \operatorname{lik}]}_{\operatorname{\colorR R}}
+\end{aligned}\]
+
+&lt;p&gt;Since KL is nonnegative, R can take on values between 0 and the surprisal. Put another way, this implies that surprisal upper-bounds the amount by which the distribution changes. Note that if surprisal is large and R is also large, KL is small—that is, despite the observation containing a large amount of information, it does not result in a large change in the distribution.&lt;/p&gt;
+
+&lt;h3 id=&quot;interactive-illustration&quot;&gt;Interactive illustration&lt;/h3&gt;
+
+&lt;p&gt;Manipulate prior and likelihood sliders below to see posterior and resulting surprisal partition:&lt;/p&gt;
+
+&lt;iframe width=&quot;100%&quot; height=&quot;1509&quot; frameborder=&quot;0&quot; src=&quot;https://observablehq.com/embed/@postylem/kl-and-surprisal?cells=viewof+showOtherKL%2Cplot1_1%2Cplot1_2%2Cviewof+dim%2Cviewof+useLogInput%2Cviewof+allowZeroes%2Cinput1%2Cviewof+scale_prior%2Cviewof+scale_likelihood%2Cviewof+applyScaleLikelihood1%2Cmodification_plots%2Cviewof+whetherPlotLogSpace%2Cviewof+maxUnits%2Cviewof+base&quot;&gt;&lt;/iframe&gt;
+
+</description>
+        <pubDate>Tue, 10 Oct 2023 00:00:00 -0400</pubDate>
+        <link>https://jahoo.github.io/2023/10/10/surprisal-and-KL.html</link>
+        <guid isPermaLink="true">https://jahoo.github.io/2023/10/10/surprisal-and-KL.html</guid>
+        
+        <category>note</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Plausibility of Sampling for Processing</title>
+        <description>&lt;p&gt;I just posted a preprint:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://osf.io/qjnpv&quot;&gt;🔗 &lt;em&gt;The Plausibility of Sampling as an Algorithmic Theory of Sentence Processing&lt;/em&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;This work is a collaboration with &lt;a href=&quot;https://people.linguistics.mcgill.ca/~morgan/&quot;&gt;Morgan Sonderegger&lt;/a&gt;, &lt;a href=&quot;http://colala.berkeley.edu/people/piantadosi/&quot;&gt;Steve Piantadosi&lt;/a&gt;, and &lt;a href=&quot;https://todonnell.github.io/&quot;&gt;Tim O’Donnell&lt;/a&gt;. It is based on the well-documented observation that for humans, the difficulty to process a given item of linguistic input depends on how predictable it is in context—more surprising words take longer to process. However, most existing theories of processing cannot simply and directly predict this behavior. What algorithm might be capable of explaining this phenomenon?&lt;/p&gt;
+
+&lt;p&gt;In this work, we focus on a class of algorithms whose runtime does naturally scale in surprisal—those that involve repeatedly sampling from the prior. Our first contribution is to show that &lt;strong&gt;simple examples of such algorithms predict runtime to increase superlinearly with surprisal, and also predict variance in runtime to increase.&lt;/strong&gt; These two predictions stand in contrast with literature on surprisal theory (&lt;a href=&quot;https://www.aclweb.org/anthology/N01-1021&quot;&gt;Hale, 2001&lt;/a&gt;; &lt;a href=&quot;https://doi.org/10.1016/j.cognition.2007.05.006&quot;&gt;Levy, 2008&lt;/a&gt;) which argues that the expected processing cost should increase linearly with surprisal, and makes no prediction about variance.&lt;/p&gt;
+
+&lt;p&gt;In the second part of this paper, we conduct an empirical study of the relationship between surprisal and reading time, using a collection of modern language models to estimate surprisal, and fitting Generalized Additive Models of the relationship. We find that with better language models, reading time increases superlinearly in surprisal, and also that variance increases. These results are consistent with the predictions of sampling-based algorithms.&lt;/p&gt;
+
+&lt;hr /&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;dl&gt;
+  &lt;dt&gt;&lt;em&gt;update 2023-07&lt;/em&gt;&lt;/dt&gt;
+  &lt;dd&gt;Published in the journal &lt;em&gt;Open Mind&lt;/em&gt; (2023) 7: 350–391. [&lt;a href=&quot;https://doi.org/10.1162/opmi_a_00086&quot;&gt;🔗 open access&lt;/a&gt;]&lt;/dd&gt;
+&lt;/dl&gt;
+</description>
+        <pubDate>Fri, 21 Oct 2022 00:00:00 -0400</pubDate>
+        <link>https://jahoo.github.io/2022/10/21/plausibility-sampling-processing.html</link>
+        <guid isPermaLink="true">https://jahoo.github.io/2022/10/21/plausibility-sampling-processing.html</guid>
+        
+        <category>note</category>
+        
+        <category>paper</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>LaTeX for Linguistics tutorial</title>
+        <description>&lt;p&gt;I’m leading a short workshop on \(\LaTeX{}\) for Linguistics today. Resources are&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;in an &lt;a href=&quot;https://www.overleaf.com/read/qvdscvjbtjxr&quot;&gt;Overleaf document here&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;and &lt;a href=&quot;https://github.com/postylem/latex-tutorial&quot;&gt;on GitHub here&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Wed, 05 Oct 2022 00:00:00 -0400</pubDate>
+        <link>https://jahoo.github.io/2022/10/05/LaTeX-tutorial.html</link>
+        <guid isPermaLink="true">https://jahoo.github.io/2022/10/05/LaTeX-tutorial.html</guid>
+        
+        <category>note</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Density of transformed random variable</title>
+        <description>&lt;!-- Note to self, remove the whole assets/transform-pdf/ dir from this website if you ever get around to making this post actually generate from markdown instead of this hacky version --&gt;
+
+&lt;div&gt;
+&lt;iframe src=&quot;/assets/transform-pdf/q/notebooks/transform-pdf.html&quot; width=&quot;100%&quot; height=&quot;10150&quot; frameborder=&quot;none&quot;&gt;
+&lt;/iframe&gt;
+&lt;/div&gt;
+</description>
+        <pubDate>Fri, 02 Sep 2022 00:00:00 -0400</pubDate>
+        <link>https://jahoo.github.io/2022/09/02/transform-pdf.html</link>
+        <guid isPermaLink="true">https://jahoo.github.io/2022/09/02/transform-pdf.html</guid>
+        
+        <category>note</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Rejection sampling</title>
+        <description>&lt;!-- Note to self, remove the html file and the whole /site_libs/ dir from this website if you ever get around to making this post actually generate from markdown instead of this hacky version --&gt;
+
+&lt;p&gt;&lt;em&gt;Rejection sampling&lt;/em&gt; refers to a particular algorithm involving drawing samples from one distribution in order to estimate some other distribution, by rejecting or accepting the samples obtained in a smart way. In this note I’m exploring this algorithm a little with some simulations, and also showing how a different, similar, algorithm can be seen as a special case of the general version (because it wasn’t at all obvious to me at first how they were related).&lt;/p&gt;
+
+&lt;div&gt;
+&lt;iframe src=&quot;/assets/rejection-sampling-expo/q/notebooks/rejection-sampling-expo.html&quot; width=&quot;100%&quot; height=&quot;8150&quot; frameborder=&quot;none&quot;&gt;
+&lt;/iframe&gt;
+&lt;/div&gt;
+</description>
+        <pubDate>Mon, 29 Aug 2022 00:00:00 -0400</pubDate>
+        <link>https://jahoo.github.io/2022/08/29/rejection-sampling-expo.html</link>
+        <guid isPermaLink="true">https://jahoo.github.io/2022/08/29/rejection-sampling-expo.html</guid>
+        
+        <category>note</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Linguistic Dependencies and Statistical Dependence</title>
+        <description>&lt;p&gt;At &lt;a href=&quot;https://2021.emnlp.org/&quot;&gt;EMNLP&lt;/a&gt; (virtually) I presented work (with &lt;a href=&quot;https://aclanthology.org/people/w/wenyu-du/&quot;&gt;Wenyu Du&lt;/a&gt;, &lt;a href=&quot;https://scholar.google.it/citations?user=DJon7w4AAAAJ&amp;amp;hl&quot;&gt;Alessandro Sordoni&lt;/a&gt;, and &lt;a href=&quot;https://scholar.google.com/citations?user=iYjXhYwAAAAJ&amp;amp;hl&quot;&gt;Timothy J. O’Donnell&lt;/a&gt;) titled &lt;em&gt;Linguistic Dependencies and Statistical Dependence&lt;/em&gt;.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img width=&quot;400&quot; src=&quot;/assets/2021-11-07-EMNLP-dependency-dependence-fig.png&quot; /&gt;&lt;/div&gt;
+
+&lt;p&gt;In this work, we compared &lt;em&gt;linguistic dependency&lt;/em&gt; trees to dependency trees representing &lt;em&gt;statistical dependence&lt;/em&gt; between words, which we extracted from mutual information estimates using pretrained language models. Computing accuracy scores we found that the accuracy of the extracted trees was only as high as a simple linear baseline that connects adjacent words, even with strong controls.  We also found considerable differences between pretrained LMs.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Paper is &lt;a href=&quot;http://dx.doi.org/10.18653/v1/2021.emnlp-main.234&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Poster is &lt;a href=&quot;/assets/pdfs/2021.10.11.EMNLP.poster.pdf&quot;&gt;here&lt;/a&gt;.&lt;/li&gt;
+  &lt;li&gt;Talk slides are &lt;a href=&quot;/assets/pdfs/2021.10.11.EMNLP.talk-slides.pdf&quot;&gt;here&lt;/a&gt;.&lt;/li&gt;
+  &lt;li&gt;Code is available &lt;a href=&quot;https://github.com/mcqll/cpmi-dependencies&quot;&gt;here&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+        <pubDate>Sun, 07 Nov 2021 00:00:00 -0400</pubDate>
+        <link>https://jahoo.github.io/2021/11/07/EMNLP-dependency-dependence.html</link>
+        <guid isPermaLink="true">https://jahoo.github.io/2021/11/07/EMNLP-dependency-dependence.html</guid>
+        
+        <category>presentation</category>
+        
+        <category>paper</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Nivre&apos;s parsing examples animated</title>
+        <description>&lt;p&gt;I made a simple flipbook animation of deterministic dependency parsing algorithms examples from &lt;a href=&quot;https://doi.org/10.1162/coli.07-056-R1-07-027&quot;&gt;Nivre (2008)&lt;/a&gt;, using &lt;a href=&quot;https://ctan.org/pkg/beamer&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;beamer&lt;/code&gt;&lt;/a&gt;, because apparently I’m living in 2006.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center;&quot;&gt;&lt;a href=&quot;/assets/2021-04-16-deterministic-dependency-parsing.pdf&quot;&gt;&lt;img width=&quot;600&quot; src=&quot;/assets/2021-04-16-deterministic-dependency-parsing-example.png&quot; /&gt;&lt;/a&gt;&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href=&quot;/assets/2021-04-16-deterministic-dependency-parsing.pdf&quot;&gt;PDF here&lt;/a&gt; is meant to be viewed in presentation mode / single-page view. The LaTeX code is &lt;a href=&quot;/assets/2021-04-deterministic-dependency-parsing.zip&quot;&gt;in this zip file&lt;/a&gt;, in case that’s useful to anyone.&lt;/p&gt;
+</description>
+        <pubDate>Fri, 16 Apr 2021 00:00:00 -0400</pubDate>
+        <link>https://jahoo.github.io/2021/04/16/deterministic-dependency-parsing.html</link>
+        <guid isPermaLink="true">https://jahoo.github.io/2021/04/16/deterministic-dependency-parsing.html</guid>
+        
+        <category>note</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Simplest least-squares in Julia</title>
+        <description>&lt;div&gt;
+&lt;iframe src=&quot;/assets/simplest_linear_regression_example.html&quot; width=&quot;100%&quot; height=&quot;1800&quot; frameborder=&quot;none&quot;&gt;
+&lt;/iframe&gt;
+&lt;/div&gt;
+
+</description>
+        <pubDate>Mon, 11 Jan 2021 00:00:00 -0500</pubDate>
+        <link>https://jahoo.github.io/2021/01/11/simplest_linear_regression_example.html</link>
+        <guid isPermaLink="true">https://jahoo.github.io/2021/01/11/simplest_linear_regression_example.html</guid>
+        
+        <category>note</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>A practical comparison of tensor train models</title>
+        <description>&lt;p&gt;I worked on a project with Jonathan Palucci exploring the trainability of a certain simple kind of &lt;a href=&quot;https://tensornetwork.org/&quot;&gt;tensor network&lt;/a&gt;, called the Tensor Trains, or Matrix Product States.&lt;/p&gt;
+
+&lt;div style=&quot;text-align: center;&quot;&gt;&lt;img width=&quot;400&quot; src=&quot;/assets/2020-12-22-training-tensor-trains-fig2.png&quot; /&gt;&lt;/div&gt;
+
+&lt;p&gt;There is a general correspondence between tensor networks and graphical models, and in particular, when restricted to non-negative valued parameters, &lt;a href=&quot;https://tensornetwork.org/mps/&quot;&gt;Matrix Product States&lt;/a&gt; are equivalent to Hidden Markov Models (HMMs)). &lt;a href=&quot;https://arxiv.org/abs/1907.03741&quot;&gt;Glasser &lt;em&gt;et al&lt;/em&gt;. 2019&lt;/a&gt; discussed this correspondence, and proved theoretical results about these non-negative models, as well as similar real– and complex–valued tensor trains.  They supplemented their theoretical results with evidence from numerical experiments.  In this project, we re-implemented models from their paper, and also implemented time-homogeneous versions of their models.
+We replicated some of their results for non-homogeneous models, adding a comparison with homogeneous models on the same data.  We found evidence that homogeneity decreases ability of the models to fit non-sequential data, but preliminarily observed that on sequential data (for which the assumption of homogeneity is justified), homogeneous models achieved an equally good fit with far fewer parameters. Surprisingly, we also found that the more powerful non time-homogeneous positive MPS performs identically to a time homogeneous HMM.&lt;/p&gt;
+
+&lt;p&gt;📊 Poster –&amp;gt; &lt;a href=&quot;/assets/pdfs/2020.12.15.tensor-trains-poster.pdf&quot;&gt;here (PDF)&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;📄 Writeup titled &lt;em&gt;A practical comparison of tensor train models: The effect of homogeneity&lt;/em&gt; –&amp;gt; &lt;a href=&quot;/assets/pdfs/2020.12.22.tensor-trains-writeup.pdf&quot;&gt;here (PDF)&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;💻 Code –&amp;gt; &lt;a href=&quot;https://github.com/postylem/comparison-of-tensor-train-models&quot;&gt;on GitHub&lt;/a&gt;.&lt;/p&gt;
+
+</description>
+        <pubDate>Tue, 22 Dec 2020 00:00:00 -0500</pubDate>
+        <link>https://jahoo.github.io/2020/12/22/training-tensor-trains.html</link>
+        <guid isPermaLink="true">https://jahoo.github.io/2020/12/22/training-tensor-trains.html</guid>
+        
+        <category>presentation</category>
+        
+        
+      </item>
+    
   </channel>
 </rss>

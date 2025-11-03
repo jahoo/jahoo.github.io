@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-WR9S0121FQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());gtag('config', 'G-WR9S0121FQ');
+  </script>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>A practical comparison of tensor train models</title>
+  <meta name="description" content="I worked on a project with Jonathan Palucci exploring the trainability of a certain simple kind of tensor network, called the Tensor Trains, or Matrix Produc...">
+
+
+  <link rel="stylesheet" type="text/css" href="https://storage.googleapis.com/app.klipse.tech/css/codemirror.css">
+    <script>
+      window.klipse_settings = {
+        selector: '.language-eval-clojure', // css selector for the html elements you want to klipsify
+        selector_reagent: '.language-reagent', // selector for reagent snippets
+        editor_type: 'codemirror',
+        codemirror_options_in: {
+           indentUnit: 2,
+           lineWrapping: true,
+           lineNumbers: true,
+           autoCloseBrackets: true
+        },
+        codemirror_options_out: {
+           lineWrapping: true,
+           lineNumbers: false,
+           readOnly: "true" 
+        },
+        // clojure_cached_macro_ns_regexp: /reagent.*/, // the regexp for clojure macro namespaces that are cached
+        // clojure_cached_ns_regexp: /reagent.*/,       // the regexp for clojure namespaces that are cached
+      };
+    </script>
+
+  <!-- Import Vega 5 & Vega-Lite 3 (does not have to be from CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@3"></script>
+  <!-- Import vega-embed -->
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed"></script>
+  <!-- FOR KATEX (https://stackoverflow.com/a/57370526/1676393) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js" integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="https://jahoo.github.io/2020/12/22/training-tensor-trains.html">
+  <link rel="alternate" type="application/rss+xml" title="jacob hoover vigly" href="https://jahoo.github.io/feed.xml">
+
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">jacob hoover vigly</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+        
+          
+          <a class="page-link" href="/">about</a>
+          
+        
+          
+        
+          
+          <a class="page-link" href="/posts.html">posts</a>
+          
+        
+          
+          <a class="page-link" href="/pubs.html">research</a>
+          
+        
+        <!-- Add CV manually -->
+        <a class="page-link" href="/assets/CV/jlhv-academic_cv.pdf" target="_blank">cv</a>
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <div class="post-title" itemprop="name headline">
+    	A practical comparison of tensor train models
+    </div>
+    <span class="post-meta">
+    	<time datetime="2020-12-22T00:00:00-05:00" itemprop="datePublished">
+    		22 Dec 2020
+    	</time>
+    	
+	</span>
+    <span class="post-tags">
+      
+        - presentation
+      
+    </span>
+  </header>
+
+  <article class="post-content" itemscope itemtype="http://schema.org/BlogPosting">
+    <!-- <div itemprop="articleBody"> -->
+      <p>I worked on a project with Jonathan Palucci exploring the trainability of a certain simple kind of <a href="https://tensornetwork.org/">tensor network</a>, called the Tensor Trains, or Matrix Product States.</p>
+
+<div style="text-align: center;"><img width="400" src="/assets/2020-12-22-training-tensor-trains-fig2.png" /></div>
+
+<p>There is a general correspondence between tensor networks and graphical models, and in particular, when restricted to non-negative valued parameters, <a href="https://tensornetwork.org/mps/">Matrix Product States</a> are equivalent to Hidden Markov Models (HMMs)). <a href="https://arxiv.org/abs/1907.03741">Glasser <em>et al</em>. 2019</a> discussed this correspondence, and proved theoretical results about these non-negative models, as well as similar real– and complex–valued tensor trains.  They supplemented their theoretical results with evidence from numerical experiments.  In this project, we re-implemented models from their paper, and also implemented time-homogeneous versions of their models.
+We replicated some of their results for non-homogeneous models, adding a comparison with homogeneous models on the same data.  We found evidence that homogeneity decreases ability of the models to fit non-sequential data, but preliminarily observed that on sequential data (for which the assumption of homogeneity is justified), homogeneous models achieved an equally good fit with far fewer parameters. Surprisingly, we also found that the more powerful non time-homogeneous positive MPS performs identically to a time homogeneous HMM.</p>
+
+<p>📊 Poster –&gt; <a href="/assets/pdfs/2020.12.15.tensor-trains-poster.pdf">here (PDF)</a>.</p>
+
+<p>📄 Writeup titled <em>A practical comparison of tensor train models: The effect of homogeneity</em> –&gt; <a href="/assets/pdfs/2020.12.22.tensor-trains-writeup.pdf">here (PDF)</a>.</p>
+
+<p>💻 Code –&gt; <a href="https://github.com/postylem/comparison-of-tensor-train-models">on GitHub</a>.</p>
+
+
+    <!-- </div> -->
+  </article><div><p><hr></p></div>
+    <div id="disqus_thread"></div>
+<script type="text/javascript">
+  var disqus_shortname  = 'jaclouhoo';
+  var disqus_identifier = '/2020/12/22/training-tensor-trains';
+  var disqus_title      = '"A practical comparison of tensor train models"';
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+    <span class="last-modified-note">
+      Last modified: 2025-11-03 13:17:41 -0500
+    </span>
+      
+    <!-- <h2 class="footer-heading">jacob hoover vigly</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>jacob hoover vigly</li>
+          <li><a href="mailto:jacob.hoover@mail.mcgill.ca">jacob.hoover@mail.mcgill.ca</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Postdoc at MIT, Department of Brain and Cognitive Sciences.
+</p>
+      </div>
+    </div> -->
+
+  </div>
+
+</footer>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-140260727-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-140260727-1');
+</script>
+
+
+    <script src="https://storage.googleapis.com/app.klipse.tech/plugin/js/klipse_plugin.js"></script>
+  </body>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+  <!-- Load Common JS (for custom things like abstract hidden / open) -->
+  <script src="https://jahoo.github.io/assets/js/common.js"></script>
+</html>
+

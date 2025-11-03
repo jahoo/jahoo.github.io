@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-WR9S0121FQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());gtag('config', 'G-WR9S0121FQ');
+  </script>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>research</title>
+  <meta name="description" content="Postdoc at MIT, Department of Brain and Cognitive Sciences.
+">
+
+
+  <link rel="stylesheet" type="text/css" href="https://storage.googleapis.com/app.klipse.tech/css/codemirror.css">
+    <script>
+      window.klipse_settings = {
+        selector: '.language-eval-clojure', // css selector for the html elements you want to klipsify
+        selector_reagent: '.language-reagent', // selector for reagent snippets
+        editor_type: 'codemirror',
+        codemirror_options_in: {
+           indentUnit: 2,
+           lineWrapping: true,
+           lineNumbers: true,
+           autoCloseBrackets: true
+        },
+        codemirror_options_out: {
+           lineWrapping: true,
+           lineNumbers: false,
+           readOnly: "true" 
+        },
+        // clojure_cached_macro_ns_regexp: /reagent.*/, // the regexp for clojure macro namespaces that are cached
+        // clojure_cached_ns_regexp: /reagent.*/,       // the regexp for clojure namespaces that are cached
+      };
+    </script>
+
+  <!-- Import Vega 5 & Vega-Lite 3 (does not have to be from CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@3"></script>
+  <!-- Import vega-embed -->
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed"></script>
+  <!-- FOR KATEX (https://stackoverflow.com/a/57370526/1676393) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js" integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="https://jahoo.github.io/pubs.html">
+  <link rel="alternate" type="application/rss+xml" title="jacob hoover vigly" href="https://jahoo.github.io/feed.xml">
+
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">jacob hoover vigly</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+        
+          
+          <a class="page-link" href="/">about</a>
+          
+        
+          
+        
+          
+          <a class="page-link" href="/posts.html">posts</a>
+          
+        
+          
+          <a class="page-link" href="/pubs.html">research</a>
+          
+        
+          
+        
+        <!-- Add CV manually -->
+        <a class="page-link" href="/assets/CV/jlhv-academic_cv.pdf" target="_blank">cv</a>
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article>
+
+  <header class="post-header">
+    <div class="post-title">research</div>
+  </header>
+
+  <div class="page-container">
+    <ul class="social-media-list">
+  
+
+  
+
+  
+  <li>
+    <a href="https://scholar.google.com/citations?user=koLi2TwAAAAJ"><span class="icon icon--google_scholar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M390.9 298.5c0 0 0 .1 .1 .1c9.2 19.4 14.4 41.1 14.4 64C405.3 445.1 338.5 512 256 512s-149.3-66.9-149.3-149.3c0-22.9 5.2-44.6 14.4-64h0c1.7-3.6 3.6-7.2 5.6-10.7c4.4-7.6 9.4-14.7 15-21.3c27.4-32.6 68.5-53.3 114.4-53.3c33.6 0 64.6 11.1 89.6 29.9c9.1 6.9 17.4 14.7 24.8 23.5c5.6 6.6 10.6 13.8 15 21.3c2 3.4 3.8 7 5.5 10.5zm26.4-18.8c-30.1-58.4-91-98.4-161.3-98.4s-131.2 40-161.3 98.4L0 202.7 256 0 512 202.7l-94.7 77.1z" /></svg></span><span class="username"> Google scholar</span></a>
+
+  </li>
+  
+</ul>
+
+<h3 id="preprints">Preprints</h3>
+
+<ol class="bibliography"><li>
+
+<div id="vigly.j:2025psyarxiv">
+  
+    <span class="title">Comprehension Effort as the Cost of Inference</span>
+    <span class="author">
+      
+        
+          
+            Jacob Hoover Vigly,
+          
+        
+      
+        
+          
+            Peng Qian,
+          
+        
+      
+        
+          
+            Morgan Sonderegger,
+          
+        
+      
+        
+          
+            and Timothy J. O’Donnell
+          
+        
+      
+    </span>
+
+    <span class="howpublished">
+    
+      psyArXiv.
+    
+    
+    
+    
+    
+    
+      18
+    
+    
+      Jun,
+    
+    
+      2025.
+    
+    </span>
+
+    
+  
+
+  <span class="links">
+  
+  
+  
+  
+  
+    [<a href="https://osf.io/2498w" target="_blank">link</a>]
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    <details>
+    <summary>bib</summary>
+    <div class="content">
+      <figure class="highlight"><pre><code class="language-bibtex" data-lang="bibtex"><span class="nc">@online</span><span class="p">{</span><span class="nl">vigly.j:2025psyarxiv</span><span class="p">,</span>
+  <span class="na">title</span> <span class="p">=</span> <span class="s">{Comprehension Effort as the Cost of Inference}</span><span class="p">,</span>
+  <span class="na">author</span> <span class="p">=</span> <span class="s">{Vigly, Jacob Hoover and Qian, Peng and Sonderegger, Morgan and O'Donnell, Timothy J.}</span><span class="p">,</span>
+  <span class="na">year</span> <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
+  <span class="na">month</span> <span class="p">=</span> <span class="nv">jun</span><span class="p">,</span>
+  <span class="na">day</span> <span class="p">=</span> <span class="s">{18}</span><span class="p">,</span>
+  <span class="na">url</span> <span class="p">=</span> <span class="s">{https://osf.io/2498w}</span><span class="p">,</span>
+  <span class="na">eprinttype</span> <span class="p">=</span> <span class="s">{psyArXiv}</span>
+<span class="p">}</span></code></pre></figure>
+    </div>
+  </details>
+  </span>
+    
+    <details>
+      <summary>abstract</summary>
+      <div class="content">
+        <p>As you read this text, word by word, you build an understanding of its meaning. What cognitive mechanisms underlie this ability?  An influential approach to answering this question comes from viewing comprehension as probabilistic inference over potential interpretations given linguistic input. Motivated within this perspective, a wealth of previous literature in psycholinguistics has focused on an important empirical relationship made precise by surprisal theory (Hale, 2001; Levy, 2008a), the hypothesis that the effort required to process a word scales in its negative log probability, in context. However, the standard derivation of surprisal within the inference framework relies on a crucial assumption: that there is a deterministic relationship between the latent interpretations targeted by inference and the observable input. In this work we propose relaxing this assumption and formalize inference cost directly as the amount of change in probabilistic beliefs. This proposal forms a nontrivial generalization of standard surprisal theory, which provides a more direct connection to algorithmic theories, and naturally explains phenomena where unpredictable input requires little processing effort. To test this framework against surprisal theory, we conduct a self-paced reading time study targeting words with orthographic errors, a specific setting where our approach predicts substantially different patterns. We find that processing effort follows the predictions of belief-update rather than surprisal, in a noisy-channel model of comprehension as inference about intended words. These results demonstrate a clear case where surface surprisal cannot explain human processing cost, and provide further support for models of language comprehension as rational inference.</p>
+      </div>
+    </details>
+  
+</div>
+
+</li></ol>
+
+<h3 id="selected-publications">Selected publications</h3>
+
+<!-- 7 -->
+
+<ol class="bibliography"><li>
+
+<div id="lipkin.b:2025">
+  
+    <span class="title">Fast Controlled Generation from Language Models with Adaptive Weighted Rejection Sampling</span>
+    <span class="author">
+      
+        
+          
+            Ben Lipkin,
+          
+        
+      
+        
+          
+            Benjamin LeBrun,
+          
+        
+      
+        
+          
+            Jacob Hoover Vigly,
+          
+        
+      
+        
+          
+            João Loula,
+          
+        
+      
+        
+          
+            David R. MacIver,
+          
+        
+      
+        
+          
+            Li Du,
+          
+        
+      
+        
+          
+            Jason Eisner,
+          
+        
+      
+        
+          
+            Ryan Cotterell,
+          
+        
+      
+        
+          
+            Vikash Mansinghka,
+          
+        
+      
+        
+          
+            Timothy J. O’Donnell,
+          
+        
+      
+        
+          
+            Alexander K. Lew,
+          
+        
+      
+        
+          
+            and Tim Vieira
+          
+        
+      
+    </span>
+
+    <span class="howpublished">
+    
+      Second Conference on Language Modeling (COLM).
+    
+    
+    
+    
+      Montréal.
+    
+    
+    
+      7
+    
+    
+      Oct,
+    
+    
+      2025.
+    
+    </span>
+
+    
+    <span class="note">
+      Outstanding Paper Award.
+    </span>
+    
+  
+
+  <span class="links">
+  
+  
+  
+    [<a href="http://arxiv.org/abs/https://doi.org/10.48550/arXiv.2504.05410" target="_blank">preprint</a>]
+  
+  
+  
+    [<a href="https://openreview.net/forum?id=3BmPSFAdq3" target="_blank">link</a>]
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    <details>
+    <summary>bib</summary>
+    <div class="content">
+      <figure class="highlight"><pre><code class="language-bibtex" data-lang="bibtex"><span class="nc">@misc</span><span class="p">{</span><span class="nl">lipkin.b:2025</span><span class="p">,</span>
+  <span class="na">title</span> <span class="p">=</span> <span class="s">{Fast Controlled Generation from Language Models with Adaptive Weighted Rejection Sampling}</span><span class="p">,</span>
+  <span class="na">howpublished</span> <span class="p">=</span> <span class="s">{Second Conference on Language Modeling ({{COLM}})}</span><span class="p">,</span>
+  <span class="na">author</span> <span class="p">=</span> <span class="s">{Lipkin, Ben and LeBrun, Benjamin and Vigly, Jacob Hoover and Loula, Jo{\~a}o and MacIver, David R. and Du, Li and Eisner, Jason and Cotterell, Ryan and Mansinghka, Vikash and O'Donnell, Timothy J. and Lew, Alexander K. and Vieira, Tim}</span><span class="p">,</span>
+  <span class="na">year</span> <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
+  <span class="na">month</span> <span class="p">=</span> <span class="nv">oct</span><span class="p">,</span>
+  <span class="na">day</span> <span class="p">=</span> <span class="s">{7}</span><span class="p">,</span>
+  <span class="na">address</span> <span class="p">=</span> <span class="s">{Montr{\'e}al}</span><span class="p">,</span>
+  <span class="na">arxiv</span> <span class="p">=</span> <span class="s">{https://doi.org/10.48550/arXiv.2504.05410}</span><span class="p">,</span>
+  <span class="na">url</span> <span class="p">=</span> <span class="s">{https://openreview.net/forum?id=3BmPSFAdq3}</span><span class="p">,</span>
+  <span class="na">note</span> <span class="p">=</span> <span class="s">{Outstanding Paper Award}</span>
+<span class="p">}</span></code></pre></figure>
+    </div>
+  </details>
+  </span>
+    
+    <details>
+      <summary>abstract</summary>
+      <div class="content">
+        <p>The dominant approach to generating from language models subject to some constraint is locally constrained decoding (LCD), incrementally sampling tokens at each time step such that the constraint is never violated. Typically, this is achieved through token masking: looping over the vocabulary and excluding non-conforming tokens. There are two important problems with this approach. (i) Evaluating the constraint on every token can be prohibitively expensive – LM vocabularies often exceed 100,000 tokens. (ii) LCD can distort the global distribution over strings, sampling tokens based only on local information, even if they lead down dead-end paths. This work introduces a new algorithm that addresses both these problems. First, to avoid evaluating a constraint on the full vocabulary at each step of generation, we propose an adaptive rejection sampling algorithm that typically requires orders of magnitude fewer constraint evaluations. Second, we show how this algorithm can be extended to produce low-variance, unbiased estimates of importance weights at a very small additional cost – estimates that can be soundly used within previously proposed sequential Monte Carlo algorithms to correct for the myopic behavior of local constraint enforcement. Through extensive empirical evaluation in text-to-SQL, molecular synthesis, goal inference, pattern matching, and JSON domains, we show that our approach is superior to state-of-the-art baselines, supporting a broader class of constraints and improving both runtime and performance. Additional theoretical and empirical analyses show that our method’s runtime efficiency is driven by its dynamic use of computation, scaling with the divergence between the unconstrained and constrained LM, and as a consequence, runtime improvements are greater for better models.</p>
+      </div>
+    </details>
+  
+</div>
+
+</li>
+<li>
+
+<div id="vigly.j:2025cogsci">
+  
+    <span class="title">When Unpredictable Does Not Mean Difficult to Process</span>
+    <span class="author">
+      
+        
+          
+            Jacob Hoover Vigly,
+          
+        
+      
+        
+          
+            Peng Qian,
+          
+        
+      
+        
+          
+            Morgan Sonderegger,
+          
+        
+      
+        
+          
+            and Timothy J. O’Donnell
+          
+        
+      
+    </span>
+
+    <span class="howpublished">
+    
+      Poster at the Annual Meeting of the Cognitive Science Society.
+    
+    
+    
+    
+      San Francisco, CA.
+    
+    
+    
+      31
+    
+    
+      Jul,
+    
+    
+      2025.
+    
+    </span>
+
+    
+  
+
+  <span class="links">
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    [<a href="https://underline.io/events/489/posters/20440/poster/119457-" target="_blank">poster</a>]
+  
+  
+  
+  
+    <details>
+    <summary>bib</summary>
+    <div class="content">
+      <figure class="highlight"><pre><code class="language-bibtex" data-lang="bibtex"><span class="nc">@misc</span><span class="p">{</span><span class="nl">vigly.j:2025cogsci</span><span class="p">,</span>
+  <span class="na">type</span> <span class="p">=</span> <span class="s">{Poster}</span><span class="p">,</span>
+  <span class="na">title</span> <span class="p">=</span> <span class="s">{When Unpredictable Does Not Mean Difficult to Process}</span><span class="p">,</span>
+  <span class="na">author</span> <span class="p">=</span> <span class="s">{Vigly, Jacob Hoover and Qian, Peng and Sonderegger, Morgan and O'Donnell, Timothy J.}</span><span class="p">,</span>
+  <span class="na">year</span> <span class="p">=</span> <span class="s">{2025}</span><span class="p">,</span>
+  <span class="na">month</span> <span class="p">=</span> <span class="nv">jul</span><span class="p">,</span>
+  <span class="na">day</span> <span class="p">=</span> <span class="s">{31}</span><span class="p">,</span>
+  <span class="na">howpublished</span> <span class="p">=</span> <span class="s">{Poster at the Annual Meeting of the {{Cognitive Science Society}}}</span><span class="p">,</span>
+  <span class="na">address</span> <span class="p">=</span> <span class="s">{San Francisco, CA}</span>
+<span class="p">}</span></code></pre></figure>
+    </div>
+  </details>
+  </span>
+    
+</div>
+
+</li>
+<li>
+
+<div id="hoover.j:2024phd">
+  
+    <span class="title">The Cost of Information: Looking beyond Predictability in Language Processing</span>
+    <span class="author">
+      
+        
+          Jacob Louis Hoover
+        
+      
+    </span>
+
+    <span class="howpublished">
+    
+    
+    
+    
+    
+    
+    
+      Aug,
+    
+    
+      2024.
+    
+    </span>
+
+    
+    <span class="note">
+      PhD Thesis, McGill University, Linguistics Department.
+    </span>
+    
+  
+
+  <span class="links">
+  
+  
+  
+  
+  
+    [<a href="https://escholarship.mcgill.ca/concern/theses/r494vr42w" target="_blank">link</a>]
+  
+  
+  
+  
+  
+    [<a href="https://jahoo.github.io/assets/pdfs/dissertation.pdf" target="_blank">pdf</a>]
+  
+  
+  
+  
+  
+    
+      [<a href="assets/pdfs/dissertation_precis.pdf" target="_blank">☛ précis</a>]
+    
+  
+    <details>
+    <summary>bib</summary>
+    <div class="content">
+      <figure class="highlight"><pre><code class="language-bibtex" data-lang="bibtex"><span class="nc">@thesis</span><span class="p">{</span><span class="nl">hoover.j:2024phd</span><span class="p">,</span>
+  <span class="na">title</span> <span class="p">=</span> <span class="s">{The Cost of Information: Looking beyond Predictability in Language Processing}</span><span class="p">,</span>
+  <span class="na">author</span> <span class="p">=</span> <span class="s">{Hoover, Jacob Louis}</span><span class="p">,</span>
+  <span class="na">type</span> <span class="p">=</span> <span class="s">{PhD}</span><span class="p">,</span>
+  <span class="na">year</span> <span class="p">=</span> <span class="s">{2024}</span><span class="p">,</span>
+  <span class="na">month</span> <span class="p">=</span> <span class="nv">aug</span><span class="p">,</span>
+  <span class="na">note</span> <span class="p">=</span> <span class="s">{PhD Thesis, McGill University, Linguistics Department}</span><span class="p">,</span>
+  <span class="na">school</span> <span class="p">=</span> <span class="s">{McGill University}</span><span class="p">,</span>
+  <span class="na">langid</span> <span class="p">=</span> <span class="s">{en-CA}</span><span class="p">,</span>
+  <span class="na">url</span> <span class="p">=</span> <span class="s">{https://escholarship.mcgill.ca/concern/theses/r494vr42w}</span>
+<span class="p">}</span></code></pre></figure>
+    </div>
+  </details>
+  </span>
+    
+</div>
+
+</li>
+<li>
+
+<div id="hoover.j:2023">
+  
+    <span class="title">The Plausibility of Sampling as an Algorithmic Theory of Sentence Processing</span>
+    <span class="author">
+      
+        
+          
+            Jacob Louis Hoover,
+          
+        
+      
+        
+          
+            Morgan Sonderegger,
+          
+        
+      
+        
+          
+            Steven T. Piantadosi,
+          
+        
+      
+        
+          
+            and Timothy J. O’Donnell
+          
+        
+      
+    </span>
+
+    <span class="howpublished">
+    
+      <em>Open Mind: Discoveries in Cognitive Science</em>.
+    
+    
+      350–391.
+    
+    
+    
+    
+    
+    
+      Jul,
+    
+    
+      2023.
+    
+    </span>
+
+    
+  
+
+  <span class="links">
+  
+    [<a href="http://doi.org/10.1162/opmi_a_00086" target="_blank">DOI</a>]
+  
+  
+  
+  
+  
+  
+    [<a href="https://doi.org/10.31234/osf.io/qjnpv" target="_blank">preprint</a>]
+  
+  
+  
+  
+  
+  
+  
+    [<a href="https://github.com/mcqll/plausibility-sampling-processing/" target="_blank">code repository</a>]
+  
+  
+    
+      [<a href="https://jahoo.shinyapps.io/surprisal_explorer/" target="_blank">☛ surprisal explorer</a>]
+    
+  
+    <details>
+    <summary>bib</summary>
+    <div class="content">
+      <figure class="highlight"><pre><code class="language-bibtex" data-lang="bibtex"><span class="nc">@article</span><span class="p">{</span><span class="nl">hoover.j:2023</span><span class="p">,</span>
+  <span class="na">title</span> <span class="p">=</span> <span class="s">{The Plausibility of Sampling as an Algorithmic Theory of Sentence Processing}</span><span class="p">,</span>
+  <span class="na">author</span> <span class="p">=</span> <span class="s">{Hoover, Jacob Louis and Sonderegger, Morgan and Piantadosi, Steven T. and O'Donnell, Timothy J.}</span><span class="p">,</span>
+  <span class="na">year</span> <span class="p">=</span> <span class="s">{2023}</span><span class="p">,</span>
+  <span class="na">month</span> <span class="p">=</span> <span class="nv">jul</span><span class="p">,</span>
+  <span class="na">journal</span> <span class="p">=</span> <span class="s">{Open Mind: Discoveries in Cognitive Science}</span><span class="p">,</span>
+  <span class="na">volume</span> <span class="p">=</span> <span class="s">{7}</span><span class="p">,</span>
+  <span class="na">pages</span> <span class="p">=</span> <span class="s">{350--391}</span><span class="p">,</span>
+  <span class="na">issn</span> <span class="p">=</span> <span class="s">{2470-2986}</span><span class="p">,</span>
+  <span class="na">doi</span> <span class="p">=</span> <span class="s">{10.1162/opmi_a_00086}</span><span class="p">,</span>
+  <span class="na">urldate</span> <span class="p">=</span> <span class="s">{2023-07-21}</span><span class="p">,</span>
+  <span class="na">copyright</span> <span class="p">=</span> <span class="s">{All rights reserved}</span><span class="p">,</span>
+  <span class="na">pmcid</span> <span class="p">=</span> <span class="s">{PMC10449406}</span>
+<span class="p">}</span></code></pre></figure>
+    </div>
+  </details>
+  </span>
+    
+    <details>
+      <summary>abstract</summary>
+      <div class="content">
+        <p>Words that are more surprising given context take longer to process. However, no incremental parsing algorithm has been shown to directly predict this phenomenon. In this work, we focus on a class of algorithms whose runtime does naturally scale in surprisal—those that involve repeatedly sampling from the prior. Our first contribution is to show that simple examples of such algorithms predict runtime to increase superlinearly with surprisal, and also predict variance in runtime to increase. These two predictions stand in contrast with literature on surprisal theory (<a href="https://www.aclweb.org/anthology/N01-1021">Hale, 2001</a>; <a href="https://doi.org/10.1016/j.cognition.2007.05.006">Levy, 2008</a>) which assumes that the expected processing cost increases linearly with surprisal, and makes no prediction about variance. In the second part of this paper, we conduct an empirical study of the relationship between surprisal and reading time, using a collection of modern language models to estimate surprisal. We find that with better language models, reading time increases superlinearly in surprisal, and also that variance increases. These results are consistent with the predictions of sampling-based algorithms.</p>
+      </div>
+    </details>
+  
+</div>
+
+</li>
+<li>
+
+<div id="socolof.m:2022coling">
+  
+    <span class="title">Measuring Morphological Fusion Using Partial Information Decomposition</span>
+    <span class="author">
+      
+        
+          
+            Michaela Socolof,
+          
+        
+      
+        
+          
+            Jacob Louis Hoover,
+          
+        
+      
+        
+          
+            Richard Futrell,
+          
+        
+      
+        
+          
+            Alessandro Sordoni,
+          
+        
+      
+        
+          
+            and Timothy J. O’Donnell
+          
+        
+      
+    </span>
+
+    <span class="howpublished">
+    
+      In <em>Proceedings of the 29th International Conference on Computational Linguistics (COLING)</em>.
+      
+    
+    
+      44–54.
+    
+    
+      International Committee on Computational Linguistics.
+    
+    
+    
+    
+      12
+    
+    
+      Oct,
+    
+    
+      2022.
+    
+    </span>
+
+    
+  
+
+  <span class="links">
+  
+  
+  
+  
+  
+    [<a href="https://aclanthology.org/2022.coling-1.5" target="_blank">link</a>]
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    <details>
+    <summary>bib</summary>
+    <div class="content">
+      <figure class="highlight"><pre><code class="language-bibtex" data-lang="bibtex"><span class="nc">@inproceedings</span><span class="p">{</span><span class="nl">socolof.m:2022coling</span><span class="p">,</span>
+  <span class="na">title</span> <span class="p">=</span> <span class="s">{Measuring Morphological Fusion Using Partial Information Decomposition}</span><span class="p">,</span>
+  <span class="na">booktitle</span> <span class="p">=</span> <span class="s">{Proceedings of the 29th {{International Conference}} on {{Computational Linguistics}} ({{COLING}})}</span><span class="p">,</span>
+  <span class="na">author</span> <span class="p">=</span> <span class="s">{Socolof, Michaela and Hoover, Jacob Louis and Futrell, Richard and Sordoni, Alessandro and O'Donnell, Timothy J.}</span><span class="p">,</span>
+  <span class="na">year</span> <span class="p">=</span> <span class="s">{2022}</span><span class="p">,</span>
+  <span class="na">month</span> <span class="p">=</span> <span class="nv">oct</span><span class="p">,</span>
+  <span class="na">day</span> <span class="p">=</span> <span class="s">{12}</span><span class="p">,</span>
+  <span class="na">pages</span> <span class="p">=</span> <span class="s">{44--54}</span><span class="p">,</span>
+  <span class="na">publisher</span> <span class="p">=</span> <span class="s">{International Committee on Computational Linguistics}</span><span class="p">,</span>
+  <span class="na">location</span> <span class="p">=</span> <span class="s">{Gyeongju, Republic of Korea}</span><span class="p">,</span>
+  <span class="na">url</span> <span class="p">=</span> <span class="s">{https://aclanthology.org/2022.coling-1.5}</span><span class="p">,</span>
+  <span class="na">eventtitle</span> <span class="p">=</span> <span class="s">{{{COLING}} 2022}</span>
+<span class="p">}</span></code></pre></figure>
+    </div>
+  </details>
+  </span>
+    
+    <details>
+      <summary>abstract</summary>
+      <div class="content">
+        <p>Morphological systems across languages vary when it comes to the relation between form and meaning. In some languages, a single meaning feature corresponds to a single morpheme, whereas in other languages, multiple meaning features are bundled together into one morpheme. The two types of languages have been called agglutinative and fusional, respectively, but this distinction does not capture the graded nature of the phenomenon. We provide a mathematically precise way of characterizing morphological systems using partial information decomposition, a framework for decomposing mutual information into three components: unique, redundant, and synergistic information. We show that highly fusional languages are characterized by high levels of synergy.</p>
+      </div>
+    </details>
+  
+</div>
+
+</li>
+<li>
+
+<div id="hoover.j:2021emnlp">
+  
+    <span class="title">Linguistic Dependencies and Statistical Dependence</span>
+    <span class="author">
+      
+        
+          
+            Jacob Louis Hoover,
+          
+        
+      
+        
+          
+            Wenyu Du,
+          
+        
+      
+        
+          
+            Alessandro Sordoni,
+          
+        
+      
+        
+          
+            and Timothy J. O’Donnell
+          
+        
+      
+    </span>
+
+    <span class="howpublished">
+    
+      In <em>Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing</em>.
+      
+    
+    
+      2941–2963.
+    
+    
+      Association for Computational Linguistics.
+    
+    
+      Online and Punta Cana, Dominican Republic.
+    
+    
+    
+    
+      Nov,
+    
+    
+      2021.
+    
+    </span>
+
+    
+  
+
+  <span class="links">
+  
+  
+  
+  
+  
+    [<a href="https://aclanthology.org/2021.emnlp-main.234" target="_blank">link</a>]
+  
+  
+  
+  
+  
+  
+    [<a href="https://jahoo.github.io/assets/pdfs/2021.10.11.EMNLP.poster.pdf" target="_blank">poster</a>]
+  
+  
+    [<a href="https://jahoo.github.io/assets/pdfs/2021.10.11.EMNLP.talk-slides.pdf" target="_blank">slides</a>]
+  
+  
+    [<a href="https://github.com/mcqll/cpmi-dependencies" target="_blank">code repository</a>]
+  
+  
+    <details>
+    <summary>bib</summary>
+    <div class="content">
+      <figure class="highlight"><pre><code class="language-bibtex" data-lang="bibtex"><span class="nc">@inproceedings</span><span class="p">{</span><span class="nl">hoover.j:2021emnlp</span><span class="p">,</span>
+  <span class="na">address</span> <span class="p">=</span> <span class="s">{Online and Punta Cana, Dominican Republic}</span><span class="p">,</span>
+  <span class="na">author</span> <span class="p">=</span> <span class="s">{Hoover, Jacob Louis and Du, Wenyu and Sordoni, Alessandro and O{'}Donnell, Timothy J.}</span><span class="p">,</span>
+  <span class="na">booktitle</span> <span class="p">=</span> <span class="s">{Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing}</span><span class="p">,</span>
+  <span class="na">month</span> <span class="p">=</span> <span class="nv">nov</span><span class="p">,</span>
+  <span class="na">pages</span> <span class="p">=</span> <span class="s">{2941--2963}</span><span class="p">,</span>
+  <span class="na">publisher</span> <span class="p">=</span> <span class="s">{Association for Computational Linguistics}</span><span class="p">,</span>
+  <span class="na">title</span> <span class="p">=</span> <span class="s">{Linguistic Dependencies and Statistical Dependence}</span><span class="p">,</span>
+  <span class="na">url</span> <span class="p">=</span> <span class="s">{https://aclanthology.org/2021.emnlp-main.234}</span><span class="p">,</span>
+  <span class="na">year</span> <span class="p">=</span> <span class="s">{2021}</span>
+<span class="p">}</span></code></pre></figure>
+    </div>
+  </details>
+  </span>
+    
+    <details>
+      <summary>abstract</summary>
+      <div class="content">
+        <p>Are pairs of words that tend to occur together also likely to stand in a linguistic dependency? This empirical question is motivated by a long history of literature in cognitive science, psycholinguistics, and NLP. In this work we contribute an extensive analysis of the relationship between linguistic dependencies and statistical dependence between words. Improving on previous work, we introduce the use of large pretrained language models to compute contextualized estimates of the pointwise mutual information between words (CPMI). For multiple models and languages, we extract dependency trees which maximize CPMI, and compare to gold standard linguistic dependencies. Overall, we find that CPMI dependencies achieve an unlabelled undirected attachment score of at most ≈0.5. While far above chance, and consistently above a non-contextualized PMI baseline, this score is generally comparable to a simple baseline formed by connecting adjacent words. We analyze which kinds of linguistic dependencies are best captured in CPMI dependencies, and also find marked differences between the estimates of the large pretrained language models, illustrating how their different training schemes affect the type of dependencies they capture.</p>
+      </div>
+    </details>
+  
+</div>
+
+</li>
+<li>
+
+<div id="hoover.j:2021wccfl">
+  
+    <span class="title">Accounting for Variation in Number Agreement in Icelandic Dative-Nominative Constructions</span>
+    <span class="author">
+      
+        
+          Jacob Louis Hoover
+        
+      
+    </span>
+
+    <span class="howpublished">
+    
+      In <em>Proceedings of the 38th West Coast Conference on Formal Linguistics</em>.
+      
+        Ed. Rachel Soo, Una Y. Chow, Sander Nederveen.
+      
+    
+    
+      231–241.
+    
+    
+      Cascadilla Proceedings Project.
+    
+    
+      Somerville, Mass., USA.
+    
+    
+    
+    
+      Oct,
+    
+    
+      2021.
+    
+    </span>
+
+    
+  
+
+  <span class="links">
+  
+  
+  
+  
+  
+    [<a href="http://www.lingref.com/cpp/wccfl/38/abstract3568.html" target="_blank">link</a>]
+  
+  
+  
+    [<a href="assets/pdfs/wccfl2020-handout.pdf" target="_blank">handout</a>]
+  
+  
+  
+    [<a href="https://jahoo.github.io/assets/pdfs/wccfl2020-cascadilla-paper3568-proof.pdf" target="_blank">pdf</a>]
+  
+  
+  
+  
+  
+    <details>
+    <summary>bib</summary>
+    <div class="content">
+      <figure class="highlight"><pre><code class="language-bibtex" data-lang="bibtex"><span class="nc">@inproceedings</span><span class="p">{</span><span class="nl">hoover.j:2021wccfl</span><span class="p">,</span>
+  <span class="na">address</span> <span class="p">=</span> <span class="s">{Somerville, Mass., USA}</span><span class="p">,</span>
+  <span class="na">author</span> <span class="p">=</span> <span class="s">{Hoover, Jacob Louis}</span><span class="p">,</span>
+  <span class="na">booktitle</span> <span class="p">=</span> <span class="s">{Proceedings of the 38th West Coast Conference on Formal Linguistics}</span><span class="p">,</span>
+  <span class="na">editor</span> <span class="p">=</span> <span class="s">{Rachel Soo, Una Y. Chow, Sander Nederveen}</span><span class="p">,</span>
+  <span class="na">month</span> <span class="p">=</span> <span class="nv">oct</span><span class="p">,</span>
+  <span class="na">pages</span> <span class="p">=</span> <span class="s">{231--241}</span><span class="p">,</span>
+  <span class="na">publisher</span> <span class="p">=</span> <span class="s">{Cascadilla Proceedings Project}</span><span class="p">,</span>
+  <span class="na">title</span> <span class="p">=</span> <span class="s">{Accounting for Variation in Number Agreement in Icelandic Dative-Nominative Constructions}</span><span class="p">,</span>
+  <span class="na">url</span> <span class="p">=</span> <span class="s">{http://www.lingref.com/cpp/wccfl/38/abstract3568.html}</span><span class="p">,</span>
+  <span class="na">year</span> <span class="p">=</span> <span class="s">{2021}</span>
+<span class="p">}</span></code></pre></figure>
+    </div>
+  </details>
+  </span>
+    
+    <details>
+      <summary>abstract</summary>
+      <div class="content">
+        <p>Icelandic dative-nominative constructions exhibit a syntactic hierarchy effect known as the Person Restriction: only third person nominatives may control agreement. In these constructions, there is variation between speakers in the extent to which the verb agrees with the nominative for number. <a href="https://ling.auf.net/lingbuzz/000371">Sigurðsson &amp; Holmberg (2008)</a> explain this variation as arising due to differences between varieties in the timing of subject raising, using a split phi-probe. This paper revises their approach, using the feature gluttony mechanism for Agree developed in <a href="https://ling.auf.net/lingbuzz/004224">Coon &amp; Keine (2020)</a>, and a split phi-probe in which person probing precedes number probing.  Within this framework, the observed variation can be captured by allowing variability two independent parameters: the timing of EPP subject raising, and the visibility of a number feature on dative DPs.  The proposed mechanism describes the variation, including predicting the observed optional agreement in certain cases that previous literature had struggled to account for, and makes additional predictions about the differences between varieties in cases of syncretism within the verbal paradigm. An investigation into these predictions should allow this already well-studied area of Icelandic grammar to continue to be a useful test-case for crosslinguistic assumptions about the mechanism of Agree, and the status of dative arguments.</p>
+      </div>
+    </details>
+  
+</div>
+
+</li></ol>
+
+<hr />
+
+<p><span class="post-meta">
+<em>Note on my name:</em><br />
+My surname is Vigly. Prior to September 2024, my surname was Hoover, which is now a middle name.
+</span></p>
+
+  </div>
+
+  <div class="hidden">
+    <a rel="me" href="https://mathstodon.xyz/@postylem">Mastodon</a>
+  </div>
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+    <span class="last-modified-note">
+      Last modified: 2025-11-03 13:17:41 -0500
+    </span>
+      
+    <!-- <h2 class="footer-heading">jacob hoover vigly</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>jacob hoover vigly</li>
+          <li><a href="mailto:jacob.hoover@mail.mcgill.ca">jacob.hoover@mail.mcgill.ca</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Postdoc at MIT, Department of Brain and Cognitive Sciences.
+</p>
+      </div>
+    </div> -->
+
+  </div>
+
+</footer>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-140260727-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-140260727-1');
+</script>
+
+
+    <script src="https://storage.googleapis.com/app.klipse.tech/plugin/js/klipse_plugin.js"></script>
+  </body>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+  <!-- Load Common JS (for custom things like abstract hidden / open) -->
+  <script src="https://jahoo.github.io/assets/js/common.js"></script>
+</html>
+
