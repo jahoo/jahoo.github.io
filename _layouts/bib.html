@@ -65,9 +65,6 @@
         {{entry.mypubstate}}.
       {% endif %}
     {% endif %}
-    {% if entry.note %}
-      {{entry.note}}.
-    {% endif %}
     {% if entry.day %}
       {{entry.day}}
     {% endif %}
@@ -79,6 +76,11 @@
     {% endif %}
     </span>
 
+    {% if entry.note %}
+    <span class="note">
+      {{entry.note}}.
+    </span>
+    {% endif %}
   {% endif %}
 
   <span class="links">
