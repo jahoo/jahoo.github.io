@@ -2,7 +2,6 @@
 layout: post
 title: Linguistic Dependencies and Statistical Dependence
 published: true
-comments: true
 tags:
     - presentation
     - paper

@@ -1,6 +1,5 @@
 ---
 layout: post
-comments: true
 title: Interactive diagrams with Klipse+Vega
 published: true
 tags: note

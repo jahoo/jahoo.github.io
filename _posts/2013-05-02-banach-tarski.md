@@ -1,8 +1,7 @@
 ---
 layout: post
 title: Banach-Tarski - A basic magic of group theory
-comments: true
-published: true 
+published: true
 tags:
     - note
 ---

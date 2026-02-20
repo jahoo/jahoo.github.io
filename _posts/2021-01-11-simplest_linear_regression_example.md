@@ -1,6 +1,5 @@
 ---
 layout: post
-comments: true
 title: Simplest least-squares in Julia
 published: true 
 tags:

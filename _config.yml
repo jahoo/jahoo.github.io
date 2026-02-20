@@ -12,8 +12,6 @@ description: > # this means to ignore newlines until "baseurl:"
   Postdoc at MIT, Department of Brain and Cognitive Sciences.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://jahoo.github.io" # the base hostname & protocol for your site
-# twitter_username: postylem
-# github_username:  postylem
 google_scholar_id: koLi2TwAAAAJ
 
 # Build settings
@@ -34,13 +32,7 @@ scholar:
   bibliography: default.bib
   bibliography_template: bib # references file _layouts/bib.*
 
-# Comments (see _layouts/posts.html)
-disqus_shortname: jaclouhoo
-# https://help.disqus.com/en/articles/1717111-what-s-a-shortname
-
 # USE THE FOLLOWING FOR MATH:
 # $$\LaTeX code$$   (for display)
 # \\[\LaTeX code\\] (also for display)
 # \\(\LaTeX code\\) (for inline)
-
-# theme: jekyll-theme-minimal

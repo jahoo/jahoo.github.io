@@ -1,8 +1,7 @@
 ---
 layout: post
 title: A practical comparison of tensor train models
-comments: true
-published: true 
+published: true
 tags:
     - presentation
 ---

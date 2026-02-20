@@ -1,7 +1,6 @@
 ---
 layout: post
-comments: true
-tags: 
+tags:
     - note
 author:
 - Jacob Louis Hoover

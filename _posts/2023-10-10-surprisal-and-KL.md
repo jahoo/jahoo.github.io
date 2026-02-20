@@ -1,6 +1,5 @@
 ---
 layout: post
-comments: false
 title: surprisal and KL
 published: true 
 tags:

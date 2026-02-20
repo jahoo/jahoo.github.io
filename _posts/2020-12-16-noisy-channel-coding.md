@@ -1,8 +1,7 @@
 ---
 layout: post
 title: Shannon’s noisy channel-coding theorem
-comments: true
-published: true 
+published: true
 tags: presentation
 ---
 I put together [a presentation](/assets/pdfs/2020.12.16-noisy_channel_coding-handout.pdf) going through the proof of the noisy-channel coding theorem (based on the proofs given in [Cover and Thomas 2006, Ch.7](https://archive.org/details/ElementsOfInformationTheory2ndEd/page/n225) and [MacKay 2003, Ch.10](http://www.inference.org.uk/mackay/itprnn/ps/161.173.pdf)), a central result in information theory, which is a statement about _noisy channels_ (a set up where a message passed from sender to receiver is disturbed by some random process during transmission).
