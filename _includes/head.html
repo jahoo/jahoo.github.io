@@ -14,6 +14,7 @@
   <meta name="description" content="{% if page.excerpt %}{{ page.excerpt | strip_html | strip_newlines | truncate: 160 }}{% else %}{{ site.description }}{% endif %}">
 
 
+  {% if page.klipse %}
   <link rel="stylesheet" type="text/css" href="https://storage.googleapis.com/app.klipse.tech/css/codemirror.css">
     <script>
       window.klipse_settings = {
@@ -29,18 +30,18 @@
         codemirror_options_out: {
            lineWrapping: true,
            lineNumbers: false,
-           readOnly: "true" 
+           readOnly: "true"
         },
-        // clojure_cached_macro_ns_regexp: /reagent.*/, // the regexp for clojure macro namespaces that are cached
-        // clojure_cached_ns_regexp: /reagent.*/,       // the regexp for clojure namespaces that are cached
       };
     </script>
+  {% endif %}
 
-  <!-- Import Vega 5 & Vega-Lite 5 (does not have to be from CDN) -->
+  {% if page.vega %}
   <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
-  <!-- Import vega-embed -->
   <script src="https://cdn.jsdelivr.net/npm/vega-embed"></script>
+  {% endif %}
+
   <!-- FOR KATEX (https://stackoverflow.com/a/57370526/1676393) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.28/dist/katex.min.css" integrity="sha384-Wsr4Nh3yrvMf2KCebJchRJoVo1gTU6kcP05uRSh5NV3sj9+a8IomuJoQzf3sMq4T" crossorigin="anonymous">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.28/dist/katex.min.js" integrity="sha384-+W9OcrYK2/bD7BmUAk+xeFAyKp0QjyRQUCxeU31dfyTt/FrPsUgaBTLLkVf33qWt" crossorigin="anonymous"></script>

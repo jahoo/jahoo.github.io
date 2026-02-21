@@ -14,7 +14,7 @@
     </div>
 
     {% include footer.html %}
-    <script src="https://storage.googleapis.com/app.klipse.tech/plugin/js/klipse_plugin.js"></script>
+    {% if page.klipse %}<script src="https://storage.googleapis.com/app.klipse.tech/plugin/js/klipse_plugin.js"></script>{% endif %}
   </body>
 
   <!-- Load Common JS (for custom things like abstract hidden / open) -->

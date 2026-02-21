@@ -3,6 +3,8 @@ layout: post
 title: Interactive diagrams with Klipse+Vega
 published: true
 tags: note
+klipse: true
+vega: true
 ---
 
 <!-- The following preamble (in /_includes/) is needed for the Vega stuff -->
