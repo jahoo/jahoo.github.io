@@ -6,8 +6,8 @@
 </description>
     <link>https://jahoo.github.io/</link>
     <atom:link href="https://jahoo.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 03 Nov 2025 13:46:20 -0500</pubDate>
-    <lastBuildDate>Mon, 03 Nov 2025 13:46:20 -0500</lastBuildDate>
+    <pubDate>Sat, 21 Feb 2026 00:02:10 +0000</pubDate>
+    <lastBuildDate>Sat, 21 Feb 2026 00:02:10 +0000</lastBuildDate>
     <generator>Jekyll v4.3.1</generator>
     
       <item>
@@ -18,7 +18,7 @@
   &lt;li&gt;&lt;a href=&quot;/assets/pdfs/dissertation.pdf&quot;&gt;&lt;em&gt;The Cost of Information: Looking beyond Predictability in Language Processing&lt;/em&gt;&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 </description>
-        <pubDate>Fri, 02 Aug 2024 00:00:00 -0400</pubDate>
+        <pubDate>Fri, 02 Aug 2024 00:00:00 +0000</pubDate>
         <link>https://jahoo.github.io/2024/08/02/dissertation.html</link>
         <guid isPermaLink="true">https://jahoo.github.io/2024/08/02/dissertation.html</guid>
         
@@ -54,7 +54,7 @@
 &lt;iframe width=&quot;100%&quot; height=&quot;1509&quot; frameborder=&quot;0&quot; src=&quot;https://observablehq.com/embed/@postylem/kl-and-surprisal?cells=viewof+showOtherKL%2Cplot1_1%2Cplot1_2%2Cviewof+dim%2Cviewof+useLogInput%2Cviewof+allowZeroes%2Cinput1%2Cviewof+scale_prior%2Cviewof+scale_likelihood%2Cviewof+applyScaleLikelihood1%2Cmodification_plots%2Cviewof+whetherPlotLogSpace%2Cviewof+maxUnits%2Cviewof+base&quot;&gt;&lt;/iframe&gt;
 
 </description>
-        <pubDate>Tue, 10 Oct 2023 00:00:00 -0400</pubDate>
+        <pubDate>Tue, 10 Oct 2023 00:00:00 +0000</pubDate>
         <link>https://jahoo.github.io/2023/10/10/surprisal-and-KL.html</link>
         <guid isPermaLink="true">https://jahoo.github.io/2023/10/10/surprisal-and-KL.html</guid>
         
@@ -83,7 +83,7 @@
   &lt;dd&gt;Published in the journal &lt;em&gt;Open Mind&lt;/em&gt; (2023) 7: 350–391. [&lt;a href=&quot;https://doi.org/10.1162/opmi_a_00086&quot;&gt;🔗 open access&lt;/a&gt;]&lt;/dd&gt;
 &lt;/dl&gt;
 </description>
-        <pubDate>Fri, 21 Oct 2022 00:00:00 -0400</pubDate>
+        <pubDate>Fri, 21 Oct 2022 00:00:00 +0000</pubDate>
         <link>https://jahoo.github.io/2022/10/21/plausibility-sampling-processing.html</link>
         <guid isPermaLink="true">https://jahoo.github.io/2022/10/21/plausibility-sampling-processing.html</guid>
         
@@ -103,7 +103,7 @@
   &lt;li&gt;and &lt;a href=&quot;https://github.com/postylem/latex-tutorial&quot;&gt;on GitHub here&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 </description>
-        <pubDate>Wed, 05 Oct 2022 00:00:00 -0400</pubDate>
+        <pubDate>Wed, 05 Oct 2022 00:00:00 +0000</pubDate>
         <link>https://jahoo.github.io/2022/10/05/LaTeX-tutorial.html</link>
         <guid isPermaLink="true">https://jahoo.github.io/2022/10/05/LaTeX-tutorial.html</guid>
         
@@ -121,7 +121,7 @@
 &lt;/iframe&gt;
 &lt;/div&gt;
 </description>
-        <pubDate>Fri, 02 Sep 2022 00:00:00 -0400</pubDate>
+        <pubDate>Fri, 02 Sep 2022 00:00:00 +0000</pubDate>
         <link>https://jahoo.github.io/2022/09/02/transform-pdf.html</link>
         <guid isPermaLink="true">https://jahoo.github.io/2022/09/02/transform-pdf.html</guid>
         
@@ -141,7 +141,7 @@
 &lt;/iframe&gt;
 &lt;/div&gt;
 </description>
-        <pubDate>Mon, 29 Aug 2022 00:00:00 -0400</pubDate>
+        <pubDate>Mon, 29 Aug 2022 00:00:00 +0000</pubDate>
         <link>https://jahoo.github.io/2022/08/29/rejection-sampling-expo.html</link>
         <guid isPermaLink="true">https://jahoo.github.io/2022/08/29/rejection-sampling-expo.html</guid>
         
@@ -168,7 +168,7 @@
 &lt;/ul&gt;
 
 </description>
-        <pubDate>Sun, 07 Nov 2021 00:00:00 -0400</pubDate>
+        <pubDate>Sun, 07 Nov 2021 00:00:00 +0000</pubDate>
         <link>https://jahoo.github.io/2021/11/07/EMNLP-dependency-dependence.html</link>
         <guid isPermaLink="true">https://jahoo.github.io/2021/11/07/EMNLP-dependency-dependence.html</guid>
         
@@ -188,7 +188,7 @@
 
 &lt;p&gt;The &lt;a href=&quot;/assets/2021-04-16-deterministic-dependency-parsing.pdf&quot;&gt;PDF here&lt;/a&gt; is meant to be viewed in presentation mode / single-page view. The LaTeX code is &lt;a href=&quot;/assets/2021-04-deterministic-dependency-parsing.zip&quot;&gt;in this zip file&lt;/a&gt;, in case that’s useful to anyone.&lt;/p&gt;
 </description>
-        <pubDate>Fri, 16 Apr 2021 00:00:00 -0400</pubDate>
+        <pubDate>Fri, 16 Apr 2021 00:00:00 +0000</pubDate>
         <link>https://jahoo.github.io/2021/04/16/deterministic-dependency-parsing.html</link>
         <guid isPermaLink="true">https://jahoo.github.io/2021/04/16/deterministic-dependency-parsing.html</guid>
         
@@ -205,7 +205,7 @@
 &lt;/div&gt;
 
 </description>
-        <pubDate>Mon, 11 Jan 2021 00:00:00 -0500</pubDate>
+        <pubDate>Mon, 11 Jan 2021 00:00:00 +0000</pubDate>
         <link>https://jahoo.github.io/2021/01/11/simplest_linear_regression_example.html</link>
         <guid isPermaLink="true">https://jahoo.github.io/2021/01/11/simplest_linear_regression_example.html</guid>
         
@@ -230,7 +230,7 @@ We replicated some of their results for non-homogeneous models, adding a compari
 &lt;p&gt;💻 Code –&amp;gt; &lt;a href=&quot;https://github.com/postylem/comparison-of-tensor-train-models&quot;&gt;on GitHub&lt;/a&gt;.&lt;/p&gt;
 
 </description>
-        <pubDate>Tue, 22 Dec 2020 00:00:00 -0500</pubDate>
+        <pubDate>Tue, 22 Dec 2020 00:00:00 +0000</pubDate>
         <link>https://jahoo.github.io/2020/12/22/training-tensor-trains.html</link>
         <guid isPermaLink="true">https://jahoo.github.io/2020/12/22/training-tensor-trains.html</guid>
         

@@ -11,7 +11,6 @@
   </script>
 
   <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>Simplest least-squares in Julia</title>
@@ -40,15 +39,15 @@
       };
     </script>
 
-  <!-- Import Vega 5 & Vega-Lite 3 (does not have to be from CDN) -->
+  <!-- Import Vega 5 & Vega-Lite 5 (does not have to be from CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vega-lite@3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
   <!-- Import vega-embed -->
   <script src="https://cdn.jsdelivr.net/npm/vega-embed"></script>
   <!-- FOR KATEX (https://stackoverflow.com/a/57370526/1676393) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js" integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ" crossorigin="anonymous"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.28/dist/katex.min.css" integrity="sha384-Wsr4Nh3yrvMf2KCebJchRJoVo1gTU6kcP05uRSh5NV3sj9+a8IomuJoQzf3sMq4T" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.28/dist/katex.min.js" integrity="sha384-+W9OcrYK2/bD7BmUAk+xeFAyKp0QjyRQUCxeU31dfyTt/FrPsUgaBTLLkVf33qWt" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.28/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
 
 
   <link rel="stylesheet" href="/css/main.css">
@@ -112,7 +111,7 @@
     	Simplest least-squares in Julia
     </div>
     <span class="post-meta">
-    	<time datetime="2021-01-11T00:00:00-05:00" itemprop="datePublished">
+    	<time datetime="2021-01-11T00:00:00+00:00" itemprop="datePublished">
     		11 Jan 2021
     	</time>
     	
@@ -133,19 +132,7 @@
 
 
     <!-- </div> -->
-  </article><div><p><hr></p></div>
-    <div id="disqus_thread"></div>
-<script type="text/javascript">
-  var disqus_shortname  = 'jaclouhoo';
-  var disqus_identifier = '/2021/01/11/simplest_linear_regression_example';
-  var disqus_title      = '"Simplest least-squares in Julia"';
-  (function() {
-    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-  })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </article>
 
 
 </div>
@@ -157,51 +144,15 @@
 
   <div class="wrapper">
     <span class="last-modified-note">
-      Last modified: 2025-11-03 13:17:41 -0500
+      Last modified: 2026-02-21 00:01:49 +0000
     </span>
-      
-    <!-- <h2 class="footer-heading">jacob hoover vigly</h2>
-
-    <div class="footer-col-wrapper">
-      <div class="footer-col footer-col-1">
-        <ul class="contact-list">
-          <li>jacob hoover vigly</li>
-          <li><a href="mailto:jacob.hoover@mail.mcgill.ca">jacob.hoover@mail.mcgill.ca</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col footer-col-2">
-        <ul class="social-media-list">
-          
-
-          
-        </ul>
-      </div>
-
-      <div class="footer-col footer-col-3">
-        <p>Postdoc at MIT, Department of Brain and Cognitive Sciences.
-</p>
-      </div>
-    </div> -->
 
   </div>
 
 </footer>
 
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-140260727-1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'UA-140260727-1');
-</script>
-
-
     <script src="https://storage.googleapis.com/app.klipse.tech/plugin/js/klipse_plugin.js"></script>
   </body>
-  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 
   <!-- Load Common JS (for custom things like abstract hidden / open) -->
   <script src="https://jahoo.github.io/assets/js/common.js"></script>
