@@ -9,3 +9,9 @@ Because jekyll-scholar isn't in the list of GitHub-sanctioned plugins, we use a 
 
 #### Deploy
 Push to `source`. A GitHub Actions workflow will automatically build the site (`bundle exec jekyll build`) and deploy the result to the `master` branch, where GitHub Pages serves it at [jahoo.github.io](https://jahoo.github.io).
+
+#### Branch structure
+- `source` — Jekyll source files (edit this branch)
+- `master` — built HTML output (deployed automatically, do not edit directly!)
+
+GitHub may show these branches as "ahead/behind" each other — this is normal. They have independent commit histories: `source` has source-code commits that aren't on `master`, and `master` has deploy commits (built HTML) that aren't on `source`.
