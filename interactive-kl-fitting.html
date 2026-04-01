@@ -159,9 +159,8 @@
             background: #e0e0e0;
         }
 
-        .det-only {
-            display: none;
-        }
+        body.mode-mc .det-only { display: none; }
+        body.mode-det .mc-only { display: none; }
 
         .controls button.active {
             background: #333;
@@ -204,7 +203,7 @@
     </style>
 </head>
 
-<body>
+<body class="mode-mc">
 
     <h1>Interactive KL Divergence Fitting</h1>
     <p style="font-size:0.85em; color:#666; margin-bottom:0.3em;">This page built off of <a
@@ -222,7 +221,7 @@
                 <button id="btn-K-minus" style="padding:0 5px;font-size:0.85em;border:1px solid #ccc;border-radius:3px;background:#f8f8f8;cursor:pointer;line-height:1.4;">&minus;</button>
                 <span id="val-K" style="display:inline-block;min-width:1.8em;text-align:center;">64</span>
                 <button id="btn-K-plus" style="padding:0 5px;font-size:0.85em;border:1px solid #ccc;border-radius:3px;background:#f8f8f8;cursor:pointer;line-height:1.4;">+</button>
-                <input type="range" id="slider-K" min="1" max="512" value="64" step="1">
+                <input type="range" id="slider-K" min="0" max="1000" value="667" step="1">
                 </label></span>
     </div>
     <div class="controls">
@@ -243,7 +242,7 @@
     </div>
 
     <div class="grid-3x2">
-        <div class="row-label">Forward KL: $\mathrm{KL}(p \| \textcolor{#7B2D8E}{q_\phi})$ — mean-seeking<span class="mc-only">, via importance sampling</span></div>
+        <div class="row-label">Forward KL: $\mathrm{KL}(p \| \textcolor{#7B2D8E}{q_\phi})$ — mean-seeking<span class="mc-only">, via importance sampling</span><span class="det-only">, via closed-form moments</span></div>
         <div class="panel">
             <div class="panel-label">Distributions</div>
             <canvas class="kl-canvas" id="canvas-fwd" height="220"></canvas>
@@ -261,7 +260,7 @@
                     title="Score function estimator: reward × score. Works for discrete distributions.">REINFORCE</button>
                 <button id="btn-reparam" class="method-toggle"
                     title="Reparameterization trick: backprop through z = μ + σε. Lower variance, requires differentiable q.">reparameterization</button>
-            </span></div>
+            </span><span class="det-only">, via numerical integration</span></div>
         <div class="panel">
             <div class="panel-label">Distributions</div>
             <canvas class="kl-canvas" id="canvas-rev" height="220"></canvas>
@@ -288,7 +287,6 @@
         <span>rug: fwd = purple (dark = high $w$); rev = <span style="color:rgba(50,100,220,0.8)">blue</span> ($r > 0$)
             / <span style="color:rgba(200,50,50,0.8)">red</span> ($r < 0$), opacity $\propto |r|$</span>
     </div>
-
     <details style="font-size:0.85em; color:#555; margin-top:0.8em;">
         <summary style="cursor:pointer; color:#333; font-weight:600;">Reading the plots</summary>
         <ul style="margin-top:0.5em; padding-left:1.2em; line-height:1.7;">
@@ -312,94 +310,35 @@
         </ul>
     </details>
 
-    <details class="mc-only" style="font-size:0.85em; color:#555; margin-top:0.8em;">
-        <summary style="cursor:pointer; color:#333; font-weight:600;">Why MC optimization can get "stuck" where gradient
-            descent wouldn't</summary>
-        <p style="margin-top:0.5em;">
-            None of the methods here compute exact gradients — they all use <b>Monte Carlo estimates</b> based on $K$
-            samples from $q_\phi$. This means the optimizer can get stuck in regions that are <i>not</i> local minima of
-            the true objective, simply because the gradient estimator has no signal there.
-        </p>
-        <p>
-            <b>Forward KL</b> is the most striking case: $\mathrm{KL}(p \| q_\phi)$ is convex in the natural parameters
-            of the Gaussian — it has a unique global minimum (the moment-matching solution). True gradient descent would
-            always find it. But with IS, when $q_\phi$ doesn't overlap with a mode of $p$, no samples land near that
-            mode, the IS weights are all $\approx 0$ there, and the gradient estimate is <b>blind to the mode's
-                existence</b>.
-        </p>
-        <p>
-            <b>Reverse KL</b> has the same issue. Both REINFORCE and reparameterization sample from $q_\phi$, so the
-            gradient can only reflect what $q_\phi$ "sees." If $q_\phi$ is locked onto one mode, samples from the other
-            mode are exponentially rare, and the gradient provides no signal to escape. Note: for the reverse KL,
-            mode-locking <i>is</i> a genuine local minimum of the true objective — even exact gradient descent would
-            stay there. But MC noise can additionally make the optimizer sticky in places that aren't true local minima
-            at all.
-        </p>
-        <p>
-            You can see this in the rug plot: if all ticks cluster in one region and none reach the other mode, the
-            stochastic gradient can only pull $q_\phi$ toward what it sees. In the forward KL, the ticks near the
-            missing mode will be nearly invisible (low $w$), meaning those samples contribute almost nothing to the
-            gradient.
-        </p>
-        <p>
-            <b>Try it:</b> set $K$ low (e.g. 16), drag $q_\phi$ onto one mode, and watch — it may stay there
-            indefinitely, despite the loss landscape (for the forward KL) showing no local minimum. Then increase $K$
-            and watch it escape. This is why SMC / annealing is used in practice: to maintain particle diversity across
-            modes.
-        </p>
-    </details>
+    <details style="font-size:0.85em; color:#555; margin-top:0.8em;">
+        <summary style="cursor:pointer; color:#333; font-weight:600;">How the gradients are computed</summary>
 
-    <details class="det-only" style="font-size:0.85em; color:#555; margin-top:0.8em;">
-        <summary style="cursor:pointer; color:#333; font-weight:600;">How deterministic gradients work</summary>
+        <div class="det-only">
         <p style="margin-top:0.5em;">
-            In this mode, gradients are computed exactly (or via high-resolution numerical integration), not estimated
-            from random samples.
+        <b>Forward KL</b>: $\nabla_\phi \mathrm{KL}(p \| q_\phi) = -\mathbb{E}_p[\nabla_\phi \log q_\phi(x)]$. For a Gaussian $q$ this depends only on $\mathbb{E}_p[x]$ and $\mathbb{E}_p[(x-\mu)^2]$, which are available in closed form for a Gaussian mixture &mdash; no integration or sampling needed. The forward KL is convex; the gradient always points toward the unique moment-matching solution.
         </p>
         <p>
-            <b>Forward KL</b>: The gradient of $\mathrm{KL}(p \| q_\phi)$ has a closed-form solution when $q$ is
-            Gaussian. The optimal $q^*$ is the moment-matching solution: $\mu^* = \mathbb{E}_p[x]$, $\sigma^{*2} =
-            \mathrm{Var}_p(x)$. Since $p$ is a known mixture, these moments are computed directly from the component
-            parameters. The gradient always points toward the unique global minimum, and Adam converges reliably every
-            time.
+        <b>Reverse KL</b>: $\nabla_\phi \mathrm{KL}(q_\phi \| p) = -\nabla_\phi \mathbb{E}_{q_\phi}[\log p(x)] + \ldots$ requires $\mathbb{E}_q[\nabla_x \log p(x)]$, an expectation of a nonlinear function of $p$ under $q$. This has no closed form, so it is computed by numerical integration (trapezoidal rule, 400 grid points) &mdash; effectively exact in 1D. The reverse KL is nonconvex, so gradient descent finds local minima but cannot escape them.
         </p>
         <p>
-            <b>Reverse KL</b>: The gradient of $\mathrm{KL}(q_\phi \| p)$ requires computing $\mathbb{E}_q[\nabla_x \log
-            p(x)]$. Since both $q$ and $p$ have known closed forms, this expectation is evaluated by numerical
-            integration (trapezoidal rule, ~400 grid points). In 1D this is effectively exact. The reverse KL is
-            nonconvex, so gradient descent finds local minima &mdash; but it does so reliably, without the additional
-            failure modes of stochastic estimation.
+        <b>Why this doesn't scale.</b> In higher dimensions, numerical integration requires $N^d$ evaluations ($N$ grid points per dimension), and closed-form mixture moments are unavailable for complex targets like empirical data distributions. In maximum likelihood training, $\mathbb{E}_p[\cdot]$ is replaced with a sample average over training data &mdash; this <i>is</i> Monte Carlo estimation of the forward KL gradient. Switch to <b>Monte Carlo</b> mode to see how stochastic estimation changes the dynamics.
         </p>
-    </details>
+        </div>
 
-    <details class="det-only" style="font-size:0.85em; color:#555; margin-top:0.8em;">
-        <summary style="cursor:pointer; color:#333; font-weight:600;">Why this doesn't scale (and why we need Monte
-            Carlo)</summary>
+        <div class="mc-only">
         <p style="margin-top:0.5em;">
-            Deterministic gradients work perfectly in this 1D toy setting. In practice, they break down for several
-            reasons:
+        <b>Forward KL</b>: $\nabla_\phi \mathrm{KL}(p \| q_\phi) = -\mathbb{E}_p[\nabla_\phi \log q_\phi(x)]$. The expectation is under $p$, which we can evaluate but not sample from, so we use <b>importance sampling</b> from $q_\phi$: sample $z^{(i)} \sim q_\phi$, compute self-normalized weights $\bar{w}_i \propto p(z^{(i)})/q_\phi(z^{(i)})$, and estimate the gradient as a weighted average of score functions.
         </p>
         <p>
-            <b>The curse of dimensionality.</b> Numerical integration on a grid requires $N^d$ evaluations in $d$
-            dimensions. Here we use ~400 grid points in 1D. A language model has millions of parameters &mdash;
-            $400^{1{,}000{,}000}$ grid points is unthinkable. Monte Carlo estimation uses a fixed number of samples $K$
-            regardless of dimension.
+        <b>Reverse KL</b>: $\nabla_\phi \mathrm{KL}(q_\phi \| p) = -\nabla_\phi \mathbb{E}_{q_\phi}[\log p(x)] + \ldots$. The expectation is under $q_\phi$, which depends on $\phi$, so we need to differentiate through the sampling distribution. <b>REINFORCE</b> uses the log-derivative trick: weight each sample's score function $\nabla_\phi \log q_\phi(z^{(i)})$ by the reward $r_i = \log p(z^{(i)}) - \log q_\phi(z^{(i)})$. <b>Reparameterization</b> writes $z = \mu + \sigma\varepsilon$ with $\varepsilon \sim \mathcal{N}(0,1)$ and differentiates through the sample directly, using $\nabla_x \log p(z)$.
         </p>
         <p>
-            <b>Closed-form moments are rare.</b> The forward KL gradient here exploits the fact that $\mathbb{E}_p[x]$
-            and $\mathrm{Var}_p(x)$ can be read off the mixture parameters. For complex targets &mdash; empirical data
-            distributions, energy-based models &mdash; no such closed form exists. In maximum likelihood training, we
-            replace $\mathbb{E}_p[\cdot]$ with a sample average over training data: this <i>is</i> Monte Carlo
-            estimation of the forward KL gradient.
+        <b>Why MC optimization can get stuck.</b> All MC estimators sample from $q_\phi$, so the gradient can only reflect what $q_\phi$ "sees." If $q_\phi$ doesn't overlap a mode of $p$, the gradient has no signal to move toward it. This is most striking for the forward KL, which is convex &mdash; true gradient descent always converges, but MC estimation can get stuck indefinitely. Set $K$ low and drag $q_\phi$ onto one mode to see this. For the reverse KL, mode-locking is a genuine local minimum even with exact gradients, but MC noise can additionally trap the optimizer in places that are not true local minima.
         </p>
-        <p>
-            <b>Global evaluation of $p$ is impractical.</b> The trapezoidal rule sums $p(x)$ across the entire domain.
-            In variational inference, $p$ is typically known only up to a normalizing constant, and evaluating it
-            everywhere is infeasible. Monte Carlo methods only need pointwise evaluations at sampled locations.
-        </p>
-        <p>
-            <b>Try it:</b> switch to <b>Monte Carlo</b> mode to see how stochastic gradient estimation changes the
-            dynamics &mdash; particularly how sample-based gradients can be <i>blind</i> to modes that $q_\phi$ doesn't
-            overlap with, even when the true loss landscape has no local minimum there.
+        </div>
+
+        <p style="margin-top:0.5em;">
+        <b>Optimizer</b>: All gradients are fed to <b>Adam</b> ($\beta_1 = 0.9$, $\beta_2 = 0.999$, $\varepsilon = 10^{-8}$) with a decaying learning rate $\mathrm{lr}_t = \mathrm{lr}_0 / (1 + 0.001 t)$, where $\mathrm{lr}_0$ is set by the LR slider. Optimization is over $(\mu, \log\sigma)$.
         </p>
     </details>
 
@@ -1124,8 +1063,8 @@
                 const baselineY = yToC(0, canvas, yMax);
                 const isFwd = (label === 'fwd');
 
-                // Forward KL: dotted purple curve showing w = p̃/q
-                if (isFwd) {
+                // Forward KL: dotted purple curve showing w = p̃/q (MC mode only)
+                if (isFwd && gradientMode === 'mc') {
                     const curveW = new Float64Array(N_GRID + 1);
                     let wMax = 0;
                     for (let i = 0; i <= N_GRID; i++) {
@@ -1434,12 +1373,15 @@
                 resetAdam();
             });
             const sliderK = document.getElementById('slider-K');
+            const LOG_K_MAX = Math.log(512);
+            function kToSlider(k) { return Math.round(Math.log(Math.max(1, k)) / LOG_K_MAX * 1000); }
+            function sliderToK(s) { return Math.max(1, Math.round(Math.exp(s / 1000 * LOG_K_MAX))); }
             function setK(v) {
                 K = Math.max(1, Math.min(512, v));
-                sliderK.value = K;
+                sliderK.value = kToSlider(K);
                 document.getElementById('val-K').textContent = K;
             }
-            sliderK.addEventListener('input', function () { setK(+this.value); });
+            sliderK.addEventListener('input', function () { setK(sliderToK(+this.value)); });
             document.getElementById('btn-K-minus').addEventListener('click', () => setK(K - 1));
             document.getElementById('btn-K-plus').addEventListener('click', () => setK(K + 1));
 
@@ -1478,8 +1420,7 @@
                 gradientMode = mode;
                 btnDeterministic.classList.toggle('active', mode === 'deterministic');
                 btnMC.classList.toggle('active', mode === 'mc');
-                document.querySelectorAll('.mc-only').forEach(el => el.style.display = mode === 'mc' ? '' : 'none');
-                document.querySelectorAll('.det-only').forEach(el => el.style.display = mode === 'deterministic' ? '' : 'none');
+                document.body.className = mode === 'mc' ? 'mode-mc' : 'mode-det';
                 document.getElementById('subtitle').textContent = mode === 'mc'
                     ? 'Monte Carlo gradient estimation \u2014 drag the target modes or the fitted distribution'
                     : 'Deterministic gradient computation \u2014 drag the target modes or the fitted distribution';
