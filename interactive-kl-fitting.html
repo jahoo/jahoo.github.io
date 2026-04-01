@@ -218,9 +218,14 @@
             title="Exact gradients via closed-form moments and numerical integration">deterministic</button>
         <button id="btn-mc" class="method-toggle active" title="Stochastic gradient estimation from K samples">Monte
             Carlo</button>
-        <span class="mc-only"><label title="Number of Monte Carlo particles per gradient step">$K$: <input type="range"
-                    id="slider-K" min="1" max="512" value="64" step="1">
-                <span id="val-K">64</span></label></span>
+        <span class="mc-only"><label title="Number of Monte Carlo particles per gradient step">$K$:
+                <button id="btn-K-minus" style="padding:0 5px;font-size:0.85em;border:1px solid #ccc;border-radius:3px;background:#f8f8f8;cursor:pointer;line-height:1.4;">&minus;</button>
+                <span id="val-K" style="display:inline-block;min-width:1.8em;text-align:center;">64</span>
+                <button id="btn-K-plus" style="padding:0 5px;font-size:0.85em;border:1px solid #ccc;border-radius:3px;background:#f8f8f8;cursor:pointer;line-height:1.4;">+</button>
+                <input type="range" id="slider-K" min="1" max="512" value="64" step="1">
+                </label></span>
+    </div>
+    <div class="controls">
         <label title="Adam learning rate">LR: <input type="range" id="slider-lr" min="1" max="30" value="8">
             <span id="val-lr">0.08</span></label>
         <label title="Mixture weight: 0 = all left component, 1 = all right component">Mix weight: <input type="range"
@@ -1428,9 +1433,15 @@
                 qRev.mu = mu0; qRev.logSigma = ls0;
                 resetAdam();
             });
-            document.getElementById('slider-K').addEventListener('input', function () {
-                K = +this.value; document.getElementById('val-K').textContent = K;
-            });
+            const sliderK = document.getElementById('slider-K');
+            function setK(v) {
+                K = Math.max(1, Math.min(512, v));
+                sliderK.value = K;
+                document.getElementById('val-K').textContent = K;
+            }
+            sliderK.addEventListener('input', function () { setK(+this.value); });
+            document.getElementById('btn-K-minus').addEventListener('click', () => setK(K - 1));
+            document.getElementById('btn-K-plus').addEventListener('click', () => setK(K + 1));
 
             let targetDelay = 30;  // ms between steps; 0 = full speed (every rAF)
             document.getElementById('slider-delay').addEventListener('input', function () {
