@@ -225,7 +225,7 @@
                 </label></span>
     </div>
     <div class="controls">
-        <label title="Adam learning rate">LR: <input type="range" id="slider-lr" min="1" max="30" value="8">
+        <label title="Adam base learning rate (decays as lr₀ / (1 + 0.001t))">LR: <input type="range" id="slider-lr" min="1" max="30" value="8">
             <span id="val-lr">0.08</span></label>
         <label title="Mixture weight: 0 = all left component, 1 = all right component">Mix weight: <input type="range"
                 id="slider-mix" min="0" max="100" value="50" step="1">
@@ -235,10 +235,10 @@
         <button id="btn-playpause" title="Play/pause optimization (space)">⏸ <span class="key">space</span></button>
         <button id="btn-step" title="Advance one gradient step (>)" disabled>⏭ <span class="key">&gt;</span></button>
         <button id="btn-reset" title="Randomize q starting position">↻</button>
-        <label title="Delay between gradient steps (0 = full speed)">Delay: <input type="range" id="slider-delay"
-                min="0" max="500" value="30" step="10">
-            <span id="val-delay">30ms</span></label>
-        <span class="fps-display" id="fps-display" style="font-size:0.8em; color:#aaa; font-family:monospace;"></span>
+        <label title="Optimization speed (gradient steps per second)">Speed: <input type="range" id="slider-speed"
+                min="0" max="1000" value="446" step="1" list="speed-ticks" style="width:120px;"></label>
+        <datalist id="speed-ticks"><option value="446" label="1/frame"></datalist>
+        <span class="fps-display" id="fps-display" style="font-size:0.8em; color:#aaa; font-family:monospace;">... steps/s</span>
     </div>
 
     <div class="grid-3x2">
@@ -257,7 +257,7 @@
         <div class="row-label">Reverse KL: $\mathrm{KL}(\textcolor{#7B2D8E}{q_\phi} \| p)$ — mode-seeking<span
                 class="mc-only">, via
                 <button id="btn-reinforce" class="method-toggle active"
-                    title="Score function estimator: reward × score. Works for discrete distributions.">REINFORCE</button>
+                    title="Score function estimator: weight each sample's score ∇log q by reward r = log p - log q">REINFORCE</button>
                 <button id="btn-reparam" class="method-toggle"
                     title="Reparameterization trick: backprop through z = μ + σε. Lower variance, requires differentiable q.">reparameterization</button>
             </span><span class="det-only">, via numerical integration</span></div>
@@ -1385,10 +1385,12 @@
             document.getElementById('btn-K-minus').addEventListener('click', () => setK(K - 1));
             document.getElementById('btn-K-plus').addEventListener('click', () => setK(K + 1));
 
-            let targetDelay = 30;  // ms between steps; 0 = full speed (every rAF)
-            document.getElementById('slider-delay').addEventListener('input', function () {
-                targetDelay = +this.value;
-                document.getElementById('val-delay').textContent = targetDelay + 'ms';
+            // Speed slider: log-scale steps/sec. slider 0→~2/s, ~405→~60/s, 1000→~4000/s
+            const LOG_SPEED_MIN = 1, LOG_SPEED_MAX = 12;  // 2^1=2 to 2^12=4096
+            let stepsPerSec = 60;
+            function speedFromSlider(v) { return Math.pow(2, LOG_SPEED_MIN + (v / 1000) * (LOG_SPEED_MAX - LOG_SPEED_MIN)); }
+            document.getElementById('slider-speed').addEventListener('input', function () {
+                stepsPerSec = speedFromSlider(+this.value);
             });
 
             document.getElementById('slider-lr').addEventListener('input', function () {
@@ -1461,7 +1463,7 @@
 
             // ===== Animation loop =====
             let lastFwd = null, lastRev = null;
-            let lastStepTime = 0;
+            let stepsAccum = 0, lastFrameTime = 0;
             let fpsFrames = 0, fpsLast = performance.now(), fpsVal = 0;
 
             function isOffGrid(q) {
@@ -1500,15 +1502,21 @@
                     document.getElementById('fps-display').textContent = fpsVal + ' steps/s';
                 }
 
-                // Step if enough time has passed
+                // Accumulator-based stepping: accurate steps/sec regardless of frame rate
+                const dt = lastFrameTime ? (now - lastFrameTime) : 0;
+                lastFrameTime = now;
                 if (!dragState) {
-                    if (running && now - lastStepTime >= targetDelay) {
-                        doStep();
-                        lastStepTime = now;
+                    if (running) {
+                        stepsAccum += stepsPerSec * dt / 1000;
+                        const n = Math.min(Math.floor(stepsAccum), 256);  // cap to avoid death spiral
+                        stepsAccum -= n;
+                        for (let i = 0; i < n; i++) doStep();
                     } else if (doOneStep) {
                         doStep();
                         doOneStep = false;
                     }
+                } else {
+                    stepsAccum = 0;  // reset accumulator while dragging
                 }
 
                 drawPanel(canvasFwd, qFwd, optFwd ? [optFwd] : null, lastFwd, 'fwd');
