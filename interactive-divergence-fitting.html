@@ -931,7 +931,7 @@
                         const g = gradFn(mu, sigma);
                         mu -= 0.02 * g.dmu;
                         sigma -= 0.5 * 0.02 * g.dsigma;
-                        sigma = Math.max(0.05, sigma);
+                        sigma = Math.max(0.1, sigma);
                     }
                     return { mu, sigma, kl: evalFn(mu, sigma) };
                 }
@@ -1038,13 +1038,33 @@
                 ctx.globalAlpha = 1.0;
 
                 // Contour lines via marching squares
-                const logGrid = new Float64Array(landCurRes * landCurRes);
-                for (let k = 0; k < logGrid.length; k++)
-                    logGrid[k] = Math.log10(Math.max(grid[k], 1e-3));
+                const rawLogGrid = new Float64Array(landCurRes * landCurRes);
+                for (let k = 0; k < rawLogGrid.length; k++) {
+                    const v = Math.log10(Math.max(grid[k], 1e-3));
+                    rawLogGrid[k] = isFinite(v) ? v : 100;
+                }
+                // 5×5 median filter: cleans up integration noise in extreme regions,
+                // no-op in the smooth basin where neighbors agree
+                const logGrid = new Float64Array(rawLogGrid.length);
+                const _med = new Float64Array(25);
+                for (let j = 0; j < landCurRes; j++) {
+                    for (let i = 0; i < landCurRes; i++) {
+                        let n = 0;
+                        for (let dj = -2; dj <= 2; dj++)
+                            for (let di = -2; di <= 2; di++) {
+                                const jj = Math.max(0, Math.min(landCurRes - 1, j + dj));
+                                const ii = Math.max(0, Math.min(landCurRes - 1, i + di));
+                                _med[n++] = rawLogGrid[jj * landCurRes + ii];
+                            }
+                        _med.sort();
+                        logGrid[j * landCurRes + i] = _med[12];
+                    }
+                }
 
-                // Per-panel contour range (not shared landVmax — avoids reverse χ² crushing forward)
-                const sorted = Float64Array.from(logGrid).filter(v => v > landVmin).sort();
-                const panelVmax = sorted.length > 0 ? sorted[Math.floor(sorted.length * 0.88)] : landVmax;
+                // Per-panel contour range: dense in the basin, sparse in the cliff
+                const sorted = Float64Array.from(logGrid).filter(v => isFinite(v) && v > landVmin).sort();
+                const panelVknee = sorted.length > 0 ? sorted[Math.floor(sorted.length * 0.85)] : landVmax;
+                const panelVtop = sorted.length > 0 ? sorted[sorted.length - 1] : landVmax;
 
                 // Marching squares segment lookup (SW=bit0 SE=bit1 NE=bit2 NW=bit3)
                 // Edges: 0=south 1=east 2=west 3=north
@@ -1052,9 +1072,11 @@
                     [[0,3]],[[2,3]],[[3,2]],[[0,3]],[[0,1],[3,2]],
                     [[3,1]],[[2,1]],[[0,1]],[[0,2]],[]];
 
-                const nLevels = 25;
-                for (let li = 1; li < nLevels; li++) {
-                    const level = landVmin + (panelVmax - landVmin) * li / nLevels;
+                const nMain = 20, nTail = 5;
+                for (let li = 1; li <= nMain + nTail; li++) {
+                    const level = li <= nMain
+                        ? landVmin + (panelVknee - landVmin) * li / nMain
+                        : panelVknee + (panelVtop - panelVknee) * (li - nMain) / nTail;
                     ctx.beginPath();
                     ctx.strokeStyle = 'rgba(80,80,80,0.3)';
                     ctx.lineWidth = 1.0 * dpr;
