@@ -69,6 +69,8 @@
             margin-top: 0.8em;
             padding-bottom: 2px;
             border-bottom: 1px solid #eee;
+            white-space: nowrap;
+            overflow: hidden;
         }
 
         .grid-3x2 .panel {
@@ -79,6 +81,7 @@
             font-weight: 600;
             font-size: 0.95em;
             margin-bottom: 4px;
+            min-height: 1.4em;
             display: flex;
             justify-content: space-between;
             align-items: baseline;
@@ -104,45 +107,78 @@
             touch-action: none;
         }
 
-        .controls {
-            margin: 1em 0;
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
+        .control-box {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #fafafa;
+            padding: 8px 12px;
+            margin: 0.8em 0;
         }
 
-        .controls button {
-            padding: 6px 14px;
+        .control-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: nowrap;
+            overflow: hidden;
+            padding: 3px 0;
+            font-size: 0.85em;
+        }
+
+        .control-row + .control-row {
+            border-top: 1px solid #eee;
+            margin-top: 3px;
+            padding-top: 6px;
+        }
+
+        .control-row button {
+            padding: 4px 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
             background: #f8f8f8;
             cursor: pointer;
-            font-size: 0.9em;
+            font-size: 1em;
         }
 
-        .controls button:hover {
-            background: #eee;
-        }
+        .control-row button:hover { background: #eee; }
 
-        .controls button:disabled {
+        .control-row button:disabled {
             opacity: 0.35;
             cursor: default;
         }
 
-        .controls button:disabled:hover {
-            background: #f8f8f8;
+        .control-row button:disabled:hover { background: #f8f8f8; }
+
+        .control-row button .key {
+            color: #aaa;
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 0.95em;
         }
 
-        .controls button .key {
-            color: #aaa;
-            font-family: monospace;
-            font-size: 0.85em;
+        .toggle-group {
+            display: inline-flex;
+        }
+
+        .toggle-group .method-toggle {
+            border-radius: 0;
+        }
+
+        .toggle-group .method-toggle:first-child {
+            border-radius: 3px 0 0 3px;
+        }
+
+        .toggle-group .method-toggle:last-child {
+            border-radius: 0 3px 3px 0;
+        }
+
+        .toggle-group .method-toggle + .method-toggle {
+            border-left: none;
         }
 
         .method-toggle {
             padding: 2px 10px;
             font-size: 0.85em;
+            line-height: 1.4;
             border: 1px solid #aaa;
             border-radius: 3px;
             background: #f0f0f0;
@@ -150,39 +186,53 @@
         }
 
         .method-toggle.active {
-            background: #44c;
+            background: #333;
             color: #fff;
-            border-color: #44c;
+            border-color: #333;
         }
 
-        .method-toggle:hover:not(.active) {
-            background: #e0e0e0;
-        }
+        .method-toggle:hover:not(.active) { background: #e0e0e0; }
 
         body.mode-mc .det-only { display: none; }
         body.mode-det .mc-only { display: none; }
         body.div-kl .div-chisq-only { display: none; }
         body.div-chisq .div-kl-only { display: none; }
 
-        .controls button.active {
+        .control-row button.active {
             background: #333;
             color: #fff;
             border-color: #333;
         }
 
-        .controls label {
-            font-size: 0.85em;
+        .control-row label {
+            font-size: 1em;
             color: #555;
+            cursor: help;
         }
 
-        .controls input[type=range] {
+        .control-row input[type=range] {
             width: 80px;
             vertical-align: middle;
         }
 
-        .controls select {
+        .control-row select {
+            padding: 3px 6px;
+            font-size: 1em;
+        }
+
+        .land-tooltip {
+            position: fixed;
+            pointer-events: none;
+            background: rgba(30,30,30,0.88);
+            color: #eee;
+            font-family: monospace;
+            font-size: 0.75em;
+            line-height: 1.5;
             padding: 4px 8px;
-            font-size: 0.9em;
+            border-radius: 4px;
+            white-space: nowrap;
+            z-index: 100;
+            display: none;
         }
 
         .legend {
@@ -206,82 +256,78 @@
 </head>
 
 <body class="mode-mc div-kl">
+    <div class="land-tooltip" id="land-tooltip"></div>
 
-    <div style="display:flex; justify-content:space-between; align-items:baseline;">
     <h1>Interactive Divergence Fitting</h1>
-    <select id="select-divergence" style="display:none; font-size:0.85em; padding:3px 8px; border:1px solid #ccc; border-radius:4px; color:#555;">
-        <option value="kl">KL divergence</option>
-        <option value="chisq">χ² divergence</option>
-    </select>
-    </div>
     <p style="font-size:0.85em; color:#666; margin-bottom:0.3em;">This page built off of <a
             href="https://timvieira.github.io/blog/interactive-kl-divergence-fitting/" style="color:#44c;">Tim Vieira's
             interactive KL divergence fitting post</a></p>
     <p class="subtitle" id="subtitle">Monte Carlo gradient estimation — drag the target modes or the fitted distribution
     </p>
 
-    <div class="controls">
-        <button id="btn-deterministic" class="method-toggle"
-            title="Exact gradients via closed-form moments and numerical integration">deterministic</button>
-        <button id="btn-mc" class="method-toggle active" title="Stochastic gradient estimation from K samples">Monte
-            Carlo</button>
-        <span class="mc-only"><label title="Number of Monte Carlo particles per gradient step">$K$:
-                <button id="btn-K-minus" style="padding:0 5px;font-size:0.85em;border:1px solid #ccc;border-radius:3px;background:#f8f8f8;cursor:pointer;line-height:1.4;">&minus;</button>
-                <span id="val-K" style="display:inline-block;min-width:1.8em;text-align:center;">64</span>
-                <button id="btn-K-plus" style="padding:0 5px;font-size:0.85em;border:1px solid #ccc;border-radius:3px;background:#f8f8f8;cursor:pointer;line-height:1.4;">+</button>
-                <input type="range" id="slider-K" min="0" max="1000" value="667" step="1">
-                </label></span>
-    </div>
-    <div class="controls">
-        <label title="Adam base learning rate (decays as lr₀ / (1 + 0.001t))">LR: <input type="range" id="slider-lr" min="1" max="30" value="8">
-            <span id="val-lr">0.08</span></label>
-        <label title="Mixture weight: 0 = all left component, 1 = all right component">Mix weight: <input type="range"
-                id="slider-mix" min="0" max="100" value="50" step="1">
-            <span id="val-mix">0.50</span></label>
-    </div>
-    <div class="controls">
-        <button id="btn-playpause" title="Play/pause optimization (space)" class="active">▶ <span class="key">space</span></button>
-        <button id="btn-step" title="Advance one gradient step (>)">⏭ <span class="key">&gt;</span></button>
-        <label title="Optimization speed (gradient steps per second)">Speed: <input type="range" id="slider-speed"
-                min="0" max="1000" value="446" step="1" list="speed-ticks" style="width:120px;"></label>
-        <datalist id="speed-ticks"><option value="446" label="1/frame"></datalist>
-        <span class="fps-display" id="fps-display" style="font-size:0.8em; color:#aaa; font-family:monospace;">... steps/s</span>
-    </div>
-    <div class="controls" style="align-items:center;">
-        <button id="btn-reset" title="Randomize q starting position">↻ randomize $q$</button>
-        $\phi\!=$ <select id="select-parameterization" style="font-size:0.85em; padding:3px 8px; border:1px solid #ccc; border-radius:4px; color:#555;"></select>
-        <span id="q-formula" style="font-size:0.95em; cursor:help; border-bottom:1px dotted #aaa;" title=""></span>
-        <label id="label-natgrad" title="Premultiply gradient by F⁻¹ (Fisher information inverse). Makes the update parameterization-invariant: same step in KL-divergence space regardless of φ. Uses SGD with momentum (not Adam — Adam's per-parameter adaptivity interferes with F⁻¹ and breaks invariance)." style="font-size:0.85em; margin-left:8px; cursor:help;"><input type="checkbox" id="chk-natgrad" checked> natural gradient</label>
+    <div class="control-box">
+        <div class="control-row">
+            <span class="toggle-group"><button id="btn-deterministic" class="method-toggle"
+                title="Exact gradients via closed-form moments and numerical integration">Deterministic</button><button id="btn-mc" class="method-toggle active" title="Stochastic gradient estimation from K samples">Monte Carlo</button></span>
+            <span class="mc-only"><label title="Number of Monte Carlo particles per gradient step">$K$:
+                    <button id="btn-K-minus" style="padding:0 4px;border:1px solid #ccc;border-radius:3px;background:#f8f8f8;cursor:pointer;line-height:1.3;">&minus;</button>
+                    <span id="val-K" style="display:inline-block;min-width:1.6em;text-align:center;">64</span>
+                    <button id="btn-K-plus" style="padding:0 4px;border:1px solid #ccc;border-radius:3px;background:#f8f8f8;cursor:pointer;line-height:1.3;">+</button>
+                    <input type="range" id="slider-K" min="0" max="1000" value="667" step="1">
+                    </label></span>
+            <span style="flex:1;"></span>
+            <select id="select-divergence" style="padding:2px 6px; border:1px solid #ccc; border-radius:3px;">
+                <option value="kl">KL divergence</option>
+                <option value="chisq">χ² divergence</option>
+            </select>
+        </div>
+        <div class="control-row">
+            <button id="btn-playpause" title="Play/pause optimization (space)" class="active">▶ <span class="key">␣</span></button>
+            <button id="btn-step" title="Advance one gradient step (>)">⏭ <span class="key">&gt;</span></button>
+            <label title="Optimization speed (gradient steps per second)">Speed: <input type="range" id="slider-speed"
+                    min="0" max="1000" value="446" step="1" list="speed-ticks" style="width:100px;"></label>
+            <datalist id="speed-ticks"><option value="446" label="1/frame"></datalist>
+            <span class="fps-display" id="fps-display" style="color:#aaa; font-family:monospace;">... steps/s</span>
+            <label title="Learning rate (decays as lr₀ / (1 + 0.001t))">LR: <input type="range" id="slider-lr" min="1" max="30" value="8">
+                <span id="val-lr">0.08</span></label>
+            <label title="Mixture weight: 0 = all left, 1 = all right">$p$ mix: <input type="range"
+                    id="slider-mix" min="0" max="100" value="50" step="1">
+                <span id="val-mix">0.50</span></label>
+        </div>
+        <div class="control-row" style="flex-wrap:wrap;">
+            <span style="display:flex; gap:10px; align-items:center; flex-wrap:nowrap; overflow:hidden;">$\textcolor{#7B2D8E}{q_\phi}$:
+            <button id="btn-reset" title="Randomize q starting position">↻ randomize</button>
+            $\phi\!=$ <select id="select-parameterization"></select>
+            <span id="q-formula" style="cursor:help; border-bottom:1px dotted #aaa;" title=""></span></span>
+            <span style="display:flex; gap:10px; align-items:center;">
+            <label id="label-natgrad" title="Premultiply gradient by F⁻¹ (Fisher information inverse). Makes the update parameterization-invariant: same step in KL-divergence space regardless of φ. Uses SGD with momentum (not Adam — Adam's per-parameter adaptivity interferes with F⁻¹ and breaks invariance)."><input type="checkbox" id="chk-natgrad" checked> natural gradient</label>
+            <label class="div-chisq-only" title="Clip gradient norm to a maximum of 5 before the optimizer step. Mitigates a pathology of reverse χ²: the gradient ∂χ²(q‖p)/∂φ includes weights q/p that scale as ~1/σ, creating a positive feedback loop where small σ → large gradient → even smaller σ. Gradient clipping breaks this runaway."><input type="checkbox" id="chk-gradclip" checked> gradient clipping</label>
+            </span>
+        </div>
     </div>
 
     <div class="grid-3x2">
-        <div class="row-label" id="row-label-fwd"><span class="div-kl-only">Forward KL: $\mathrm{KL}(p \| \textcolor{#7B2D8E}{q_\phi})$</span><span class="div-chisq-only">Forward $\chi^2$: $\chi^2(p \| \textcolor{#7B2D8E}{q_\phi})$</span> — mean-seeking<span id="fwd-via"></span></div>
+        <div class="row-label" id="row-label-fwd">Minimize <span class="div-kl-only">$\mathrm{KL}(p \| \textcolor{#7B2D8E}{q_\phi})$</span><span class="div-chisq-only">$\chi^2(p \| \textcolor{#7B2D8E}{q_\phi})$</span> — mean-seeking<span id="fwd-via"></span></div>
         <div class="panel">
-            <div class="panel-label">Distributions</div>
+            <div class="panel-label"><span class="kl-val" id="kl-fwd"><span class="div-kl-only">$\mathrm{KL}(p \| \textcolor{#7B2D8E}{q_\phi})$</span><span class="div-chisq-only">$\chi^2(p \| \textcolor{#7B2D8E}{q_\phi})$</span> =
+                    <span class="kl-num">...</span></span></div>
             <canvas class="kl-canvas" id="canvas-fwd" height="220"></canvas>
         </div>
         <div class="panel">
-            <div class="panel-label"><span class="kl-val" id="kl-fwd"><span class="div-kl-only">$\mathrm{KL}(p \| \textcolor{#7B2D8E}{q_\phi})$</span><span class="div-chisq-only">$\chi^2(p \| \textcolor{#7B2D8E}{q_\phi})$</span> =
-                    <span class="kl-num">...</span></span> <span class="kl-hover-val" id="hover-fwd"
-                    style="font-size:0.8em; color:#999; font-family:monospace;"></span></div>
+            <div class="panel-label"><span id="q-params-fwd" style="font-weight:400; font-size:0.85em; font-family:monospace; color:#7B2D8E;"></span></div>
             <canvas class="kl-canvas" id="canvas-land-fwd" height="220"></canvas>
         </div>
 
-        <div class="row-label" id="row-label-rev"><span class="div-kl-only">Reverse KL: $\mathrm{KL}(\textcolor{#7B2D8E}{q_\phi} \| p)$</span><span class="div-chisq-only">Reverse $\chi^2$: $\chi^2(\textcolor{#7B2D8E}{q_\phi} \| p)$</span> — mode-seeking<span id="rev-via"></span>
-            <span id="rev-method-btns" class="mc-only div-kl-only">
-                <button id="btn-reinforce" class="method-toggle active"
-                    title="Score function estimator: weight each sample's score ∇log q by reward r = log p - log q">REINFORCE</button>
-                <button id="btn-reparam" class="method-toggle"
-                    title="Reparameterization trick: backprop through z = μ + σε. Lower variance, requires differentiable q.">reparameterization</button>
-            </span></div>
+        <div class="row-label" id="row-label-rev">Minimize <span class="div-kl-only">$\mathrm{KL}(\textcolor{#7B2D8E}{q_\phi} \| p)$</span><span class="div-chisq-only">$\chi^2(\textcolor{#7B2D8E}{q_\phi} \| p)$</span> — mode-seeking<span id="rev-via"></span><span id="rev-method-btns" class="mc-only div-kl-only toggle-group"><button id="btn-reinforce" class="method-toggle active"
+                    title="Score function estimator: weight each sample's score ∇log q by reward r = log p - log q">REINFORCE</button><button id="btn-reparam" class="method-toggle"
+                    title="Reparameterization trick: backprop through z = μ + σε. Lower variance, requires differentiable q.">reparameterization</button></span></div>
         <div class="panel">
-            <div class="panel-label">Distributions</div>
+            <div class="panel-label"><span class="kl-val" id="kl-rev"><span class="div-kl-only">$\mathrm{KL}(\textcolor{#7B2D8E}{q_\phi} \| p)$</span><span class="div-chisq-only">$\chi^2(\textcolor{#7B2D8E}{q_\phi} \| p)$</span> =
+                    <span class="kl-num">...</span></span></div>
             <canvas class="kl-canvas" id="canvas-rev" height="220"></canvas>
         </div>
         <div class="panel">
-            <div class="panel-label"><span class="kl-val" id="kl-rev"><span class="div-kl-only">$\mathrm{KL}(\textcolor{#7B2D8E}{q_\phi} \| p)$</span><span class="div-chisq-only">$\chi^2(\textcolor{#7B2D8E}{q_\phi} \| p)$</span> =
-                    <span class="kl-num">...</span></span> <span class="kl-hover-val" id="hover-rev"
-                    style="font-size:0.8em; color:#999; font-family:monospace;"></span></div>
+            <div class="panel-label"><span id="q-params-rev" style="font-weight:400; font-size:0.85em; font-family:monospace; color:#7B2D8E;"></span></div>
             <canvas class="kl-canvas" id="canvas-land-rev" height="220"></canvas>
         </div>
 
@@ -296,7 +342,7 @@
     </div>
     <div class="legend mc-only">
         <span><span class="swatch" style="border-top:2px dotted rgba(50,100,220,0.4)"></span> <span class="div-kl-only">$w = \tilde{p}/\textcolor{#7B2D8E}{q_\phi}$</span><span class="div-chisq-only">$w^2 = (\tilde{p}/\textcolor{#7B2D8E}{q_\phi})^2$</span> (fwd only)</span>
-        <span>rug: <span style="color:rgba(50,100,220,0.8)">blue</span> = positive $\alpha_i$ (pull); <span style="color:rgba(200,50,50,0.8)">red</span> = negative (push); opacity $\propto |\alpha_i|$</span>
+        <span>rug: <span style="color:rgba(50,100,220,0.8)">blue</span> = positive gradient contribution; <span style="color:rgba(200,50,50,0.8)">red</span> = negative</span>
     </div>
     <details style="font-size:0.85em; color:#555; margin-top:0.8em;">
         <summary style="cursor:pointer; color:#333; font-weight:600;">Reading the plots</summary>
@@ -310,9 +356,9 @@
                 = local minima. These recompute when you move the target modes.</li>
             <li class="mc-only"><strong>Rug plot</strong> (below x-axis) — the $K$ Monte Carlo particles sampled from
                 $q_\phi$ each gradient step. Each tick marks a sample location $z^{(i)}$.
-                <span style="color:rgba(50,100,220,0.8)">Blue</span> = positive $\alpha_i$ (pull toward high-$p$ regions);
-                <span style="color:rgba(200,50,50,0.8)">red</span> = negative $\alpha_i$ (push away from low-$p$ regions).
-                Opacity $\propto |\alpha_i|$. Forward ticks are always blue; reverse KL has both; reverse $\chi^2$ is always red.</li>
+                <span style="color:rgba(50,100,220,0.8)">Blue</span> = positive gradient contribution (pulls $q$ toward that region);
+                <span style="color:rgba(200,50,50,0.8)">red</span> = negative (pushes $q$ away).
+                Opacity $\propto$ contribution magnitude. Forward ticks are always blue; reverse KL has both; reverse $\chi^2$ is always red.</li>
             <li class="mc-only"><strong>Dotted purple curve</strong> (forward only) — the theoretical per-particle weight: $w(z) = p(z)/q_\phi(z)$ for KL, $w(z)^2$ for $\chi^2$.</li>
             <li><strong>Divergence value</strong> (top of each panel) — the current divergence (KL or $\chi^2$), computed by numerical integration. The underline color matches the loss landscape at $q_\phi$'s position.</li>
         </ul>
@@ -339,6 +385,9 @@
         </p>
         <p>
         <b>Reverse $\chi^2$</b>: $\nabla_\phi \chi^2(q_\phi \| p) = 2\,\mathbb{E}_{q_\phi}[(q_\phi/p)\,\nabla_\phi \log q_\phi(z)]$. Also computed by numerical integration. Like reverse KL, the landscape is nonconvex and mode-seeking, but the penalty for placing mass where $p \approx 0$ is quadratic rather than logarithmic.
+        </p>
+        <p>
+        <b>Convexity</b>: Like forward KL, forward $\chi^2(p \| q_\phi)$ is convex in the natural parameters &mdash; in fact <em>log</em>-convex, which is stronger. This is because $\chi^2 + 1 = \exp(A(\eta) + f(\eta))$ where both $A$ (log-partition) and $f(\eta) = \log \int p(x)^2 e^{-\eta \cdot T(x)} dx$ are convex. Reverse $\chi^2$ is nonconvex in all parameterizations.
         </p>
         </div>
 
@@ -416,6 +465,18 @@
                 return e;
             }
 
+            // ===== Formatting =====
+            function fmtNum(v) {
+                if (v === Infinity) return '∞';
+                if (v === -Infinity) return '−∞';
+                if (!isFinite(v)) return 'NaN';
+                const a = Math.abs(v);
+                if (a < 1e-3) return v.toExponential(2);
+                if (a < 100) return v.toFixed(4);
+                if (a < 1e6) return v.toFixed(1);
+                return v.toExponential(2);
+            }
+
             // ===== Config =====
             const X_MIN = -8, X_MAX = 8, N_GRID = 400;
 
@@ -435,6 +496,7 @@
             let divergenceType = 'kl';  // 'kl' or 'chisq'
             let landParam = 'mu-sigma';  // key into PARAMS registry
             let natGrad = true;  // apply Fisher inverse to gradients
+            let gradClip = true;  // clip gradient norm (mitigates reverse χ² blowup)
 
             // Optimal solutions (recomputed when p changes)
             let optFwd = null;   // { mu, sigma }
@@ -458,9 +520,13 @@
             // The dropdown is generated from this at runtime.
             const PARAMS = {
                 'natural': {
-                    label: 'η₁, η₂ (natural)',
+                    label: 'η₁, η₂',
                     formula: '\\textcolor{#7B2D8E}{q_\\phi}(x) \\propto \\exp(\\eta_1 x + \\eta_2 x^2)',
-                    tooltip: 'Natural (exponential family) parameters. Forward KL is convex in φ — the only parameterization here where gradient descent is guaranteed to find the global optimum.',
+                    tooltip() {
+                        return divergenceType === 'chisq'
+                            ? 'Natural (exponential family) parameters. Both forward KL and forward χ² are convex in φ (χ² is even log-convex). The only parameterization here where gradient descent is guaranteed to find the global optimum.'
+                            : 'Natural (exponential family) parameters. Forward KL is convex in φ — the only parameterization here where gradient descent is guaranteed to find the global optimum.';
+                    },
                     axes: ['η₁', 'η₂'],
                     fromQ(q) {
                         const s2 = q.sigma * q.sigma;
@@ -492,8 +558,8 @@
                         return [((4*mu*mu*s2 + 2*s4) * g1 - 2*mu*s2 * g2) / det,
                                 (-2*mu*s2 * g1 + s2 * g2) / det];
                     },
-                    hoverLabel(a1, a2) { return ' η₁=' + a1.toFixed(2) + ' η₂=' + a2.toFixed(3); },
-                    bounds(pComps, optFwd, optRev, qs) {
+                    hoverLabel(a1, a2) { return 'η₁ = ' + a1.toFixed(2) + '<br>η₂ = ' + a2.toFixed(3); },
+                    bounds(pComps, optFwd, optRev, qs, divType) {
                         const pts = [];
                         for (const c of pComps) {
                             const s2 = c.sigma * c.sigma;
@@ -516,15 +582,17 @@
                             a1Lo = Math.min(a1Lo, a1); a1Hi = Math.max(a1Hi, a1);
                             a2Lo = Math.min(a2Lo, a2); a2Hi = Math.max(a2Hi, a2);
                         }
-                        const a1Pad = Math.max(1, (a1Hi - a1Lo) * 0.3);
-                        const a2Pad = Math.max(0.1, (a2Hi - a2Lo) * 0.3);
-                        return [a1Lo - a1Pad, a1Hi + a1Pad, a2Lo - a2Pad, Math.min(-0.02, a2Hi + a2Pad)];
+                        const tight = divType === 'chisq' ? 0.15 : 0.3;
+                        const a1Pad = Math.max(1, (a1Hi - a1Lo) * tight);
+                        const a2Pad = Math.max(0.1, (a2Hi - a2Lo) * tight);
+                        const eta2Max = divType === 'chisq' ? -0.05 : -0.02;
+                        return [a1Lo - a1Pad, a1Hi + a1Pad, a2Lo - a2Pad, Math.min(eta2Max, a2Hi + a2Pad)];
                     },
                 },
                 'mu-sigma': {
                     label: 'μ, σ',
                     formula: '\\textcolor{#7B2D8E}{q_\\phi}(x) = \\mathcal{N}(x;\\, \\mu,\\, \\sigma^2)',
-                    tooltip: 'Direct parameterization. The optimum is moment matching: μ* = 𝔼ₚ[x], σ* = √Varₚ(x). Simple and interpretable, but requires σ > 0 and the landscape is not globally convex.',
+                    tooltip() { return 'Direct parameterization. The optimum is moment matching: μ* = 𝔼ₚ[x], σ* = √Varₚ(x). Simple and interpretable, but requires σ > 0 and the landscape is not globally convex.'; },
                     axes: ['μ', 'σ'],
                     fromQ(q) { return [q.mu, q.sigma]; },
                     toQ(a1, a2, q) {
@@ -538,21 +606,22 @@
                         const s2 = q.sigma * q.sigma;
                         return [s2 * g1, s2 / 2 * g2];
                     },
-                    hoverLabel(a1, a2) { return ' μ=' + a1.toFixed(2) + ' σ=' + a2.toFixed(2); },
-                    bounds(pComps, optFwd, optRev, qs) {
-                        let sLo = 0.3, sHi = 3;
+                    hoverLabel(a1, a2) { return 'μ = ' + a1.toFixed(2) + '<br>σ = ' + a2.toFixed(2); },
+                    bounds(pComps, optFwd, optRev, qs, divType) {
+                        const pad = divType === 'chisq' ? 1.15 : 1.5;
+                        let sLo = 0.3, sHi = divType === 'chisq' ? 2 : 3;
                         if (optFwd) {
                             sLo = Math.min(sLo, optFwd.sigma * 0.5);
-                            sHi = Math.max(sHi, optFwd.sigma * 1.5);
+                            sHi = Math.max(sHi, optFwd.sigma * pad);
                         }
                         for (const o of optRev) {
                             sLo = Math.min(sLo, o.sigma * 0.5);
-                            sHi = Math.max(sHi, o.sigma * 1.5);
+                            sHi = Math.max(sHi, o.sigma * pad);
                         }
-                        for (const c of pComps) sHi = Math.max(sHi, c.sigma * 1.5);
+                        for (const c of pComps) sHi = Math.max(sHi, c.sigma * pad);
                         for (const q of qs) {
                             sLo = Math.min(sLo, q.sigma * 0.8);
-                            sHi = Math.max(sHi, q.sigma * 1.3);
+                            sHi = Math.max(sHi, q.sigma * 1.2);
                         }
                         return [X_MIN, X_MAX, Math.max(0.1, sLo), sHi];
                     },
@@ -560,7 +629,7 @@
                 'mu-logsigma': {
                     label: 'μ, log σ',
                     formula: '\\textcolor{#7B2D8E}{q_\\phi}(x) = \\mathcal{N}(x;\\, \\mu,\\, e^{2\\log\\sigma})',
-                    tooltip: 'The standard ML parameterization (VAEs, normalizing flows). Unconstrained: φ ∈ ℝ², no positivity constraints needed. Still non-convex, but log σ compresses the large-σ region where non-convexity lives.',
+                    tooltip() { return 'The standard ML parameterization (VAEs, normalizing flows). Unconstrained: φ ∈ ℝ², no positivity constraints needed. Still non-convex, but log σ compresses the large-σ region where non-convexity lives.'; },
                     axes: ['μ', 'log σ'],
                     fromQ(q) { return [q.mu, q.logSigma]; },
                     toQ(a1, a2, q) { q.mu = a1; q.logSigma = a2; },
@@ -569,18 +638,19 @@
                     transformGrad(gMu, gLs, _q) { return [gMu, gLs]; },
                     // F^{-1} = diag(σ², 1/2)
                     fisherInv(g1, g2, q) { return [q.sigma * q.sigma * g1, g2 / 2]; },
-                    hoverLabel(a1, a2) { return ' μ=' + a1.toFixed(2) + ' logσ=' + a2.toFixed(2); },
-                    bounds(pComps, optFwd, optRev, qs) {
-                        let lsLo = -0.5, lsHi = 1.5;
+                    hoverLabel(a1, a2) { return 'μ = ' + a1.toFixed(2) + '<br>log σ = ' + a2.toFixed(2); },
+                    bounds(pComps, optFwd, optRev, qs, divType) {
+                        const pad = divType === 'chisq' ? 0.3 : 0.5;
+                        let lsLo = -0.5, lsHi = divType === 'chisq' ? 0.8 : 1.5;
                         if (optFwd) {
-                            lsLo = Math.min(lsLo, Math.log(optFwd.sigma) - 0.5);
-                            lsHi = Math.max(lsHi, Math.log(optFwd.sigma) + 0.5);
+                            lsLo = Math.min(lsLo, Math.log(optFwd.sigma) - pad);
+                            lsHi = Math.max(lsHi, Math.log(optFwd.sigma) + pad);
                         }
                         for (const o of optRev) {
-                            lsLo = Math.min(lsLo, Math.log(o.sigma) - 0.5);
-                            lsHi = Math.max(lsHi, Math.log(o.sigma) + 0.5);
+                            lsLo = Math.min(lsLo, Math.log(o.sigma) - pad);
+                            lsHi = Math.max(lsHi, Math.log(o.sigma) + pad);
                         }
-                        for (const c of pComps) lsHi = Math.max(lsHi, Math.log(c.sigma) + 0.5);
+                        for (const c of pComps) lsHi = Math.max(lsHi, Math.log(c.sigma) + pad);
                         for (const q of qs) {
                             lsLo = Math.min(lsLo, q.logSigma - 0.3);
                             lsHi = Math.max(lsHi, q.logSigma + 0.3);
@@ -589,9 +659,9 @@
                     },
                 },
                 'mu-tau': {
-                    label: 'μ, τ (precision)',
+                    label: 'μ, τ',
                     formula: '\\textcolor{#7B2D8E}{q_\\phi}(x) \\propto \\sqrt{\\tau}\\,\\exp\\!\\bigl({-}\\tfrac{\\tau}{2}(x{-}\\mu)^2\\bigr)',
-                    tooltip: 'Precision parameterization: τ = 1/σ². Since η₂ = −τ/2, τ is linear in one natural parameter. But η₁ = μτ is bilinear in (μ,τ), so the joint map is nonlinear — partial linearity is not enough for convexity.',
+                    tooltip() { return 'Precision parameterization: τ = 1/σ². Since η₂ = −τ/2, τ is linear in one natural parameter. But η₁ = μτ is bilinear in (μ,τ), so the joint map is nonlinear — partial linearity is not enough for convexity.'; },
                     axes: ['μ', 'τ'],
                     fromQ(q) { return [q.mu, 1 / (q.sigma * q.sigma)]; },
                     toQ(a1, a2, q) {
@@ -609,26 +679,28 @@
                         const s2 = q.sigma * q.sigma;
                         return [s2 * g1, 2 * g2 / (s2 * s2)];
                     },
-                    hoverLabel(a1, a2) { return ' μ=' + a1.toFixed(2) + ' τ=' + a2.toFixed(2); },
-                    bounds(pComps, optFwd, optRev, qs) {
+                    hoverLabel(a1, a2) { return 'μ = ' + a1.toFixed(2) + '<br>τ = ' + a2.toFixed(2); },
+                    bounds(pComps, optFwd, optRev, qs, divType) {
+                        const pad = divType === 'chisq' ? 1.15 : 1.5;
                         let tLo = 0.2, tHi = 3;
                         if (optFwd) {
                             const t = 1 / (optFwd.sigma * optFwd.sigma);
-                            tLo = Math.min(tLo, t * 0.5); tHi = Math.max(tHi, t * 1.5);
+                            tLo = Math.min(tLo, t * 0.5); tHi = Math.max(tHi, t * pad);
                         }
                         for (const o of optRev) {
                             const t = 1 / (o.sigma * o.sigma);
-                            tLo = Math.min(tLo, t * 0.5); tHi = Math.max(tHi, t * 1.5);
+                            tLo = Math.min(tLo, t * 0.5); tHi = Math.max(tHi, t * pad);
                         }
                         for (const c of pComps) {
                             const t = 1 / (c.sigma * c.sigma);
-                            tLo = Math.min(tLo, t * 0.5); tHi = Math.max(tHi, t * 1.5);
+                            tLo = Math.min(tLo, t * 0.5); tHi = Math.max(tHi, t * pad);
                         }
                         for (const q of qs) {
                             const t = 1 / (q.sigma * q.sigma);
                             tLo = Math.min(tLo, t * 0.7); tHi = Math.max(tHi, t * 1.3);
                         }
-                        return [X_MIN, X_MAX, Math.max(0.04, tLo), tHi];
+                        const tLoFloor = divType === 'chisq' ? 0.1 : 0.04;
+                        return [X_MIN, X_MAX, Math.max(tLoFloor, tLo), tHi];
                     },
                 },
             };
@@ -689,12 +761,12 @@
             let landVmin = 0, landVmax = 1;
 
             function computeLandBounds() {
-                const [a1Lo, a1Hi, a2Lo, a2Hi] = curP().bounds(pComps, optFwd, optRev, [qFwd, qRev]);
+                const [a1Lo, a1Hi, a2Lo, a2Hi] = curP().bounds(pComps, optFwd, optRev, [qFwd, qRev], divergenceType);
                 landMuMin = a1Lo; landMuMax = a1Hi;
                 landLsMin = a2Lo; landLsMax = a2Hi;
             }
 
-            function computeLandscapes(res) {
+            function computeLandscapes(res, _retry) {
                 res = res || LAND_RES;
                 computeLandBounds();
                 const mus = new Float64Array(res);
@@ -750,19 +822,22 @@
                                 return qx * (gaussLogPdf(x, mu, sigma) - mixtureLogPdf(x, pComps));
                             }, lo, hi, nInt);
                         }
+                        // Negative divergence = numerical failure (no overlap); true value is +∞
+                        if (landFwdGrid[idx] < 0) landFwdGrid[idx] = Infinity;
+                        if (landRevGrid[idx] < 0) landRevGrid[idx] = Infinity;
                     }
                 }
 
-                // Color range: absolute bottom at KL=0 (log10 not defined, use a small floor),
-                // top capped at the 90th percentile so basins aren't washed out
+                // Color range: absolute bottom at div≈0 (log10 floor),
+                // top capped at the 85th percentile so basins aren't washed out
                 const allVals = [];
                 for (let i = 0; i < landFwdGrid.length; i++) {
                     allVals.push(Math.max(landFwdGrid[i], 1e-3));
                     allVals.push(Math.max(landRevGrid[i], 1e-3));
                 }
                 allVals.sort((a, b) => a - b);
-                landVmin = Math.log10(1e-3);  // absolute: KL ≈ 0 maps to black
-                landVmax = Math.log10(allVals[Math.floor(allVals.length * 0.90)]);
+                landVmin = Math.log10(1e-3);
+                landVmax = Math.log10(allVals[Math.floor(allVals.length * 0.85)]);
 
                 // ===== χ² gradient functions for multi-start optimization =====
                 function chisqFwdEval(mu, sigma) {
@@ -883,6 +958,17 @@
                 } else {
                     optRev = multiStartOptimize(klRevEval, gradRevRefine);
                 }
+
+                // Check if any optimum is outside the grid (can happen for χ² where
+                // optima are found after bounds are computed). If so, recompute.
+                function optimumInBounds(o) {
+                    const [a1, a2] = muSigmaToLand(o.mu, o.sigma);
+                    return a1 >= landMuMin && a1 <= landMuMax && a2 >= landLsMin && a2 <= landLsMax;
+                }
+                let needRecompute = false;
+                if (optFwd && !optimumInBounds(optFwd)) needRecompute = true;
+                for (const o of optRev) if (!optimumInBounds(o)) needRecompute = true;
+                if (needRecompute && !_retry) return computeLandscapes(res, true);
             }
             computeLandscapes();
 
@@ -952,18 +1038,22 @@
                 for (let k = 0; k < logGrid.length; k++)
                     logGrid[k] = Math.log10(Math.max(grid[k], 1e-3));
 
+                // Per-panel contour range (not shared landVmax — avoids reverse χ² crushing forward)
+                const sorted = Float64Array.from(logGrid).filter(v => v > landVmin).sort();
+                const panelVmax = sorted.length > 0 ? sorted[Math.floor(sorted.length * 0.88)] : landVmax;
+
                 // Marching squares segment lookup (SW=bit0 SE=bit1 NE=bit2 NW=bit3)
                 // Edges: 0=south 1=east 2=west 3=north
                 const CS = [[],[[0,2]],[[0,1]],[[2,1]],[[3,1]],[[0,2],[3,1]],
                     [[0,3]],[[2,3]],[[3,2]],[[0,3]],[[0,1],[3,2]],
                     [[3,1]],[[2,1]],[[0,1]],[[0,2]],[]];
 
-                const nLevels = 30;
+                const nLevels = 25;
                 for (let li = 1; li < nLevels; li++) {
-                    const level = landVmin + (landVmax - landVmin) * li / nLevels;
+                    const level = landVmin + (panelVmax - landVmin) * li / nLevels;
                     ctx.beginPath();
                     ctx.strokeStyle = 'rgba(80,80,80,0.3)';
-                    ctx.lineWidth = 0.8 * dpr;
+                    ctx.lineWidth = 1.0 * dpr;
 
                     for (let j = 0; j < landCurRes - 1; j++) {
                         for (let i = 0; i < landCurRes - 1; i++) {
@@ -1069,6 +1159,10 @@
             function adamUpdate(q, gradMu, gradLogSigma, state) {
                 let [g1, g2] = transformGrad(gradMu, gradLogSigma, q);
                 if (natGrad) [g1, g2] = curP().fisherInv(g1, g2, q);
+                if (gradClip) {
+                    const gNorm = Math.sqrt(g1 * g1 + g2 * g2);
+                    if (gNorm > 5) { const s = 5 / gNorm; g1 *= s; g2 *= s; }
+                }
                 const [p1, p2] = qToLand(q);
 
                 state.t++;
@@ -1648,15 +1742,30 @@
             setupCanvas(canvasRev, qRev, () => optRev);
 
             // Landscape canvases: drag the purple circle to move q in (mu, logSigma) space
-            function setupLandscape(canvas, q, getGrid, hoverId) {
+            let landDragActive = false;
+            const landTip = document.getElementById('land-tooltip');
+            function showTip(html, clientX, clientY) {
+                landTip.innerHTML = html;
+                landTip.style.display = 'block';
+                // Position near cursor, then clamp to viewport
+                let x = clientX + 14, y = clientY - 60;
+                const w = landTip.offsetWidth, h = landTip.offsetHeight;
+                const vw = window.innerWidth, vh = window.innerHeight;
+                if (x + w > vw - 4) x = clientX - w - 10;
+                if (y < 4) y = 4;
+                if (y + h > vh - 4) y = vh - h - 4;
+                landTip.style.left = x + 'px';
+                landTip.style.top = y + 'px';
+            }
+            function hideTip() { landTip.style.display = 'none'; }
+            function setupLandscape(canvas, q, getGrid) {
                 let landDrag = null;
-                const hoverEl = document.getElementById(hoverId);
                 function getLandPos(e) {
                     const rect = canvas.getBoundingClientRect();
                     const dpr = window.devicePixelRatio || 1;
                     const cx = e.touches ? e.touches[0].clientX : e.clientX;
                     const cy = e.touches ? e.touches[0].clientY : e.clientY;
-                    return { x: (cx - rect.left) * dpr, y: (cy - rect.top) * dpr };
+                    return { x: (cx - rect.left) * dpr, y: (cy - rect.top) * dpr, cx, cy };
                 }
                 function posToParams(pos) {
                     const dpr = window.devicePixelRatio || 1;
@@ -1682,6 +1791,7 @@
                     if (isNearQ(pos)) {
                         e.preventDefault();
                         landDrag = true;
+                        landDragActive = true;
                         canvas.style.cursor = 'grabbing';
                     }
                 }
@@ -1696,7 +1806,10 @@
                     } else {
                         canvas.style.cursor = isNearQ(pos) ? 'grab' : 'crosshair';
                     }
-                    // Show KL value at mouse position
+                }
+                // Tooltip on canvas hover (separate from window-level drag handler)
+                function onHover(e) {
+                    const pos = getLandPos(e);
                     const p = posToParams(pos);
                     if (p.a1 >= landMuMin && p.a1 <= landMuMax && p.a2 >= landLsMin && p.a2 <= landLsMax) {
                         const grid = getGrid();
@@ -1707,36 +1820,39 @@
                         const kl = grid[j * landCurRes + i];
                         const divLabel = divergenceType === 'chisq' ? 'χ²' : 'KL';
                         const paramLabel = curP().hoverLabel(p.a1, p.a2);
-                        hoverEl.textContent = isFinite(kl) ? divLabel + '=' + kl.toFixed(3) + paramLabel : '';
-                    } else {
-                        hoverEl.textContent = '';
+                        showTip(divLabel + ' = ' + fmtNum(kl) + '<br>' + paramLabel, pos.cx, pos.cy);
                     }
                 }
-                canvas.addEventListener('mouseleave', function () { hoverEl.textContent = ''; });
+                canvas.addEventListener('mousemove', onHover);
+                canvas.addEventListener('mouseleave', hideTip);
                 function onUp() {
                     if (landDrag) {
                         landDrag = false;
+                        landDragActive = false;
                         canvas.style.cursor = 'default';
                         resetAdam();
                         lastFwd = null; lastRev = null;
                     }
                 }
                 canvas.addEventListener('mousedown', onDown);
-                canvas.addEventListener('touchstart', onDown, { passive: false });
+                canvas.addEventListener('touchstart', function(e) {
+                    onDown(e);
+                    if (!landDrag) onMove(e);  // show tooltip on tap
+                }, { passive: false });
                 window.addEventListener('mousemove', onMove);
                 window.addEventListener('touchmove', onMove, { passive: false });
                 window.addEventListener('mouseup', onUp);
-                window.addEventListener('touchend', onUp);
+                window.addEventListener('touchend', function() { onUp(); hideTip(); });
             }
-            setupLandscape(canvasLandFwd, qFwd, () => landFwdGrid, 'hover-fwd');
-            setupLandscape(canvasLandRev, qRev, () => landRevGrid, 'hover-rev');
+            setupLandscape(canvasLandFwd, qFwd, () => landFwdGrid);
+            setupLandscape(canvasLandRev, qRev, () => landRevGrid);
 
             // ===== Controls =====
             const btnPlayPause = document.getElementById('btn-playpause');
             const btnStep = document.getElementById('btn-step');
 
             function updatePlayState() {
-                btnPlayPause.innerHTML = running ? '⏸ <span class="key">space</span>' : '▶ <span class="key">space</span>';
+                btnPlayPause.innerHTML = running ? '⏸ <span class="key">␣</span>' : '▶ <span class="key">␣</span>';
                 btnPlayPause.classList.toggle('active', !running);  // dark when paused
                 btnStep.disabled = running;
             }
@@ -1803,17 +1919,20 @@
 
             // Divergence type selector
             const selectDiv = document.getElementById('select-divergence');
+            const divOptsFull = ['KL divergence', 'χ² divergence'];
+            const divOptsShort = ['KL', 'χ²'];
 
             function updateViaLabels() {
                 const fwdVia = document.getElementById('fwd-via');
                 const revVia = document.getElementById('rev-via');
                 if (divergenceType === 'kl') {
-                    fwdVia.textContent = gradientMode === 'mc' ? ', via importance sampling' : ', via closed-form moments';
-                    revVia.textContent = gradientMode === 'mc' ? '' : ', via numerical integration';
+                    fwdVia.textContent = gradientMode === 'mc' ? ', via importance sampling' : ', via closed-form moments of p';
+                    revVia.textContent = gradientMode === 'mc' ? ', via ' : ', via numerical integration';
                 } else {
                     fwdVia.textContent = gradientMode === 'mc' ? ', via IS (w\u00B2 weights)' : ', via numerical integration';
-                    revVia.textContent = gradientMode === 'mc' ? ', via pathwise gradient' : ', via numerical integration';
+                    revVia.textContent = gradientMode === 'mc' ? ', via pathwise estimator' : ', via numerical integration';
                 }
+                if (typeof fitRowLabels === 'function') fitRowLabels();
             }
 
             function setDivergence(type) {
@@ -1822,6 +1941,8 @@
                 document.body.classList.toggle('div-kl', type === 'kl');
                 document.body.classList.toggle('div-chisq', type === 'chisq');
                 updateViaLabels();
+                renderQFormula();  // tooltip is divergence-aware
+                updateOptimizerNote();
                 computeOptimal();
                 computeLandscapes();
                 resetAdam();
@@ -1843,7 +1964,7 @@
             window.renderQFormula = function() {
                 if (typeof katex !== 'undefined' && qFormulaEl) {
                     katex.render(curP().formula, qFormulaEl, { throwOnError: false });
-                    qFormulaEl.title = curP().tooltip || '';
+                    qFormulaEl.title = curP().tooltip() || '';
                 }
             };
             renderQFormula();
@@ -1858,17 +1979,20 @@
             // Natural gradient toggle
             function updateOptimizerNote() {
                 const el = document.getElementById('optimizer-note');
-                if (natGrad) {
-                    el.innerHTML = '<b>Optimizer</b>: Gradients are premultiplied by <b>F⁻¹</b> (Fisher information inverse of <i>q<sub>φ</sub></i>), then fed to <b>SGD with momentum</b> (β = 0.9). Adam is not used — its per-parameter adaptive scaling interferes with F⁻¹ and breaks parameterization invariance. Learning rate decays as lr<sub>t</sub> = lr₀ / (1 + 0.001t). Optimization is over the selected φ.';
-                } else {
-                    el.innerHTML = '<b>Optimizer</b>: All gradients are fed to <b>Adam</b> (β₁ = 0.9, β₂ = 0.999, ε = 10⁻⁸) with a decaying learning rate lr<sub>t</sub> = lr₀ / (1 + 0.001t), where lr₀ is set by the LR slider. Optimization is over the selected φ.';
+                let s = '<b>Optimizer</b>: With <b>natural gradient</b> on (default), gradients are premultiplied by <b>F⁻¹</b> (Fisher information inverse of <i>q<sub>φ</sub></i>) and fed to <b>SGD with momentum</b> (β = 0.9) — this makes the update parameterization-invariant. With natural gradient off, <b>Adam</b> is used instead (β₁ = 0.9, β₂ = 0.999, ε = 10⁻⁸). Learning rate decays as lr<sub>t</sub> = lr₀ / (1 + 0.001t). Optimization is over the selected φ.';
+                if (divergenceType === 'chisq') {
+                    s += ' Note: F⁻¹ is the Fisher of <i>q</i>, not the Hessian of χ², so natural gradient is not Newton\'s method here (unlike forward KL in natural parameters). The forward χ² landscape is still convex in natural parameters (in fact log-convex), so convergence is guaranteed.';
                 }
+                el.innerHTML = s;
             }
             updateOptimizerNote();
             document.getElementById('chk-natgrad').addEventListener('change', function () {
                 natGrad = this.checked;
                 resetAdam();
-                updateOptimizerNote();
+            });
+
+            document.getElementById('chk-gradclip').addEventListener('change', function () {
+                gradClip = this.checked;
             });
 
             // Gradient mode toggle
@@ -1986,7 +2110,7 @@
                 // Accumulator-based stepping: accurate steps/sec regardless of frame rate
                 const dt = lastFrameTime ? (now - lastFrameTime) : 0;
                 lastFrameTime = now;
-                if (!dragState) {
+                if (!dragState && !landDragActive) {
                     if (running) {
                         stepsAccum += stepsPerSec * dt / 1000;
                         const n = Math.min(Math.floor(stepsAccum), 256);  // cap to avoid death spiral
@@ -2010,17 +2134,47 @@
                 function updateKLDisplay(id, klVal) {
                     const el = document.getElementById(id);
                     const numEl = el.querySelector('.kl-num');
-                    numEl.textContent = klVal.toFixed(4);
+                    numEl.textContent = fmtNum(klVal);
                     const t = (Math.log10(Math.max(klVal, 1e-3)) - landVmin) / (landVmax - landVmin);
                     numEl.style.borderBottomColor = heatmap(t);
                 }
+                function updateQParams(id, q) {
+                    const [a1, a2] = qToLand(q);
+                    const [n1, n2] = curP().axes;
+                    document.getElementById(id).textContent = n1 + '=' + fmtNum(a1) + '  ' + n2 + '=' + fmtNum(a2);
+                }
                 updateKLDisplay('kl-fwd', divForward());
                 updateKLDisplay('kl-rev', divReverse());
+                updateQParams('q-params-fwd', qFwd);
+                updateQParams('q-params-rev', qRev);
 
                 requestAnimationFrame(frame);
             }
             requestAnimationFrame(frame);
             updateViaLabels();
+
+            // Auto-shrink row labels and control rows to fit without wrapping
+            function fitRowLabels() {
+                // Reset divergence select to full labels
+                selectDiv.options[0].textContent = divOptsFull[0];
+                selectDiv.options[1].textContent = divOptsFull[1];
+                for (const el of document.querySelectorAll('.row-label, .control-row:not([style*="flex-wrap:wrap"])')) {
+                    el.style.fontSize = '';
+                    let size = parseFloat(getComputedStyle(el).fontSize);
+                    while (el.scrollWidth > el.clientWidth && size > 6) {
+                        size -= 0.5;
+                        el.style.fontSize = size + 'px';
+                    }
+                }
+                // If the top control row is still too tight, collapse divergence labels
+                const topRow = document.querySelector('.control-row');
+                if (topRow && topRow.scrollWidth > topRow.clientWidth) {
+                    selectDiv.options[0].textContent = divOptsShort[0];
+                    selectDiv.options[1].textContent = divOptsShort[1];
+                }
+            }
+            fitRowLabels();
+            window.addEventListener('resize', fitRowLabels);
 
         })();
     </script>
