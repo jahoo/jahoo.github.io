@@ -277,22 +277,26 @@
                     </label></span>
             <span style="flex:1;"></span>
             <select id="select-divergence" style="padding:2px 6px; border:1px solid #ccc; border-radius:3px;">
-                <option value="kl">KL divergence</option>
-                <option value="chisq">χ² divergence</option>
+                <option value="kl">KL</option>
+                <option value="chisq">χ²</option>
             </select>
         </div>
-        <div class="control-row">
-            <button id="btn-playpause" title="Play/pause optimization (space)" class="active">▶ <span class="key">␣</span></button>
-            <button id="btn-step" title="Advance one gradient step (>)">⏭ <span class="key">&gt;</span></button>
+        <div class="control-row" style="flex-wrap:wrap;">
+            <span style="display:flex; gap:10px; align-items:center; flex-wrap:nowrap;">
+            <button id="btn-playpause" title="Play/pause optimization (space)">⏸ <span class="key">␣</span></button>
+            <button id="btn-step" title="Advance one gradient step (>)" disabled>⏭ <span class="key">&gt;</span></button>
             <label title="Optimization speed (gradient steps per second)">Speed: <input type="range" id="slider-speed"
                     min="0" max="1000" value="446" step="1" list="speed-ticks" style="width:100px;"></label>
             <datalist id="speed-ticks"><option value="446" label="1/frame"></datalist>
             <span class="fps-display" id="fps-display" style="color:#aaa; font-family:monospace;">... steps/s</span>
+            </span>
+            <span style="display:flex; gap:10px; align-items:center;">
             <label title="Learning rate (decays as lr₀ / (1 + 0.001t))">LR: <input type="range" id="slider-lr" min="1" max="30" value="8">
                 <span id="val-lr">0.08</span></label>
             <label title="Mixture weight: 0 = all left, 1 = all right">$p$ mix: <input type="range"
                     id="slider-mix" min="0" max="100" value="50" step="1">
                 <span id="val-mix">0.50</span></label>
+            </span>
         </div>
         <div class="control-row" style="flex-wrap:wrap;">
             <span style="display:flex; gap:10px; align-items:center; flex-wrap:nowrap; overflow:hidden;">$\textcolor{#7B2D8E}{q_\phi}$:
@@ -502,7 +506,7 @@
             let optFwd = null;   // { mu, sigma }
             let optRev = [];     // [{ mu, sigma, kl }, ...]
 
-            let running = false;
+            let running = true;
             let K = 64;
             let baseLR = 0.08;
 
@@ -1919,8 +1923,6 @@
 
             // Divergence type selector
             const selectDiv = document.getElementById('select-divergence');
-            const divOptsFull = ['KL divergence', 'χ² divergence'];
-            const divOptsShort = ['KL', 'χ²'];
 
             function updateViaLabels() {
                 const fwdVia = document.getElementById('fwd-via');
@@ -2155,9 +2157,6 @@
 
             // Auto-shrink row labels and control rows to fit without wrapping
             function fitRowLabels() {
-                // Reset divergence select to full labels
-                selectDiv.options[0].textContent = divOptsFull[0];
-                selectDiv.options[1].textContent = divOptsFull[1];
                 for (const el of document.querySelectorAll('.row-label, .control-row:not([style*="flex-wrap:wrap"])')) {
                     el.style.fontSize = '';
                     let size = parseFloat(getComputedStyle(el).fontSize);
@@ -2165,12 +2164,6 @@
                         size -= 0.5;
                         el.style.fontSize = size + 'px';
                     }
-                }
-                // If the top control row is still too tight, collapse divergence labels
-                const topRow = document.querySelector('.control-row');
-                if (topRow && topRow.scrollWidth > topRow.clientWidth) {
-                    selectDiv.options[0].textContent = divOptsShort[0];
-                    selectDiv.options[1].textContent = divOptsShort[1];
                 }
             }
             fitRowLabels();
