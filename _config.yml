@@ -14,6 +14,11 @@ baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://jahoo.github.io" # the base hostname & protocol for your site
 google_scholar_id: koLi2TwAAAAJ
 
+collections:
+  explorations:
+    output: true
+    permalink: /explorations/:name:output_ext
+
 # Build settings
 markdown: kramdown
 highlighter: rouge

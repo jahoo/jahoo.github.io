@@ -1,36 +1,63 @@
 ---
 layout: page
-title: posts
+title: blog
 ---
 
 <div class="home">
-  <!-- <h2 class="post-list-heading">notes</h2> -->
 
-  <ul class="post-list">
-    {% for post in site.posts %}
-    <li>
-      <h3 id="no-pad">
-        <a
-          {% if post.tags contains "paper" or post.tags contains "dissertation" %}
-          class="post-link-highlighted"
-          {% else %}
-          class="post-link"
-          {% endif %}
-          href="{{ post.url | prepend: site.baseurl }}"
-        >
-          {{ post.title }}
-        </a>
-      </h3>
-      <span class="post-meta">
-        {{ post.date | date: "%-d %b %Y" }}
-      </span>
-      <span class="post-tags">
-        {% for tag in post.tags %}
-        - {{ tag }}
+  <details open>
+    <summary><h2 class="post-list-heading">posts</h2></summary>
+    <div class="content">
+      <ul class="post-list">
+        {% for post in site.posts %}
+        <li>
+          <h3 id="no-pad">
+            <a
+              {% if post.tags contains "paper" or post.tags contains "dissertation" %}
+              class="post-link-highlighted"
+              {% else %}
+              class="post-link"
+              {% endif %}
+              href="{{ post.url | prepend: site.baseurl }}"
+            >
+              {{ post.title }}
+            </a>
+          </h3>
+          <span class="post-meta">
+            {{ post.date | date: "%-d %b %Y" }}
+          </span>
+          <span class="post-tags">
+            {% for tag in post.tags %}
+            - {{ tag }}
+            {% endfor %}
+          </span>
+        </li>
         {% endfor %}
-      </span>
-    </li>
-    {% endfor %}
-  </ul>
+      </ul>
+    </div>
+  </details>
+
+  {% if site.explorations.size > 0 %}
+  <details open>
+    <summary><h2 class="post-list-heading">explorations</h2></summary>
+    <div class="content">
+      <ul class="post-list">
+        {% assign sorted_explorations = site.explorations | sort: "date" | reverse %}
+        {% for exploration in sorted_explorations %}
+        <li>
+          <h3 id="no-pad">
+            <a class="post-link" href="{{ exploration.url | prepend: site.baseurl }}">
+              {{ exploration.title }}
+            </a>
+          </h3>
+          <span class="post-meta">
+            {{ exploration.date | date: "%-d %b %Y" }}
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </details>
+  {% endif %}
 
 </div>

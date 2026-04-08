@@ -212,6 +212,27 @@
   font-family: $header-font-family;
   color: $grey-color;
   font-style: italic;
+  display: inline;
+}
+
+.home > details > summary {
+  cursor: pointer;
+  list-style: none;
+  margin-bottom: calc($spacing-unit / 2);
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &::before {
+    content: "▸ ";
+    font-style: normal;
+    color: $grey-color;
+  }
+}
+
+.home > details[open] > summary::before {
+  content: "▾ ";
 }
 
 .post-meta {
