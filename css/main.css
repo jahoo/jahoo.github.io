@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /*Local webfonts*/
 @import "/assets/fonts/FiraCode/fira_code.css";
 @import "/assets/fonts/LinLibertine/style.css";
@@ -393,6 +394,25 @@ kbd {
   font-family: "Linux Libertine", "Computer Modern Concrete", Times, serif;
   color: #828282;
   font-style: italic;
+  display: inline;
+}
+
+.home > details > summary {
+  cursor: pointer;
+  list-style: none;
+  margin-bottom: 15px;
+}
+.home > details > summary::-webkit-details-marker {
+  display: none;
+}
+.home > details > summary::before {
+  content: "▸ ";
+  font-style: normal;
+  color: #828282;
+}
+
+.home > details[open] > summary::before {
+  content: "▾ ";
 }
 
 .post-meta {
