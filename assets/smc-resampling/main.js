@@ -33,6 +33,9 @@
     // Section 6 residual
     S.sec6 = { detCounts: null, stoCounts: null, totalCounts: null, residualProbes: [], hist: null, mode: 'none' };
 
+    // Branch-kill
+    S.secBK = { detCounts: null, bonusProbes: null, totalCounts: null, hist: null, mode: 'none' };
+
     // Section 7 comparison
     S.compData = null;
 
@@ -45,6 +48,7 @@
     var cvSec4 = document.getElementById('cv-sec4');
     var cvSec5 = document.getElementById('cv-sec5');
     var cvSec6 = document.getElementById('cv-sec6');
+    var cvBK   = document.getElementById('cv-bk');
 
     // ================================================================
     //  SECTION 2 — DRAWING
@@ -284,6 +288,8 @@
         S.drawCounterexample();
         // Section 6
         S.drawResidualSection();
+        // Branch-kill
+        S.drawBranchKillSection();
         // Section 7
         S.drawComparisonPanel();
         // Estimator distributions for sections 3-6
@@ -291,6 +297,7 @@
         S.drawEstDist('cv-est-strat', S.sec4, S.METHOD_COLORS.stratified, 'Stratified');
         S.drawEstDist('cv-est-sys',   S.sec5, S.METHOD_COLORS.systematic, 'Systematic');
         S.drawEstDist('cv-est-resid', S.sec6, S.METHOD_COLORS.residual,   'Residual');
+        S.drawEstDist('cv-est-bk',   S.secBK, S.METHOD_COLORS.branchkill, 'Branch-kill');
         // Section 7 overlaid distributions
         S.drawCompEstDist();
     }
@@ -302,7 +309,7 @@
     initSec2Events(cvSec2);
 
     // Attach weight drag to ALL panel canvases
-    [cvSec2, cvSec3, cvSec4, cvSec5, cvSec6].forEach(function (c) { if (c) initWeightDrag(c); });
+    [cvSec2, cvSec3, cvSec4, cvSec5, cvSec6, cvBK].forEach(function (c) { if (c) initWeightDrag(c); });
 
     // ---- Section 5 comb drag ----
     (function () {
@@ -363,6 +370,8 @@
         document.getElementById('btn-clear-' + prefix).addEventListener('click', function () {
             sec.probes = []; sec.counts = null; sec.hist = null; sec.mode = 'none';
             document.getElementById('var-' + prefix).textContent = '';
+            var estEl = document.getElementById('est-' + prefix);
+            if (estEl) estEl.classList.remove('visible');
             redrawAll();
         });
         var slider = document.getElementById('slider-K-' + prefix);
@@ -377,6 +386,8 @@
             var estStd = ev ? Math.sqrt(ev.estVar) : 0;
             setMathHTML('var-' + prefix,
                 'std of estimator ' + S.getTestFnLabel() + ' = ' + estStd.toFixed(4) + '  (' + K + ' trials)');
+            var estEl = document.getElementById('est-' + prefix);
+            if (estEl) estEl.classList.add('visible');
             redrawAll();
         });
     }
@@ -400,6 +411,8 @@
     document.getElementById('btn-clear-sys').addEventListener('click', function () {
         S.sec5.counts = null; S.sec5.hist = null; S.sec5.mode = 'none';
         document.getElementById('var-sys').textContent = '';
+        var estEl = document.getElementById('est-sys');
+        if (estEl) estEl.classList.remove('visible');
         redrawAll();
     });
     (function () {
@@ -415,6 +428,8 @@
             var estStd = ev ? Math.sqrt(ev.estVar) : 0;
             setMathHTML('var-sys',
                 'std of estimator ' + S.getTestFnLabel() + ' = ' + estStd.toFixed(4) + '  (' + K + ' trials)');
+            var estEl = document.getElementById('est-sys');
+            if (estEl) estEl.classList.add('visible');
             redrawAll();
         });
     })();
@@ -528,6 +543,8 @@
         S.sec6.detCounts = null; S.sec6.stoCounts = null; S.sec6.totalCounts = null;
         S.sec6.residualProbes = []; S.sec6.hist = null; S.sec6.mode = 'none';
         document.getElementById('var-resid').textContent = '';
+        var estEl = document.getElementById('est-resid');
+        if (estEl) estEl.classList.remove('visible');
         redrawAll();
     });
 
@@ -535,6 +552,8 @@
         S.sec6.detCounts = null; S.sec6.stoCounts = null; S.sec6.totalCounts = null;
         S.sec6.residualProbes = []; S.sec6.hist = null; S.sec6.mode = 'none';
         document.getElementById('var-resid').textContent = '';
+        var estEl = document.getElementById('est-resid');
+        if (estEl) estEl.classList.remove('visible');
         redrawAll();
     });
     (function () {
@@ -549,6 +568,50 @@
             var estStd = ev ? Math.sqrt(ev.estVar) : 0;
             setMathHTML('var-resid',
                 'std of estimator ' + S.getTestFnLabel() + ' = ' + estStd.toFixed(4) + '  (' + K + ' trials)');
+            var estEl = document.getElementById('est-resid');
+            if (estEl) estEl.classList.add('visible');
+            redrawAll();
+        });
+    })();
+
+    // Branch-kill
+    document.getElementById('btn-resample-bk').addEventListener('click', function () {
+        var det = S.weights.map(function (wi) { return Math.floor(N * wi); });
+        var bonusProbes = S.weights.map(function (wi, i) {
+            var p = N * wi - det[i];
+            var u = Math.random();
+            return { u: u, p: p, hit: u >= 1 - p };
+        });
+        var total = det.map(function (d, i) { return d + (bonusProbes[i].hit ? 1 : 0); });
+        S.secBK.detCounts = det;
+        S.secBK.bonusProbes = bonusProbes;
+        S.secBK.totalCounts = total;
+        S.secBK.hist = null;
+        S.secBK.mode = 'single';
+        redrawAll();
+    });
+    document.getElementById('btn-clear-bk').addEventListener('click', function () {
+        S.secBK.detCounts = null; S.secBK.bonusProbes = null; S.secBK.totalCounts = null;
+        S.secBK.hist = null; S.secBK.mode = 'none';
+        document.getElementById('var-bk').textContent = '';
+        var estEl = document.getElementById('est-bk');
+        if (estEl) estEl.classList.remove('visible');
+        redrawAll();
+    });
+    (function () {
+        var slider = document.getElementById('slider-K-bk');
+        var valSpan = document.getElementById('val-K-bk');
+        slider.addEventListener('input', function () { valSpan.textContent = slider.value; });
+        document.getElementById('btn-run-bk').addEventListener('click', function () {
+            var K = parseInt(slider.value, 10);
+            S.secBK.hist = S.runTrials(S.resample.branchkill, K);
+            S.secBK.mode = 'ktrials';
+            var ev = S.evalEstimators(S.secBK.hist);
+            var estStd = ev ? Math.sqrt(ev.estVar) : 0;
+            setMathHTML('var-bk',
+                'std of estimator ' + S.getTestFnLabel() + ' = ' + estStd.toFixed(4) + '  (' + K + ' trials)');
+            var estEl = document.getElementById('est-bk');
+            if (estEl) estEl.classList.add('visible');
             redrawAll();
         });
     })();
@@ -579,10 +642,10 @@
 
     // Test function selectors — populate all .testfn-select elements and sync them
     var testFnOptions = [
-        { value: 'position', label: 'i/n  (mean position)' },
+        { value: 'position', label: 'i/N  (mean position)' },
         { value: 'indicator', label: '1{i=k}  (particle count)' },
         { value: 'tail', label: '1{i\u22655}  (upper tail)' },
-        { value: 'square', label: '(i/n)\u00B2  (squared position)' },
+        { value: 'square', label: '(i/N)\u00B2  (squared position)' },
         { value: 'evenodd', label: '1{i even}  (even/odd class)' },
     ];
     var allTestFnSelects = document.querySelectorAll('.testfn-select');

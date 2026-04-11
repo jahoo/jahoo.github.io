@@ -31,7 +31,8 @@
 
 <body>
 
-    <div class="exploration-content">
+    {% assign sidenotes = page.sidenotes | default: true %}
+    <div class="exploration-content{% unless sidenotes %} no-sidenotes{% endunless %}">
         {{ content }}
     </div>
 

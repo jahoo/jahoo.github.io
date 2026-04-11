@@ -55,6 +55,7 @@
   font-size: 1.1rem;
   line-height: 1.7;
   color: var(--s-text);
+  background: var(--s-bg);
 }
 
 /* Content elements: leave right margin for sidenotes */
@@ -64,13 +65,13 @@
 .exploration-content > pre, .exploration-content > figure,
 .exploration-content > table,
 .exploration-content > header,
-.exploration-content > div.sourceCode,
+.exploration-content > div.sourceCode, .exploration-content > div.highlighter-rouge,
 .exploration-content section > p,
 .exploration-content section > ul, .exploration-content section > ol, .exploration-content section > dl,
 .exploration-content section > blockquote,
 .exploration-content section > pre, .exploration-content section > figure,
 .exploration-content section > table,
-.exploration-content section > div.sourceCode,
+.exploration-content section > div.sourceCode, .exploration-content section > div.highlighter-rouge,
 .exploration-content h1, .exploration-content h2, .exploration-content h3,
 .exploration-content h4, .exploration-content h5, .exploration-content h6 {
   width: 60%;
@@ -178,12 +179,12 @@ input.margin-toggle { display: none; }
   .exploration-content > ol, .exploration-content > dl,
   .exploration-content > blockquote, .exploration-content > pre,
   .exploration-content > figure, .exploration-content > table,
-  .exploration-content > header, .exploration-content > div.sourceCode,
+  .exploration-content > header, .exploration-content > div.sourceCode, .exploration-content > div.highlighter-rouge,
   .exploration-content section > p, .exploration-content section > ul,
   .exploration-content section > ol, .exploration-content section > dl,
   .exploration-content section > blockquote, .exploration-content section > pre,
   .exploration-content section > figure, .exploration-content section > table,
-  .exploration-content section > div.sourceCode,
+  .exploration-content section > div.sourceCode, .exploration-content section > div.highlighter-rouge,
   .exploration-content h1, .exploration-content h2, .exploration-content h3,
   .exploration-content h4, .exploration-content h5, .exploration-content h6 {
     width: 100%;
@@ -221,6 +222,62 @@ input.margin-toggle { display: none; }
     cursor: pointer;
     color: var(--s-accent);
   }
+}
+
+/* ── No-sidenotes mode (full-width content, inline notes at all widths) ── */
+/* Activated by class="exploration-content no-sidenotes" */
+/* Set via front matter: sidenotes: false */
+
+.exploration-content.no-sidenotes {
+  padding: 2rem 2rem 4rem 2rem;
+}
+.exploration-content.no-sidenotes > p, .exploration-content.no-sidenotes > ul,
+.exploration-content.no-sidenotes > ol, .exploration-content.no-sidenotes > dl,
+.exploration-content.no-sidenotes > blockquote, .exploration-content.no-sidenotes > pre,
+.exploration-content.no-sidenotes > figure, .exploration-content.no-sidenotes > table,
+.exploration-content.no-sidenotes > header, .exploration-content.no-sidenotes > div.sourceCode,
+.exploration-content.no-sidenotes section > p, .exploration-content.no-sidenotes section > ul,
+.exploration-content.no-sidenotes section > ol, .exploration-content.no-sidenotes section > dl,
+.exploration-content.no-sidenotes section > blockquote, .exploration-content.no-sidenotes section > pre,
+.exploration-content.no-sidenotes section > figure, .exploration-content.no-sidenotes section > table,
+.exploration-content.no-sidenotes section > div.sourceCode,
+.exploration-content.no-sidenotes h1, .exploration-content.no-sidenotes h2, .exploration-content.no-sidenotes h3,
+.exploration-content.no-sidenotes h4, .exploration-content.no-sidenotes h5, .exploration-content.no-sidenotes h6 {
+  width: 100%;
+  max-width: 800px;
+}
+.exploration-content.no-sidenotes .sidenote,
+.exploration-content.no-sidenotes .marginnote {
+  display: none;
+}
+.exploration-content.no-sidenotes .margin-toggle:checked + .sidenote,
+.exploration-content.no-sidenotes .margin-toggle:checked + .marginnote {
+  display: block;
+  float: none;
+  clear: both;
+  width: 100%;
+  max-width: 800px;
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
+  text-indent: 0;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--s-border);
+  font-size: 0.9rem;
+}
+.exploration-content.no-sidenotes .sidenote::before {
+  display: none;
+}
+.exploration-content.no-sidenotes label.margin-toggle:not(.sidenote-number) {
+  display: inline;
+  cursor: pointer;
+  color: var(--s-accent);
+  font-size: 0.75rem;
+  vertical-align: super;
+  line-height: 0;
+}
+.exploration-content.no-sidenotes .sidenote-number {
+  cursor: pointer;
+  color: var(--s-accent);
 }
 
 /* ── Document typography ────────────────────────────── */
@@ -304,10 +361,10 @@ input.margin-toggle { display: none; }
   opacity: 0.5;
 }
 .exploration-content section.collapsed > :not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) {
-  display: none;
+  display: none !important;
 }
 .exploration-content section.collapsed > section {
-  display: none;
+  display: none !important;
 }
 
 /* ── YAML metadata header ──────────────────────────── */
@@ -357,14 +414,62 @@ input.margin-toggle { display: none; }
   line-height: 1.45;
   font-size: 0.85rem;
 }
-/* Pre inside div.sourceCode: fill the width-constrained parent */
-.exploration-content div.sourceCode pre {
+/* Code blocks span full width by default (override the 60% sidenote-column rule).
+   Use {:.code-sidenote} on a fenced block to constrain it back to 60% when a
+   sidenote sits alongside. */
+.exploration-content > pre,
+.exploration-content > div.sourceCode, .exploration-content > div.highlighter-rouge,
+.exploration-content section > pre,
+.exploration-content section > div.sourceCode, .exploration-content section > div.highlighter-rouge {
+  width: 100%;
+}
+.exploration-content > div.code-sidenote,
+.exploration-content > pre.code-sidenote,
+.exploration-content section > div.code-sidenote,
+.exploration-content section > pre.code-sidenote { width: 60%; }
+@media (max-width: 800px) {
+  .exploration-content > div.code-sidenote,
+  .exploration-content > pre.code-sidenote,
+  .exploration-content section > div.code-sidenote,
+  .exploration-content section > pre.code-sidenote { width: 100%; }
+}
+/* Pre inside div.sourceCode / div.highlighter-rouge: fill the width-constrained parent */
+.exploration-content div.sourceCode pre,
+.exploration-content div.highlighter-rouge pre {
   width: 100%;
 }
 .exploration-content pre code {
   background: none;
   padding: 0;
 }
+
+/* ── Rouge syntax highlighting ─────────────────────── */
+.highlight .c, .highlight .cm, .highlight .c1, .highlight .cs { color: #998; font-style: italic; }
+.highlight .k, .highlight .kc, .highlight .kd, .highlight .kp,
+.highlight .kr, .highlight .ow                                 { font-weight: bold; }
+.highlight .kt                                                 { color: #458; font-weight: bold; }
+.highlight .o                                                  { font-weight: bold; }
+.highlight .m, .highlight .mf, .highlight .mh,
+.highlight .mi, .highlight .mo, .highlight .il                 { color: #099; }
+.highlight .s, .highlight .sb, .highlight .sc, .highlight .sd,
+.highlight .s2, .highlight .se, .highlight .sh, .highlight .si,
+.highlight .sx, .highlight .s1, .highlight .ss                 { color: #d14; }
+.highlight .sr                                                 { color: #009926; }
+.highlight .na                                                 { color: #008080; }
+.highlight .nb, .highlight .bp                                 { color: #0086B3; }
+.highlight .nc                                                 { color: #458; font-weight: bold; }
+.highlight .no, .highlight .nv, .highlight .vc,
+.highlight .vg, .highlight .vi                                 { color: #008080; }
+.highlight .ne, .highlight .nf                                 { color: #900; font-weight: bold; }
+.highlight .nn                                                 { color: #555; }
+.highlight .nt                                                 { color: #000080; }
+.highlight .ni                                                 { color: #800080; }
+.highlight .cp                                                 { color: #999; font-weight: bold; }
+.highlight .gd                                                 { color: #000; background-color: #fdd; }
+.highlight .gi                                                 { color: #000; background-color: #dfd; }
+.highlight .err                                                { color: #a61717; background-color: #e3d2d2; }
+.highlight .w                                                  { color: #bbb; }
+
 
 /* ── Blockquote ────────────────────────────────────── */
 

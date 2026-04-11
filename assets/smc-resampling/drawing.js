@@ -246,7 +246,8 @@
             ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.textAlign = 'left';
             ctx.textBaseline = 'top';
-            ctx.fillText(detTotal + ' deterministic;  R = ' + R + ' residual', L.histL + 2, L.plotB + 14);
+            var detLabel = opts.detLabel || (detTotal + ' deterministic;  R = ' + R + ' residual');
+            ctx.fillText(detLabel, L.histL + 2, L.plotB + 14);
             ctx.globalAlpha = 1;
         }
 
@@ -619,6 +620,197 @@
     }
 
     // ================================================================
+    //  DRAW: BRANCH-KILL SECTION
+    // ================================================================
+
+    function drawBranchKillSection() {
+        var cvBK = document.getElementById('cv-bk');
+        if (!cvBK) return;
+        var N = S.N;
+        var weights = S.weights;
+        var secBK = S.secBK;
+
+        var result = S.resetCanvas(cvBK);
+        var ctx = result.ctx, w = result.w, h = result.h;
+        var L = panelLayout(w, h);
+
+        // White background
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, w, h);
+
+        // Deterministic copies for histogram grid lines
+        var detCopies = weights.map(function (wi) { return Math.floor(N * wi); });
+
+        // --- Left histogram ---
+        var histValues = weights.slice();
+        var histMax = Math.max.apply(null, weights) * 1.15;
+        var detTotal = detCopies.reduce(function (a, b) { return a + b; }, 0);
+        var histOpts = { maxVal: histMax, detCopies: detCopies, methodColor: S.METHOD_COLORS.branchkill };
+
+        if (secBK.mode === 'single' && secBK.bonusProbes) {
+            // Recompute hit/miss through CURRENT weights (live update on drag)
+            for (var i = 0; i < N; i++) {
+                var livePi = N * weights[i] - detCopies[i];
+                secBK.bonusProbes[i].p = livePi;
+                secBK.bonusProbes[i].hit = secBK.bonusProbes[i].u >= 1 - livePi;
+            }
+            var liveTotals = detCopies.map(function (d, i) {
+                return d + (secBK.bonusProbes[i].hit ? 1 : 0);
+            });
+            secBK.totalCounts = liveTotals;
+            histOpts.probeCountOverlay = liveTotals;
+            histOpts.probeCountTotal = N;
+        }
+        if (secBK.mode === 'ktrials' && secBK.hist) {
+            histOpts.probeCountOverlay = secBK.hist.means;
+            histOpts.probeCountTotal = N;
+        }
+
+        // Annotation label
+        if (secBK.mode === 'ktrials' && secBK.hist) {
+            var avgTotal = secBK.hist.means.reduce(function (a, b) { return a + b; }, 0);
+            var avgBonus = avgTotal - detTotal;
+            histOpts.detLabel = detTotal + ' deterministic + ' +
+                fmtNum(avgBonus) + ' bonuses on avg = ' +
+                fmtNum(avgTotal) + ' particles on avg';
+        } else if (secBK.mode === 'single' && secBK.totalCounts) {
+            var total = secBK.totalCounts.reduce(function (a, b) { return a + b; }, 0);
+            var bonusTotal = total - detTotal;
+            histOpts.detLabel = detTotal + ' deterministic + ' +
+                bonusTotal + ' sampled bonuses = ' + total + ' particles';
+        } else {
+            histOpts.detLabel = detTotal + ' deterministic + independent Bernoulli bonuses';
+        }
+
+        drawLeftHistogram(ctx, L, histValues, histOpts);
+
+        // --- Right side: N independent Bernoulli mini-CDFs ---
+        var bkColor = S.METHOD_COLORS.branchkill;
+
+        // Axes
+        ctx.strokeStyle = '#999'; ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(L.cdfL, L.plotB); ctx.lineTo(L.cdfR, L.plotB);
+        ctx.moveTo(L.cdfL, L.plotT); ctx.lineTo(L.cdfL, L.plotB);
+        ctx.stroke();
+
+        // X-axis labels
+        ctx.fillStyle = '#666';
+        ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        var ticks = [0, 0.5, 1.0];
+        for (var ti = 0; ti < ticks.length; ti++) {
+            var u = ticks[ti];
+            ctx.fillText(u.toFixed(u === 0 || u === 1 ? 0 : 1), L.uToX(u), L.plotB + 4);
+            ctx.beginPath(); ctx.moveTo(L.uToX(u), L.plotB); ctx.lineTo(L.uToX(u), L.plotB + 3);
+            ctx.strokeStyle = '#999'; ctx.stroke();
+        }
+        ctx.fillStyle = '#888';
+        ctx.fillText('u', L.cdfL + L.cdfW / 2, L.plotB + 18);
+
+        // Draw each particle's Bernoulli CDF
+        // The CDF models P(no bonus) = 1-p_i, so the step is at 1-p_i.
+        // Probes right of the step (u >= 1-p_i) → bonus (filled dot on top line).
+        for (var i = 0; i < N; i++) {
+            var yC = L.idxToY(i);
+            var yTop = yC - L.barH / 2;
+            var yBot = yC + L.barH / 2;
+            // Inset the CDF lines so there's visible space above/below for probe dashes
+            var inset = L.barH * 0.15;
+            var yCdfTop = yTop + inset;
+            var yCdfBot = yBot - inset;
+            var pi = N * weights[i] - detCopies[i];  // bonus probability
+            var oneMinusP = 1 - pi;                   // step location
+            var xStep = L.uToX(oneMinusP);
+
+            var pColor = S.PALETTE[i];
+
+            // Shaded region right of step (bonus zone)
+            if (pi > 0.001) {
+                ctx.fillStyle = pColor;
+                ctx.globalAlpha = 0.08;
+                ctx.fillRect(xStep, yTop, L.cdfR - xStep, yBot - yTop);
+                ctx.globalAlpha = 1;
+            }
+
+            // Step function with inset CDF lines
+            ctx.strokeStyle = pColor;
+            ctx.lineWidth = 1.5;
+            ctx.globalAlpha = 0.7;
+            ctx.beginPath();
+            // Bottom segment (CDF = 0): from u=0 to u=1-p_i
+            if (oneMinusP > 0.001) {
+                ctx.moveTo(L.cdfL, yCdfBot);
+                ctx.lineTo(xStep, yCdfBot);
+            }
+            // Vertical jump at u=1-p_i
+            if (pi > 0.001 && pi < 0.999) {
+                ctx.moveTo(xStep, yCdfBot);
+                ctx.lineTo(xStep, yCdfTop);
+            }
+            // Top segment (CDF = 1): from u=1-p_i to u=1
+            if (pi < 0.999) {
+                ctx.moveTo(oneMinusP > 0.001 ? xStep : L.cdfL, yCdfTop);
+                ctx.lineTo(L.cdfR, yCdfTop);
+            } else {
+                ctx.moveTo(L.cdfL, yCdfTop);
+                ctx.lineTo(L.cdfR, yCdfTop);
+            }
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+
+            // Open circle at bottom of step, filled at top
+            var r = 2.5;
+            if (pi > 0.001 && pi < 0.999) {
+                ctx.beginPath();
+                ctx.arc(xStep, yCdfBot, r, 0, 2 * Math.PI);
+                ctx.strokeStyle = pColor; ctx.lineWidth = 1.2;
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(xStep, yCdfTop, r, 0, 2 * Math.PI);
+                ctx.fillStyle = pColor;
+                ctx.fill();
+            }
+
+            // Probe (if single resample mode)
+            if (secBK.mode === 'single' && secBK.bonusProbes) {
+                var probe = secBK.bonusProbes[i];
+                var xProbe = L.uToX(probe.u);
+                // Right of step (hit): dot on top CDF line
+                // Left of step (miss): dot on bottom CDF line
+                var yDot = probe.hit ? yCdfTop : yCdfBot;
+                ctx.strokeStyle = bkColor;
+                ctx.lineWidth = 1.2;
+                ctx.setLineDash([3, 2]);
+                ctx.globalAlpha = 0.6;
+                // Start from the row boundary (virtual x-axis for this mini-plot)
+                var yRowBase = yC + L.rowH / 2;
+                ctx.beginPath();
+                ctx.moveTo(xProbe, yRowBase);
+                ctx.lineTo(xProbe, yDot);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.globalAlpha = 1;
+
+                // Marker: filled if hit (bonus), open if miss
+                ctx.beginPath();
+                ctx.arc(xProbe, yDot, 3.5, 0, 2 * Math.PI);
+                if (probe.hit) {
+                    ctx.fillStyle = bkColor;
+                    ctx.fill();
+                } else {
+                    ctx.strokeStyle = bkColor;
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                }
+            }
+        }
+
+        drawYAxis(ctx, L);
+        cvBK._L = L;
+    }
+
+    // ================================================================
     //  DRAW: COUNTEREXAMPLE (section 5 sub)
     // ================================================================
 
@@ -892,6 +1084,7 @@
     S.drawPanel = drawPanel;
     S.drawMethodSection = drawMethodSection;
     S.drawResidualSection = drawResidualSection;
+    S.drawBranchKillSection = drawBranchKillSection;
     S.drawCounterexample = drawCounterexample;
     S.drawEstimatorDist = drawEstimatorDist;
     S.drawComparisonPanel = drawComparisonPanel;

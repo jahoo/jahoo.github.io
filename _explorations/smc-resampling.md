@@ -13,8 +13,8 @@ mathjax_macros: >-
     "state":   "\\xi",
     "rstate":  "\\widetilde{\\state}",
     "wt":      "w",
-    "np":      "n",
-    "cnt":     "N",
+    "np":      "N",
+    "cnt":     "M",
     "gen":     "{\\mathcal{G}}",
     "E":       "{\\mathbb{E}}",
     "Var":     "\\operatorname{Var}",
@@ -80,7 +80,7 @@ $\np^{-1} \sum_{i=1}^{\np} f(\rstate^i)$ is an unbiased
 estimator of the weighted average
 $\sum_{i=1}^{\np} \wt^i f(\state^i)$.
 
-All four methods we explore below satisfy this condition. But
+All the methods we explore below satisfy this condition. But
 resampling inevitably adds noise to the estimate---a consequence
 of the impoverishment it introduces. The amount of noise differs
 across methods, and the variance of the resampled estimator
@@ -93,7 +93,7 @@ estimates from the same particle budget.
 
 Three of the four methods (multinomial, stratified, systematic)
 share the same mapping from **probe points** on $[0,1]$ to
-particle indices.<label for="mn-cdf" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-cdf" class="margin-toggle"/><span class="marginnote">The fourth method, residual resampling, uses a different construction entirely---see §6.</span> The cumulative distribution function
+particle indices.<label for="mn-cdf" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-cdf" class="margin-toggle"/><span class="marginnote">The fourth method, residual resampling, uses a different construction entirely---see §4.</span> The cumulative distribution function
 $\cdf(i) = \sum_{j=1}^{i} \wt^j$ partitions $[0,1]$ into
 segments of width $\wt^i$. A probe at position $u$ selects
 whichever particle $i$ satisfies
@@ -117,21 +117,27 @@ which particle each selects. Hover to preview.
 </div>
 </div>
 
-The methods we examine below differ in **how they place the
-$\np$ probe points**:
+Now you have the mapping: a probe at position $u$ selects
+particle $\invcdf(u)$. The question is **how to place $\np$
+probes** so that, on average, particle $i$ gets selected $\np
+\wt^i$ times. Try it: click on the plot above to place probes
+yourself. What strategy would you use?
 
-- **Multinomial**{:.c-multinomial} --- $\np$ independent uniform draws on $[0,1]$.
-- **Stratified**{:.c-stratified} --- one independent draw per stratum, $\np$ equal strata.
-- **Systematic**{:.c-systematic} --- a single random offset generates $\np$ equally-spaced probes.
-- **Residual**{:.c-residual} --- a deterministic-stochastic hybrid.
-{:.method-preview}
+The most natural idea---draw $\np$ independent uniforms---turns
+out to work, and it leads to our first algorithm. We will then
+see two less obvious strategies that produce lower variance by
+spreading the probes more evenly. All three share the CDF
+mechanism above; after that, we turn to two methods that take a
+fundamentally different approach.
 
 
-## 3. Multinomial resampling
+## 3. Three ways to place the probes
+
+### Multinomial resampling
 
 The simplest approach: draw $\np$ independent uniform random
 numbers $u_1, \ldots, u_\np \overset{\text{iid}}{\sim} \mathrm{Uniform}(0,1]$
-and map each through the inverse CDF. The resulting duplication
+and map each through the inverse CDF.<label for="sn-pit" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-pit" class="margin-toggle"/><span class="sidenote">This is the *probability integral transform*, applied $\np$ times independently. A while back, I made a [post exploring the continuous case](/2022/09/02/transform-pdf.html)---given a continuous random variable $X$ with density $f$, what is the density of $Y = y(X)$ for some invertible $y$? The answer is the change-of-variables formula $g(y) = f(x(y))\,\lvert\mathrm{d}x/\mathrm{d}y\rvert$. Here we are doing the same thing in the discrete setting: each independent $u_k \sim \mathrm{Uniform}(0,1]$ is transformed through the discrete quantile function $\invcdf$ to produce a sample from the particle-weight distribution---exactly as passing a uniform draw through a continuous inverse CDF yields a draw from the corresponding distribution.</span> The resulting duplication
 counts $(\cnt^1, \ldots, \cnt^\np)$ follow a multinomial
 distribution.
 
@@ -143,28 +149,31 @@ positions = random(N)
 # Step 3: map probes through the inverse CDF → ancestor indices
 indices = np.searchsorted(cumulative_sum, positions)
 ```
+{:.code-sidenote}
 
 Equivalent to `np.random.choice(N, size=N, replace=True, p=weights)`---the
 explicit form shows the inverse-CDF mechanism shared with the other methods.
 {:.small-note}
 
-<details style="font-size:0.85em; color:#555; margin:0.3em 0 0.8em;">
+<details markdown="1" style="font-size:0.85em; color:#555; margin:0.3em 0 0.8em;">
 <summary style="cursor:pointer; color:#444;">What does <code>searchsorted</code> do?</summary>
-<p style="margin:0.4em 0;">
-For each probe value $u$, <code>searchsorted</code> finds the smallest index $j$
-such that <code>cumulative_sum[j]</code>&nbsp;$\geq u$. This is the inverse CDF lookup:
+
+For each probe value $u$, `searchsorted` finds the smallest index $j$
+such that `cumulative_sum[j]` $\geq u$. This is the inverse CDF lookup:
 $u$ falls in particle $j$'s segment of $[0,1]$, so particle $j$ gets selected.
 Internally it uses binary search, but for sorted probes (as in stratified and
 systematic) a single linear pass is equivalent and faster:
-</p>
-<pre class="code-callout">i, j = 0, 0
-while i &lt; N:
-    if positions[i] &lt; cumulative_sum[j]:
+
+```python
+i, j = 0, 0
+while i < N:
+    if positions[i] < cumulative_sum[j]:
         indices[i] = j     # probe i lands in particle j's segment
         i += 1             # move to next probe
     else:
-        j += 1             # move to next CDF step</pre>
-<p style="margin:0.4em 0;">
+        j += 1             # move to next CDF step
+```
+
 Both pointers only advance forward, so this is $O(\np)$. This is what filterpy
 actually uses for stratified and systematic resampling.
 </p>
@@ -191,18 +200,32 @@ counts fluctuate (hollow outlines over the weight bars); then
 
 <div class="var-display" id="var-multi"></div>
 
+<div class="est-section" id="est-multi">
 <div class="testfn-row">
 <span>Estimator distribution for $f(\state^i) =$</span>
 <select class="testfn-select"></select>
 </div>
-
 <canvas id="cv-est-multi" class="panel panel-short"></canvas>
+</div>
+
+<div class="proof">
+<span class="proof-label">Unbiasedness.</span>
+Each probe $u_k$ is independently $\mathrm{Uniform}(0,1]$, so it
+lands in particle $i$'s CDF segment (of width $\wt^i$) with
+probability $\wt^i$. With $\np$ independent probes,
+$\cnt^i \sim \mathrm{Binomial}(\np, \wt^i)$ and
+$\E[\cnt^i] = \np\,\wt^i$. ∎
+</div>
 
 
-## 4. Stratified resampling
+### Stratified resampling
+
+Because the draws are independent, multinomial probes can
+cluster in one region and leave gaps in another---wasting some
+of the particle budget. Can we spread them more evenly?
 
 Partition $[0,1]$ into $\np$ equal **strata**
-$\bigl(\frac{k-1}{\np},\, \frac{k}{\np}\bigr]$ and draw one
+$\bigl(\frac{k-1}{\np},\, \frac{k}{\np}\bigr]_{k=1}^{\np}$ and draw one
 independent uniform within each. The alternating blue and white
 bands below show the strata.
 
@@ -234,15 +257,32 @@ Douc et al. (2005) prove $\Var_{\text{strat}} \leq \Var_{\text{mult}}$ always.
 
 <div class="var-display" id="var-strat"></div>
 
+<div class="est-section" id="est-strat">
 <div class="testfn-row">
 <span>Estimator distribution for $f(\state^i) =$</span>
 <select class="testfn-select"></select>
 </div>
-
 <canvas id="cv-est-strat" class="panel panel-short"></canvas>
+</div>
+
+<div class="proof">
+<span class="proof-label">Unbiasedness.</span>
+Write $\mathbf{1}_k^i$ for the indicator that stratum $k$'s
+probe lands in particle $i$'s segment. Within stratum $k$, the
+probe is $\mathrm{Uniform}\bigl(\frac{k-1}{\np},\,
+\frac{k}{\np}\bigr]$, so $\E[\mathbf{1}_k^i]$ equals the
+overlap between stratum $k$ and particle $i$'s CDF interval,
+scaled by $\np$. Summing over all strata:
+$\E[\cnt^i] = \sum_{k=1}^{\np} \E[\mathbf{1}_k^i]
+= \np\,\wt^i$, since the strata tile $[0,1]$ and particle $i$'s
+segment has total length $\wt^i$. ∎
+</div>
 
 
-## 5. Systematic resampling
+### Systematic resampling
+
+Stratified resampling still draws $\np$ independent random
+numbers---one per stratum. Can we get away with just *one*?
 
 Use a **single** random offset
 $U \sim \mathrm{Uniform}(0, 1/\np)$ and place all probes
@@ -271,14 +311,28 @@ positions = (random() + np.arange(N)) / N
 
 <div class="var-display" id="var-sys"></div>
 
+<div class="est-section" id="est-sys">
 <div class="testfn-row">
 <span>Estimator distribution for $f(\state^i) =$</span>
 <select class="testfn-select"></select>
 </div>
-
 <canvas id="cv-est-sys" class="panel panel-short"></canvas>
+</div>
 
-### The counterexample (Douc et al., 2005, §3.4)
+<div class="proof">
+<span class="proof-label">Unbiasedness.</span>
+The offset $U$ is $\mathrm{Uniform}(0, 1/\np]$, so each probe
+$u_k = U + (k{-}1)/\np$ is marginally
+$\mathrm{Uniform}\bigl(\frac{k-1}{\np},\, \frac{k}{\np}\bigr]$---the
+same distribution as the stratified probe in stratum $k$. The
+same tiling argument gives $\E[\cnt^i] = \np\,\wt^i$. (But note
+that the probes are no longer independent: a single $U$
+determines all of them. The marginal distributions are identical
+to stratified, so unbiasedness holds, but the joint distribution
+differs---and with it the variance.) ∎
+</div>
+
+#### The counterexample (Douc et al., 2005, §3.4)
 
 Systematic has the same marginals as stratified, but the probes
 are **perfectly correlated**---one random number determines all
@@ -322,7 +376,7 @@ vanishes when $f$ is not aligned with the weight periodicity.
 <div class="var-display" id="var-counter"></div>
 
 
-## 6. Residual resampling
+## 4. Residual resampling
 
 A deterministic-stochastic hybrid. Each particle $i$ receives
 $\lfloor \np\wt^i \rfloor$ guaranteed copies---no randomness
@@ -332,11 +386,10 @@ resampling on the **residual weights**
 $\resid^i = (\np\wt^i - \lfloor \np\wt^i \rfloor)/R$. Any of
 the three CDF-based methods can be used for this phase---select
 below. The right plot shows the residual CDF (solid) overlaid on
-the original (dotted)---note how much flatter the residual
-distribution is.
+the original (dotted).
 
-<pre class="code-callout" id="resid-code"><span class="comment"># Phase 1 (deterministic): guaranteed copies from the integer part</span>
-num_copies = (np.floor(N * weights)).astype(int)    <span class="comment"># ⌊nωⁱ⌋</span>
+<pre id="resid-code"><span class="comment"># Phase 1 (deterministic): guaranteed copies from the integer part</span>
+num_copies = (np.floor(N * weights)).astype(int)    <span class="comment"># ⌊Nwⁱ⌋</span>
 <span class="comment"># Phase 2 (stochastic): <span id="resid-phase2-comment">multinomial</span> on the fractional remainders</span>
 residual = weights * N - num_copies
 residual /= sum(residual)                           <span class="comment"># normalize residuals</span>
@@ -366,12 +419,26 @@ indexes[k:N] = np.searchsorted(cumsum(residual), positions)</pre>
 
 <div class="var-display" id="var-resid"></div>
 
+<div class="est-section" id="est-resid">
 <div class="testfn-row">
 <span>Estimator distribution for $f(\state^i) =$</span>
 <select class="testfn-select"></select>
 </div>
-
 <canvas id="cv-est-resid" class="panel panel-short"></canvas>
+</div>
+
+<div class="proof">
+<span class="proof-label">Unbiasedness.</span>
+Phase 1 gives particle $i$ exactly $\lfloor \np\wt^i \rfloor$
+copies. Phase 2 resamples $R = \np - \sum_j \lfloor \np\wt^j
+\rfloor$ particles using normalized residual weights $\resid^i =
+(\np\wt^i - \lfloor \np\wt^i \rfloor)/R$. By the unbiasedness
+of whichever CDF method is used for phase 2, the expected
+number of phase-2 copies of particle $i$ is $R \cdot \resid^i =
+\np\wt^i - \lfloor \np\wt^i \rfloor$. Adding the two phases:
+$\E[\cnt^i] = \lfloor \np\wt^i \rfloor + (\np\wt^i - \lfloor
+\np\wt^i \rfloor) = \np\,\wt^i$. ∎
+</div>
 
 Douc et al. (2005) prove $\Var_{\text{resid}} \leq \Var_{\text{mult}}$
 always---the deterministic phase removes variance entirely for
@@ -380,9 +447,9 @@ variance; using stratified or systematic for phase 2 can reduce
 it further.
 
 
-## 7. Head-to-head comparison
+## 5. Head-to-head comparison
 
-All four methods on the same weights, overlaid on a single plot.
+All four fixed-$\np$ methods on the same weights, overlaid on a single plot.
 Gray bars show the target weights; colored error bars show each
 method's mean count ± 1 std over $K$ trials (vertically offset
 within each particle row for readability). Below, the estimator
@@ -432,40 +499,69 @@ each method concentrates around the true value.
 {:.summary-table}
 
 
-## 8. Branch-kill resampling
+## 6. Other resampling schemes
 
-All four methods above produce exactly $\np$ resampled particles.
-Branch-kill resampling relaxes this: each particle $i$ receives
-$\lfloor \np\wt^i \rfloor$ deterministic copies (as in
-residual), then independently draws one additional copy with
-probability $\np\wt^i - \lfloor \np\wt^i \rfloor$. No second
-phase or residual CDF is needed---each particle is processed in
-isolation.
+The four methods above are the most widely used, but they are
+not the only options.
+
+### Branch-kill resampling
+
+The four methods above all produce exactly $\np$ resampled
+particles. Branch-kill resampling relaxes this: each particle
+$i$ receives $\lfloor \np\wt^i \rfloor$ deterministic copies
+(as in residual), then independently draws one additional copy
+with probability $\np\wt^i - \lfloor \np\wt^i \rfloor$. No
+second phase or residual CDF is needed---each particle is
+processed in isolation.
 
 ```python
 # For each particle independently:
 num_copies = np.floor(N * weights).astype(int)
-bonus = (np.random.rand(N) < (N * weights - num_copies)).astype(int)
-num_copies += bonus                                     # total may differ from N
+p_bonus = N * weights - num_copies                     # fractional part
+u = np.random.rand(N)                                  # one uniform draw per particle
+bonus = (u >= 1 - p_bonus).astype(int)                 # inverse CDF: right of step → bonus
+num_copies += bonus                                    # total may differ from N
 ```
 
-This satisfies the unbiasedness condition---$\E[\cnt^i] =
-\lfloor \np\wt^i \rfloor + (\np\wt^i - \lfloor \np\wt^i
-\rfloor) = \np\wt^i$---but the total number of resampled
-particles $\sum_i \cnt^i$ fluctuates around $\np$ rather than
-equalling it exactly. The per-particle independence makes
-branch-kill naturally suited to parallel hardware, where each
-processing element can handle its own particle without
-communication.
+The total number of resampled particles $\sum_i \cnt^i$
+fluctuates around $\np$ rather than equalling it exactly. The
+per-particle independence makes branch-kill naturally suited to
+parallel hardware, where each processing element can handle its
+own particle without communication.
 
-*[Interactive visualization --- coming soon. Ref: Li et al. (2015), Code 5; `resampleBranching.m`.]*
-{:.placeholder-text}
+<div class="proof">
+<span class="proof-label">Unbiasedness.</span>
+Particle $i$ receives $\lfloor \np\wt^i \rfloor$ deterministic
+copies plus one bonus copy with probability $\np\wt^i - \lfloor
+\np\wt^i \rfloor$. So $\E[\cnt^i] = \lfloor \np\wt^i \rfloor +
+(\np\wt^i - \lfloor \np\wt^i \rfloor) = \np\,\wt^i$. ∎
+</div>
 
+<canvas id="cv-bk" class="panel"></canvas>
 
-## Beyond these four
+<div class="control-box">
+<div class="control-row">
+<button id="btn-resample-bk">Resample once</button>
+<button id="btn-clear-bk" style="font-size:0.9em;">Clear</button>
+<span style="flex:1;"></span>
+<label style="font-size:0.85em; color:#555;">$K$:
+<input type="range" id="slider-K-bk" min="100" max="10000" value="1000" step="100" style="width:90px; vertical-align:middle;">
+<span id="val-K-bk">1000</span></label>
+<button id="btn-run-bk">Run $K$ trials</button>
+</div>
+</div>
 
-The schemes above are the most widely used, but they are not the
-only options. A few notable extensions:
+<div class="var-display" id="var-bk"></div>
+
+<div class="est-section" id="est-bk">
+<div class="testfn-row">
+<span>Estimator distribution for $f(\state^i) =$</span>
+<select class="testfn-select"></select>
+</div>
+<canvas id="cv-est-bk" class="panel panel-short"></canvas>
+</div>
+
+### Other extensions
 
 - **Rounding-copy resampling.** Like branch-kill, but fully
   deterministic: each particle gets $\mathrm{round}(\np\wt^i)$

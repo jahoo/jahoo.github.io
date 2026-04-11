@@ -56,6 +56,10 @@ canvas.panel-short { height: 200px; }
 }
 .control-row button:hover { background: #eee; }
 
+/* --- Estimator distribution: hidden until K trials run --- */
+.est-section { display: none; }
+.est-section.visible { display: block; }
+
 /* --- Insight callout --- */
 .insight {
     border-left: 3px solid var(--s-accent, #467);
@@ -64,6 +68,21 @@ canvas.panel-short { height: 200px; }
     margin: 1em 0;
     font-size: 0.92em;
     border-radius: 0 4px 4px 0;
+}
+
+/* --- Proof box --- */
+.proof {
+    border-left: 3px solid var(--s-border, #ddd);
+    background: var(--s-surface, #f6f8fa);
+    padding: 0.6em 1em;
+    margin: 1em 0;
+    font-size: 0.92em;
+    border-radius: 0 4px 4px 0;
+}
+.proof-label {
+    font-weight: bold;
+    font-style: italic;
+    margin-right: 0.3em;
 }
 
 /* --- Code callout (legacy pre.code-callout blocks) --- */

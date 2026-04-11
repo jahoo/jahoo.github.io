@@ -16,10 +16,10 @@ window.SMC = (function () {
     const N = 8;
     const MIN_W = 0.01;
 
-    // Uniform warm sand for all particles — deliberately understated
-    // so method colors (orange/blue/green/purple) carry the visual signal.
+    // Uniform cool gray for all particles — deliberately understated
+    // so method colors (orange/blue/green/purple/brown) carry the visual signal.
     // Particle identity is encoded by y-position, not color.
-    const PARTICLE_COLOR = 'rgb(198,188,176)';
+    const PARTICLE_COLOR = 'rgb(176,182,190)';
     const PALETTE = Array.from({length: N}, () => PARTICLE_COLOR);
 
     const METHOD_COLORS = {
@@ -27,6 +27,7 @@ window.SMC = (function () {
         stratified:  '#2980b9',
         systematic:  '#27ae60',
         residual:    '#8e44ad',
+        branchkill:  '#795548',
     };
 
     // ================================================================
@@ -109,6 +110,16 @@ window.SMC = (function () {
             }
             return idx;
         },
+        branchkill(w) {
+            const n = w.length, idx = [];
+            for (let i = 0; i < n; i++) {
+                const nw = n * w[i];
+                const det = Math.floor(nw);
+                const bonus = Math.random() >= 1 - (nw - det) ? 1 : 0;
+                for (let c = 0; c < det + bonus; c++) idx.push(i);
+            }
+            return idx;
+        },
         residual(w, phase2Method) {
             const n = w.length, idx = [];
             const copies = w.map(wi => Math.floor(n * wi));
@@ -153,8 +164,8 @@ window.SMC = (function () {
 
     const TEST_FNS = {
         position: {
-            label: 'f(\u03BEi) = i/n',
-            latexLabel: '$f(\\xi^i)=i/n$',
+            label: 'f(\u03BEi) = i/N',
+            latexLabel: '$f(\\xi^i)=i/N$',
             values: () => Array.from({length: N}, (_, i) => (i + 1) / N),
         },
         indicator: {
@@ -168,8 +179,8 @@ window.SMC = (function () {
             values: () => Array.from({length: N}, (_, i) => i >= 4 ? 1 : 0),
         },
         square: {
-            label: 'f(\u03BEi) = (i/n)\u00B2',
-            latexLabel: '$f(\\xi^i)=(i/n)^2$',
+            label: 'f(\u03BEi) = (i/N)\u00B2',
+            latexLabel: '$f(\\xi^i)=(i/N)^2$',
             values: () => Array.from({length: N}, (_, i) => ((i + 1) / N) ** 2),
         },
         evenodd: {
@@ -305,6 +316,7 @@ window.SMC = (function () {
         sec4: null,
         sec5: null,
         sec6: null,
+        secBK: null,
         compData: null,
         counterData: null,
     };
