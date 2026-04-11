@@ -363,9 +363,10 @@ $\wt_{\mathrm{even}}(1 - \wt_{\mathrm{even}})/\np$.
 </div>
 </div>
 
+<div class="est-section" id="est-counter">
 <canvas id="cv-counter" class="panel panel-short"></canvas>
-
 <div class="var-display" id="var-counter"></div>
+</div>
 
 <!-- At $\np = 8$ with $\wt_{\mathrm{even}} = 0.8$: systematic
 std $\approx$ 0.245 vs. multinomial std $\approx$ 0.141---systematic
@@ -394,19 +395,19 @@ residual /= sum(residual)                           <span class="c1"># normalize
 <span id="resid-phase2-code">positions = random(R)                               <span class="c1"># multinomial: R independent probes</span></span>
 indexes[k:N] = np.searchsorted(cumsum(residual), positions)</code></pre></div></div>
 
+<label style="font-size:0.85em; color:#555;">Phase 2 method:
+<select id="select-resid-phase2" style="padding:2px 4px; border:1px solid #ccc; border-radius:3px; font-size:1em;">
+<option value="multinomial">Multinomial</option>
+<option value="stratified">Stratified</option>
+<option value="systematic">Systematic</option>
+</select></label>
+
 <canvas id="cv-sec6" class="panel"></canvas>
 
 <div class="control-box">
 <div class="control-row">
 <button id="btn-resample-resid">Resample once</button>
 <button id="btn-clear-resid" style="font-size:0.9em;">Clear</button>
-<span style="flex:1;"></span>
-<label style="font-size:0.85em; color:#555;">Phase 2:
-<select id="select-resid-phase2" style="padding:2px 4px; border:1px solid #ccc; border-radius:3px; font-size:1em;">
-<option value="multinomial">Multinomial</option>
-<option value="stratified">Stratified</option>
-<option value="systematic">Systematic</option>
-</select></label>
 <span style="flex:1;"></span>
 <label style="font-size:0.85em; color:#555;">$K$:
 <input type="range" id="slider-K-resid" min="100" max="10000" value="1000" step="100" style="width:90px; vertical-align:middle;">
@@ -462,6 +463,7 @@ each method concentrates around the true value.
 </div>
 </div>
 
+<div class="est-section" id="est-comparison">
 <canvas id="cv-comparison" class="panel"></canvas>
 
 <div class="testfn-row" style="margin-top:0.8em;">
@@ -478,6 +480,7 @@ Multinomial <span class="c-multinomial" id="comp-std-multi"></span>
 Stratified <span class="c-stratified" id="comp-std-strat"></span>
 Systematic <span class="c-systematic" id="comp-std-sys"></span>
 Residual <span class="c-residual" id="comp-std-resid"></span>
+</div>
 </div>
 
 | | Multinomial | Stratified | Systematic | Residual |

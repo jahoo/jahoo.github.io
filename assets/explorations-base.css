@@ -66,12 +66,14 @@
 .exploration-content > table,
 .exploration-content > header,
 .exploration-content > div.sourceCode, .exploration-content > div.highlighter-rouge,
+.exploration-content > mjx-container[display="true"],
 .exploration-content section > p,
 .exploration-content section > ul, .exploration-content section > ol, .exploration-content section > dl,
 .exploration-content section > blockquote,
 .exploration-content section > pre, .exploration-content section > figure,
 .exploration-content section > table,
 .exploration-content section > div.sourceCode, .exploration-content section > div.highlighter-rouge,
+.exploration-content section > mjx-container[display="true"],
 .exploration-content h1, .exploration-content h2, .exploration-content h3,
 .exploration-content h4, .exploration-content h5, .exploration-content h6 {
   width: 60%;
@@ -180,11 +182,13 @@ input.margin-toggle { display: none; }
   .exploration-content > blockquote, .exploration-content > pre,
   .exploration-content > figure, .exploration-content > table,
   .exploration-content > header, .exploration-content > div.sourceCode, .exploration-content > div.highlighter-rouge,
+  .exploration-content > mjx-container[display="true"],
   .exploration-content section > p, .exploration-content section > ul,
   .exploration-content section > ol, .exploration-content section > dl,
   .exploration-content section > blockquote, .exploration-content section > pre,
   .exploration-content section > figure, .exploration-content section > table,
   .exploration-content section > div.sourceCode, .exploration-content section > div.highlighter-rouge,
+  .exploration-content section > mjx-container[display="true"],
   .exploration-content h1, .exploration-content h2, .exploration-content h3,
   .exploration-content h4, .exploration-content h5, .exploration-content h6 {
     width: 100%;

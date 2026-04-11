@@ -487,6 +487,8 @@
         setMathHTML('var-counter',
             S.getTestFnLabel() + '&ensp; Systematic std = ' + Math.sqrt(S.counterData.sysVar).toFixed(4) +
             ',&ensp; Multinomial std = ' + Math.sqrt(S.counterData.multiVar).toFixed(4));
+        var estEl = document.getElementById('est-counter');
+        if (estEl) estEl.classList.add('visible');
         redrawAll();
     });
 
@@ -634,6 +636,8 @@
                 var std = ev ? Math.sqrt(ev.estVar).toFixed(4) : '—';
                 document.getElementById('comp-std-' + key).textContent = std;
             });
+            var estEl = document.getElementById('est-comparison');
+            if (estEl) estEl.classList.add('visible');
             redrawAll();
         });
     })();
