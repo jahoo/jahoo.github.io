@@ -1,0 +1,901 @@
+// ================================================================
+//  SMC Resampling — drawing.js
+//  All canvas drawing functions.
+//  Reads config/state from window.SMC namespace.
+// ================================================================
+
+'use strict';
+
+(function () {
+
+    var S = window.SMC;
+
+    // ================================================================
+    //  PANEL LAYOUT — computes shared coordinates for the back-to-back view
+    // ================================================================
+
+    function panelLayout(w, h) {
+        var N = S.N;
+        var margin = { top: 12, bottom: 36, left: 10, right: 10 };
+        var plotT = margin.top;
+        var plotB = h - margin.bottom;
+        var plotH = plotB - plotT;
+        var rowH = plotH / N;
+        var barH = rowH * 0.65;
+
+        // Horizontal zones
+        var histFrac = 0.28;   // fraction for histogram
+        var gapW = 32;         // gap for y-axis labels
+        var totalW = w - margin.left - margin.right;
+        var histW = totalW * histFrac;
+        var cdfW = totalW - histW - gapW;
+
+        var histL = margin.left;                    // left edge of hist area
+        var histR = margin.left + histW;            // right edge of hist bars
+        var gapL = histR;
+        var gapC = histR + gapW / 2;               // center of label gap
+        var cdfL = histR + gapW;                    // left edge of CDF area
+        var cdfR = w - margin.right;                // right edge of CDF area
+
+        function idxToY(i) { return plotB - (i + 0.5) * rowH; }
+        function uToX(u) { return cdfL + u * cdfW; }
+        function xToU(x) { return Math.max(0, Math.min(1, (x - cdfL) / cdfW)); }
+        // Histogram: value -> x (bars grow LEFT from histR)
+        function valToHistX(v, maxVal) { return histR - (v / maxVal) * histW; }
+
+        return {
+            w: w, h: h, margin: margin, plotT: plotT, plotB: plotB, plotH: plotH, rowH: rowH, barH: barH,
+            histL: histL, histR: histR, histW: histW, gapL: gapL, gapC: gapC, gapW: gapW, cdfL: cdfL, cdfR: cdfR, cdfW: cdfW,
+            idxToY: idxToY, uToX: uToX, xToU: xToU, valToHistX: valToHistX,
+        };
+    }
+
+    // ================================================================
+    //  DRAW: SHARED Y-AXIS LABELS
+    // ================================================================
+
+    function drawYAxis(ctx, L) {
+        var N = S.N;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        for (var i = 0; i < N; i++) {
+            ctx.fillStyle = S.PALETTE[i];
+            ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(i + 1, L.gapC, L.idxToY(i));
+        }
+    }
+
+    // ================================================================
+    //  DRAW: LEFT HISTOGRAM (right-justified, bars grow leftward)
+    // ================================================================
+
+    /** Format a number: integers as-is, floats to at most 4 significant figures. */
+    function fmtNum(v) {
+        if (v % 1 === 0) return v.toString();
+        return Number(v.toPrecision(4)).toString();
+    }
+
+    function drawLeftHistogram(ctx, L, values, opts) {
+        var N = S.N;
+        opts = opts || {};
+        if (!values) return;
+        var maxVal = opts.maxVal || Math.max.apply(null, values.concat([0.01]));
+        if (opts.probeCountOverlay && opts.probeCountTotal > 0) {
+            var maxProportion = Math.max.apply(null, opts.probeCountOverlay) / opts.probeCountTotal;
+            maxVal = Math.max(maxVal, maxProportion * 1.05);
+        }
+        if (opts.expected) maxVal = Math.max.apply(null, [maxVal].concat(opts.expected));
+
+        for (var i = 0; i < N; i++) {
+            var y = L.idxToY(i);
+            var barW = (values[i] / maxVal) * L.histW;
+            var x = L.histR - barW;
+
+            // Main bar
+            ctx.fillStyle = S.PALETTE[i];
+            ctx.globalAlpha = 0.5;
+            ctx.fillRect(x, y - L.barH / 2, barW, L.barH);
+            ctx.globalAlpha = 1;
+            ctx.strokeStyle = S.PALETTE[i];
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x, y - L.barH / 2, barW, L.barH);
+
+            // Drag handle
+            ctx.strokeStyle = S.PALETTE[i];
+            ctx.globalAlpha = 0.9;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x, y - L.barH / 2);
+            ctx.lineTo(x, y + L.barH / 2);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+
+            // Overlay (e.g., deterministic portion for residual)
+            if (opts.overlayValues) {
+                var oW = (opts.overlayValues[i] / maxVal) * L.histW;
+                ctx.fillStyle = S.PALETTE[i];
+                ctx.globalAlpha = 0.9;
+                ctx.fillRect(L.histR - oW, y - L.barH / 2, oW, L.barH);
+                ctx.globalAlpha = 1;
+            }
+
+            // Error bars
+            if (opts.errors && opts.errors[i]) {
+                var errInfo = opts.errors[i];
+                var xHi = L.histR - (errInfo.hi / maxVal) * L.histW;
+                var xLo = L.histR - (Math.max(0, errInfo.lo) / maxVal) * L.histW;
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 1.2;
+                ctx.beginPath();
+                ctx.moveTo(xHi, y); ctx.lineTo(xLo, y);
+                ctx.moveTo(xHi, y - 3); ctx.lineTo(xHi, y + 3);
+                ctx.moveTo(xLo, y - 3); ctx.lineTo(xLo, y + 3);
+                ctx.stroke();
+            }
+
+            // Expected value marker (dashed vertical tick)
+            if (opts.expected) {
+                var ex = L.histR - (opts.expected[i] / maxVal) * L.histW;
+                ctx.strokeStyle = '#c0392b';
+                ctx.lineWidth = 1.2;
+                ctx.setLineDash([3, 2]);
+                ctx.beginPath();
+                ctx.moveTo(ex, y - L.barH / 2 - 2);
+                ctx.lineTo(ex, y + L.barH / 2 + 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Weight value label
+            ctx.fillStyle = '#333';
+            ctx.globalAlpha = 0.5;
+            ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            var label = fmtNum(values[i]);
+            ctx.fillText(label, x - 3, y + 8);
+            ctx.globalAlpha = 1;
+        }
+
+        // 1/N grid lines on histogram (residual section only)
+        // These show the integer thresholds: any weight bar crossing
+        // a grid line gets a guaranteed deterministic copy.
+        if (opts.detCopies) {
+            ctx.strokeStyle = '#999';
+            ctx.lineWidth = 0.8;
+            ctx.setLineDash([4, 3]);
+            // Draw lines at k/N for k = 1, 2, ... up to the visible range
+            var maxK = Math.ceil(maxVal * N);
+            for (var k = 1; k <= maxK; k++) {
+                var gx = L.histR - (k / N / maxVal) * L.histW;
+                if (gx < L.histL) break;
+                ctx.globalAlpha = 0.4;
+                ctx.beginPath();
+                ctx.moveTo(gx, L.plotT);
+                ctx.lineTo(gx, L.plotB);
+                ctx.stroke();
+                // Label every visible grid line
+                ctx.globalAlpha = 0.35;
+                ctx.fillStyle = '#666';
+                ctx.font = '8px -apple-system, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.fillText(k + '/' + N, gx, L.plotB + 2);
+            }
+            ctx.setLineDash([]);
+            ctx.globalAlpha = 1;
+        }
+
+        // Deterministic + stochastic stacked bars (residual)
+        if (opts.detCopies) {
+            var extraH = 3;
+            var stoCounts = (opts.probeCountOverlay && opts.probeCountTotal > 0)
+                ? opts.probeCountOverlay.map(function (tot, i) { return Math.max(0, tot - opts.detCopies[i]); })
+                : null;
+
+            for (var i = 0; i < N; i++) {
+                var y = L.idxToY(i);
+                var detW = (opts.detCopies[i] / N / maxVal) * L.histW;
+                var stoW = stoCounts ? (stoCounts[i] / N / maxVal) * L.histW : 0;
+
+                // Deterministic segment
+                if (detW > 0) {
+                    var mc = opts.methodColor;
+                    var xDet = L.histR - detW;
+                    ctx.fillStyle = mc;
+                    ctx.globalAlpha = 0.12;
+                    ctx.fillRect(xDet, y - L.barH / 2 - extraH, detW, L.barH + 2 * extraH);
+                    ctx.strokeStyle = mc;
+                    ctx.globalAlpha = 0.7;
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(xDet, y - L.barH / 2 - extraH, detW, L.barH + 2 * extraH);
+                    ctx.globalAlpha = 1;
+                }
+
+                // Stochastic segment
+                if (stoW > 0) {
+                    var mc = opts.methodColor;
+                    var xDetEnd = L.histR - detW;
+                    var xSto = xDetEnd - stoW;
+                    ctx.fillStyle = mc;
+                    ctx.globalAlpha = 0.12;
+                    ctx.fillRect(xSto, y - L.barH / 2 - extraH, stoW, L.barH + 2 * extraH);
+                    ctx.strokeStyle = mc;
+                    ctx.globalAlpha = 0.6;
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([3, 2]);
+                    ctx.strokeRect(xSto, y - L.barH / 2 - extraH, stoW, L.barH + 2 * extraH);
+                    ctx.setLineDash([]);
+
+                    var totalCount = opts.detCopies[i] + stoCounts[i];
+                    ctx.fillStyle = mc;
+                    ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, sans-serif';
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(fmtNum(totalCount / N), xSto - 3, y - 6);
+                    ctx.globalAlpha = 1;
+                }
+            }
+
+            // Annotation below the plot area
+            var detTotal = 0;
+            for (var i = 0; i < N; i++) detTotal += opts.detCopies[i];
+            var R = N - detTotal;
+            ctx.fillStyle = '#777';
+            ctx.globalAlpha = 0.7;
+            ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillText(detTotal + ' deterministic;  R = ' + R + ' residual', L.histL + 2, L.plotB + 14);
+            ctx.globalAlpha = 1;
+        }
+
+        // Probe count overlay: dashed hollow bars (for non-residual sections)
+        if (!opts.detCopies && opts.probeCountOverlay && opts.probeCountTotal > 0) {
+            var total = opts.probeCountTotal;
+            var extraH = 4;
+            for (var i = 0; i < N; i++) {
+                var proportion = opts.probeCountOverlay[i] / total;
+                if (proportion <= 0) continue;
+                var barW = (proportion / maxVal) * L.histW;
+                var x = L.histR - barW;
+                var y = L.idxToY(i);
+
+                var mc = opts.methodColor;
+                ctx.fillStyle = mc;
+                ctx.globalAlpha = 0.12;
+                ctx.fillRect(x, y - L.barH / 2 - extraH, barW, L.barH + 2 * extraH);
+                ctx.strokeStyle = mc;
+                ctx.globalAlpha = 0.6;
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([3, 2]);
+                ctx.strokeRect(x, y - L.barH / 2 - extraH, barW, L.barH + 2 * extraH);
+                ctx.setLineDash([]);
+
+                ctx.fillStyle = mc;
+                ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(fmtNum(opts.probeCountOverlay[i] / total), x - 3, y - 6);
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // Histogram baseline (right edge)
+        ctx.strokeStyle = '#bbb';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(L.histR, L.plotT);
+        ctx.lineTo(L.histR, L.plotB);
+        ctx.stroke();
+
+        // Store the actual maxVal used for rendering so drag handler matches
+        L.histMaxVal = maxVal;
+    }
+
+    // ================================================================
+    //  DRAW: RIGHT CDF / QUANTILE PLOT
+    // ================================================================
+
+    function drawRightCDF(ctx, L, probeList, probeColor, opts) {
+        var N = S.N;
+        opts = opts || {};
+        var activeWeights = opts.residualWeights || S.weights;
+        var cs = S.cumulativeSum(activeWeights);
+
+
+        // Strata bands (on top of row shading, semi-transparent)
+        if (opts.strata) {
+            for (var k = 0; k < N; k++) {
+                ctx.fillStyle = k % 2 === 0 ? 'rgba(41,128,185,0.06)' : 'rgba(41,128,185,0.0)';
+                ctx.fillRect(L.uToX(k / N), L.plotT, L.cdfW / N, L.plotH);
+            }
+            for (var k = 0; k <= N; k++) {
+                ctx.strokeStyle = 'rgba(41,128,185,0.18)';
+                ctx.lineWidth = 0.7;
+                ctx.beginPath();
+                ctx.moveTo(L.uToX(k / N), L.plotT);
+                ctx.lineTo(L.uToX(k / N), L.plotB);
+                ctx.stroke();
+            }
+        }
+
+        // Ghost CDF (for residual)
+        if (opts.ghostCDF) {
+            var gcs = S.cumulativeSum(opts.ghostCDF.weights);
+            drawStaircase(ctx, L, gcs, '#aaa', 1, [4, 3], 0.4);
+        }
+
+        // CDF bars at each index row
+        for (var i = 0; i < N; i++) {
+            var uL = i === 0 ? 0 : cs[i - 1];
+            var uR = cs[i];
+            var xL = L.uToX(uL), xR = L.uToX(uR);
+            var yC = L.idxToY(i);
+            ctx.fillStyle = S.PALETTE[i];
+            ctx.globalAlpha = 0.5;
+            ctx.fillRect(xL, yC - L.barH / 2, xR - xL, L.barH);
+            ctx.globalAlpha = 1;
+            ctx.strokeStyle = S.PALETTE[i];
+            ctx.lineWidth = 1;
+            ctx.strokeRect(xL, yC - L.barH / 2, xR - xL, L.barH);
+        }
+
+        // Staircase outline
+        drawStaircase(ctx, L, cs, '#555', 1.2, [], 1);
+
+        // Axes
+        ctx.strokeStyle = '#999'; ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(L.cdfL, L.plotB); ctx.lineTo(L.cdfR, L.plotB);
+        ctx.moveTo(L.cdfL, L.plotT); ctx.lineTo(L.cdfL, L.plotB);
+        ctx.stroke();
+
+        // X-axis labels
+        ctx.fillStyle = '#666';
+        ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        var ticks = [0, 0.25, 0.5, 0.75, 1.0];
+        for (var ti = 0; ti < ticks.length; ti++) {
+            var u = ticks[ti];
+            ctx.fillText(u.toFixed(u === 0 || u === 1 ? 0 : 2), L.uToX(u), L.plotB + 4);
+            ctx.beginPath(); ctx.moveTo(L.uToX(u), L.plotB); ctx.lineTo(L.uToX(u), L.plotB + 3);
+            ctx.strokeStyle = '#999'; ctx.stroke();
+        }
+        ctx.fillStyle = '#888';
+        ctx.fillText('u', L.cdfL + L.cdfW / 2, L.plotB + 18);
+
+        // Hover ghost probe
+        if (opts.hoverU != null) {
+            drawProbe(ctx, L, cs, opts.hoverU, probeColor || '#333', 0.3);
+        }
+
+        // Probes
+        if (probeList) {
+            for (var pi = 0; pi < probeList.length; pi++) {
+                drawProbe(ctx, L, cs, probeList[pi].u, probeColor || '#333', 1.0);
+            }
+        }
+
+        // Comb spine
+        if (opts.comb && probeList && probeList.length > 1) {
+            ctx.strokeStyle = probeColor || '#333';
+            ctx.lineWidth = 1.5;
+            ctx.globalAlpha = 0.35;
+            ctx.beginPath();
+            ctx.moveTo(L.uToX(probeList[0].u), L.plotB + 4);
+            ctx.lineTo(L.uToX(probeList[probeList.length - 1].u), L.plotB + 4);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+            // Handle circle on first probe
+            var hx = L.uToX(probeList[0].u);
+            ctx.fillStyle = probeColor || '#333';
+            ctx.beginPath(); ctx.arc(hx, L.plotB + 4, 6, 0, 2 * Math.PI); ctx.fill();
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+        }
+    }
+
+    function drawStaircase(ctx, L, cs, color, lineWidth, dash, alpha) {
+        var N = S.N;
+        var isGhost = dash && dash.length > 0;
+        var showCircles = !isGhost && lineWidth >= 1;
+        var r = 3.2;
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.setLineDash(dash || []);
+        ctx.globalAlpha = alpha != null ? alpha : 1;
+
+        ctx.beginPath();
+        for (var i = 0; i < N; i++) {
+            var uL = i === 0 ? 0 : cs[i - 1];
+            var uR = cs[i];
+            var yC = L.idxToY(i);
+            var xL = L.uToX(uL);
+            var xR = L.uToX(uR);
+
+            var gapPx = showCircles ? r : 0;
+            ctx.moveTo(xL + gapPx, yC);
+            ctx.lineTo(xR, yC);
+
+            if (i < N - 1) {
+                var yNext = L.idxToY(i + 1);
+                ctx.moveTo(xR, yC);
+                ctx.lineTo(xR, showCircles ? yNext + r : yNext);
+            }
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Open/closed boundary circles
+        if (showCircles) {
+            for (var i = 0; i < N; i++) {
+                var uL = i === 0 ? 0 : cs[i - 1];
+                var uR = cs[i];
+                var yC = L.idxToY(i);
+                var xL = L.uToX(uL);
+                var xR = L.uToX(uR);
+
+                // Open circle at left end
+                ctx.beginPath();
+                ctx.arc(xL, yC, r, 0, 2 * Math.PI);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                // Filled circle at right end
+                ctx.beginPath();
+                ctx.arc(xR, yC, r, 0, 2 * Math.PI);
+                ctx.fillStyle = color;
+                ctx.fill();
+            }
+        }
+
+        ctx.globalAlpha = 1;
+    }
+
+    function drawProbe(ctx, L, cs, u, color, alpha) {
+        var idx = S.searchSorted(cs, u);
+        var x = L.uToX(u);
+        var yTarget = L.idxToY(idx);
+        ctx.globalAlpha = alpha;
+
+        // Vertical dashed line
+        ctx.setLineDash([4, 3]);
+        ctx.strokeStyle = color; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x, L.plotB); ctx.lineTo(x, yTarget); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Triangle on x-axis
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x, L.plotB); ctx.lineTo(x - 3.5, L.plotB + 7); ctx.lineTo(x + 3.5, L.plotB + 7);
+        ctx.closePath(); ctx.fill();
+
+        // Circle at intersection
+        ctx.fillStyle = S.PALETTE[idx];
+        ctx.beginPath(); ctx.arc(x, yTarget, 3.5, 0, 2 * Math.PI); ctx.fill();
+        ctx.strokeStyle = color; ctx.lineWidth = 0.8; ctx.stroke();
+
+        ctx.globalAlpha = 1;
+    }
+
+    // ================================================================
+    //  DRAW: FULL PANEL (histogram | y-axis | CDF)
+    // ================================================================
+
+    function drawPanel(canvas, opts) {
+        var result = S.resetCanvas(canvas);
+        var ctx = result.ctx, w = result.w, h = result.h;
+        var L = panelLayout(w, h);
+
+        // White background
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, w, h);
+
+        // Draw the three zones
+        drawLeftHistogram(ctx, L, opts.histValues, {
+            maxVal: opts.histMax,
+            expected: opts.histExpected,
+            errors: opts.histErrors,
+            overlayValues: opts.histOverlay,
+            probeCountOverlay: opts.probeCountOverlay,
+            probeCountTotal: opts.probeCountTotal,
+            detCopies: opts.detCopies,
+            methodColor: opts.probeColor || '#555',
+        });
+
+        drawRightCDF(ctx, L, opts.probes, opts.probeColor, {
+            strata: opts.strata,
+            comb: opts.comb,
+            hoverU: opts.hoverU,
+            ghostCDF: opts.ghostCDF,
+            residualWeights: opts.residualWeights,
+        });
+
+        drawYAxis(ctx, L);
+
+        // Store layout for interaction hit-testing
+        canvas._L = L;
+    }
+
+    // ================================================================
+    //  DRAW: METHOD SECTION (sections 3-5)
+    // ================================================================
+
+    function drawMethodSection(canvas, sec, probeColor, opts) {
+        var N = S.N;
+        var weights = S.weights;
+        var cs = S.cumulativeSum(weights); cs[N - 1] = 1.0;
+
+        var histValues = weights.slice();
+        var histMax = Math.max.apply(null, weights) * 1.15;
+        var overlay = {};
+
+        if (sec.mode === 'single' && sec.probes && sec.probes.length > 0) {
+            // Recompute counts from probes through CURRENT CDF (live update on weight drag)
+            var liveCounts = S.countIndices(
+                sec.probes.map(function (p) { return S.searchSorted(cs, p.u); }), N
+            );
+            overlay.probeCountOverlay = liveCounts;
+            overlay.probeCountTotal = N;
+        }
+        if (sec.mode === 'ktrials' && sec.hist) {
+            overlay.probeCountOverlay = sec.hist.means;
+            overlay.probeCountTotal = N;
+            overlay.errors = sec.hist.means.map(function (m, i) {
+                return {
+                    lo: (m - sec.hist.stds[i]) / N,
+                    hi: (m + sec.hist.stds[i]) / N,
+                };
+            });
+        }
+
+        var panelOpts = {
+            histValues: histValues, histMax: histMax,
+            probes: sec.probes,
+            probeColor: probeColor,
+            strata: opts && opts.strata,
+            comb: opts && opts.comb,
+            hoverU: null,
+        };
+        // Merge overlay
+        for (var key in overlay) panelOpts[key] = overlay[key];
+
+        drawPanel(canvas, panelOpts);
+    }
+
+    // ================================================================
+    //  DRAW: RESIDUAL SECTION (section 6)
+    // ================================================================
+
+    function drawResidualSection() {
+        var N = S.N;
+        var weights = S.weights;
+        var sec6 = S.sec6;
+        var cvSec6 = document.getElementById('cv-sec6');
+
+        var histValues = weights.slice();
+        var histMax = Math.max.apply(null, weights) * 1.15;
+        var overlay = {};
+
+        // Deterministic copies
+        var detCopies = weights.map(function (wi) { return Math.floor(N * wi); });
+        overlay.detCopies = detCopies;
+
+        if (sec6.mode === 'single' && sec6.residualProbes && sec6.residualProbes.length > 0) {
+            // Recompute stochastic counts from probes through current residual CDF
+            var res2 = weights.map(function (wi, i) { return wi - detCopies[i] / N; });
+            var resSum2 = res2.reduce(function (a, b) { return a + b; }, 0);
+            var normRes2 = resSum2 > 0 ? res2.map(function (r) { return r / resSum2; }) : weights.slice();
+            var resCs = S.cumulativeSum(normRes2); resCs[N - 1] = 1.0;
+            var stoCounts = S.countIndices(
+                sec6.residualProbes.map(function (p) { return S.searchSorted(resCs, p.u); }), N
+            );
+            var totalCounts = detCopies.map(function (d, i) { return d + stoCounts[i]; });
+            overlay.probeCountOverlay = totalCounts;
+            overlay.probeCountTotal = N;
+        }
+        if (sec6.mode === 'ktrials' && sec6.hist) {
+            overlay.probeCountOverlay = sec6.hist.means;
+            overlay.probeCountTotal = N;
+        }
+
+        // Compute residual weights for the CDF display
+        var res = weights.map(function (wi, i) { return wi - detCopies[i] / N; });
+        var resSum = res.reduce(function (a, b) { return a + b; }, 0);
+        var normRes = resSum > 0 ? res.map(function (r) { return r / resSum; }) : weights.slice();
+
+        var panelOpts = {
+            histValues: histValues, histMax: histMax,
+            probes: sec6.residualProbes,
+            probeColor: S.METHOD_COLORS.residual,
+            ghostCDF: { weights: weights.slice() },
+            residualWeights: normRes,
+        };
+        for (var key in overlay) panelOpts[key] = overlay[key];
+
+        drawPanel(cvSec6, panelOpts);
+    }
+
+    // ================================================================
+    //  DRAW: COUNTEREXAMPLE (section 5 sub)
+    // ================================================================
+
+    function drawCounterexample() {
+        var cv = document.getElementById('cv-counter');
+        var counterData = S.counterData;
+        if (!cv || !counterData) { if (cv) S.resetCanvas(cv); return; }
+        var trueVal = S.weights.reduce(function (s, w, i) { return s + w * S.getTestFnValues()[i]; }, 0);
+        drawEstimatorDist(cv, [
+            { estimators: counterData.multiEsts, color: S.METHOD_COLORS.multinomial, label: 'Multinomial' },
+            { estimators: counterData.sysEsts,   color: S.METHOD_COLORS.systematic, label: 'Systematic' },
+        ], trueVal);
+    }
+
+    // ================================================================
+    //  DRAW: ESTIMATOR DISTRIBUTION (KDE)
+    // ================================================================
+
+    function drawEstimatorDist(canvas, datasets, trueVal) {
+        if (!datasets || datasets.every(function (d) { return !d.estimators; })) { S.resetCanvas(canvas); return; }
+        var result = S.resetCanvas(canvas);
+        var ctx = result.ctx, w = result.w, h = result.h;
+        var margin = { top: 12, right: 12, bottom: 26, left: 12 };
+        var pL = margin.left, pR = w - margin.right;
+        var pT = margin.top, pB = h - margin.bottom;
+        var pW = pR - pL, pH = pB - pT;
+
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+
+        // Shared range
+        var allVals = datasets.reduce(function (acc, d) { return acc.concat(d.estimators || []); }, []);
+        if (allVals.length === 0) return;
+        var spread = Math.max(0.01, Math.max.apply(null, allVals) - Math.min.apply(null, allVals));
+        var lo = Math.min.apply(null, allVals) - spread * 0.25;
+        var hi = Math.max.apply(null, allVals) + spread * 0.25;
+
+        // Compute KDE for each dataset
+        var nPts = 150;
+        var curves = datasets.map(function (d) {
+            return {
+                points: S.gaussianKDE(d.estimators, nPts, lo, hi),
+                color: d.color,
+                label: d.label,
+            };
+        });
+
+        var maxDensity = Math.max.apply(null, curves.reduce(function (acc, c) {
+            return acc.concat(c.points.map(function (p) { return p.y; }));
+        }, [1e-10]));
+
+        function xToCanvas(v) { return pL + ((v - lo) / (hi - lo)) * pW; }
+        function yToCanvas(d) { return pB - (d / maxDensity) * pH * 0.92; }
+
+        // Draw filled KDE curves
+        for (var ci = 0; ci < curves.length; ci++) {
+            var points = curves[ci].points;
+            var color = curves[ci].color;
+
+            // Filled area
+            ctx.fillStyle = color;
+            ctx.globalAlpha = 0.2;
+            ctx.beginPath();
+            ctx.moveTo(xToCanvas(points[0].x), pB);
+            for (var pi = 0; pi < points.length; pi++) ctx.lineTo(xToCanvas(points[pi].x), yToCanvas(points[pi].y));
+            ctx.lineTo(xToCanvas(points[points.length - 1].x), pB);
+            ctx.closePath();
+            ctx.fill();
+
+            // Stroke
+            ctx.strokeStyle = color;
+            ctx.globalAlpha = 0.8;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(xToCanvas(points[0].x), yToCanvas(points[0].y));
+            for (var pi = 0; pi < points.length; pi++) ctx.lineTo(xToCanvas(points[pi].x), yToCanvas(points[pi].y));
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
+
+        // True value line
+        if (trueVal != null && trueVal >= lo && trueVal <= hi) {
+            var tx = xToCanvas(trueVal);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([5, 3]);
+            ctx.beginPath(); ctx.moveTo(tx, pT); ctx.lineTo(tx, pB); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#555';
+            ctx.font = '9px -apple-system, sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+            ctx.fillText('true', tx, pT - 1);
+        }
+
+        // X-axis
+        ctx.strokeStyle = '#bbb'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(pL, pB); ctx.lineTo(pR, pB); ctx.stroke();
+
+        // X-axis labels
+        ctx.fillStyle = '#888'; ctx.font = '9px -apple-system, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        var nTicks = 5;
+        for (var t = 0; t <= nTicks; t++) {
+            var v = lo + (hi - lo) * t / nTicks;
+            ctx.fillText(v.toFixed(2), xToCanvas(v), pB + 3);
+        }
+        ctx.fillStyle = '#aaa';
+        ctx.fillText('estimator value', pL + pW / 2, pB + 14);
+
+        // Legend (top-right)
+        ctx.font = '10px -apple-system, sans-serif';
+        ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+        var ly = pT + 2;
+        for (var ci = 0; ci < curves.length; ci++) {
+            var color = curves[ci].color;
+            var label = curves[ci].label;
+            ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.globalAlpha = 0.8;
+            ctx.beginPath(); ctx.moveTo(pR - 55, ly + 5); ctx.lineTo(pR - 42, ly + 5); ctx.stroke();
+            ctx.globalAlpha = 1; ctx.fillStyle = '#333';
+            ctx.fillText(label || '', pR - 58, ly);
+            ly += 14;
+        }
+    }
+
+    // ================================================================
+    //  DRAW: COMPARISON PANEL (section 7)
+    // ================================================================
+
+    function drawComparisonPanel() {
+        var N = S.N;
+        var weights = S.weights;
+        var compData = S.compData;
+        var cv = document.getElementById('cv-comparison');
+        if (!cv || !compData) { if (cv) S.resetCanvas(cv); return; }
+        var result = S.resetCanvas(cv);
+        var ctx = result.ctx, w = result.w, h = result.h;
+        var margin = { top: 12, right: 12, bottom: 20, left: 12 };
+        var pL = margin.left, pR = w - margin.right;
+        var pT = margin.top, pB = h - margin.bottom;
+        var pH = pB - pT;
+        var rowH = pH / N, barH = rowH * 0.65;
+
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+
+        // Shared scale across all methods
+        var allHists = [compData.multi, compData.strat, compData.sys, compData.resid];
+        var maxPropVals = weights.map(function (w) { return w * 1.1; });
+        allHists.forEach(function (hist) {
+            hist.means.forEach(function (m, i) {
+                maxPropVals.push((m + hist.stds[i]) / N);
+            });
+        });
+        var maxProp = Math.max.apply(null, maxPropVals) * 1.05;
+
+        function idxToY(i) { return pB - (i + 0.5) * rowH; }
+
+        // Draw weight bars (grayed out)
+        for (var i = 0; i < N; i++) {
+            var y = idxToY(i);
+            var wBarW = (weights[i] / maxProp) * (pR - pL);
+            ctx.fillStyle = '#ddd';
+            ctx.fillRect(pR - wBarW, y - barH / 2, wBarW, barH);
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 0.8;
+            ctx.strokeRect(pR - wBarW, y - barH / 2, wBarW, barH);
+        }
+
+        // Draw each method's error bars
+        var methods = [
+            { hist: compData.multi, color: S.METHOD_COLORS.multinomial },
+            { hist: compData.strat, color: S.METHOD_COLORS.stratified },
+            { hist: compData.sys,   color: S.METHOD_COLORS.systematic },
+            { hist: compData.resid, color: S.METHOD_COLORS.residual },
+        ];
+        var nMethods = methods.length;
+        var slotH = barH / nMethods;
+
+        for (var mi = 0; mi < nMethods; mi++) {
+            var hist = methods[mi].hist;
+            var color = methods[mi].color;
+            var yOff = -barH / 2 + slotH * (mi + 0.5);
+
+            for (var i = 0; i < N; i++) {
+                var yBase = idxToY(i);
+                var y = yBase + yOff;
+                var mProp = hist.means[i] / N;
+                var hiProp = (hist.means[i] + hist.stds[i]) / N;
+                var loProp = Math.max(0, hist.means[i] - hist.stds[i]) / N;
+
+                // Mean marker
+                var mx = pR - (mProp / maxProp) * (pR - pL);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.globalAlpha = 0.8;
+                ctx.beginPath();
+                ctx.moveTo(mx, y - slotH * 0.35);
+                ctx.lineTo(mx, y + slotH * 0.35);
+                ctx.stroke();
+
+                // Error bar
+                var xHi = pR - (hiProp / maxProp) * (pR - pL);
+                var xLo = pR - (loProp / maxProp) * (pR - pL);
+                ctx.lineWidth = 1.2;
+                ctx.beginPath();
+                ctx.moveTo(xHi, y); ctx.lineTo(xLo, y);
+                ctx.moveTo(xHi, y - 2); ctx.lineTo(xHi, y + 2);
+                ctx.moveTo(xLo, y - 2); ctx.lineTo(xLo, y + 2);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // Y-axis
+        ctx.strokeStyle = '#bbb'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(pR, pT); ctx.lineTo(pR, pB); ctx.stroke();
+
+        // Index labels
+        for (var i = 0; i < N; i++) {
+            ctx.fillStyle = S.PALETTE[i];
+            ctx.font = 'bold 11px -apple-system, sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(i + 1, pR + 8, idxToY(i));
+        }
+    }
+
+    // ================================================================
+    //  DRAW: HELPER for per-section estimator distribution
+    // ================================================================
+
+    function drawEstDist(canvasId, sec, color, label) {
+        var cv = document.getElementById(canvasId);
+        if (!cv) return;
+        var hist = sec.hist;
+        if (!hist || !hist.allCounts) { S.resetCanvas(cv); return; }
+        // Recompute estimator values for current test function (cheap)
+        var ev = S.evalEstimators(hist);
+        if (!ev) { S.resetCanvas(cv); return; }
+        drawEstimatorDist(cv,
+            [{ estimators: ev.estimators, color: color, label: label }],
+            ev.trueVal
+        );
+    }
+
+    function drawCompEstDist() {
+        var compData = S.compData;
+        var cv = document.getElementById('cv-est-all');
+        if (!cv || !compData) { if (cv) S.resetCanvas(cv); return; }
+        // Recompute all estimator values for current test function
+        var evM = S.evalEstimators(compData.multi);
+        var evS = S.evalEstimators(compData.strat);
+        var evY = S.evalEstimators(compData.sys);
+        var evR = S.evalEstimators(compData.resid);
+        if (!evM) { S.resetCanvas(cv); return; }
+        drawEstimatorDist(cv, [
+            { estimators: evM.estimators, color: S.METHOD_COLORS.multinomial, label: 'Multinomial' },
+            { estimators: evS.estimators, color: S.METHOD_COLORS.stratified, label: 'Stratified' },
+            { estimators: evY.estimators, color: S.METHOD_COLORS.systematic, label: 'Systematic' },
+            { estimators: evR.estimators, color: S.METHOD_COLORS.residual,   label: 'Residual' },
+        ], evM.trueVal);
+    }
+
+    // ================================================================
+    //  EXPORT drawing functions onto SMC namespace
+    // ================================================================
+
+    S.panelLayout = panelLayout;
+    S.drawYAxis = drawYAxis;
+    S.drawLeftHistogram = drawLeftHistogram;
+    S.drawRightCDF = drawRightCDF;
+    S.drawStaircase = drawStaircase;
+    S.drawProbe = drawProbe;
+    S.drawPanel = drawPanel;
+    S.drawMethodSection = drawMethodSection;
+    S.drawResidualSection = drawResidualSection;
+    S.drawCounterexample = drawCounterexample;
+    S.drawEstimatorDist = drawEstimatorDist;
+    S.drawComparisonPanel = drawComparisonPanel;
+    S.drawEstDist = drawEstDist;
+    S.drawCompEstDist = drawCompEstDist;
+
+})();

@@ -1,0 +1,131 @@
+/* SMC Resampling — interactive element styles only.
+   Typography and layout come from explorations-base.css. */
+
+/* --- Break interactive elements out of the 60% content width --- */
+canvas.panel,
+.control-box,
+.testfn-row,
+.var-display,
+pre.code-callout {
+    width: 100% !important;
+}
+
+/* --- Unified panel canvas --- */
+canvas.panel {
+    width: 100%;
+    height: 320px;
+    border: 1px solid var(--s-accent, #467);
+    border-radius: 4px;
+    cursor: crosshair;
+    touch-action: none;
+    display: block;
+    margin: 0.6em 0;
+}
+canvas.panel-short { height: 200px; }
+
+/* --- Controls --- */
+.control-box {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: var(--s-surface, #f6f8fa);
+    padding: 8px 12px;
+    margin: 0.8em 0;
+    font-family: var(--s-sans, -apple-system, sans-serif);
+}
+.control-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 3px 0;
+    font-size: 0.85em;
+}
+.control-row + .control-row {
+    border-top: 1px solid #eee;
+    margin-top: 3px;
+    padding-top: 6px;
+}
+.control-row button {
+    padding: 4px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f8f8f8;
+    cursor: pointer;
+    font-size: 1em;
+    font-family: inherit;
+}
+.control-row button:hover { background: #eee; }
+
+/* --- Insight callout --- */
+.insight {
+    border-left: 3px solid var(--s-accent, #467);
+    background: #f0f7fc;
+    padding: 0.6em 1em;
+    margin: 1em 0;
+    font-size: 0.92em;
+    border-radius: 0 4px 4px 0;
+}
+
+/* --- Code callout (legacy pre.code-callout blocks) --- */
+pre.code-callout {
+    background: var(--s-code-bg, #fbf5e6);
+    border: 1px solid #e0ddd5;
+    border-radius: 4px;
+    padding: 0.6em 1em;
+    font-family: var(--s-mono, Consolas, monospace);
+    font-size: 0.85rem;
+    overflow-x: auto;
+    margin: 0.8em 0;
+    line-height: 1.45;
+}
+pre.code-callout .comment { color: #888; }
+
+/* --- Method colors --- */
+.c-multinomial { color: #e67e22; }
+.c-stratified  { color: #2980b9; }
+.c-systematic  { color: #27ae60; }
+.c-residual    { color: #8e44ad; }
+
+/* --- Small note --- */
+.small-note {
+    font-size: 0.82em;
+    color: var(--s-text-dim, #777);
+    margin-top: -0.3em;
+}
+
+.placeholder-text {
+    color: #aaa; font-style: italic;
+    padding: 2em 0; text-align: center;
+}
+
+.var-display {
+    font-size: 0.82em; font-family: var(--s-mono, monospace);
+    color: var(--s-text-dim, #555); margin: 0.3em 0;
+}
+
+/* --- Inline test function selector --- */
+.testfn-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82em;
+    color: var(--s-text-dim, #666);
+    margin: 0.4em 0 0.1em;
+}
+.testfn-row select {
+    padding: 2px 4px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 1em;
+    color: #555;
+    font-family: var(--s-sans, -apple-system, sans-serif);
+}
+
+/* --- §7 comparison --- */
+.comp-header { font-weight: 700; font-size: 0.85em; text-align: center; padding: 4px 0; }
+.comp-var { font-size: 0.78em; font-family: var(--s-mono, monospace); text-align: center; color: #666; min-height: 1.5em; }
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+    canvas.panel { height: 260px; }
+}
