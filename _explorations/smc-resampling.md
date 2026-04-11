@@ -32,30 +32,28 @@ mathjax_macros: >-
 ## 1. Why resample?
 
 Sequential Monte Carlo (SMC) approximates a target distribution
-using a family of $\np$ weighted samples---called *particles*.
+using a finite set of $\np$ weighted samples---called *particles*.
 Each particle has a state $\state^i$ (its position in the space
-being sampled) and a normalized weight $\wt^i \geq 0$
-(with $\sum_{i=1}^{\np} \wt^i = 1$). Samples are expensive: you
-have a finite budget of $\np$ particles, and the goal is to
-extract maximum accuracy from them.
+being sampled) and a normalized **importance weight** $\wt^i \geq 0$
+(with $\sum_{i=1}^{\np} \wt^i = 1$).
 
-In practice, these weights tend to become highly
-unequal---**weight degeneracy**.<label for="sn-ess" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-ess" class="margin-toggle"/><span class="sidenote">A common diagnostic is the *effective sample size* $\text{ESS} = 1/\sum_i (\wt^i)^2$, which ranges from 1 (all weight on one particle) to $\np$ (uniform weights). When ESS drops below a threshold (often $\np/2$), it is time to resample.</span> One or two particles end up
+In practice, these weights can become highly
+unequal, leading to **weight degeneracy**, when a few particles end up
 holding nearly all the weight, while the rest contribute almost
-nothing to estimates. This is wasteful: your budget of $\np$
+nothing to estimates. This is wasteful: a budget of $\np$
 particles has effectively shrunk to one or two useful samples.
+This is when resampling comes in.<label for="sn-ess" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-ess" class="margin-toggle"/><span class="sidenote">A common diagnostic for weight degeneracy is the *effective sample size* $\text{ESS} = 1/\sum_i (\wt^i)^2$, which ranges from 1 (all weight on one particle) to $\np$ (uniform weights). When ESS drops below a threshold (often $\np/2$), it is time to resample.</span>
 
-*[SMC propagation visualization --- coming soon]*
+*[SMC propagation visualization, coming soon to a spot near here?]*
 {:.placeholder-text}
 
-Resampling fixes this by replacing the weighted particle family
-with an equally-weighted set of $\np$ particles, duplicating
-high-weight particles and eliminating low-weight ones. But this
-cure has a side effect: **sample impoverishment**. After
-resampling, many particles are copies of the same few ancestors,
-and the cloud loses diversity. The more aggressively you
+Resampling techniques fix weight degeneracy by replacing the weighted particle family
+with a new set of $\np$ particles, all with equal weights, duplicating
+high-weight particles and eliminating low-weight ones. This fixes the weight degeneracy problem, but has some side effects: introducing variance, and also potentially leading to **sample impoverishment**. After
+resampling, many particles may be copies of the same few ancestors,
+and the family of particles loses diversity. The more aggressively you
 concentrate copies on the heaviest particles, the fewer distinct
-values remain---which hurts the quality of exploration in
+values remain---which could hurt the quality of exploration in
 subsequent steps. This tension between *concentration*
 (replicating the winners to reduce degeneracy) and
 *diversification* (maintaining distinct particles to avoid
@@ -93,16 +91,16 @@ estimates from the same particle budget.
 
 Three of the four methods (multinomial, stratified, systematic)
 share the same mapping from **probe points** on $[0,1]$ to
-particle indices.<label for="mn-cdf" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-cdf" class="margin-toggle"/><span class="marginnote">The fourth method, residual resampling, uses a different construction entirely---see §4.</span> The cumulative distribution function
+particle indices. The cumulative distribution function
 $\cdf(i) = \sum_{j=1}^{i} \wt^j$ partitions $[0,1]$ into
 segments of width $\wt^i$. A probe at position $u$ selects
 whichever particle $i$ satisfies
 $\cdf(i{-}1) \leq u < \cdf(i)$---the **inverse CDF** (quantile
 function) $\invcdf(u)$.
 
-**Drag the bars** on the left to adjust particle weights (they
-auto-renormalize). **Click the plot** to place probes and see
-which particle each selects. Hover to preview.
+**Drag the endpoints of the bars** on the histogram (or the segments' endpoints
+in the inverse CDF plot on the righ) to adjust particle weights (they auto-renormalize).
+**Click the plot on the right** to place probes and see which particle each selects.
 
 <canvas id="cv-sec2" class="panel"></canvas>
 
@@ -111,24 +109,24 @@ which particle each selects. Hover to preview.
 <span style="font-size:0.85em; color:#666;">Presets:</span>
 <button id="btn-uniform">Uniform</button>
 <button id="btn-skewed">Skewed</button>
-<button id="btn-degenerate">Degenerate</button>
+<button id="btn-degenerate">Nearly degenerate</button>
 <span style="flex:1;"></span>
 <button id="btn-clear-probes">Clear probes</button>
 </div>
 </div>
 
-Now you have the mapping: a probe at position $u$ selects
+Play with the mapping: A probe at position $u$ selects
 particle $\invcdf(u)$. The question is **how to place $\np$
 probes** so that, on average, particle $i$ gets selected $\np
 \wt^i$ times. Try it: click on the plot above to place probes
 yourself. What strategy would you use?
 
-The most natural idea---draw $\np$ independent uniforms---turns
-out to work, and it leads to our first algorithm. We will then
-see two less obvious strategies that produce lower variance by
+The most natural idea might be to place them uniformly at random. 
+Indeed $\np$ independent uniform draws works, and that leads to our first algorithm. 
+But you can do better if you want lower variance.
+We will then see two less obvious strategies that produce lower variance by
 spreading the probes more evenly. All three share the CDF
-mechanism above; after that, we turn to two methods that take a
-fundamentally different approach.
+mechanism above; after that, we can turn to two methods that take a different approach.
 
 
 ## 3. Three ways to place the probes
@@ -139,7 +137,7 @@ The simplest approach: draw $\np$ independent uniform random
 numbers $u_1, \ldots, u_\np \overset{\text{iid}}{\sim} \mathrm{Uniform}(0,1]$
 and map each through the inverse CDF.<label for="sn-pit" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-pit" class="margin-toggle"/><span class="sidenote">This is the *probability integral transform*, applied $\np$ times independently. A while back, I made a [post exploring the continuous case](/2022/09/02/transform-pdf.html)---given a continuous random variable $X$ with density $f$, what is the density of $Y = y(X)$ for some invertible $y$? The answer is the change-of-variables formula $g(y) = f(x(y))\,\lvert\mathrm{d}x/\mathrm{d}y\rvert$. Here we are doing the same thing in the discrete setting: each independent $u_k \sim \mathrm{Uniform}(0,1]$ is transformed through the discrete quantile function $\invcdf$ to produce a sample from the particle-weight distribution---exactly as passing a uniform draw through a continuous inverse CDF yields a draw from the corresponding distribution.</span> The resulting duplication
 counts $(\cnt^1, \ldots, \cnt^\np)$ follow a multinomial
-distribution.
+distribution (or equivalently, $\np$ independent draws from the categorical distribution defined by the weights).
 
 ```python
 # Step 1: build the inverse CDF (shared by all three CDF-based methods)
@@ -167,16 +165,16 @@ systematic) a single linear pass is equivalent and faster:
 ```python
 i, j = 0, 0
 while i < N:
-    if positions[i] < cumulative_sum[j]:
-        indices[i] = j     # probe i lands in particle j's segment
-        i += 1             # move to next probe
-    else:
-        j += 1             # move to next CDF step
+  if positions[i] < cumulative_sum[j]:
+    indices[i] = j # probe i lands in particle j's segment
+    i += 1         # move to next probe
+  else:
+    j += 1         # move to next CDF step
 ```
 
 Both pointers only advance forward, so this is $O(\np)$. This is what filterpy
 actually uses for stratified and systematic resampling.
-</p>
+
 </details>
 
 Because the draws are independent, probes can cluster and leave
@@ -336,14 +334,14 @@ differs---and with it the variance.) ∎
 
 Systematic has the same marginals as stratified, but the probes
 are **perfectly correlated**---one random number determines all
-of them. For most weight patterns and test functions, this
+of them. For many weight patterns and test functions, this
 correlation is benign or even helpful. But it becomes
 pathological when the test function $f$ is **aligned** with a
 periodic weight structure that matches the comb spacing.
 
 Douc et al. (2005) construct an alternating weight pattern (high, low,
 high, low, ...) and a test function
-$f(\state^i) = \mathbf{1}\{i \text{ even}\}$ that separates the
+$f(\state^i) = \mathbf{1}[\{i \text{ even}\}]$ that separates the
 two classes. Define the total weight on even-indexed particles as
 $\wt_{\mathrm{even}} = \sum_{i\,\text{even}} \wt^i$. The comb
 teeth collectively land either all on the high-weight (even)
@@ -354,12 +352,6 @@ $(\wt_{\mathrm{even}}-\tfrac{1}{2})(1-\wt_{\mathrm{even}})$,
 which is **constant in $\np$**---it does not improve as you add
 more particles. Meanwhile, multinomial's variance decreases as
 $\wt_{\mathrm{even}}(1 - \wt_{\mathrm{even}})/\np$.
-
-At $\np = 8$ with $\wt_{\mathrm{even}} = 0.8$: systematic
-std $\approx$ 0.245 vs. multinomial std $\approx$ 0.141---systematic
-is **1.7× worse**. Try switching to other test functions
-(e.g., mean position) using the selector to see that the effect
-vanishes when $f$ is not aligned with the weight periodicity.
 
 <div class="control-box">
 <div class="control-row">
@@ -375,6 +367,12 @@ vanishes when $f$ is not aligned with the weight periodicity.
 
 <div class="var-display" id="var-counter"></div>
 
+<!-- At $\np = 8$ with $\wt_{\mathrm{even}} = 0.8$: systematic
+std $\approx$ 0.245 vs. multinomial std $\approx$ 0.141---systematic
+is **1.7× worse**.  -->
+Try switching to other test functions
+(e.g., mean position) using the selector to see that the effect
+vanishes when $f$ is not aligned with the weight periodicity.
 
 ## 4. Residual resampling
 
@@ -388,13 +386,13 @@ the three CDF-based methods can be used for this phase---select
 below. The right plot shows the residual CDF (solid) overlaid on
 the original (dotted).
 
-<pre id="resid-code"><span class="comment"># Phase 1 (deterministic): guaranteed copies from the integer part</span>
-num_copies = (np.floor(N * weights)).astype(int)    <span class="comment"># ⌊Nwⁱ⌋</span>
-<span class="comment"># Phase 2 (stochastic): <span id="resid-phase2-comment">multinomial</span> on the fractional remainders</span>
+<div class="highlighter-rouge" id="resid-code"><div class="highlight"><pre class="highlight"><code><span class="c1"># Phase 1 (deterministic): guaranteed copies from the integer part</span>
+num_copies = (np.floor(N * weights)).astype(int)    <span class="c1"># ⌊Nwⁱ⌋</span>
+<span class="c1"># Phase 2 (stochastic): <span id="resid-phase2-comment">multinomial</span> on the fractional remainders</span>
 residual = weights * N - num_copies
-residual /= sum(residual)                           <span class="comment"># normalize residuals</span>
-<span id="resid-phase2-code">positions = random(R)                               <span class="comment"># multinomial: R independent probes</span></span>
-indexes[k:N] = np.searchsorted(cumsum(residual), positions)</pre>
+residual /= sum(residual)                           <span class="c1"># normalize residuals</span>
+<span id="resid-phase2-code">positions = random(R)                               <span class="c1"># multinomial: R independent probes</span></span>
+indexes[k:N] = np.searchsorted(cumsum(residual), positions)</code></pre></div></div>
 
 <canvas id="cv-sec6" class="panel"></canvas>
 
@@ -447,12 +445,11 @@ variance; using stratified or systematic for phase 2 can reduce
 it further.
 
 
-## 5. Head-to-head comparison
+## 5. Comparing all so far
 
-All four fixed-$\np$ methods on the same weights, overlaid on a single plot.
+Let's look at all four methods examined so for on the same weights, overlaid on a single plot.
 Gray bars show the target weights; colored error bars show each
-method's mean count ± 1 std over $K$ trials (vertically offset
-within each particle row for readability). Below, the estimator
+method's mean count ± 1 std over $K$ trials. Below, the estimator
 distribution for the selected test function $f$ shows how tightly
 each method concentrates around the true value.
 
@@ -468,7 +465,7 @@ each method concentrates around the true value.
 <canvas id="cv-comparison" class="panel"></canvas>
 
 <div class="testfn-row" style="margin-top:0.8em;">
-<strong>Estimator distribution</strong> --- all four overlaid, for $f(\state^i) =$
+<strong>Estimator distributions</strong> for $f(\state^i) =$
 <select class="testfn-select"></select>
 <span style="color:#999;">(dashed = true value)</span>
 </div>
@@ -477,17 +474,10 @@ each method concentrates around the true value.
 
 <div style="display:flex; justify-content:center; gap:12px; font-size:0.82em; margin:0.3em 0;">
 <strong>Estimator std:</strong>
-<span class="c-multinomial" id="comp-std-multi"></span>
-<span class="c-stratified" id="comp-std-strat"></span>
-<span class="c-systematic" id="comp-std-sys"></span>
-<span class="c-residual" id="comp-std-resid"></span>
-</div>
-
-<div style="display:flex; justify-content:center; gap:16px; font-size:0.82em; margin:0.3em 0;">
-<span><span style="display:inline-block;width:12px;height:3px;background:#e67e22;vertical-align:middle;margin-right:3px;"></span>Multinomial <span class="comp-var" id="comp-var-multi"></span></span>
-<span><span style="display:inline-block;width:12px;height:3px;background:#2980b9;vertical-align:middle;margin-right:3px;"></span>Stratified <span class="comp-var" id="comp-var-strat"></span></span>
-<span><span style="display:inline-block;width:12px;height:3px;background:#27ae60;vertical-align:middle;margin-right:3px;"></span>Systematic <span class="comp-var" id="comp-var-sys"></span></span>
-<span><span style="display:inline-block;width:12px;height:3px;background:#8e44ad;vertical-align:middle;margin-right:3px;"></span>Residual <span class="comp-var" id="comp-var-resid"></span></span>
+Multinomial <span class="c-multinomial" id="comp-std-multi"></span>
+Stratified <span class="c-stratified" id="comp-std-strat"></span>
+Systematic <span class="c-systematic" id="comp-std-sys"></span>
+Residual <span class="c-residual" id="comp-std-resid"></span>
 </div>
 
 | | Multinomial | Stratified | Systematic | Residual |
@@ -495,7 +485,6 @@ each method concentrates around the true value.
 | $\Var \leq \Var_{\text{mult}}$? | baseline | ✓ always | ✗ not guaranteed | ✓ always |
 | $\|\cnt^i - \np\wt^i\|$ bound | up to $\np$ | $\leq 1$ | $\leq 1$ | phase-2 dependent |
 | Random draws | $\np$ | $\np$ | 1 | $R \leq \np$ |
-| Est. std | <span id="td-var-multi">---</span> | <span id="td-var-strat">---</span> | <span id="td-var-sys">---</span> | <span id="td-var-resid">---</span> |
 {:.summary-table}
 
 

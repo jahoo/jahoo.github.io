@@ -533,9 +533,9 @@
         if (commentEl && codeEl) {
             commentEl.textContent = S.residualPhase2;
             var codeLines = {
-                multinomial: 'positions = random(R)                               <span class="comment"># multinomial: R independent probes</span>',
-                stratified:  'positions = (random(R) + range(R)) / R              <span class="comment"># stratified: one probe per stratum</span>',
-                systematic:  'positions = (random() + np.arange(R)) / R           <span class="comment"># systematic: single-offset comb</span>',
+                multinomial: 'positions = random(R)                               <span class="c1"># multinomial: R independent probes</span>',
+                stratified:  'positions = (random(R) + range(R)) / R              <span class="c1"># stratified: one probe per stratum</span>',
+                systematic:  'positions = (random() + np.arange(R)) / R           <span class="c1"># systematic: single-offset comb</span>',
             };
             codeEl.innerHTML = codeLines[S.residualPhase2] || codeLines.multinomial;
         }
@@ -632,8 +632,6 @@
             ['multi', 'strat', 'sys', 'resid'].forEach(function (key) {
                 var ev = S.evalEstimators(S.compData[key]);
                 var std = ev ? Math.sqrt(ev.estVar).toFixed(4) : '—';
-                document.getElementById('comp-var-' + key).textContent = 'std=' + std;
-                document.getElementById('td-var-' + key).textContent = std;
                 document.getElementById('comp-std-' + key).textContent = std;
             });
             redrawAll();
