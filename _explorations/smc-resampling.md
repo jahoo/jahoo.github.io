@@ -388,7 +388,7 @@ below. The right plot shows the residual CDF (solid) overlaid on
 the original (dotted).
 
 <div class="highlighter-rouge" id="resid-code"><div class="highlight"><pre class="highlight"><code><span class="c1"># Phase 1 (deterministic): guaranteed copies from the integer part</span>
-num_copies = (np.floor(N * weights)).astype(int)    <span class="c1"># ⌊Nwⁱ⌋</span>
+num_copies = np.floor(N * weights)                  <span class="c1"># ⌊Nwⁱ⌋</span>
 <span class="c1"># Phase 2 (stochastic): <span id="resid-phase2-comment">multinomial</span> on the fractional remainders</span>
 residual = weights * N - num_copies
 residual /= sum(residual)                           <span class="c1"># normalize residuals</span>
@@ -508,10 +508,10 @@ processed in isolation.
 
 ```python
 # For each particle independently:
-num_copies = np.floor(N * weights).astype(int)
+num_copies = np.floor(N * weights)
 p_bonus = N * weights - num_copies                     # fractional part
 u = np.random.rand(N)                                  # one uniform draw per particle
-bonus = (u >= 1 - p_bonus).astype(int)                 # inverse CDF: right of step → bonus
+bonus = (u >= 1 - p_bonus)                             # inverse CDF: right of step → bonus
 num_copies += bonus                                    # total may differ from N
 ```
 
