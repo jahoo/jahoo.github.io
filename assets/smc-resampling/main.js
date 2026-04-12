@@ -436,28 +436,26 @@
 
     // Section 5 counterexample
     document.getElementById('btn-load-counter').addEventListener('click', function () {
-        S.weights = [];
-        for (var i = 0; i < N; i++) S.weights.push(i % 2 === 0 ? 0.20 : 0.05);
-        S.normalize(S.weights);
-        S.probes = [];
-        [S.sec3, S.sec4, S.sec6].forEach(function (s) { s.probes = []; s.counts = null; s.hist = null; s.mode = 'none'; });
-        S.sec5.mode = 'none'; S.sec5.offset = Math.random() / N;
-        S.compData = null; S.counterData = null;
-        // Auto-switch to the even/odd test function — the counterexample
-        // only manifests when f is aligned with the weight alternation
+        setAlternatingWeights();
+        // Auto-switch to the even/odd test function
         S.testFnKey = 'evenodd';
         document.querySelectorAll('.testfn-select').forEach(function (s) { s.value = 'evenodd'; });
         redrawAll();
     });
-    document.getElementById('btn-reset-weights').addEventListener('click', function () {
-        S.weights = [0.05, 0.08, 0.12, 0.30, 0.20, 0.12, 0.08, 0.05];
-        S.probes = [];
-        [S.sec3, S.sec4, S.sec5, S.sec6].forEach(function (s) { s.probes = []; s.counts = null; s.hist = null; s.mode = 'none'; });
-        S.compData = null; S.counterData = null;
+    document.getElementById('btn-clear-counter').addEventListener('click', function () {
+        S.counterData = null;
+        document.getElementById('var-counter').textContent = '';
+        var estEl = document.getElementById('est-counter');
+        if (estEl) estEl.classList.remove('visible');
         redrawAll();
     });
+    (function () {
+        var slider = document.getElementById('slider-K-counter');
+        var valSpan = document.getElementById('val-K-counter');
+        slider.addEventListener('input', function () { valSpan.textContent = slider.value; });
+    })();
     document.getElementById('btn-run-counter').addEventListener('click', function () {
-        var K = 2000;
+        var K = parseInt(document.getElementById('slider-K-counter').value, 10);
         var perm = document.getElementById('chk-permute').checked;
         var positions = S.getTestFnValues();
         var sysEsts = [], multiEsts = [];
@@ -712,6 +710,15 @@
     });
     document.getElementById('btn-degenerate').addEventListener('click', function () {
         S.weights = [0.01, 0.01, 0.02, 0.02, 0.02, 0.02, 0.01, 0.89]; clearAll(); redrawAll();
+    });
+    function setAlternatingWeights() {
+        S.weights = [];
+        for (var i = 0; i < N; i++) S.weights.push(i % 2 === 0 ? 0.20 : 0.05);
+        S.normalize(S.weights);
+        clearAll(); redrawAll();
+    }
+    document.getElementById('btn-alternating').addEventListener('click', function () {
+        setAlternatingWeights();
     });
     document.getElementById('btn-clear-probes').addEventListener('click', function () {
         S.probes = []; redrawAll();
