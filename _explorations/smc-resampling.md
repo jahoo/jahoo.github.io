@@ -70,15 +70,12 @@ and dropping low-weight ones. This addresses weight degeneracy, but introduces a
 **path degeneracy**.<label for="sn-pathdegen" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-pathdegen" class="margin-toggle"/><span class="sidenote">I'm getting this terminology for the two kinds of degeneracy from the excellent Naesseth et al. (2019, Chapter 2). They note that *adaptive resampling* can be a partial mitigation for path degeneracy. Only resample when the effective sample size $\text{ESS} = 1/\sum_\idx (\normwt^\idx)^2$ (which ranges from 1 when one particle has all the weight to $\np$ when weights are uniform) drops below a threshold (e.g., $\np/2$), rather than at every step. In this post I want to focus just on what happens when we _do_ resample, rather than on when to resample, but the ESS values in the illustration can give a sense of when resampling would be triggered in an adaptive resampling method.</span> 
 After enough steps, all current particles may trace back to a single ancestor at earlier timesteps [click on a timestep label in the illustration].
 
-Low-variance resampling methods (like stratified, systematic, or residual) produce more diverse resampled sets than multinomial resampling, which slows ancestry collapse, but doesn't prevent it entirely. This, along with the variance of the filtering estimate, makes the choice of resampling method matter.
+Adding resampling can keep our particle approximation useful (fixing SIS's weight degeneracy problem), but the method we use to resample can affect both the variance of our estimates and how quickly path diversity is lost. The rest of this post explores several resampling methods, visualizes their differences, to help build intuition for why some would perform better than others.
 
-In short: we resample to keep our particle approximation useful (preventing weight degeneracy), but the way we resample affects both the variance of our estimates and how quickly ancestral diversity is lost. The rest of this post explores several resampling methods, visualizes their differences, and builds intuition for why some perform better than others.
+### The unbiasedness requirement
 
-### Staying unbiased
-
-Let $\cnt^\idx\sim r$ be the number of copies of particle $\idx$ after
-resampling (writing $r$ for the resampling method, some distribution over nonnegative integers, conditioned on the current set of weighted particles). For resampling to be unbiased, the expected number
-of copies must be proportional to the weight:
+For any resampling method to be unbiased, the expected number of copies made of each particle must be proportional to its weight. That is, $\cnt^\idx\sim r$ be the number of copies of particle $\idx$ after
+resampling (writing $r$ for the resampling method, some distribution over nonnegative integers, conditioned on the current set of weighted particles)
 
 $$\E_{r}[\cnt^\idx] = \np \normwt^\idx \quad \text{for all } \idx$$
 
@@ -86,14 +83,14 @@ This ensures that the equally-weighted resampled estimate
 $\sum_{\idx=1}^{\np} \frac{1}{\np} f(\rstate^\idx)$ is unbiased for
 $\sum_\idx \normwt^\idx f(\state^\idx)$. The different methods we'll look at in this post all satisfy this
 condition, but they differ in how much variance the resampling
-step adds.
+step adds. We'll look in detail at four standard methods --- **multinomial**, **stratified**, **systematic**, and **residual** resampling --- and then briefly discuss **branch-kill** and other extensions.
 
 
 ## 2. Inverse transform sampling
 
-Three of the first four methods share the same core idea, mapping random samples on the unit inverval through the inverse CDF of the weight distribution. The
-CDF $\cdf(\idx) = \sum_{j=1}^{\idx} \normwt^j$ partitions $[0,1]$ into
-segments of width $\normwt^\idx$, so it will map a sampled **probe** at position $\probe$ to a selected (resampled) particle $\invcdf(\probe)$.<label for="mn-cdf" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-cdf" class="margin-toggle"/><span class="marginnote">The fourth method, residual resampling, uses slightly different two-stage construction (see below).</span>
+The first methods we'll look at share the same core idea of inverse transform sampling. The
+CDF of the weight distribution $\cdf(\idx) = \sum_{j=1}^{\idx} \normwt^j$ partitions $[0,1]$ into
+segments of width $\normwt^\idx$, so it will map a sampled **probe** at position $\probe$ to a selected (resampled) particle $\invcdf(\probe)$.
 
 The question is **how to place $\np$ probes** so that particle
 $i$ gets selected $\np\normwt^\idx$ times on average. Try clicking
