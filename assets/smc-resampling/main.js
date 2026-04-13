@@ -280,6 +280,32 @@
     }
 
     // ================================================================
+    //  TOOLBAR SPARKLINE (must be defined before redrawAll)
+    // ================================================================
+
+    function drawMiniWeights(canvas, weights, w, h) {
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+        var maxW = Math.max.apply(null, weights);
+        var rowH = h / N;
+        var barH = rowH * 0.7;
+        for (var i = 0; i < N; i++) {
+            var y = h - (i + 0.5) * rowH - barH / 2;
+            var barW = (weights[i] / maxW) * (w - 2);
+            ctx.fillStyle = S.PALETTE[i];
+            ctx.globalAlpha = 0.55;
+            ctx.fillRect(w - 1 - barW, y, barW, barH);
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    // ================================================================
     //  REDRAW ALL
     // ================================================================
 
@@ -311,8 +337,21 @@
         S.drawEstDist('cv-est-bk',   S.secBK, S.METHOD_COLORS.branchkill, 'Branch-kill');
         // Section 7 overlaid distributions
         S.drawCompEstDist();
-        // Toolbar updates
-        if (redrawAll._toolbarUpdate) redrawAll._toolbarUpdate();
+        // Toolbar sparkline
+        var _spk = document.getElementById('toolbar-sparkline');
+        if (_spk) drawMiniWeights(_spk, S.weights, 36, 24);
+        // Toolbar label
+        var _lbl = document.getElementById('weight-dropdown-label');
+        if (_lbl) {
+            var _match = 'Custom';
+            var _presetMap = {skewed:'Skewed', uniform:'Uniform', degenerate:'Nearly degen.', alternating:'Alternating'};
+            for (var _k in PRESETS) {
+                var _pw = PRESETS[_k](), _same = true;
+                for (var _j = 0; _j < N; _j++) if (Math.abs(_pw[_j] - S.weights[_j]) > 1e-6) { _same = false; break; }
+                if (_same) { _match = _presetMap[_k] || _k; break; }
+            }
+            _lbl.textContent = _match;
+        }
     }
 
     // ================================================================
@@ -811,57 +850,8 @@
     var toolbarPhase2 = document.getElementById('toolbar-phase2');
     var toolbarPhase2Select = document.getElementById('toolbar-phase2-select');
     var phase2Select = document.getElementById('select-resid-phase2');
-    var sparklineCanvas = document.getElementById('toolbar-sparkline');
     var dropdownBtn = document.getElementById('weight-dropdown-btn');
     var dropdownPanel = document.getElementById('weight-dropdown-panel');
-    var dropdownLabel = document.getElementById('weight-dropdown-label');
-
-    // -- Vertical sparkline: bars grow leftward, particle 1 at bottom --
-    function drawMiniWeights(canvas, weights, w, h) {
-        var dpr = window.devicePixelRatio || 1;
-        canvas.width = Math.round(w * dpr);
-        canvas.height = Math.round(h * dpr);
-        canvas.style.width = w + 'px';
-        canvas.style.height = h + 'px';
-        var ctx = canvas.getContext('2d');
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx.clearRect(0, 0, w, h);
-        var maxW = Math.max.apply(null, weights);
-        var rowH = h / N;
-        var barH = rowH * 0.7;
-        for (var i = 0; i < N; i++) {
-            var y = h - (i + 0.5) * rowH - barH / 2;
-            var barW = (weights[i] / maxW) * (w - 2);
-            ctx.fillStyle = S.PALETTE[i];
-            ctx.globalAlpha = 0.55;
-            ctx.fillRect(w - 1 - barW, y, barW, barH);
-            ctx.globalAlpha = 1;
-        }
-    }
-
-    function drawToolbarSparkline() {
-        if (sparklineCanvas) drawMiniWeights(sparklineCanvas, S.weights, 36, 24);
-    }
-
-    // -- Detect current preset --
-    function getCurrentPresetKey() {
-        for (var key in PRESETS) {
-            var pw = PRESETS[key]();
-            var same = true;
-            for (var i = 0; i < N; i++) {
-                if (Math.abs(pw[i] - S.weights[i]) > 1e-6) { same = false; break; }
-            }
-            if (same) return key;
-        }
-        return 'custom';
-    }
-
-    function updateDropdownLabel() {
-        if (!dropdownLabel) return;
-        var key = getCurrentPresetKey();
-        var LABELS = { skewed: 'Skewed', uniform: 'Uniform', degenerate: 'Nearly degen.', alternating: 'Alternating', custom: 'Custom' };
-        dropdownLabel.textContent = LABELS[key] || 'Custom';
-    }
 
     // -- Build dropdown panel with preset options --
     var PRESET_ORDER = ['skewed', 'uniform', 'degenerate', 'alternating'];
@@ -870,7 +860,12 @@
     function buildDropdownPanel() {
         if (!dropdownPanel) return;
         dropdownPanel.innerHTML = '';
-        var currentKey = getCurrentPresetKey();
+        var currentKey = 'custom';
+        for (var ck in PRESETS) {
+            var cpw = PRESETS[ck](), csame = true;
+            for (var ci = 0; ci < N; ci++) if (Math.abs(cpw[ci] - S.weights[ci]) > 1e-6) { csame = false; break; }
+            if (csame) { currentKey = ck; break; }
+        }
         PRESET_ORDER.forEach(function (key) {
             var row = document.createElement('div');
             row.className = 'weight-dropdown-option' + (key === currentKey ? ' active' : '');
@@ -938,12 +933,6 @@
         }
     }
     window.addEventListener('scroll', updateToolbarVisibility, { passive: true });
-
-    // Register toolbar update callback
-    redrawAll._toolbarUpdate = function () {
-        drawToolbarSparkline();
-        updateDropdownLabel();
-    };
 
     // Resize
     var resizeTimer;
