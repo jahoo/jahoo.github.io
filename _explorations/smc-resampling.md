@@ -14,7 +14,7 @@ js:
   - /assets/smc-resampling/toolbar.js
 mathjax_macros: >-
   {
-    "state":   "\\xi",
+    "state":   "s",
     "rstate":  "\\widetilde{\\state}",
     "target":  "\\pi",
     "impwt":   "\\rho",
@@ -26,7 +26,7 @@ mathjax_macros: >-
     "Var":     "\\operatorname{Var}",
     "cdf":     "F",
     "invcdf":  "{F^{-1}}",
-    "probe":   "x",
+    "probe":   "u",
     "resid":   "\\widetilde{\\normwt}",
     "idx":     "i"
   }
@@ -44,8 +44,8 @@ Like many other things, while there are many asymptotically identical methods, i
 
 ## 1. Why care about different resampling methods?
 
-SMC relies on importance sampling. So let's start quickly recapping that, and defining some notation. We approximate a target distribution $\pi(\cdot)$ with a set of samples from some surrogate proposal distribution, by assigning each sample an (unnormalized) importance weight
-$\impwt^\idx$ (density ratio of target to proposal). Then the set of weighted particles 
+SMC relies on importance sampling. So let's start quickly recapping that, and defining some notation. We approximate a target distribution $\target(\cdot)$ with a set of samples from some surrogate proposal distribution, by assigning each sample an importance weight
+$\impwt^\idx$ (proportional to the density ratio of target to proposal). Then the set of weighted particles 
 $(\state^\idx,\impwt^\idx)_{\idx=1}^\np$
 defines an empirical approximation to the current target $\target(\cdot)$:
 
@@ -56,8 +56,9 @@ For any test function $f$, taking a weighted average of the function applied ove
 gives an estimator of its expectation under the target:
 $\widehat{\E_{\target}[f]}\triangleq\E_{\widehat{\target}}[f]=\sum_\idx \normwt^\idx f(\state^\idx)$.
 
-In sequential importance sampling (SIS), we approximates a _sequence_ of target distributions by evolving
-a population particles, iteratively sampling and reweighting. One main issue with SIS is that it can suffer 
+In sequential importance sampling (SIS), we apply importance sampling sequentially, to approximate a _sequence_ of target distributions by maintaining an evolving population of particles,
+iteratively propagating and reweighting. 
+One main issue with SIS is that it can suffer 
 from **weight degeneracy**: When the weights become concentrated and the budget of $\np$ 
 particles effectively behaves as if it were just one sample, defeating the purpose of 
 having multiple particles.<label for="mn-degen" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-degen" class="margin-toggle"/><span class="marginnote"><canvas id="cv-degeneracy" style="width:100%; height:200px; border:1px solid #ddd; border-radius:3px;"></canvas><br><span class="degen-toggle"><span class="degen-toggle-label" id="degen-label-sis">SIS</span><label class="degen-switch"><input type="checkbox" id="chk-degen-resample"><span class="degen-slider"></span></label><span class="degen-toggle-label" id="degen-label-smc">SMC</span></span> <button id="btn-degen-rerun" style="font-size:0.8em;">Re-run</button> <span id="degen-info" style="font-size:0.8em; margin-left:4px;"></span><br>Particle weight evolution illustration. Bars show normalized weights $\normwt_t^\idx$ at each step when running a bootstrap particle filter on a Gaussian random walk model 
@@ -70,6 +71,8 @@ and dropping low-weight ones. This addresses weight degeneracy, but introduces a
 After enough steps, all current particles may trace back to a single ancestor at earlier timesteps [click on a timestep label in the illustration].
 
 Low-variance resampling methods (like stratified, systematic, or residual) produce more diverse resampled sets than multinomial resampling, which slows ancestry collapse, but doesn't prevent it entirely. This, along with the variance of the filtering estimate, makes the choice of resampling method matter.
+
+In short: we resample to keep our particle approximation useful (preventing weight degeneracy), but the way we resample affects both the variance of our estimates and how quickly ancestral diversity is lost. The rest of this post explores several resampling methods, visualizes their differences, and builds intuition for why some perform better than others.
 
 ### Staying unbiased
 
