@@ -63,38 +63,65 @@
 
         var nParticles = 6;
         var maxSteps = 8;
-        var history = [];  // history[t] = [w1, w2, ..., wN] normalized weights
+        var history = [];   // history[t] = { weights: [...], states: [...] }
 
-        // Simple toy model: at each step, multiply weights by random factors
-        // and renormalize — mimics likelihood reweighting without resampling
-        function initWeights() {
-            var w = [];
-            for (var i = 0; i < nParticles; i++) w.push(1 / nParticles);
-            return w;
+        // Bootstrap particle filter on a 1D Gaussian state-space model:
+        //   x_t = x_{t-1} + eps,   eps ~ N(0, sigmaProc^2)
+        //   y_t ~ N(x_t, sigmaObs^2)
+        // Proposal = transition (bootstrap), so weight update is just the likelihood.
+        // Observations fixed at y_t = 2 to pull particles toward a single region.
+        var sigmaProc = 1.0;
+        var sigmaObs = 0.5;
+        var yObs = 2.0;
+
+        // Box-Muller for normal random
+        function randn() {
+            var u1 = Math.random(), u2 = Math.random();
+            return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
         }
 
-        function stepWeights(w) {
-            // Multiply each weight by exp(noise) where noise differs per particle
-            // This simulates importance weight updates that create degeneracy
-            var newW = w.slice();
+        // Gaussian pdf (unnormalized is fine since we renormalize weights)
+        function gaussLogLik(x, mu, sigma) {
+            var z = (x - mu) / sigma;
+            return -0.5 * z * z;
+        }
+
+        function init() {
+            var w = [], states = [];
             for (var i = 0; i < nParticles; i++) {
-                var logFactor = (Math.random() - 0.5) * 2.0;  // random log-weight increment
-                newW[i] *= Math.exp(logFactor);
+                states.push(randn() * sigmaProc);  // prior: N(0, sigmaProc^2)
+                w.push(1 / nParticles);
             }
+            return { weights: w, states: states };
+        }
+
+        function step(prev) {
+            // Propagate via transition (bootstrap proposal)
+            var newStates = prev.states.map(function (x) {
+                return x + randn() * sigmaProc;
+            });
+            // Weight update: w_t^i ∝ w_{t-1}^i * p(y_t | x_t^i)
+            var logW = prev.weights.map(function (wi, i) {
+                return Math.log(wi) + gaussLogLik(yObs, newStates[i], sigmaObs);
+            });
+            // Log-sum-exp for numerical stability
+            var maxLogW = Math.max.apply(null, logW);
+            var newW = logW.map(function (lw) { return Math.exp(lw - maxLogW); });
             var sum = newW.reduce(function (a, b) { return a + b; }, 0);
-            return newW.map(function (v) { return v / sum; });
+            newW = newW.map(function (v) { return v / sum; });
+            return { weights: newW, states: newStates };
         }
 
         function reset() {
-            history = [initWeights()];
+            history = [init()];
             draw();
             updateInfo();
         }
 
-        function step() {
+        function doStep() {
             if (history.length >= maxSteps) return;
             var prev = history[history.length - 1];
-            history.push(stepWeights(prev));
+            history.push(step(prev));
             draw();
             updateInfo();
         }
@@ -102,7 +129,7 @@
         function updateInfo() {
             if (!infoSpan) return;
             var t = history.length - 1;
-            var w = history[t];
+            var w = history[t].weights;
             var ess = 1 / w.reduce(function (s, wi) { return s + wi * wi; }, 0);
             infoSpan.textContent = 't = ' + t + ',  ESS = ' + ess.toFixed(1) + ' / ' + nParticles;
         }
@@ -146,7 +173,7 @@
 
             // Draw weight bars at each timestep
             for (var t = 0; t < T; t++) {
-                var w = history[t];
+                var w = history[t].weights;
                 var maxW = Math.max.apply(null, w);
                 var cx = pL + (t + 0.5) * colW;  // center of column
 
@@ -166,7 +193,7 @@
                     // Arrow to next timestep
                     if (t < T - 1) {
                         var nextCx = pL + (t + 1.5) * colW;
-                        var nextW = history[t + 1];
+                        var nextW = history[t + 1].weights;
                         var nextMaxW = Math.max.apply(null, nextW);
                         var nextBw = (nextW[i] / nextMaxW) * maxBarW;
                         var arrowStartX = cx + 2;
@@ -215,7 +242,7 @@
             ctx.fillText('SIS iterations (no resampling)', pL + pW / 2, pB + 16);
         }
 
-        btnStep.addEventListener('click', step);
+        btnStep.addEventListener('click', doStep);
         btnReset.addEventListener('click', reset);
 
         // Initialize
