@@ -330,7 +330,7 @@
         var sysProbes = [];
         for (var k = 0; k < N; k++) sysProbes.push({ u: S.sec5.offset + k / N });
         S.sec5.probes = sysProbes;
-        S.drawMethodSection(cvSec5, S.sec5, S.METHOD_COLORS.systematic, { comb: true });
+        S.drawMethodSection(cvSec5, S.sec5, S.METHOD_COLORS.systematic, { comb: true, strata: true, strataColor: 'rgba(39,174,96,' });
         // Section 5 counterexample
         S.drawCounterexample();
         // Section 6

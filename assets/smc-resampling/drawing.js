@@ -307,12 +307,14 @@
 
         // Strata bands (on top of row shading, semi-transparent)
         if (opts.strata) {
+            // Parse method color to rgba for bands
+            var bandColor = opts.strataColor || 'rgba(41,128,185,';  // default: stratified blue
             for (var k = 0; k < N; k++) {
-                ctx.fillStyle = k % 2 === 0 ? 'rgba(41,128,185,0.06)' : 'rgba(41,128,185,0.0)';
+                ctx.fillStyle = k % 2 === 0 ? bandColor + '0.06)' : bandColor + '0.0)';
                 ctx.fillRect(L.uToX(k / N), L.plotT, L.cdfW / N, L.plotH);
             }
             for (var k = 0; k <= N; k++) {
-                ctx.strokeStyle = 'rgba(41,128,185,0.18)';
+                ctx.strokeStyle = bandColor + '0.18)';
                 ctx.lineWidth = 0.7;
                 ctx.beginPath();
                 ctx.moveTo(L.uToX(k / N), L.plotT);
@@ -509,6 +511,7 @@
 
         drawRightCDF(ctx, L, opts.probes, opts.probeColor, {
             strata: opts.strata,
+            strataColor: opts.strataColor,
             comb: opts.comb,
             hoverU: opts.hoverU,
             ghostCDF: opts.ghostCDF,
@@ -558,6 +561,7 @@
             probes: sec.probes,
             probeColor: probeColor,
             strata: opts && opts.strata,
+            strataColor: opts && opts.strataColor,
             comb: opts && opts.comb,
             hoverU: null,
         };
