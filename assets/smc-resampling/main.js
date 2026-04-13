@@ -109,7 +109,7 @@
             for (var t = 1; t <= T; t++) {
                 // Propagate
                 var newStates = states.map(function (x) { return x + randn() * sigmaProc; });
-                // Weight update
+                // Weight update: w_t^i ∝ w_{t-1}^i * p(y_t | x_t^i)
                 var logW = weights.map(function (wi, i) {
                     return Math.log(wi) + gaussLogLik(yObs, newStates[i], sigmaObs);
                 });
@@ -118,17 +118,20 @@
                 var s = newW.reduce(function (a, b) { return a + b; }, 0);
                 newW = newW.map(function (v) { return v / s; });
 
+                // Store pre-resampling weights for display
+                var displayW = newW.slice();
                 var ancestors = null;
                 if (doResample) {
-                    // Resample then set weights to uniform
+                    // Resample based on current weights, then reset to uniform for next step
                     ancestors = resampleMultinomial(newW);
                     var resampledStates = ancestors.map(function (a) { return newStates[a]; });
                     newStates = resampledStates;
+                    // Next step starts with uniform weights (post-resampling)
                     newW = [];
                     for (var i = 0; i < nP; i++) newW.push(1 / nP);
                 }
 
-                history.push({ weights: newW.slice(), states: newStates.slice(), ancestors: ancestors });
+                history.push({ weights: displayW, states: newStates.slice(), ancestors: ancestors });
                 states = newStates;
                 weights = newW;
             }
