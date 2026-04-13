@@ -89,12 +89,12 @@
             cvSec2._clearProbeBtn = null;
             if (S.probes.length > 0) {
                 var clearText = '\u00d7 Clear probes';
-                var clearX = L.histL + 2;
-                var clearY = capY + 13;
                 ctx.globalAlpha = 0.8;
                 ctx.fillStyle = '#467';
-                ctx.fillText(clearText, clearX, clearY);
                 var tw = ctx.measureText(clearText).width;
+                var clearX = L.cdfR - tw;
+                var clearY = capY;
+                ctx.fillText(clearText, clearX, clearY);
                 cvSec2._clearProbeBtn = { x: clearX, y: clearY, w: tw, h: 12 };
             }
             ctx.globalAlpha = 1;
