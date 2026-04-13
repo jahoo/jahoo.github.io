@@ -307,18 +307,18 @@
 
         // Strata bands (on top of row shading, semi-transparent)
         if (opts.strata) {
-            // Parse method color to rgba for bands
             var bandColor = opts.strataColor || 'rgba(41,128,185,';  // default: stratified blue
-            for (var k = 0; k < N; k++) {
+            var nStrata = opts.strataCount || N;  // R for residual, N otherwise
+            for (var k = 0; k < nStrata; k++) {
                 ctx.fillStyle = k % 2 === 0 ? bandColor + '0.06)' : bandColor + '0.0)';
-                ctx.fillRect(L.uToX(k / N), L.plotT, L.cdfW / N, L.plotH);
+                ctx.fillRect(L.uToX(k / nStrata), L.plotT, L.cdfW / nStrata, L.plotH);
             }
-            for (var k = 0; k <= N; k++) {
+            for (var k = 0; k <= nStrata; k++) {
                 ctx.strokeStyle = bandColor + '0.18)';
                 ctx.lineWidth = 0.7;
                 ctx.beginPath();
-                ctx.moveTo(L.uToX(k / N), L.plotT);
-                ctx.lineTo(L.uToX(k / N), L.plotB);
+                ctx.moveTo(L.uToX(k / nStrata), L.plotT);
+                ctx.lineTo(L.uToX(k / nStrata), L.plotB);
                 ctx.stroke();
             }
         }
@@ -512,6 +512,7 @@
         drawRightCDF(ctx, L, opts.probes, opts.probeColor, {
             strata: opts.strata,
             strataColor: opts.strataColor,
+            strataCount: opts.strataCount,
             comb: opts.comb,
             hoverU: opts.hoverU,
             ghostCDF: opts.ghostCDF,
@@ -612,12 +613,21 @@
         var resSum = res.reduce(function (a, b) { return a + b; }, 0);
         var normRes = resSum > 0 ? res.map(function (r) { return r / resSum; }) : weights.slice();
 
+        // Phase-2 strata bands for stratified/systematic
+        var R = N - detCopies.reduce(function (a, b) { return a + b; }, 0);
+        var phase2 = S.residualPhase2;
+        var showStrata = (phase2 === 'stratified' || phase2 === 'systematic') && R > 0;
+
         var panelOpts = {
             histValues: histValues, histMax: histMax,
             probes: sec6.residualProbes,
             probeColor: S.METHOD_COLORS.residual,
             ghostCDF: { weights: weights.slice() },
             residualWeights: normRes,
+            strata: showStrata,
+            strataColor: 'rgba(142,68,173,',  // residual purple
+            strataCount: R,  // number of strata (R, not N)
+            comb: phase2 === 'systematic' && R > 0,
         };
         for (var key in overlay) panelOpts[key] = overlay[key];
 
