@@ -56,82 +56,103 @@
 
     (function () {
         var cv = document.getElementById('cv-degeneracy');
-        var btnStep = document.getElementById('btn-degen-step');
-        var btnReset = document.getElementById('btn-degen-reset');
+        var btnRerun = document.getElementById('btn-degen-rerun');
+        var chkResample = document.getElementById('chk-degen-resample');
         var infoSpan = document.getElementById('degen-info');
-        if (!cv || !btnStep) return;
+        var captionSpan = document.getElementById('degen-caption');
+        if (!cv || !btnRerun) return;
 
-        var nParticles = 6;
-        var maxSteps = 8;
-        var history = [];   // history[t] = { weights: [...], states: [...] }
-
-        // Bootstrap particle filter on a 1D Gaussian state-space model:
-        //   x_t = x_{t-1} + eps,   eps ~ N(0, sigmaProc^2)
-        //   y_t ~ N(x_t, sigmaObs^2)
-        // Proposal = transition (bootstrap), so weight update is just the likelihood.
-        // Observations fixed at y_t = 2 to pull particles toward a single region.
+        var nP = 8;       // match rest of post
+        var T = 8;         // number of SIS/SMC steps
         var sigmaProc = 1.0;
         var sigmaObs = 0.5;
         var yObs = 2.0;
+        var history = [];  // [{weights, states, ancestors}]
 
-        // Box-Muller for normal random
         function randn() {
             var u1 = Math.random(), u2 = Math.random();
             return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
         }
 
-        // Gaussian pdf (unnormalized is fine since we renormalize weights)
         function gaussLogLik(x, mu, sigma) {
             var z = (x - mu) / sigma;
             return -0.5 * z * z;
         }
 
-        function init() {
-            var w = [], states = [];
-            for (var i = 0; i < nParticles; i++) {
-                states.push(randn() * sigmaProc);  // prior: N(0, sigmaProc^2)
-                w.push(1 / nParticles);
+        // Multinomial resampling: returns ancestor indices
+        function resampleMultinomial(weights) {
+            var cs = [weights[0]];
+            for (var i = 1; i < nP; i++) cs.push(cs[i - 1] + weights[i]);
+            cs[nP - 1] = 1.0;
+            var ancestors = [];
+            for (var k = 0; k < nP; k++) {
+                var u = Math.random();
+                var j = 0;
+                while (j < nP - 1 && u > cs[j]) j++;
+                ancestors.push(j);
             }
-            return { weights: w, states: states };
+            return ancestors;
         }
 
-        function step(prev) {
-            // Propagate via transition (bootstrap proposal)
-            var newStates = prev.states.map(function (x) {
-                return x + randn() * sigmaProc;
-            });
-            // Weight update: w_t^i ∝ w_{t-1}^i * p(y_t | x_t^i)
-            var logW = prev.weights.map(function (wi, i) {
-                return Math.log(wi) + gaussLogLik(yObs, newStates[i], sigmaObs);
-            });
-            // Log-sum-exp for numerical stability
-            var maxLogW = Math.max.apply(null, logW);
-            var newW = logW.map(function (lw) { return Math.exp(lw - maxLogW); });
-            var sum = newW.reduce(function (a, b) { return a + b; }, 0);
-            newW = newW.map(function (v) { return v / sum; });
-            return { weights: newW, states: newStates };
-        }
+        function run() {
+            var doResample = chkResample && chkResample.checked;
+            history = [];
+            // t=0: init from prior
+            var states = [], weights = [];
+            for (var i = 0; i < nP; i++) {
+                states.push(randn() * sigmaProc);
+                weights.push(1 / nP);
+            }
+            history.push({ weights: weights.slice(), states: states.slice(), ancestors: null });
 
-        function reset() {
-            history = [init()];
+            for (var t = 1; t <= T; t++) {
+                // Propagate
+                var newStates = states.map(function (x) { return x + randn() * sigmaProc; });
+                // Weight update
+                var logW = weights.map(function (wi, i) {
+                    return Math.log(wi) + gaussLogLik(yObs, newStates[i], sigmaObs);
+                });
+                var maxLW = Math.max.apply(null, logW);
+                var newW = logW.map(function (lw) { return Math.exp(lw - maxLW); });
+                var s = newW.reduce(function (a, b) { return a + b; }, 0);
+                newW = newW.map(function (v) { return v / s; });
+
+                var ancestors = null;
+                if (doResample) {
+                    // Resample then set weights to uniform
+                    ancestors = resampleMultinomial(newW);
+                    var resampledStates = ancestors.map(function (a) { return newStates[a]; });
+                    newStates = resampledStates;
+                    newW = [];
+                    for (var i = 0; i < nP; i++) newW.push(1 / nP);
+                }
+
+                history.push({ weights: newW.slice(), states: newStates.slice(), ancestors: ancestors });
+                states = newStates;
+                weights = newW;
+            }
             draw();
             updateInfo();
-        }
-
-        function doStep() {
-            if (history.length >= maxSteps) return;
-            var prev = history[history.length - 1];
-            history.push(step(prev));
-            draw();
-            updateInfo();
+            updateCaption();
         }
 
         function updateInfo() {
             if (!infoSpan) return;
-            var t = history.length - 1;
-            var w = history[t].weights;
+            var w = history[history.length - 1].weights;
             var ess = 1 / w.reduce(function (s, wi) { return s + wi * wi; }, 0);
-            infoSpan.textContent = 't = ' + t + ',  ESS = ' + ess.toFixed(1) + ' / ' + nParticles;
+            infoSpan.textContent = 'ESS=' + ess.toFixed(1) + '/' + nP;
+        }
+
+        function updateCaption() {
+            if (!captionSpan) return;
+            var doResample = chkResample && chkResample.checked;
+            if (doResample) {
+                captionSpan.textContent = 'SMC (with multinomial resampling) on the random walk model. '
+                    + 'Resampling restores weight diversity at each step.';
+            } else {
+                captionSpan.textContent = 'SIS (no resampling) on the random walk model. '
+                    + 'Without resampling, one particle quickly dominates.';
+            }
         }
 
         function draw() {
@@ -146,69 +167,69 @@
             ctx.fillStyle = '#fff';
             ctx.fillRect(0, 0, W, H);
 
-            var margin = { top: 14, bottom: 28, left: 30, right: 10 };
+            var margin = { top: 10, bottom: 22, left: 14, right: 6 };
             var pL = margin.left, pR = W - margin.right;
             var pT = margin.top, pB = H - margin.bottom;
             var pW = pR - pL, pH = pB - pT;
 
-            var T = history.length;
-            var colW = pW / maxSteps;
-            var rowH = pH / nParticles;
-            var barH = rowH * 0.6;
-            var maxBarW = colW * 0.85;
+            var nCols = T + 1;
+            var colW = pW / nCols;
+            var rowH = pH / nP;
+            var barH = rowH * 0.55;
+            var maxBarW = colW * 0.8;
 
-            // Particle colors (use a warm palette distinct from method colors)
-            var colors = ['#c0392b', '#d35400', '#f39c12', '#27ae60', '#2980b9', '#8e44ad', '#e74c3c', '#16a085'];
+            var colors = S.PALETTE;
 
-            // Draw grid lines for each timestep
-            ctx.strokeStyle = '#eee';
-            ctx.lineWidth = 1;
-            for (var t = 0; t <= maxSteps; t++) {
+            // Grid lines
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 0.5;
+            for (var t = 0; t <= nCols; t++) {
                 var gx = pL + t * colW;
-                ctx.beginPath();
-                ctx.moveTo(gx, pT);
-                ctx.lineTo(gx, pB);
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(gx, pT); ctx.lineTo(gx, pB); ctx.stroke();
             }
 
-            // Draw weight bars at each timestep
-            for (var t = 0; t < T; t++) {
-                var w = history[t].weights;
-                var maxW = Math.max.apply(null, w);
-                var cx = pL + (t + 0.5) * colW;  // center of column
+            // Weight bars + ancestor arrows
+            for (var t = 0; t < history.length; t++) {
+                var h = history[t];
+                var maxW = Math.max.apply(null, h.weights);
+                var cx = pL + (t + 0.5) * colW;
 
-                for (var i = 0; i < nParticles; i++) {
+                for (var i = 0; i < nP; i++) {
                     var y = pB - (i + 0.5) * rowH;
-                    var bw = (w[i] / maxW) * maxBarW;
+                    var bw = maxW > 0 ? (h.weights[i] / maxW) * maxBarW : 0;
 
-                    // Bar grows leftward from center line (like our histograms)
+                    // Bar
                     ctx.fillStyle = colors[i % colors.length];
-                    ctx.globalAlpha = 0.5;
+                    ctx.globalAlpha = 0.45;
                     ctx.fillRect(cx - bw, y - barH / 2, bw, barH);
                     ctx.globalAlpha = 1;
                     ctx.strokeStyle = colors[i % colors.length];
-                    ctx.lineWidth = 0.8;
+                    ctx.lineWidth = 0.7;
                     ctx.strokeRect(cx - bw, y - barH / 2, bw, barH);
+                }
 
-                    // Arrow to next timestep
-                    if (t < T - 1) {
-                        var nextCx = pL + (t + 1.5) * colW;
-                        var nextW = history[t + 1].weights;
-                        var nextMaxW = Math.max.apply(null, nextW);
-                        var nextBw = (nextW[i] / nextMaxW) * maxBarW;
-                        var arrowStartX = cx + 2;
-                        var arrowEndX = nextCx - nextBw - 2;
-                        if (arrowEndX > arrowStartX + 5) {
-                            ctx.strokeStyle = '#bbb';
-                            ctx.lineWidth = 0.8;
+                // Arrows to next step
+                if (t < history.length - 1) {
+                    var nextH = history[t + 1];
+                    var nextMaxW = Math.max.apply(null, nextH.weights);
+                    var nextCx = pL + (t + 1.5) * colW;
+
+                    for (var i = 0; i < nP; i++) {
+                        // Where does particle i at t+1 come from?
+                        var srcIdx = nextH.ancestors ? nextH.ancestors[i] : i;
+                        var srcY = pB - (srcIdx + 0.5) * rowH;
+                        var dstY = pB - (i + 0.5) * rowH;
+                        var srcBw = maxW > 0 ? (h.weights[srcIdx] / maxW) * maxBarW : 0;
+                        var nextBw = nextMaxW > 0 ? (nextH.weights[i] / nextMaxW) * maxBarW : 0;
+                        var ax1 = cx + 1;
+                        var ax2 = nextCx - nextBw - 1;
+                        if (ax2 > ax1 + 3) {
+                            ctx.strokeStyle = '#ccc';
+                            ctx.lineWidth = 0.6;
                             ctx.globalAlpha = 0.5;
                             ctx.beginPath();
-                            ctx.moveTo(arrowStartX, y);
-                            ctx.lineTo(arrowEndX, y);
-                            // Small arrowhead
-                            ctx.lineTo(arrowEndX - 3, y - 2);
-                            ctx.moveTo(arrowEndX, y);
-                            ctx.lineTo(arrowEndX - 3, y + 2);
+                            ctx.moveTo(ax1, srcY);
+                            ctx.lineTo(ax2, dstY);
                             ctx.stroke();
                             ctx.globalAlpha = 1;
                         }
@@ -216,38 +237,22 @@
                 }
             }
 
-            // Y-axis: particle labels
-            ctx.fillStyle = '#666';
-            ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.textAlign = 'right';
-            ctx.textBaseline = 'middle';
-            for (var i = 0; i < nParticles; i++) {
-                ctx.fillText(i + 1, pL - 4, pB - (i + 0.5) * rowH);
-            }
-
-            // X-axis: timestep labels
+            // X-axis labels
+            ctx.fillStyle = '#999';
+            ctx.font = '8px -apple-system, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
-            ctx.fillStyle = '#888';
-            for (var t = 0; t < maxSteps; t++) {
-                var opacity = t < T ? 1 : 0.3;
-                ctx.globalAlpha = opacity;
-                ctx.fillText('t=' + t, pL + (t + 0.5) * colW, pB + 4);
+            for (var t = 0; t < nCols; t++) {
+                ctx.fillText(t, pL + (t + 0.5) * colW, pB + 2);
             }
-            ctx.globalAlpha = 1;
-
-            // Label
-            ctx.fillStyle = '#aaa';
-            ctx.font = '9px -apple-system, sans-serif';
-            ctx.fillText('SIS iterations (no resampling)', pL + pW / 2, pB + 16);
+            ctx.fillText('t', pL + pW / 2, pB + 12);
         }
 
-        btnStep.addEventListener('click', doStep);
-        btnReset.addEventListener('click', reset);
+        btnRerun.addEventListener('click', run);
+        if (chkResample) chkResample.addEventListener('change', run);
 
-        // Initialize
-        reset();
-        // Redraw on window resize
+        // Initial run
+        run();
         window.addEventListener('resize', function () { draw(); });
     })();
 
