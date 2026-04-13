@@ -141,10 +141,8 @@
         }
 
         function updateInfo() {
-            if (!infoSpan) return;
-            var w = history[history.length - 1].weights;
-            var ess = 1 / w.reduce(function (s, wi) { return s + wi * wi; }, 0);
-            infoSpan.textContent = 'ESS=' + ess.toFixed(1) + '/' + nP;
+            // ESS is now shown per-step inside the plot
+            if (infoSpan) infoSpan.textContent = '';
         }
 
         function updateCaption() {
@@ -207,7 +205,7 @@
             ctx.fillStyle = '#fff';
             ctx.fillRect(0, 0, W, H);
 
-            var margin = { top: 10, bottom: 22, left: 14, right: 6 };
+            var margin = { top: 10, bottom: 30, left: 14, right: 6 };
             var pL = margin.left, pR = W - margin.right;
             var pT = margin.top, pB = H - margin.bottom;
             var pW = pR - pL, pH = pB - pT;
@@ -290,15 +288,26 @@
                 }
             }
 
-            // X-axis labels
-            ctx.fillStyle = '#999';
-            ctx.font = '8px -apple-system, sans-serif';
+            // X-axis: timestep labels + per-step ESS
+            ctx.font = '7px -apple-system, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
             for (var t = 0; t < nCols; t++) {
-                ctx.fillText(t, pL + (t + 0.5) * colW, pB + 2);
+                var cx = pL + (t + 0.5) * colW;
+                // Timestep number
+                ctx.fillStyle = '#999';
+                ctx.fillText(t, cx, pB + 1);
+                // ESS for this step
+                if (t < history.length) {
+                    var w = history[t].weights;
+                    var ess = 1 / w.reduce(function (s, wi) { return s + wi * wi; }, 0);
+                    ctx.fillStyle = ess < nP * 0.3 ? '#c0392b' : '#999';
+                    ctx.fillText(ess.toFixed(1), cx, pB + 10);
+                }
             }
-            ctx.fillText('t', pL + pW / 2, pB + 12);
+            // Axis label
+            ctx.fillStyle = '#bbb';
+            ctx.fillText('t / ESS', pL + pW / 2, pB + 19);
         }
 
         // Click to highlight lineage
@@ -331,6 +340,11 @@
         // Initial run
         run();
         window.addEventListener('resize', function () { draw(); });
+        // Redraw when marginnote toggle reveals the canvas (narrow mode)
+        var toggle = document.getElementById('mn-degen');
+        if (toggle) toggle.addEventListener('change', function () {
+            setTimeout(draw, 50);  // small delay for CSS transition
+        });
     })();
 
     // ================================================================

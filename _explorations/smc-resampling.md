@@ -62,7 +62,7 @@ To start, consider the sequential importance sampling (SIS) algorithm, which doe
     of its expectation under the target:
     $\widehat{\E_{\target_t}[f]}\triangleq\E_{\widehat{\target_t}}[f]=\sum_\idx \normwt^\idx f(\state^\idx)$.
 
-Now, one main issue with SIS (inherited from importance sampling) is that it can suffer from **weight degeneracy**: When the weights become concentrated and the budget of $\np$ particles effectively behaves as if it were just one sample.<label for="mn-degen" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-degen" class="margin-toggle"/><span class="marginnote"><canvas id="cv-degeneracy" style="width:100%; height:200px; border:1px solid #ddd; border-radius:3px;"></canvas><br><label style="font-size:0.8em;"><input type="checkbox" id="chk-degen-resample"> Resample</label> <button id="btn-degen-rerun" style="font-size:0.8em;">Re-run</button> <span id="degen-info" style="font-size:0.8em; margin-left:4px;"></span><br>Bootstrap particle filter on the random walk model ($\state_t \sim N(\state_{t-1}, 1)$; $y_t \sim N(\state_t, 0.25)$; $y_t{=}2$). <span id="degen-caption"></span></span> This issue motivates sequential Monte Carlo (SMC), which improves on SIS by the addition of a **resampling** step, which replaces a current set of particles (with highly skewed weights) with a new set of samples with weights all set to be equal, duplicating high-weight particles and
+Now, one main issue with SIS (inherited from importance sampling) is that it can suffer from **weight degeneracy**: When the weights become concentrated and the budget of $\np$ particles effectively behaves as if it were just one sample, wasting the rest.<label for="mn-degen" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-degen" class="margin-toggle"/><span class="marginnote"><canvas id="cv-degeneracy" style="width:100%; height:200px; border:1px solid #ddd; border-radius:3px;"></canvas><br><label style="font-size:0.8em;"><input type="checkbox" id="chk-degen-resample"> Resample</label> <button id="btn-degen-rerun" style="font-size:0.8em;">Re-run</button> <span id="degen-info" style="font-size:0.8em; margin-left:4px;"></span><br>Bootstrap particle filter on the random walk model ($\state_t \sim N(\state_{t-1}, 1)$; $y_t \sim N(\state_t, 0.25)$; $y_t{=}2$). Bars show normalized weights at each step. Click a particle to trace its lineage. <span id="degen-caption"></span></span> This issue motivates sequential Monte Carlo (SMC), which improves on SIS by the addition of a **resampling** step, which replaces a current set of particles (with highly skewed weights) with a new set of samples with weights all set to be equal, duplicating high-weight particles and
 dropping low-weight ones. This addresses weight degeneracy, but also reduces diversity (many particles become copies of the same few ancestors) and adds variance to the estimate.
 
 The tension between reducing degeneracy and maintaining variance and diversity is what makes
@@ -425,12 +425,10 @@ $\E[\cnt^\idx] = \lfloor \np\normwt^\idx \rfloor + (\np\normwt^\idx - \lfloor
 
 
 
-## 5. Head-to-head comparison
+## 5. Comparison
 
-All four methods on the same weights. Colored error bars show
-mean count ± 1 std over $K$ trials; below, the estimator
-distributions show how tightly each concentrates around the true
-value.
+Comparing all four methods on the same weights: Colored error bars show
+mean count ± 1 std over $K$ trials.
 
 <div class="control-box">
 <div class="control-row">
