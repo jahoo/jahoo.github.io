@@ -805,64 +805,112 @@
     //  STICKY TOOLBAR
     // ================================================================
 
-    var toolbarEl = document.getElementById('sticky-toolbar');
-    var sparklineCanvas = document.getElementById('toolbar-sparkline');
-    var toolbarPreset = document.getElementById('toolbar-preset');
     var toolbarTestFn = document.getElementById('toolbar-testfn');
     var toolbarPhase2 = document.getElementById('toolbar-phase2');
     var toolbarPhase2Select = document.getElementById('toolbar-phase2-select');
     var phase2Select = document.getElementById('select-resid-phase2');
+    var sparklineCanvas = document.getElementById('toolbar-sparkline');
+    var dropdownBtn = document.getElementById('weight-dropdown-btn');
+    var dropdownPanel = document.getElementById('weight-dropdown-panel');
+    var dropdownLabel = document.getElementById('weight-dropdown-label');
 
-    // -- Sparkline drawing --
-    function drawSparkline() {
-        if (!sparklineCanvas) return;
+    // -- Vertical sparkline: bars grow leftward, particle 1 at bottom --
+    function drawMiniWeights(canvas, weights, w, h) {
         var dpr = window.devicePixelRatio || 1;
-        var w = 80, h = 20;
-        sparklineCanvas.width = w * dpr;
-        sparklineCanvas.height = h * dpr;
-        sparklineCanvas.style.width = w + 'px';
-        sparklineCanvas.style.height = h + 'px';
-        var ctx = sparklineCanvas.getContext('2d');
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        var ctx = canvas.getContext('2d');
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.clearRect(0, 0, w, h);
-        var maxW = Math.max.apply(null, S.weights);
-        var barW = w / N - 1;
+        var maxW = Math.max.apply(null, weights);
+        var rowH = h / N;
+        var barH = rowH * 0.7;
         for (var i = 0; i < N; i++) {
-            var bh = (S.weights[i] / maxW) * (h - 2);
-            var x = i * (barW + 1);
+            var y = h - (i + 0.5) * rowH - barH / 2;
+            var barW = (weights[i] / maxW) * (w - 2);
             ctx.fillStyle = S.PALETTE[i];
-            ctx.globalAlpha = 0.6;
-            ctx.fillRect(x, h - 1 - bh, barW, bh);
+            ctx.globalAlpha = 0.55;
+            ctx.fillRect(w - 1 - barW, y, barW, barH);
             ctx.globalAlpha = 1;
         }
     }
 
-    // -- Toolbar preset dropdown --
-    function updateToolbarPreset() {
-        if (!toolbarPreset) return;
-        // Check if current weights match a known preset
-        var match = 'custom';
+    function drawToolbarSparkline() {
+        if (sparklineCanvas) drawMiniWeights(sparklineCanvas, S.weights, 36, 24);
+    }
+
+    // -- Detect current preset --
+    function getCurrentPresetKey() {
         for (var key in PRESETS) {
             var pw = PRESETS[key]();
             var same = true;
             for (var i = 0; i < N; i++) {
                 if (Math.abs(pw[i] - S.weights[i]) > 1e-6) { same = false; break; }
             }
-            if (same) { match = key; break; }
+            if (same) return key;
         }
-        toolbarPreset.value = match;
+        return 'custom';
     }
 
-    if (toolbarPreset) {
-        toolbarPreset.addEventListener('change', function () {
-            var key = toolbarPreset.value;
-            if (key !== 'custom' && PRESETS[key]) {
+    function updateDropdownLabel() {
+        if (!dropdownLabel) return;
+        var key = getCurrentPresetKey();
+        var LABELS = { skewed: 'Skewed', uniform: 'Uniform', degenerate: 'Nearly degen.', alternating: 'Alternating', custom: 'Custom' };
+        dropdownLabel.textContent = LABELS[key] || 'Custom';
+    }
+
+    // -- Build dropdown panel with preset options --
+    var PRESET_ORDER = ['skewed', 'uniform', 'degenerate', 'alternating'];
+    var PRESET_LABELS = { skewed: 'Skewed', uniform: 'Uniform', degenerate: 'Nearly degenerate', alternating: 'Alternating' };
+
+    function buildDropdownPanel() {
+        if (!dropdownPanel) return;
+        dropdownPanel.innerHTML = '';
+        var currentKey = getCurrentPresetKey();
+        PRESET_ORDER.forEach(function (key) {
+            var row = document.createElement('div');
+            row.className = 'weight-dropdown-option' + (key === currentKey ? ' active' : '');
+            // Mini canvas for this preset
+            var cv = document.createElement('canvas');
+            drawMiniWeights(cv, PRESETS[key](), 36, 24);
+            row.appendChild(cv);
+            // Label
+            var label = document.createElement('span');
+            label.textContent = PRESET_LABELS[key];
+            row.appendChild(label);
+            row.addEventListener('click', function () {
                 S.weights = PRESETS[key]();
                 clearAll();
+                dropdownPanel.classList.remove('open');
                 redrawAll();
+            });
+            dropdownPanel.appendChild(row);
+        });
+    }
+
+    // -- Toggle dropdown --
+    var dropdownJustOpened = false;
+    if (dropdownBtn) {
+        dropdownBtn.addEventListener('mousedown', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var isOpen = dropdownPanel.classList.contains('open');
+            if (!isOpen) {
+                buildDropdownPanel();
+                dropdownPanel.classList.add('open');
+                dropdownJustOpened = true;
+                setTimeout(function () { dropdownJustOpened = false; }, 0);
+            } else {
+                dropdownPanel.classList.remove('open');
             }
         });
     }
+    // Close on click outside
+    document.addEventListener('mousedown', function () {
+        if (!dropdownJustOpened && dropdownPanel) dropdownPanel.classList.remove('open');
+    });
 
     // -- Toolbar phase-2 sync --
     if (toolbarPhase2Select && phase2Select) {
@@ -878,8 +926,8 @@
 
     // -- Progressive reveal via scroll position --
     function updateToolbarVisibility() {
-        var testfnTrigger = document.getElementById('btn-run-multi');  // always visible
-        var phase2Trigger = document.getElementById('cv-sec6');        // residual canvas, always visible
+        var testfnTrigger = document.getElementById('btn-run-multi');
+        var phase2Trigger = document.getElementById('cv-sec6');
         if (toolbarTestFn && testfnTrigger) {
             toolbarTestFn.style.display = testfnTrigger.getBoundingClientRect().top < 50 ? 'flex' : 'none';
         }
@@ -889,12 +937,12 @@
     }
     window.addEventListener('scroll', updateToolbarVisibility, { passive: true });
 
-    // -- Hook sparkline + preset into redrawAll --
+    // -- Hook toolbar updates into redrawAll --
     var _origRedrawAll = redrawAll;
     redrawAll = function () {
         _origRedrawAll();
-        drawSparkline();
-        updateToolbarPreset();
+        drawToolbarSparkline();
+        updateDropdownLabel();
     };
 
     // Resize

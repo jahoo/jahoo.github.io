@@ -77,32 +77,6 @@ condition, but they differ in how much variance the resampling
 step adds.
 
 
-<div id="sticky-toolbar" class="sticky-toolbar">
-<div class="toolbar-section" id="toolbar-weights">
-<span style="font-size:0.8em; color:#666;">Weights:</span>
-<canvas id="toolbar-sparkline" width="80" height="20" style="vertical-align:middle;"></canvas>
-<select id="toolbar-preset" style="padding:1px 4px; border:1px solid #ccc; border-radius:3px; font-size:0.85em;">
-<option value="skewed">Skewed</option>
-<option value="uniform">Uniform</option>
-<option value="degenerate">Nearly degenerate</option>
-<option value="alternating">Alternating</option>
-<option value="custom">Custom</option>
-</select>
-</div>
-<div class="toolbar-section" id="toolbar-testfn" style="display:none;">
-<span style="font-size:0.8em; color:#666;">$f$:</span>
-<select class="testfn-select toolbar-testfn-select" style="padding:1px 4px; border:1px solid #ccc; border-radius:3px; font-size:0.85em;"></select>
-</div>
-<div class="toolbar-section" id="toolbar-phase2" style="display:none;">
-<span style="font-size:0.8em; color:#666;">Phase 2:</span>
-<select id="toolbar-phase2-select" style="padding:1px 4px; border:1px solid #ccc; border-radius:3px; font-size:0.85em;">
-<option value="multinomial">Multinomial</option>
-<option value="stratified">Stratified</option>
-<option value="systematic">Systematic</option>
-</select>
-</div>
-</div>
-
 ## 2. Inverse CDF mapping
 
 Three of the first four methods share the same core idea, mapping random samples on the unit inverval through the inverse CDF of the weight distribution. The
@@ -117,12 +91,6 @@ on the CDF plot at right to place probes, and consider what strategy would you u
 
 <div class="control-box">
 <div class="control-row">
-<span style="font-size:0.85em; color:#666;">Presets:</span>
-<button id="btn-uniform">Uniform</button>
-<button id="btn-skewed">Skewed</button>
-<button id="btn-degenerate">Nearly degenerate</button>
-<button id="btn-alternating">Alternating</button>
-<span style="flex:1;"></span>
 <button id="btn-clear-probes">Clear probes</button>
 </div>
 </div>
@@ -131,6 +99,31 @@ The most natural idea, $\np$ independent uniform draws, works and leads to our f
 algorithm. We then see two less obvious strategies that reduce
 variance by spreading probes more evenly.
 
+<div id="sticky-toolbar" class="sticky-toolbar">
+<div class="toolbar-section" id="toolbar-weights">
+<span style="font-size:0.8em; color:#666;">Weights:</span>
+<div class="weight-dropdown" id="weight-dropdown">
+<button class="weight-dropdown-btn" id="weight-dropdown-btn">
+<canvas id="toolbar-sparkline" width="48" height="24"></canvas>
+<span class="weight-dropdown-label" id="weight-dropdown-label">Skewed</span>
+<span class="weight-dropdown-arrow">▾</span>
+</button>
+<div class="weight-dropdown-panel" id="weight-dropdown-panel"></div>
+</div>
+</div>
+<div class="toolbar-section" id="toolbar-testfn" style="display:none;">
+<span style="font-size:0.8em; color:#666;">$f$:</span>
+<select class="testfn-select toolbar-testfn-select" style="padding:1px 4px; border:1px solid #ccc; border-radius:3px; font-size:0.85em;"></select>
+</div>
+<div class="toolbar-section" id="toolbar-phase2" style="display:none;">
+<span style="font-size:0.8em; color:#666;">Phase 2:</span>
+<select id="toolbar-phase2-select" style="padding:1px 4px; border:1px solid #ccc; border-radius:3px; font-size:0.85em;">
+<option value="multinomial">Multinomial</option>
+<option value="stratified">Stratified</option>
+<option value="systematic">Systematic</option>
+</select>
+</div>
+</div>
 
 ## 3. Three ways to place the probes
 
@@ -447,17 +440,6 @@ value.
 </div>
 
 <div class="est-section" id="est-comparison">
-
-<div class="control-box">
-<div class="control-row">
-<span style="font-size:0.85em; color:#666;">Presets:</span>
-<button class="comp-preset-btn" data-preset="skewed">Skewed</button>
-<button class="comp-preset-btn" data-preset="uniform">Uniform</button>
-<button class="comp-preset-btn" data-preset="degenerate">Nearly degenerate</button>
-<button class="comp-preset-btn" data-preset="alternating">Alternating</button>
-</div>
-</div>
-
 <canvas id="cv-comparison" class="panel"></canvas>
 
 <div class="testfn-row" style="margin-top:0.8em;">
