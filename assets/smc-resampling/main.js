@@ -93,7 +93,7 @@
             cvSec2._clearProbeBtn = null;
             if (S.probes.length > 0) {
                 var clearText = '\u00d7 Clear probes';
-                var line3Y = L.plotB + 30;
+                var line3Y = L.plotB + 18;
                 ctx.globalAlpha = 0.8;
                 ctx.fillStyle = '#467';
                 var tw = ctx.measureText(clearText).width;
