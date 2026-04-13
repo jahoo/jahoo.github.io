@@ -708,11 +708,11 @@
 
     // Test function selectors — populate all .testfn-select elements and sync them
     var testFnOptions = [
-        { value: 'position', label: 'i/N  (mean position)' },
-        { value: 'indicator', label: '1{i=k}  (particle count)' },
-        { value: 'tail', label: '1{i\u22655}  (upper tail)' },
-        { value: 'square', label: '(i/N)\u00B2  (squared position)' },
-        { value: 'evenodd', label: '1{i even}  (even/odd class)' },
+        { value: 'position', label: 'n/N  (mean position)' },
+        { value: 'indicator', label: '1{n=k}  (particle count)' },
+        { value: 'tail', label: '1{n\u22655}  (upper tail)' },
+        { value: 'square', label: '(n/N)\u00B2  (squared position)' },
+        { value: 'evenodd', label: '1{n even}  (even/odd class)' },
     ];
     var allTestFnSelects = document.querySelectorAll('.testfn-select');
     allTestFnSelects.forEach(function (sel) {
