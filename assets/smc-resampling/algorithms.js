@@ -164,28 +164,28 @@ window.SMC = (function () {
 
     const TEST_FNS = {
         position: {
-            label: 'f(\u03BEn) = n/N',
-            latexLabel: '$f(\\xi^n)=n/N$',
+            label: 'f(\u03BEi) = i/N',
+            latexLabel: '$f(\\xi^i)=i/N$',
             values: () => Array.from({length: N}, (_, i) => (i + 1) / N),
         },
         indicator: {
-            label: () => `f(\u03BEn) = 1{n=${indicatorK + 1}}`,
-            latexLabel: () => `$f(\\xi^n)=\\mathbf{1}\\{n=${indicatorK + 1}\\}$`,
+            label: () => `f(\u03BEi) = 1{i=${indicatorK + 1}}`,
+            latexLabel: () => `$f(\\xi^i)=\\mathbf{1}\\{i=${indicatorK + 1}\\}$`,
             values: () => Array.from({length: N}, (_, i) => i === indicatorK ? 1 : 0),
         },
         tail: {
-            label: 'f(\u03BEn) = 1{n\u22655}',
-            latexLabel: '$f(\\xi^n)=\\mathbf{1}\\{n\\geq 5\\}$',
+            label: 'f(\u03BEi) = 1{i\u22655}',
+            latexLabel: '$f(\\xi^i)=\\mathbf{1}\\{i\\geq 5\\}$',
             values: () => Array.from({length: N}, (_, i) => i >= 4 ? 1 : 0),
         },
         square: {
-            label: 'f(\u03BEn) = (n/N)\u00B2',
-            latexLabel: '$f(\\xi^n)=(n/N)^2$',
+            label: 'f(\u03BEi) = (i/N)\u00B2',
+            latexLabel: '$f(\\xi^i)=(i/N)^2$',
             values: () => Array.from({length: N}, (_, i) => ((i + 1) / N) ** 2),
         },
         evenodd: {
-            label: 'f(\u03BEn) = 1{n even}',
-            latexLabel: '$f(\\xi^n)=\\mathbf{1}\\{n\\text{ even}\\}$',
+            label: 'f(\u03BEi) = 1{i even}',
+            latexLabel: '$f(\\xi^i)=\\mathbf{1}\\{i\\text{ even}\\}$',
             values: () => Array.from({length: N}, (_, i) => i % 2 === 0 ? 1 : 0),
         },
     };

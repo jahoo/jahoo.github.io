@@ -25,7 +25,7 @@ mathjax_macros: >-
     "invcdf":  "{F^{-1}}",
     "probe":   "x",
     "resid":   "\\widetilde{\\normwt}",
-    "stateidx":"n"
+    "idx":     "i"
   }
 ---
 
@@ -44,15 +44,15 @@ SIS approximates a sequence of target distributions by evolving
 a population of $\np$ samples, termed **particles**. 
 At each step, particles are propagated via a
 proposal and assigned unnormalized importance weights
-$\impwt^\stateidx$ (density ratios of target to proposal). The set of weighted particles 
-$(\state^\stateidx,\impwt^\stateidx)_{\stateidx=1}^\np$
+$\impwt^\idx$      (density ratios of target to proposal). The set of weighted particles 
+$(\state^\idx,\     impwt^\idx)_     {\idx=1     }^\np$
 define an empirical approximation to the current target $\target(\cdot)$:
 
-$$\widehat{\target}(\cdot) \triangleq \sum_{\stateidx=1}^\np \normwt^\stateidx \delta_{\state^\stateidx}(\cdot)$$
+$$\widehat{\target}(\cdot) \triangleq \sum_{\idx=1     }^\np \normwt^\idx \     delta_{\state^\idx}(     \cdot)$$
 
-where $\normwt^\stateidx = \impwt^\stateidx / \sum_j \impwt^j$ are the **normalized weights**.<label for="sn-normwt" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-normwt" class="margin-toggle"/><span class="sidenote">Throughout the rest of this post, "weights" and `weights` in code refer to the normalized weights $\normwt^\stateidx$.</span>
+where $\normwt^\idx =      \impwt^\idx /      \sum_j \impwt^j$ are the **normalized weights**.<label for="sn-normwt" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-normwt" class="margin-toggle"/><span class="sidenote">Throughout the rest of this post, "weights" and `weights` in code refer to the normalized weights $\normwt^\idx$.     </span>
 For any test function $f$, this gives an estimator of its expectation under the target:
-$\widehat{\E_{\target_t}[f]}\triangleq\E_{\widehat{\target_t}}[f]=\sum_\stateidx \normwt^\stateidx f(\state^\stateidx)$.
+$\widehat{\E_{\target_t}[f]}\triangleq\E_{\widehat{\target_t}}[f]=\sum_\idx \     normwt^\idx f     (\state^\idx)$     .
 
 SIS can suffer from **weight degeneracy**, when the weights become concentrated on one particle, with the rest of the particles having negligible weight. When this happens, the budget of $\np$ particles
 effectively behaves as if it were just one samples.
@@ -61,7 +61,7 @@ Resampling replaces the current weighted particles with a new set of equally-wei
 dropping low-weight ones. This addresses
 degeneracy but also reduces diversity (many particles become
 copies of the same few ancestors) and adds variance to
-estimates.<label for="sn-ess" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-ess" class="margin-toggle"/><span class="sidenote">Rather than resampling at every step, SMC usually only resamples when weights start to become degenerate. A common diagnostic is the *effective sample size* $\text{ESS} = 1/\sum_\stateidx (\normwt^\stateidx)^2$, ranging from 1 (all weight on one particle) to $\np$ (uniform). When ESS drops below a threshold (often $\np/2$), it is time to resample.</span>
+estimates.<label for="sn-ess" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-ess" class="margin-toggle"/><span class="sidenote">Rather than resampling at every step, SMC usually only resamples when weights start to become degenerate. A common diagnostic is the *effective sample size* $\text{ESS} = 1/\sum_\idx (     \normwt^\idx)^     2$, ranging from 1 (all weight on one particle) to $\np$ (uniform). When ESS drops below a threshold (often $\np/2$), it is time to resample.</span>
 
 The tension
 between reducing degeneracy and maintaining variance and diversity is what makes
@@ -69,15 +69,15 @@ the choice of resampling method matter.
 
 ### The unbiasedness condition
 
-Let $\cnt^\stateidx$ be the number of copies of particle $\stateidx$ after
+Let $\cnt^\idx$      be the number of copies of particle $\idx$      after
 resampling. For resampling to be unbiased, the expected number
 of copies must be proportional to the weight:
 
-$$\E[\cnt^\stateidx] = \np\, \normwt^\stateidx \quad \text{for all } \stateidx$$
+$$\E[\cnt^\idx]      = \np\, \normwt^\idx \     quad \text{for all } \idx$$     
 
 This ensures that the equally-weighted resampled estimate
-$\sum_{\stateidx=1}^{\np} \frac{1}{\np} f(\rstate^\stateidx)$ is unbiased for
-$\sum_\stateidx \normwt^\stateidx f(\state^\stateidx)$. The different methods we'll look at in this post all satisfy this
+$\sum_{\idx=1     }^{\np} \frac{1}{\np} f(\rstate^\idx)$      is unbiased for
+$\sum_\idx \     normwt^\idx f     (\state^\idx)$     . The different methods we'll look at in this post all satisfy this
 condition, but they differ in how much variance the resampling
 step adds.
 
@@ -85,11 +85,11 @@ step adds.
 ## 2. Inverse transform sampling
 
 Three of the first four methods share the same core idea, mapping random samples on the unit inverval through the inverse CDF of the weight distribution. The
-CDF $\cdf(\stateidx) = \sum_{j=1}^{\stateidx} \normwt^j$ partitions $[0,1]$ into
-segments of width $\normwt^\stateidx$, so it will map a sampled **probe** at position $\probe$ to a selected (resampled) particle $\invcdf(\probe)$.<label for="mn-cdf" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-cdf" class="margin-toggle"/><span class="marginnote">The fourth method, residual resampling, uses slightly different two-stage construction (see below).</span>
+CDF $\cdf(\idx)      = \sum_{j=1}^{\idx}      \normwt^j$ partitions $[0,1]$ into
+segments of width $\normwt^\idx$,      so it will map a sampled **probe** at position $\probe$ to a selected (resampled) particle $\invcdf(\probe)$.<label for="mn-cdf" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-cdf" class="margin-toggle"/><span class="marginnote">The fourth method, residual resampling, uses slightly different two-stage construction (see below).</span>
 
 The question is **how to place $\np$ probes** so that particle
-$i$ gets selected $\np\normwt^\stateidx$ times on average. Try clicking
+$i$ gets selected $\np\normwt^\idx$      times on average. Try clicking
 on the CDF plot at right to place probes, and consider what strategy would you use for placing $\np$ probes, in order to have the distribution of resampled particles recreate the weight histogram on average.
 
 <canvas id="cv-sec2" class="panel"></canvas>
@@ -190,7 +190,7 @@ $K$ trials** to see means settle toward the weights.
 
 <div class="est-section" id="est-multi">
 <div class="testfn-row">
-<span>Estimator distribution for $f(\state^\stateidx) =$</span>
+<span>Estimator distribution for $f(\state^\idx)      =$</span>
 <select class="testfn-select"></select>
 </div>
 <canvas id="cv-est-multi" class="panel panel-short"></canvas>
@@ -199,10 +199,10 @@ $K$ trials** to see means settle toward the weights.
 <div class="proof">
 <span class="proof-label">Unbiasedness.</span>
 Each probe $\probe_k$ is independently $\mathrm{Uniform}(0,1)$, so it
-lands in particle $\stateidx$'s CDF segment (of width $\normwt^\stateidx$) with
-probability $\normwt^\stateidx$. With $\np$ independent probes,
-$\cnt^\stateidx \sim \mathrm{Binomial}(\np, \normwt^\stateidx)$ and
-$\E[\cnt^\stateidx] = \np\,\normwt^\stateidx$. ∎
+lands in particle $\idx$'     s CDF segment (of width $\normwt^\idx$)      with
+probability $\normwt^\idx$.      With $\np$ independent probes,
+$\cnt^\idx \     sim \mathrm{Binomial}(\np, \normwt^\idx)$      and
+$\E[\cnt^\idx]      = \np\,\normwt^\idx$.      ∎
 </div>
 
 
@@ -221,7 +221,7 @@ positions = (random(N) + range(N)) / N
 
 <div class="insight">
 Each stratum gets exactly one probe, so
-$\lfloor \np\normwt^\stateidx \rfloor \leq \cnt^\stateidx \leq \lceil \np\normwt^\stateidx \rceil$.
+$\lfloor \np\normwt^\idx \     rfloor \leq \cnt^\idx \     leq \lceil \np\normwt^\idx \     rceil$.
 Douc et al. (2005) prove $\Var_{\text{strat}} \leq \Var_{\text{mult}}$ always.
 </div>
 
@@ -243,7 +243,7 @@ Douc et al. (2005) prove $\Var_{\text{strat}} \leq \Var_{\text{mult}}$ always.
 
 <div class="est-section" id="est-strat">
 <div class="testfn-row">
-<span>Estimator distribution for $f(\state^\stateidx) =$</span>
+<span>Estimator distribution for $f(\state^\idx)      =$</span>
 <select class="testfn-select"></select>
 </div>
 <canvas id="cv-est-strat" class="panel panel-short"></canvas>
@@ -251,15 +251,15 @@ Douc et al. (2005) prove $\Var_{\text{strat}} \leq \Var_{\text{mult}}$ always.
 
 <div class="proof">
 <span class="proof-label">Unbiasedness.</span>
-Write $\mathbf{1}_k^\stateidx$ for the indicator that stratum $k$'s
-probe lands in particle $\stateidx$'s segment. Within stratum $k$, the
+Write $\mathbf{1}_k^\idx$      for the indicator that stratum $k$'s
+probe lands in particle $\idx$'     s segment. Within stratum $k$, the
 probe is $\mathrm{Uniform}\bigl(\frac{k-1}{\np},\,
-\frac{k}{\np}\bigr)$, so $\E[\mathbf{1}_k^\stateidx]$ equals the
-overlap between stratum $k$ and particle $\stateidx$'s CDF interval,
+\frac{k}{\np}\bigr)$, so $\E[\mathbf{1}_k^\idx]$      equals the
+overlap between stratum $k$ and particle $\idx$'     s CDF interval,
 scaled by $\np$. Summing over all strata:
-$\E[\cnt^\stateidx] = \sum_{k=1}^{\np} \E[\mathbf{1}_k^\stateidx]
-= \np\,\normwt^\stateidx$, since the strata tile $[0,1]$ and particle $\stateidx$'s
-segment has total length $\normwt^\stateidx$. ∎
+$\E[\cnt^\idx]      = \sum_{k=1}^{\np} \E[\mathbf{1}_k^\idx]
+     = \np\,\normwt^\idx$,      since the strata tile $[0,1]$ and particle $\idx$'     s
+segment has total length $\normwt^\idx$.      ∎
 </div>
 
 
@@ -294,7 +294,7 @@ positions = (random() + np.arange(N)) / N
 
 <div class="est-section" id="est-sys">
 <div class="testfn-row">
-<span>Estimator distribution for $f(\state^\stateidx) =$</span>
+<span>Estimator distribution for $f(\state^\idx)      =$</span>
 <select class="testfn-select"></select>
 </div>
 <canvas id="cv-est-sys" class="panel panel-short"></canvas>
@@ -306,7 +306,7 @@ The offset $U$ is $\mathrm{Uniform}(0, 1/\np)$, so each probe
 $\probe_k = U + (k{-}1)/\np$ is marginally
 $\mathrm{Uniform}\bigl(\frac{k-1}{\np},\, \frac{k}{\np}\bigr)$---the
 same distribution as the stratified probe in stratum $k$. The
-same tiling argument gives $\E[\cnt^\stateidx] = \np\,\normwt^\stateidx$. (But note
+same tiling argument gives $\E[\cnt^\idx]      = \np\,\normwt^\idx$.      (But note
 that the probes are no longer independent: a single $U$
 determines all of them. The marginal distributions are identical
 to stratified, so unbiasedness holds, but the joint distribution
@@ -321,7 +321,7 @@ pathological when $f$ aligns with a periodic weight pattern
 matching the comb spacing.
 
 With alternating weights (high, low, high, low, ...) and
-$f(\state^\stateidx) = \mathbf{1}[\stateidx \text{ even}]$, the comb teeth
+$f(\state^\idx)      = \mathbf{1}[\idx \     text{ even}]$, the comb teeth
 land either all on even or split evenly---producing a
 **bimodal** estimator. The systematic variance is
 $(\normwt_{\mathrm{even}}-\tfrac{1}{2})(1-\normwt_{\mathrm{even}})$,
@@ -362,15 +362,15 @@ vanish when $f$ isn't aligned with the weight periodicity.
 
 We could also consider a deterministic-stochastic hybrid, 
 where some particles are deterministically set, and others are allocated randomly. 
-In *residual resampling*, we give particle $\stateidx$ exactly
-$\lfloor \np\normwt^\stateidx \rfloor$ copies, then fill the remaining
-$R = \np - \sum_\stateidx \lfloor \np\normwt^\stateidx \rfloor$ slots by resampling
+In *residual resampling*, we give particle $\idx$ exactly
+$\lfloor \np\normwt^\idx \rfloor$ copies, then fill the remaining
+$R = \np - \sum_\idx \lfloor \np\normwt^\idx \rfloor$ slots by resampling
 on the **residual weights**
-$\resid^\stateidx = (\np\normwt^\stateidx - \lfloor \np\normwt^\stateidx \rfloor)/R$. This nondeterministic part of the algorithm could be done usinany of the three CDF methods (select below).<label for="mn-resid-var" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-resid-var" class="margin-toggle"/><span class="marginnote">Note $\Var_{\text{resid}} \leq \Var_{\text{mult}}$ always. The deterministic phase removes variance entirely for the integer parts, and the phase-2 choice affects only the residual variance.</span> The right ploshows the residual CDF (solid) overlaid on the original weights CDF (dotted). For highly skewed weights, you can see that first allocating the deterministic weights makes the residual CDF much more even than the original was.
+$\resid^\idx = (\np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor)/R$. This nondeterministic part of the algorithm could be done usinany of the three CDF methods (select below).<label for="mn-resid-var" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-resid-var" class="margin-toggle"/><span class="marginnote">Note $\Var_{\text{resid}} \leq \Var_{\text{mult}}$ always. The deterministic phase removes variance entirely for the integer parts, and the phase-2 choice affects only the residual variance.</span> The right ploshows the residual CDF (solid) overlaid on the original weights CDF (dotted). For highly skewed weights, you can see that first allocating the deterministic weights makes the residual CDF much more even than the original was.
 
 
 <div class="highlighter-rouge code-sidenote" id="resid-code"><div class="highlight"><pre class="highlight"><code><span class="c1"># Phase 1 (deterministic): guaranteed copies from the integer part</span>
-num_copies = np.floor(N * weights) <span class="c1"># ⌊Nwⁿ⌋</span>
+num_copies = np.floor(N * weights) <span class="c1"># ⌊Nwⁱ⌋</span>
 <span class="c1"># Phase 2 (stochastic): <span id="resid-phase2-comment">multinomial</span> on the fractional remainders</span>
 residual = weights * N - num_copies
 residual /= sum(residual)          <span class="c1"># normalize residuals</span>
@@ -402,7 +402,7 @@ indexes[k:N] = np.searchsorted(cumsum(residual), positions)</code></pre></div></
 
 <div class="est-section" id="est-resid">
 <div class="testfn-row">
-<span>Estimator distribution for $f(\state^\stateidx) =$</span>
+<span>Estimator distribution for $f(\state^\idx)      =$</span>
 <select class="testfn-select"></select>
 </div>
 <canvas id="cv-est-resid" class="panel panel-short"></canvas>
@@ -410,15 +410,15 @@ indexes[k:N] = np.searchsorted(cumsum(residual), positions)</code></pre></div></
 
 <div class="proof">
 <span class="proof-label">Unbiasedness.</span>
-Phase 1 gives particle $\stateidx$ exactly $\lfloor \np\normwt^\stateidx \rfloor$
+Phase 1 gives particle $\idx$      exactly $\lfloor \np\normwt^\idx \     rfloor$
 copies. Phase 2 resamples $R = \np - \sum_j \lfloor \np\normwt^j
-\rfloor$ particles using normalized residual weights $\resid^\stateidx =
-(\np\normwt^\stateidx - \lfloor \np\normwt^\stateidx \rfloor)/R$. By the unbiasedness
+\rfloor$ particles using normalized residual weights $\resid^\idx =     
+(\np\normwt^\idx -      \lfloor \np\normwt^\idx \     rfloor)/R$. By the unbiasedness
 of whichever CDF method is used for phase 2, the expected
-number of phase-2 copies of particle $\stateidx$ is $R \cdot \resid^\stateidx =
-\np\normwt^\stateidx - \lfloor \np\normwt^\stateidx \rfloor$. Adding the two phases:
-$\E[\cnt^\stateidx] = \lfloor \np\normwt^\stateidx \rfloor + (\np\normwt^\stateidx - \lfloor
-\np\normwt^\stateidx \rfloor) = \np\,\normwt^\stateidx$. ∎
+number of phase-2 copies of particle $\idx$      is $R \cdot \resid^\idx =     
+\np\normwt^\idx -      \lfloor \np\normwt^\idx \     rfloor$. Adding the two phases:
+$\E[\cnt^\idx]      = \lfloor \np\normwt^\idx \     rfloor + (\np\normwt^\idx -      \lfloor
+\np\normwt^\idx \     rfloor) = \np\,\normwt^\idx$.      ∎
 </div>
 
 
@@ -443,7 +443,7 @@ value.
 <canvas id="cv-comparison" class="panel"></canvas>
 
 <div class="testfn-row" style="margin-top:0.8em;">
-<strong>Estimator distributions</strong> for $f(\state^\stateidx) =$
+<strong>Estimator distributions</strong> for $f(\state^\idx)      =$
 <select class="testfn-select"></select>
 <span style="color:#999;">(dashed = true value)</span>
 </div>
@@ -462,7 +462,7 @@ Residual <span class="c-residual" id="comp-std-resid"></span>
 | | Multinomial | Stratified | Systematic | Residual |
 |---|---|---|---|---|
 | $\Var \leq \Var_{\text{mult}}$? | baseline | ✓ always | ✗ not guaranteed | ✓ always |
-| $\|\cnt^\stateidx - \np\normwt^\stateidx\|$ bound | up to $\np$ | $\leq 1$ | $\leq 1$ | phase-2 dependent |
+| $\|\cnt^\idx -      \np\normwt^\idx\|     $ bound | up to $\np$ | $\leq 1$ | $\leq 1$ | phase-2 dependent |
 | Random draws | $\np$ | $\np$ | 1 | $R \leq \np$ |
 {:.summary-table}
 
@@ -475,9 +475,9 @@ not the only options.
 ### Branch-kill resampling
 
 The methods above all produce exactly $\np$ resampled particles.
-Branch-kill relaxes this: each particle $\stateidx$ independently gets
-$\lfloor \np\normwt^\stateidx \rfloor$ deterministic copies plus one bonus
-copy with probability $\np\normwt^\stateidx - \lfloor \np\normwt^\stateidx \rfloor$.
+Branch-kill relaxes this: each particle $\idx$      independently gets
+$\lfloor \np\normwt^\idx \     rfloor$ deterministic copies plus one bonus
+copy with probability $\np\normwt^\idx -      \lfloor \np\normwt^\idx \     rfloor$.
 No shared CDF or residual phase needed.
 
 ```python
@@ -489,16 +489,16 @@ bonus = (u >= 1 - p_bonus)                             # inverse CDF: right of s
 num_copies += bonus                                    # total may differ from N
 ```
 
-The total $\sum_\stateidx \cnt^\stateidx$ fluctuates around $\np$ rather than
+The total $\sum_\idx \     cnt^\idx$      fluctuates around $\np$ rather than
 equalling it exactly. The per-particle independence makes
 branch-kill naturally suited to parallel hardware.
 
 <div class="proof">
 <span class="proof-label">Unbiasedness.</span>
-Particle $i$ receives $\lfloor \np\normwt^\stateidx \rfloor$ deterministic
-copies plus one bonus copy with probability $\np\normwt^\stateidx - \lfloor
-\np\normwt^\stateidx \rfloor$. So $\E[\cnt^\stateidx] = \lfloor \np\normwt^\stateidx \rfloor +
-(\np\normwt^\stateidx - \lfloor \np\normwt^\stateidx \rfloor) = \np\,\normwt^\stateidx$. ∎
+Particle $i$ receives $\lfloor \np\normwt^\idx \     rfloor$ deterministic
+copies plus one bonus copy with probability $\np\normwt^\idx -      \lfloor
+\np\normwt^\idx \     rfloor$. So $\E[\cnt^\idx]      = \lfloor \np\normwt^\idx \     rfloor +
+(\np\normwt^\idx -      \lfloor \np\normwt^\idx \     rfloor) = \np\,\normwt^\idx$.      ∎
 </div>
 
 <canvas id="cv-bk" class="panel"></canvas>
@@ -519,7 +519,7 @@ copies plus one bonus copy with probability $\np\normwt^\stateidx - \lfloor
 
 <div class="est-section" id="est-bk">
 <div class="testfn-row">
-<span>Estimator distribution for $f(\state^\stateidx) =$</span>
+<span>Estimator distribution for $f(\state^\idx)      =$</span>
 <select class="testfn-select"></select>
 </div>
 <canvas id="cv-est-bk" class="panel panel-short"></canvas>
@@ -528,7 +528,7 @@ copies plus one bonus copy with probability $\np\normwt^\stateidx - \lfloor
 ### Other extensions
 
 - **Rounding-copy resampling.** Like branch-kill, but fully
-  deterministic: each particle gets $\mathrm{round}(\np\normwt^\stateidx)$
+  deterministic: each particle gets $\mathrm{round}(\np\normwt^\idx)$     
   copies. This uses zero random draws, but sacrifices the strict
   unbiasedness condition (the bias per particle is at most
   $0.5/\np$, vanishing as $\np$ grows). See Li et al. (2015).
