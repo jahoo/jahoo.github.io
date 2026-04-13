@@ -337,21 +337,7 @@
         S.drawEstDist('cv-est-bk',   S.secBK, S.METHOD_COLORS.branchkill, 'Branch-kill');
         // Section 7 overlaid distributions
         S.drawCompEstDist();
-        // Toolbar sparkline
-        var _spk = document.getElementById('toolbar-sparkline');
-        if (_spk) drawMiniWeights(_spk, S.weights, 36, 24);
-        // Toolbar label
-        var _lbl = document.getElementById('weight-dropdown-label');
-        if (_lbl) {
-            var _match = 'Custom';
-            var _presetMap = {skewed:'Skewed', uniform:'Uniform', degenerate:'Nearly degen.', alternating:'Alternating'};
-            for (var _k in PRESETS) {
-                var _pw = PRESETS[_k](), _same = true;
-                for (var _j = 0; _j < N; _j++) if (Math.abs(_pw[_j] - S.weights[_j]) > 1e-6) { _same = false; break; }
-                if (_same) { _match = _presetMap[_k] || _k; break; }
-            }
-            _lbl.textContent = _match;
-        }
+        // Toolbar is updated by updateToolbar() polling
     }
 
     // ================================================================
@@ -888,26 +874,23 @@
     }
 
     // -- Toggle dropdown --
-    var dropdownJustOpened = false;
-    if (dropdownBtn) {
-        dropdownBtn.addEventListener('mousedown', function (e) {
-            e.preventDefault();
+    if (dropdownBtn && dropdownPanel) {
+        dropdownBtn.addEventListener('click', function (e) {
             e.stopPropagation();
-            var isOpen = dropdownPanel.classList.contains('open');
-            if (!isOpen) {
+            if (dropdownPanel.classList.contains('open')) {
+                dropdownPanel.classList.remove('open');
+            } else {
                 buildDropdownPanel();
                 dropdownPanel.classList.add('open');
-                dropdownJustOpened = true;
-                setTimeout(function () { dropdownJustOpened = false; }, 0);
-            } else {
+            }
+        });
+        // Close on click outside (delayed to avoid same-event close)
+        document.addEventListener('click', function (e) {
+            if (!dropdownBtn.contains(e.target) && !dropdownPanel.contains(e.target)) {
                 dropdownPanel.classList.remove('open');
             }
         });
     }
-    // Close on click outside
-    document.addEventListener('mousedown', function () {
-        if (!dropdownJustOpened && dropdownPanel) dropdownPanel.classList.remove('open');
-    });
 
     // -- Toolbar phase-2 sync --
     if (toolbarPhase2Select && phase2Select) {
@@ -943,5 +926,58 @@
 
     // Initial draw
     redrawAll();
+
+    // ================================================================
+    //  TOOLBAR UPDATER (runs after every redrawAll + on interval)
+    //  Self-contained — no dependency on closures or hoisting.
+    // ================================================================
+
+    var _prevWeightsJSON = '';
+    function updateToolbar() {
+        var wJSON = JSON.stringify(S.weights);
+        if (wJSON === _prevWeightsJSON) return;
+        _prevWeightsJSON = wJSON;
+
+        // Sparkline
+        var spk = document.getElementById('toolbar-sparkline');
+        if (spk) {
+            var dpr = window.devicePixelRatio || 1;
+            var sw = 36, sh = 24;
+            spk.width = Math.round(sw * dpr);
+            spk.height = Math.round(sh * dpr);
+            spk.style.width = sw + 'px';
+            spk.style.height = sh + 'px';
+            var sctx = spk.getContext('2d');
+            sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            sctx.clearRect(0, 0, sw, sh);
+            var maxW = Math.max.apply(null, S.weights);
+            var rowH = sh / N, barH = rowH * 0.7;
+            for (var i = 0; i < N; i++) {
+                var y = sh - (i + 0.5) * rowH - barH / 2;
+                var bw = (S.weights[i] / maxW) * (sw - 2);
+                sctx.fillStyle = S.PALETTE[i];
+                sctx.globalAlpha = 0.55;
+                sctx.fillRect(sw - 1 - bw, y, bw, barH);
+                sctx.globalAlpha = 1;
+            }
+        }
+
+        // Label
+        var lbl = document.getElementById('weight-dropdown-label');
+        if (lbl) {
+            var match = 'Custom';
+            var presetMap = {skewed:'Skewed', uniform:'Uniform', degenerate:'Nearly degen.', alternating:'Alternating'};
+            for (var k in PRESETS) {
+                var pw = PRESETS[k](), same = true;
+                for (var j = 0; j < N; j++) if (Math.abs(pw[j] - S.weights[j]) > 1e-6) { same = false; break; }
+                if (same) { match = presetMap[k] || k; break; }
+            }
+            lbl.textContent = match;
+        }
+    }
+
+    // Run after initial draw and on a polling interval (catches all updates)
+    updateToolbar();
+    setInterval(function () { updateToolbar(); }, 200);
 
 })();
