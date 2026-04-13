@@ -549,3 +549,7 @@ Li, T., Bolic, M., & Djuric, P. M. (2015). Resampling methods for
 particle filtering: Classification, implementation, and strategies.
 *IEEE Signal Processing Magazine*, *32*(3), 70--86.
 <https://doi.org/10.1109/MSP.2014.2330626>
+
+Naesseth, C. A., Lindsten, F., & Schön, T. B. (2019). Elements of
+sequential Monte Carlo. *Foundations and Trends® in Machine Learning*,
+*12*(3), 307--392. <https://doi.org/10.1561/2200000074>
