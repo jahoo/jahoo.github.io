@@ -95,11 +95,6 @@ variance by spreading probes more evenly.
 
 <canvas id="cv-sec2" class="panel"></canvas>
 
-<div id="sec2-probe-controls" style="font-size:0.85em; color:#666; margin-top:2px;">
-<span>Click on CDF plot to place probes $\probe_i$</span>
-<button id="btn-clear-probes" style="display:none; margin-left:8px; font-size:0.9em;">Clear probes</button>
-</div>
-
 <div id="smc-toolbar" class="smc-toolbar">
 <div class="smc-toolbar-item" id="smc-toolbar-weights">
 <span class="smc-toolbar-label">Weights:</span>

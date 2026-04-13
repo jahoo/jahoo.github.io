@@ -73,20 +73,42 @@
             probeColor: '#333',
             hoverU: S.hoverU,
         });
-        // Annotation below plot
+        // In-canvas annotations below CDF plot
         var L = cvSec2._L;
         if (L) {
             var ctx = cvSec2.getContext('2d');
+            var annotY = L.plotB + 14;
+            // Left annotation: drag instruction
             ctx.fillStyle = '#999';
             ctx.globalAlpha = 0.7;
             ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-            ctx.fillText('Drag bars/endpoints to adjust weights.', L.histL + 2, L.plotB + 14);
+            ctx.fillText('Drag bars/endpoints to adjust weights.', L.histL + 2, annotY);
+            // Right annotation: probe instruction + clear button
+            var probeTextY = annotY;
+            ctx.fillStyle = '#888';
+            ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'left';
+            var instrText = 'Click to place probes x\u1D62';
+            ctx.fillText(instrText, L.cdfL, probeTextY);
+            // "Clear probes" button (only when probes exist)
+            if (S.probes.length > 0) {
+                var clearText = '[Clear probes]';
+                var clearX = L.cdfL;
+                var clearY = probeTextY + 13;
+                ctx.fillStyle = 'var(--s-accent, #467)';
+                // Use a solid color since var() doesn't work in canvas
+                ctx.fillStyle = '#467';
+                ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.fillText(clearText, clearX, clearY);
+                // Store hit region for click detection
+                var tw = ctx.measureText(clearText).width;
+                cvSec2._clearProbeBtn = { x: clearX, y: clearY, w: tw, h: 12 };
+            } else {
+                cvSec2._clearProbeBtn = null;
+            }
             ctx.globalAlpha = 1;
         }
-        // Show/hide clear probes button
-        var clearBtn = document.getElementById('btn-clear-probes');
-        if (clearBtn) clearBtn.style.display = S.probes.length > 0 ? 'inline' : 'none';
     }
 
     // ================================================================
@@ -229,6 +251,14 @@
                 return;
             }
 
+            // Cursor for clear-probes button
+            var cb = canvas._clearProbeBtn;
+            if (cb && pos.x >= cb.x && pos.x <= cb.x + cb.w && pos.y >= cb.y - 2 && pos.y <= cb.y + cb.h + 2) {
+                canvas.style.cursor = 'pointer';
+            } else {
+                canvas.style.cursor = '';
+            }
+
             if (!globalWeightDrag.active && pos.x >= L.cdfL && pos.x <= L.cdfR && pos.y >= L.plotT && pos.y <= L.plotB + 10) {
                 S.hoverU = L.xToU(pos.x);
             } else {
@@ -246,6 +276,14 @@
 
             if (L && downPos) {
                 var pos = S.getPos(canvas, e);
+                // Check if click hit the "Clear probes" button
+                var cb = canvas._clearProbeBtn;
+                if (cb && pos.x >= cb.x && pos.x <= cb.x + cb.w && pos.y >= cb.y - 2 && pos.y <= cb.y + cb.h + 2) {
+                    S.probes = [];
+                    redrawAll();
+                    downPos = null;
+                    return;
+                }
                 if (pos.x >= L.cdfL && pos.x <= L.cdfR) {
                     if (Math.hypot(pos.x - downPos.x, pos.y - downPos.y) < 5) {
                         var u = L.xToU(pos.x);
@@ -743,10 +781,7 @@
         S.compData = null; S.counterData = null;
         document.querySelectorAll('.var-display').forEach(function (el) { el.textContent = ''; });
     }
-    var clearProbesBtn = document.getElementById('btn-clear-probes');
-    if (clearProbesBtn) clearProbesBtn.addEventListener('click', function () {
-        S.probes = []; redrawAll();
-    });
+    // Clear probes button is now drawn inside the canvas (see drawSection2)
 
     // Preset weight configurations (used by toolbar.js via custom events)
     var PRESETS = {
