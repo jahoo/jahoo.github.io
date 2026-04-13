@@ -62,8 +62,9 @@
         var captionSpan = document.getElementById('degen-caption');
         if (!cv || !btnRerun) return;
 
-        var nP = 8;       // match rest of post
-        var T = 8;         // number of SIS/SMC steps
+        var nP = 8;
+        var T = 8;
+        var selectedLineage = null;  // Set of "t,i" strings that are highlighted
         var sigmaProc = 1.0;
         var sigmaObs = 0.5;
         var yObs = 2.0;
@@ -155,6 +156,42 @@
             }
         }
 
+        // Trace full lineage from a clicked (t, i): ancestors back + descendants forward
+        function traceLineage(clickT, clickI) {
+            var lineage = {};
+            lineage[clickT + ',' + clickI] = true;
+            // Trace ancestors backward
+            var idx = clickI;
+            for (var t = clickT; t > 0; t--) {
+                var anc = history[t].ancestors;
+                var parent = anc ? anc[idx] : idx;
+                lineage[(t - 1) + ',' + parent] = true;
+                idx = parent;
+            }
+            // Trace descendants forward
+            var current = [clickI];
+            for (var t = clickT + 1; t < history.length; t++) {
+                var next = [];
+                var anc = history[t].ancestors;
+                for (var i = 0; i < nP; i++) {
+                    var parent = anc ? anc[i] : i;
+                    for (var c = 0; c < current.length; c++) {
+                        if (parent === current[c]) {
+                            lineage[t + ',' + i] = true;
+                            next.push(i);
+                            break;
+                        }
+                    }
+                }
+                current = next;
+                if (current.length === 0) break;
+            }
+            return lineage;
+        }
+
+        // Also store layout info for click detection
+        var drawLayout = null;
+
         function draw() {
             var dpr = window.devicePixelRatio || 1;
             var W = cv.clientWidth, H = cv.clientHeight;
@@ -180,6 +217,9 @@
 
             var colors = S.PALETTE;
 
+            // Store layout for click detection
+            drawLayout = { pL: pL, pT: pT, pB: pB, colW: colW, rowH: rowH, nCols: nCols };
+
             // Grid lines
             ctx.strokeStyle = '#f0f0f0';
             ctx.lineWidth = 0.5;
@@ -196,6 +236,7 @@
             }
 
             // Weight bars + ancestor arrows
+            var hasSelection = selectedLineage !== null;
             for (var t = 0; t < history.length; t++) {
                 var h = history[t];
                 var cx = pL + (t + 0.5) * colW;
@@ -203,15 +244,18 @@
                 for (var i = 0; i < nP; i++) {
                     var y = pB - (i + 0.5) * rowH;
                     var bw = globalMaxW > 0 ? (h.weights[i] / globalMaxW) * maxBarW : 0;
+                    var inLineage = hasSelection && selectedLineage[t + ',' + i];
+                    var dimmed = hasSelection && !inLineage;
 
                     // Bar
                     ctx.fillStyle = colors[i % colors.length];
-                    ctx.globalAlpha = 0.45;
+                    ctx.globalAlpha = dimmed ? 0.1 : (inLineage ? 0.7 : 0.45);
                     ctx.fillRect(cx - bw, y - barH / 2, bw, barH);
-                    ctx.globalAlpha = 1;
                     ctx.strokeStyle = colors[i % colors.length];
-                    ctx.lineWidth = 0.7;
+                    ctx.globalAlpha = dimmed ? 0.15 : (inLineage ? 1 : 0.7);
+                    ctx.lineWidth = inLineage ? 1.2 : 0.7;
                     ctx.strokeRect(cx - bw, y - barH / 2, bw, barH);
+                    ctx.globalAlpha = 1;
                 }
 
                 // Arrows to next step
@@ -224,12 +268,15 @@
                         var srcY = pB - (srcIdx + 0.5) * rowH;
                         var dstY = pB - (i + 0.5) * rowH;
                         var nextBw = globalMaxW > 0 ? (nextH.weights[i] / globalMaxW) * maxBarW : 0;
+                        // Arrow is "in lineage" if source AND dest are both in lineage
+                        var arrowInLineage = hasSelection && selectedLineage[t + ',' + srcIdx] && selectedLineage[(t + 1) + ',' + i];
+                        var arrowDimmed = hasSelection && !arrowInLineage;
                         var ax1 = cx + 1;
                         var ax2 = nextCx - nextBw - 1;
                         if (ax2 > ax1 + 3) {
-                            ctx.strokeStyle = '#ccc';
-                            ctx.lineWidth = 0.6;
-                            ctx.globalAlpha = 0.5;
+                            ctx.strokeStyle = arrowInLineage ? '#555' : '#ccc';
+                            ctx.lineWidth = arrowInLineage ? 1.2 : 0.6;
+                            ctx.globalAlpha = arrowDimmed ? 0.1 : (arrowInLineage ? 0.8 : 0.5);
                             ctx.beginPath();
                             ctx.moveTo(ax1, srcY);
                             ctx.lineTo(ax2, dstY);
@@ -251,8 +298,32 @@
             ctx.fillText('t', pL + pW / 2, pB + 12);
         }
 
-        btnRerun.addEventListener('click', run);
-        if (chkResample) chkResample.addEventListener('change', run);
+        // Click to highlight lineage
+        cv.addEventListener('click', function (e) {
+            if (!drawLayout || history.length === 0) return;
+            var rect = cv.getBoundingClientRect();
+            var x = e.clientX - rect.left;
+            var y = e.clientY - rect.top;
+            var L = drawLayout;
+            // Which timestep column?
+            var t = Math.floor((x - L.pL) / L.colW);
+            if (t < 0 || t >= history.length) { selectedLineage = null; draw(); return; }
+            // Which particle row?
+            var i = Math.floor((L.pB - y) / L.rowH);
+            if (i < 0 || i >= nP) { selectedLineage = null; draw(); return; }
+            // Toggle: click same particle again to deselect
+            var key = t + ',' + i;
+            if (selectedLineage && selectedLineage[key]) {
+                selectedLineage = null;
+            } else {
+                selectedLineage = traceLineage(t, i);
+            }
+            draw();
+        });
+        cv.style.cursor = 'pointer';
+
+        btnRerun.addEventListener('click', function () { selectedLineage = null; run(); });
+        if (chkResample) chkResample.addEventListener('change', function () { selectedLineage = null; run(); });
 
         // Initial run
         run();
