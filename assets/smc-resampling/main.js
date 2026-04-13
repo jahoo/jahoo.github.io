@@ -188,15 +188,21 @@
                 ctx.beginPath(); ctx.moveTo(gx, pT); ctx.lineTo(gx, pB); ctx.stroke();
             }
 
+            // Global max weight across all timesteps (absolute scale)
+            var globalMaxW = 0;
+            for (var t = 0; t < history.length; t++) {
+                var mw = Math.max.apply(null, history[t].weights);
+                if (mw > globalMaxW) globalMaxW = mw;
+            }
+
             // Weight bars + ancestor arrows
             for (var t = 0; t < history.length; t++) {
                 var h = history[t];
-                var maxW = Math.max.apply(null, h.weights);
                 var cx = pL + (t + 0.5) * colW;
 
                 for (var i = 0; i < nP; i++) {
                     var y = pB - (i + 0.5) * rowH;
-                    var bw = maxW > 0 ? (h.weights[i] / maxW) * maxBarW : 0;
+                    var bw = globalMaxW > 0 ? (h.weights[i] / globalMaxW) * maxBarW : 0;
 
                     // Bar
                     ctx.fillStyle = colors[i % colors.length];
@@ -211,16 +217,13 @@
                 // Arrows to next step
                 if (t < history.length - 1) {
                     var nextH = history[t + 1];
-                    var nextMaxW = Math.max.apply(null, nextH.weights);
                     var nextCx = pL + (t + 1.5) * colW;
 
                     for (var i = 0; i < nP; i++) {
-                        // Where does particle i at t+1 come from?
                         var srcIdx = nextH.ancestors ? nextH.ancestors[i] : i;
                         var srcY = pB - (srcIdx + 0.5) * rowH;
                         var dstY = pB - (i + 0.5) * rowH;
-                        var srcBw = maxW > 0 ? (h.weights[srcIdx] / maxW) * maxBarW : 0;
-                        var nextBw = nextMaxW > 0 ? (nextH.weights[i] / nextMaxW) * maxBarW : 0;
+                        var nextBw = globalMaxW > 0 ? (nextH.weights[i] / globalMaxW) * maxBarW : 0;
                         var ax1 = cx + 1;
                         var ax2 = nextCx - nextBw - 1;
                         if (ax2 > ax1 + 3) {
