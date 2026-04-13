@@ -51,6 +51,180 @@
     var cvBK   = document.getElementById('cv-bk');
 
     // ================================================================
+    //  WEIGHT DEGENERACY ILLUSTRATION
+    // ================================================================
+
+    (function () {
+        var cv = document.getElementById('cv-degeneracy');
+        var btnStep = document.getElementById('btn-degen-step');
+        var btnReset = document.getElementById('btn-degen-reset');
+        var infoSpan = document.getElementById('degen-info');
+        if (!cv || !btnStep) return;
+
+        var nParticles = 6;
+        var maxSteps = 8;
+        var history = [];  // history[t] = [w1, w2, ..., wN] normalized weights
+
+        // Simple toy model: at each step, multiply weights by random factors
+        // and renormalize — mimics likelihood reweighting without resampling
+        function initWeights() {
+            var w = [];
+            for (var i = 0; i < nParticles; i++) w.push(1 / nParticles);
+            return w;
+        }
+
+        function stepWeights(w) {
+            // Multiply each weight by exp(noise) where noise differs per particle
+            // This simulates importance weight updates that create degeneracy
+            var newW = w.slice();
+            for (var i = 0; i < nParticles; i++) {
+                var logFactor = (Math.random() - 0.5) * 2.0;  // random log-weight increment
+                newW[i] *= Math.exp(logFactor);
+            }
+            var sum = newW.reduce(function (a, b) { return a + b; }, 0);
+            return newW.map(function (v) { return v / sum; });
+        }
+
+        function reset() {
+            history = [initWeights()];
+            draw();
+            updateInfo();
+        }
+
+        function step() {
+            if (history.length >= maxSteps) return;
+            var prev = history[history.length - 1];
+            history.push(stepWeights(prev));
+            draw();
+            updateInfo();
+        }
+
+        function updateInfo() {
+            if (!infoSpan) return;
+            var t = history.length - 1;
+            var w = history[t];
+            var ess = 1 / w.reduce(function (s, wi) { return s + wi * wi; }, 0);
+            infoSpan.textContent = 't = ' + t + ',  ESS = ' + ess.toFixed(1) + ' / ' + nParticles;
+        }
+
+        function draw() {
+            var dpr = window.devicePixelRatio || 1;
+            var W = cv.clientWidth, H = cv.clientHeight;
+            if (W === 0 || H === 0) return;
+            cv.width = Math.round(W * dpr);
+            cv.height = Math.round(H * dpr);
+            var ctx = cv.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, W, H);
+
+            var margin = { top: 14, bottom: 28, left: 30, right: 10 };
+            var pL = margin.left, pR = W - margin.right;
+            var pT = margin.top, pB = H - margin.bottom;
+            var pW = pR - pL, pH = pB - pT;
+
+            var T = history.length;
+            var colW = pW / maxSteps;
+            var rowH = pH / nParticles;
+            var barH = rowH * 0.6;
+            var maxBarW = colW * 0.85;
+
+            // Particle colors (use a warm palette distinct from method colors)
+            var colors = ['#c0392b', '#d35400', '#f39c12', '#27ae60', '#2980b9', '#8e44ad', '#e74c3c', '#16a085'];
+
+            // Draw grid lines for each timestep
+            ctx.strokeStyle = '#eee';
+            ctx.lineWidth = 1;
+            for (var t = 0; t <= maxSteps; t++) {
+                var gx = pL + t * colW;
+                ctx.beginPath();
+                ctx.moveTo(gx, pT);
+                ctx.lineTo(gx, pB);
+                ctx.stroke();
+            }
+
+            // Draw weight bars at each timestep
+            for (var t = 0; t < T; t++) {
+                var w = history[t];
+                var maxW = Math.max.apply(null, w);
+                var cx = pL + (t + 0.5) * colW;  // center of column
+
+                for (var i = 0; i < nParticles; i++) {
+                    var y = pB - (i + 0.5) * rowH;
+                    var bw = (w[i] / maxW) * maxBarW;
+
+                    // Bar grows leftward from center line (like our histograms)
+                    ctx.fillStyle = colors[i % colors.length];
+                    ctx.globalAlpha = 0.5;
+                    ctx.fillRect(cx - bw, y - barH / 2, bw, barH);
+                    ctx.globalAlpha = 1;
+                    ctx.strokeStyle = colors[i % colors.length];
+                    ctx.lineWidth = 0.8;
+                    ctx.strokeRect(cx - bw, y - barH / 2, bw, barH);
+
+                    // Arrow to next timestep
+                    if (t < T - 1) {
+                        var nextCx = pL + (t + 1.5) * colW;
+                        var nextW = history[t + 1];
+                        var nextMaxW = Math.max.apply(null, nextW);
+                        var nextBw = (nextW[i] / nextMaxW) * maxBarW;
+                        var arrowStartX = cx + 2;
+                        var arrowEndX = nextCx - nextBw - 2;
+                        if (arrowEndX > arrowStartX + 5) {
+                            ctx.strokeStyle = '#bbb';
+                            ctx.lineWidth = 0.8;
+                            ctx.globalAlpha = 0.5;
+                            ctx.beginPath();
+                            ctx.moveTo(arrowStartX, y);
+                            ctx.lineTo(arrowEndX, y);
+                            // Small arrowhead
+                            ctx.lineTo(arrowEndX - 3, y - 2);
+                            ctx.moveTo(arrowEndX, y);
+                            ctx.lineTo(arrowEndX - 3, y + 2);
+                            ctx.stroke();
+                            ctx.globalAlpha = 1;
+                        }
+                    }
+                }
+            }
+
+            // Y-axis: particle labels
+            ctx.fillStyle = '#666';
+            ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            for (var i = 0; i < nParticles; i++) {
+                ctx.fillText(i + 1, pL - 4, pB - (i + 0.5) * rowH);
+            }
+
+            // X-axis: timestep labels
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillStyle = '#888';
+            for (var t = 0; t < maxSteps; t++) {
+                var opacity = t < T ? 1 : 0.3;
+                ctx.globalAlpha = opacity;
+                ctx.fillText('t=' + t, pL + (t + 0.5) * colW, pB + 4);
+            }
+            ctx.globalAlpha = 1;
+
+            // Label
+            ctx.fillStyle = '#aaa';
+            ctx.font = '9px -apple-system, sans-serif';
+            ctx.fillText('SIS iterations (no resampling)', pL + pW / 2, pB + 16);
+        }
+
+        btnStep.addEventListener('click', step);
+        btnReset.addEventListener('click', reset);
+
+        // Initialize
+        reset();
+        // Redraw on window resize
+        window.addEventListener('resize', function () { draw(); });
+    })();
+
+    // ================================================================
     //  SECTION 2 — DRAWING
     // ================================================================
 

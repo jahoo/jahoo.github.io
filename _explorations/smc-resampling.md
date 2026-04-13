@@ -43,27 +43,27 @@ Like many other things, while there are many asymptotically identical methods, i
 
 ## Why care about different resampling methods?
 
-To start, consider the sequential importance sampling (SIS) algorithm.
-SIS approximates a sequence of target distributions by evolving
-a population of $\np$ samples, termed **particles**. 
-At each step, particles are propagated via a
-proposal and assigned unnormalized importance weights
-$\impwt^\idx$ (density ratios of target to proposal). The set of weighted particles 
-$(\state^\idx,\impwt^\idx)_{\idx=1}^\np$
-define an empirical approximation to the current target $\target(\cdot)$:
+To start, consider the sequential importance sampling (SIS) algorithm, which does not include resampling.
 
-$$\widehat{\target}(\cdot) \triangleq \sum_{\idx=1}^\np \normwt^\idx \delta_{\state^\idx}(\cdot)$$
+-   SIS approximates a sequence of target distributions by evolving
+    a population of $\np$ samples, termed **particles**. 
 
-where $\normwt^\idx = \impwt^\idx / \sum_j \impwt^j$ are the **normalized weights**.<label for="sn-normwt" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-normwt" class="margin-toggle"/><span class="sidenote">Throughout the rest of this post, "weights" and `weights` in code refer to the normalized weights $\normwt^\idx$. </span>
-For any test function $f$, this gives an estimator of its expectation under the target:
-$\widehat{\E_{\target_t}[f]}\triangleq\E_{\widehat{\target_t}}[f]=\sum_\idx \normwt^\idx f(\state^\idx)$.
+-   At each step, particles are propagated via a
+    proposal and assigned unnormalized importance weights
+    $\impwt^\idx$ (density ratios of target to proposal). The set of weighted particles 
+    $(\state^\idx,\impwt^\idx)_{\idx=1}^\np$
+    define an empirical approximation to the current target $\target(\cdot)$:
 
-SIS can suffer from **weight degeneracy**, when the weights become concentrated and the budget of $\np$ particles effectively behaves as if it were just one sample. This issue motivates sequential Monte Carlo (SMC), which adds a **resampling** step.
-Resampling replaces a current set of particles (with highly skewed weights) with a new set of samples with weights all set to be equal, duplicating high-weight particles and
-dropping low-weight ones. This addresses
-degeneracy but also reduces diversity (many particles become
-copies of the same few ancestors) and adds variance to
-estimates.
+    $$\widehat{\target}(\cdot) \triangleq \sum_{\idx=1}^\np \normwt^\idx \delta_{\state^\idx}(\cdot)$$
+
+    where $\normwt^\idx = \impwt^\idx / \sum_j \impwt^j$ are the **normalized weights**.<label for="sn-normwt" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-normwt" class="margin-toggle"/><span class="sidenote">Throughout the rest of this post, "weights" and `weights` in code refer to the normalized weights $\normwt^\idx$. </span>
+    
+-   For any test function $f$, this gives an importance sampling estimator
+    of its expectation under the target:
+    $\widehat{\E_{\target_t}[f]}\triangleq\E_{\widehat{\target_t}}[f]=\sum_\idx \normwt^\idx f(\state^\idx)$.
+
+Now, one issue with SIS is that it can suffer from **weight degeneracy**, when the weights become concentrated and the budget of $\np$ particles effectively behaves as if it were just one sample.<label for="mn-degen" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-degen" class="margin-toggle"/><span class="marginnote"><canvas id="cv-degeneracy" style="width:100%; height:180px; border:1px solid #ddd; border-radius:3px;"></canvas><br><button id="btn-degen-step" style="font-size:0.8em;">Step</button> <button id="btn-degen-reset" style="font-size:0.8em;">Reset</button> <span id="degen-info" style="font-size:0.8em; margin-left:4px;"></span><br>Weight degeneracy in SIS: at each step, weights are updated and renormalized. Without resampling, one particle quickly dominates.</span> This issue motivates sequential Monte Carlo (SMC), which improves on SIS by the addition of a **resampling** step, which replaces a current set of particles (with highly skewed weights) with a new set of samples with weights all set to be equal, duplicating high-weight particles and
+dropping low-weight ones. This addresses weight degeneracy, but also reduces diversity (many particles become copies of the same few ancestors) and adds variance to the estimate.
 
 The tension between reducing degeneracy and maintaining variance and diversity is what makes
 the choice of resampling method matter.
