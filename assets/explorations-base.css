@@ -136,6 +136,16 @@
 .marginnote {
   padding-left: 0.8em;
 }
+/* Allow block elements (details, canvas, etc.) inside sidenotes/marginnotes */
+.sidenote, .marginnote {
+  display: block;
+}
+.sidenote details, .marginnote details {
+  margin-top: 0.3em;
+}
+.sidenote summary, .marginnote summary {
+  cursor: pointer;
+}
 
 /* Sidenote counter */
 .exploration-content { counter-reset: sidenote-counter; }
