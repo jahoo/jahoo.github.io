@@ -205,7 +205,7 @@
             ctx.fillStyle = '#fff';
             ctx.fillRect(0, 0, W, H);
 
-            var margin = { top: 10, bottom: 30, left: 14, right: 6 };
+            var margin = { top: 10, bottom: 22, left: 22, right: 6 };
             var pL = margin.left, pR = W - margin.right;
             var pT = margin.top, pB = H - margin.bottom;
             var pW = pR - pL, pH = pB - pT;
@@ -221,11 +221,11 @@
             // Store layout for click detection
             drawLayout = { pL: pL, pT: pT, pB: pB, colW: colW, rowH: rowH, nCols: nCols };
 
-            // Grid lines
+            // Grid lines at each timestep center
             ctx.strokeStyle = '#f0f0f0';
             ctx.lineWidth = 0.5;
-            for (var t = 0; t <= nCols; t++) {
-                var gx = pL + t * colW;
+            for (var t = 0; t < nCols; t++) {
+                var gx = pL + (t + 0.5) * colW;
                 ctx.beginPath(); ctx.moveTo(gx, pT); ctx.lineTo(gx, pB); ctx.stroke();
             }
 
@@ -288,16 +288,19 @@
                 }
             }
 
-            // X-axis: timestep labels + per-step ESS
+            // Row labels on the left
             ctx.font = '7px -apple-system, sans-serif';
-            ctx.textAlign = 'center';
+            ctx.textAlign = 'right';
             ctx.textBaseline = 'top';
+            ctx.fillStyle = '#999';
+            ctx.fillText('t', pL - 3, pB + 1);
+            ctx.fillText('ESS', pL - 3, pB + 10);
+            // Per-step values
+            ctx.textAlign = 'center';
             for (var t = 0; t < nCols; t++) {
                 var cx = pL + (t + 0.5) * colW;
-                // Timestep number
                 ctx.fillStyle = '#999';
                 ctx.fillText(t, cx, pB + 1);
-                // ESS for this step
                 if (t < history.length) {
                     var w = history[t].weights;
                     var ess = 1 / w.reduce(function (s, wi) { return s + wi * wi; }, 0);
@@ -305,9 +308,6 @@
                     ctx.fillText(ess.toFixed(1), cx, pB + 10);
                 }
             }
-            // Axis label
-            ctx.fillStyle = '#bbb';
-            ctx.fillText('t / ESS', pL + pW / 2, pB + 19);
         }
 
         // Click to highlight lineage
