@@ -822,7 +822,12 @@
     // Listen for generic redraw requests from toolbar.js
     document.addEventListener('smc-redraw', function () { redrawAll(); });
 
-    // Initial draw
-    redrawAll();
+    // Initial draw — deferred to ensure canvases have layout dimensions
+    // (scripts run before CSS layout is complete on some browsers)
+    if (document.readyState === 'complete') {
+        redrawAll();
+    } else {
+        window.addEventListener('load', function () { redrawAll(); });
+    }
 
 })();

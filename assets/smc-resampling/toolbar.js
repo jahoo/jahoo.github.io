@@ -163,6 +163,9 @@
         }
         requestAnimationFrame(tick);
     }
+    // Start tick loop + force initial draw
+    lastJSON = '';
+    updateSparkline();
     requestAnimationFrame(tick);
 
 })();
