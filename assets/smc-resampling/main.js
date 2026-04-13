@@ -154,11 +154,9 @@
             if (smcLabel) smcLabel.className = 'degen-toggle-label' + (doResample ? ' active' : '');
             if (!captionSpan) return;
             if (doResample) {
-                captionSpan.textContent = 'SMC (with multinomial resampling). '
-                    + 'Resampling restores weight diversity at each step.';
+                captionSpan.textContent = 'With resampling (SMC): weights stay diverse across steps.';
             } else {
-                captionSpan.textContent = 'SIS (no resampling). '
-                    + 'Without resampling, one particle quickly dominates.';
+                captionSpan.textContent = 'Without resampling (SIS): weights concentrate on one particle.';
             }
         }
 
