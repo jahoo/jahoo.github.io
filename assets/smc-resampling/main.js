@@ -300,7 +300,7 @@
             var colors = S.PALETTE;
 
             // Display permutations for untangling
-            var doUntangle = chkUntangle && chkUntangle.checked;
+            var doUntangle = true;
             var perms = doUntangle ? computeDisplayPerms() : null;
             // Helper: get y position for particle i at step t
             function particleY(t, i) {
@@ -448,7 +448,6 @@
 
         btnRerun.addEventListener('click', function () { selectedLineage = null; run(); });
         if (chkResample) chkResample.addEventListener('change', function () { selectedLineage = null; run(); });
-        if (chkUntangle) chkUntangle.addEventListener('change', function () { draw(); });
 
         // Initial run
         run();
