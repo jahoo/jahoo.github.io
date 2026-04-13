@@ -449,16 +449,7 @@
 
     // Section 5 counterexample
     var counterPreWeights = null;  // weights before counterexample changed them
-    var COUNTER_PRESETS = {
-        alternating: function () {
-            var w = [];
-            for (var i = 0; i < N; i++) w.push(i % 2 === 0 ? 0.20 : 0.05);
-            S.normalize(w); return w;
-        },
-        skewed: function () { return [0.05, 0.08, 0.12, 0.30, 0.20, 0.12, 0.08, 0.05]; },
-        uniform: function () { return new Array(N).fill(1 / N); },
-        degenerate: function () { return [0.01, 0.01, 0.02, 0.02, 0.02, 0.02, 0.01, 0.89]; },
-    };
+    // PRESETS removed — uses PRESETS (defined below, available at call time)
     function clearCounterDisplay() {
         S.counterData = null;
         document.getElementById('var-counter').textContent = '';
@@ -468,7 +459,7 @@
     function applyCounterPreset() {
         var key = document.getElementById('select-counter-weights').value;
         if (!counterPreWeights) counterPreWeights = S.weights.slice();
-        S.weights = COUNTER_PRESETS[key]();
+        S.weights = PRESETS[key]();
         clearCounterDisplay();
         redrawAll();
     }
@@ -495,7 +486,7 @@
     document.getElementById('btn-run-counter').addEventListener('click', function () {
         var key = document.getElementById('select-counter-weights').value;
         if (!counterPreWeights) counterPreWeights = S.weights.slice();
-        S.weights = COUNTER_PRESETS[key]();
+        S.weights = PRESETS[key]();
         var K = parseInt(document.getElementById('slider-K-counter').value, 10);
         var perm = document.getElementById('chk-permute').checked;
         var sysAllCounts = new Array(K);
@@ -778,9 +769,6 @@
             redrawAll();
         }
     });
-
-    // Listen for generic redraw requests from toolbar.js
-    document.addEventListener('smc-redraw', function () { redrawAll(); });
 
     // Initial draw — defer if DOM not ready yet (scripts at bottom of body
     // may run before layout is complete)
