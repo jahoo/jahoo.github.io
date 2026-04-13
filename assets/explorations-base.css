@@ -50,7 +50,7 @@
   padding: 2rem 2rem 4rem 6%;
   overflow-wrap: break-word;
   min-width: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
   font-family: var(--s-body);
   font-size: 1.1rem;
   line-height: 1.7;
@@ -126,6 +126,9 @@
 .sidenote {
   padding-top: 0.1rem;
   text-indent: -0.8em;
+  padding-left: 0.8em;
+}
+.marginnote {
   padding-left: 0.8em;
 }
 

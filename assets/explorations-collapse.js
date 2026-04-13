@@ -37,6 +37,10 @@
       section.appendChild(heading);
       while (sibling) {
         var next = sibling.nextElementSibling;
+        // Skip sticky toolbar — leave as direct child of .exploration-content
+        if (sibling.classList && sibling.classList.contains('sticky-toolbar')) {
+          sibling = next; continue;
+        }
         // Stop at next heading of same or higher level
         if (/^H[1-9]$/.test(sibling.tagName) && parseInt(sibling.tagName[1]) <= headingLevel) break;
         // Also stop at a section that was already wrapped around a same-level heading

@@ -1,6 +1,32 @@
 /* SMC Resampling — interactive element styles only.
    Typography and layout come from explorations-base.css. */
 
+/* --- Sticky toolbar --- */
+.sticky-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--s-bg, #fefefe);
+    border-bottom: 1px solid var(--s-border, #ddd);
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.85em;
+    width: 100% !important;
+    box-sizing: border-box;
+}
+.toolbar-section {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+#toolbar-sparkline {
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
 /* --- Break interactive elements out of the 60% content width --- */
 canvas.panel,
 .control-box,

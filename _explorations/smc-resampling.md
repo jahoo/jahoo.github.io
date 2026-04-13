@@ -12,7 +12,9 @@ mathjax_macros: >-
   {
     "state":   "\\xi",
     "rstate":  "\\widetilde{\\state}",
-    "wt":      "w",
+    "target":  "\\pi",
+    "impwt":   "u",
+    "normwt":  "w",
     "np":      "N",
     "cnt":     "M",
     "gen":     "{\\mathcal{G}}",
@@ -20,65 +22,96 @@ mathjax_macros: >-
     "Var":     "\\operatorname{Var}",
     "cdf":     "F",
     "invcdf":  "{F^{-1}}",
-    "resid":   "\\widetilde{\\wt}"
+    "resid":   "\\widetilde{\\normwt}"
   }
 ---
 
-# Resampling in Sequential Monte Carlo
+# Resampling in sequential Monte Carlo
 {:.no_toc}
 
-*An interactive exploration of four standard resampling schemes*
+*Exploring some standard resampling schemes*
 
-## 1. Why resample?
+## Why care about different resampling methods?
 
-Sequential Monte Carlo (SMC) approximates a target distribution
-with $\np$ weighted particles $\{(\state^i, \wt^i)\}_{i=1}^{\np}$,
-where the weights are normalized ($\sum_i \wt^i = 1$). The
-weighted particle set defines an empirical distribution that
-serves as an importance-sampling estimate of the target: for any
-test function $f$,
+Sequential importance sampling (SIS) approximates a sequence of
+target distributions $\target_1, \target_2, \ldots$ by evolving
+a population of $\np$ samples $\state^1, \ldots,
+\state^\np$, called **particles**. At each step, particles are propagated via a
+proposal and assigned unnormalized importance weights
+$\impwt^i$ (density ratios of target to proposal). The
+**normalized weights** $\normwt^i = \impwt^i / \sum_j \impwt^j$
+define an empirical approximation to the current
+target:<label for="sn-normwt" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-normwt" class="margin-toggle"/><span class="sidenote">Throughout the rest of this post, "weights" and `weights` in code refer to the normalized weights $\normwt^i$.</span>
 
-$$\sum_{i=1}^{\np} \wt^i f(\state^i) \;\approx\; \E_{\text{target}}[f]$$
+$$\widehat{\target_t} = \sum_{i=1}^\np \normwt^i \delta_{\state^i} \;\approx\; \target_t$$
 
-In practice, weights tend to become highly unequal---**weight
-degeneracy**---with a few particles holding nearly all the
-weight.<label for="sn-ess" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-ess" class="margin-toggle"/><span class="sidenote">A common diagnostic is the *effective sample size* $\text{ESS} = 1/\sum_i (\wt^i)^2$, ranging from 1 (all weight on one particle) to $\np$ (uniform). When ESS drops below a threshold (often $\np/2$), it is time to resample.</span>
-The budget of $\np$ particles effectively shrinks to one or two
-useful samples.
+For any test function $f$, this gives an estimator:
+$\sum_i \normwt^i f(\state^i) \approx \E_{\target_t}[f]$.
 
-**Resampling** fixes this by replacing the weighted family with
-$\np$ equally-weighted copies, duplicating high-weight particles
-and dropping low-weight ones. This restores the particle budget
-but introduces **sample impoverishment**: many particles become
-copies of the same few ancestors, reducing diversity. The tension
-between *concentration* (reducing degeneracy) and
-*diversification* (maintaining distinct particles) is what makes
+SIS can suffer from **weight degeneracy**: The normalized weights
+become highly unequal, and the budget of $\np$ particles
+effectively behaves as if it were many fewer useful samples.
+Sequential Monte Carlo (SMC) adds a **resampling** step.
+Resampling replaces the current weighted particles with a new set of equally-weighted samples, duplicating high-weight particles and
+dropping low-weight ones. This addresses
+degeneracy but also reduces diversity (many particles become
+copies of the same few ancestors) and adds variance to
+estimates.<label for="sn-ess" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-ess" class="margin-toggle"/><span class="sidenote">Rather than resampling at every step, SMC usually only resamples when weights start to become degenerate. A common diagnostic is the *effective sample size* $\text{ESS} = 1/\sum_i (\normwt^i)^2$, ranging from 1 (all weight on one particle) to $\np$ (uniform). When ESS drops below a threshold (often $\np/2$), it is time to resample.</span>
+
+The tension
+between reducing degeneracy and maintaining variance and diversity is what makes
 the choice of resampling method matter.
 
 ### The unbiasedness condition
 
 Let $\cnt^i$ be the number of copies of particle $i$ after
-resampling. The key requirement is **unbiasedness**:
+resampling. For resampling to be unbiased, the expected number
+of copies must be proportional to the weight:
 
-$$\E[\cnt^i] = \np\, \wt^i \quad \text{for all } i$$
+$$\E[\cnt^i] = \np\, \normwt^i \quad \text{for all } i$$
 
 This ensures that the equally-weighted resampled estimate
-$\np^{-1} \sum_{i=1}^{\np} f(\rstate^i)$ is unbiased for the
-original weighted sum $\sum_i \wt^i f(\state^i)$---which is
-itself our IS approximation to the target. All methods below
-satisfy this condition, but they differ in how much variance the
-resampling step adds.
+$\sum_{i=1}^{\np} \frac{1}{\np} f(\rstate^i)$ is unbiased for
+$\sum_i \normwt^i f(\state^i)$. The different methods we'll look at in this post all satisfy this
+condition, but they differ in how much variance the resampling
+step adds.
 
 
-## 2. The shared mechanism: inverse CDF mapping
+<div id="sticky-toolbar" class="sticky-toolbar">
+<div class="toolbar-section" id="toolbar-weights">
+<span style="font-size:0.8em; color:#666;">Weights:</span>
+<canvas id="toolbar-sparkline" width="80" height="20" style="vertical-align:middle;"></canvas>
+<select id="toolbar-preset" style="padding:1px 4px; border:1px solid #ccc; border-radius:3px; font-size:0.85em;">
+<option value="skewed">Skewed</option>
+<option value="uniform">Uniform</option>
+<option value="degenerate">Nearly degenerate</option>
+<option value="alternating">Alternating</option>
+<option value="custom">Custom</option>
+</select>
+</div>
+<div class="toolbar-section" id="toolbar-testfn" style="display:none;">
+<span style="font-size:0.8em; color:#666;">$f$:</span>
+<select class="testfn-select toolbar-testfn-select" style="padding:1px 4px; border:1px solid #ccc; border-radius:3px; font-size:0.85em;"></select>
+</div>
+<div class="toolbar-section" id="toolbar-phase2" style="display:none;">
+<span style="font-size:0.8em; color:#666;">Phase 2:</span>
+<select id="toolbar-phase2-select" style="padding:1px 4px; border:1px solid #ccc; border-radius:3px; font-size:0.85em;">
+<option value="multinomial">Multinomial</option>
+<option value="stratified">Stratified</option>
+<option value="systematic">Systematic</option>
+</select>
+</div>
+</div>
 
-Three of the first four methods share the same core idea. The
-CDF $\cdf(i) = \sum_{j=1}^{i} \wt^j$ partitions $[0,1]$ into
-segments of width $\wt^i$. A **probe** at position $u$ selects
-particle $\invcdf(u)$---whichever segment it lands in.<label for="mn-cdf" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-cdf" class="margin-toggle"/><span class="marginnote">The fourth method, residual resampling, uses a different construction---see §4.</span>
+## 2. Inverse CDF mapping
 
-**Drag** the bars or CDF endpoints to adjust weights.
-**Click** the CDF plot to place probes.
+Three of the first four methods share the same core idea, mapping random samples on the unit inverval through the inverse CDF of the weight distribution. The
+CDF $\cdf(i) = \sum_{j=1}^{i} \normwt^j$ partitions $[0,1]$ into
+segments of width $\normwt^i$, so it will map a sampled **probe** at position $u$ to a selected (resampled) particle $\invcdf(u)$.<label for="mn-cdf" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-cdf" class="margin-toggle"/><span class="marginnote">The fourth method, residual resampling, uses slightly different two-stage construction (see below).</span>
+
+The question is **how to place $\np$ probes** so that particle
+$i$ gets selected $\np\normwt^i$ times on average. Try clicking
+on the CDF plot at right to place probes, and consider what strategy would you use for placing $\np$ probes, in order to have the distribution of resampled particles recreate the weight histogram on average.
 
 <canvas id="cv-sec2" class="panel"></canvas>
 
@@ -94,10 +127,7 @@ particle $\invcdf(u)$---whichever segment it lands in.<label for="mn-cdf" class=
 </div>
 </div>
 
-The question is **how to place $\np$ probes** so that particle
-$i$ gets selected $\np\wt^i$ times on average. Try clicking
-above---what strategy would you use? The most natural idea,
-$\np$ independent uniform draws, works and leads to our first
+The most natural idea, $\np$ independent uniform draws, works and leads to our first
 algorithm. We then see two less obvious strategies that reduce
 variance by spreading probes more evenly.
 
@@ -124,7 +154,7 @@ Equivalent to `np.random.choice(N, size=N, replace=True, p=weights)`.
 {:.small-note}
 
 <details markdown="1" style="font-size:0.85em; color:#555; margin:0.3em 0 0.8em;">
-<summary style="cursor:pointer; color:#444;">What does <code>searchsorted</code> do?</summary>
+<summary style="cursor:pointer; color:#444;"><code>searchsorted</code> does inverse-CDF lookup</summary>
 
 For each probe value $u$, `searchsorted` finds the smallest index $j$
 such that `cumulative_sum[j]` $\geq u$. This is the inverse CDF lookup:
@@ -142,8 +172,7 @@ while i < N:
     j += 1         # move to next CDF step
 ```
 
-Both pointers only advance forward, so this is $O(\np)$. This is what filterpy
-actually uses for stratified and systematic resampling.
+Both pointers only advance forward, so this is $O(\np)$.
 
 </details>
 
@@ -178,10 +207,10 @@ $K$ trials** to see means settle toward the weights.
 <div class="proof">
 <span class="proof-label">Unbiasedness.</span>
 Each probe $u_k$ is independently $\mathrm{Uniform}(0,1]$, so it
-lands in particle $i$'s CDF segment (of width $\wt^i$) with
-probability $\wt^i$. With $\np$ independent probes,
-$\cnt^i \sim \mathrm{Binomial}(\np, \wt^i)$ and
-$\E[\cnt^i] = \np\,\wt^i$. ∎
+lands in particle $i$'s CDF segment (of width $\normwt^i$) with
+probability $\normwt^i$. With $\np$ independent probes,
+$\cnt^i \sim \mathrm{Binomial}(\np, \normwt^i)$ and
+$\E[\cnt^i] = \np\,\normwt^i$. ∎
 </div>
 
 
@@ -200,7 +229,7 @@ positions = (random(N) + range(N)) / N
 
 <div class="insight">
 Each stratum gets exactly one probe, so
-$\lfloor \np\wt^i \rfloor \leq \cnt^i \leq \lceil \np\wt^i \rceil$.
+$\lfloor \np\normwt^i \rfloor \leq \cnt^i \leq \lceil \np\normwt^i \rceil$.
 Douc et al. (2005) prove $\Var_{\text{strat}} \leq \Var_{\text{mult}}$ always.
 </div>
 
@@ -237,8 +266,8 @@ probe is $\mathrm{Uniform}\bigl(\frac{k-1}{\np},\,
 overlap between stratum $k$ and particle $i$'s CDF interval,
 scaled by $\np$. Summing over all strata:
 $\E[\cnt^i] = \sum_{k=1}^{\np} \E[\mathbf{1}_k^i]
-= \np\,\wt^i$, since the strata tile $[0,1]$ and particle $i$'s
-segment has total length $\wt^i$. ∎
+= \np\,\normwt^i$, since the strata tile $[0,1]$ and particle $i$'s
+segment has total length $\normwt^i$. ∎
 </div>
 
 
@@ -285,14 +314,14 @@ The offset $U$ is $\mathrm{Uniform}(0, 1/\np]$, so each probe
 $u_k = U + (k{-}1)/\np$ is marginally
 $\mathrm{Uniform}\bigl(\frac{k-1}{\np},\, \frac{k}{\np}\bigr]$---the
 same distribution as the stratified probe in stratum $k$. The
-same tiling argument gives $\E[\cnt^i] = \np\,\wt^i$. (But note
+same tiling argument gives $\E[\cnt^i] = \np\,\normwt^i$. (But note
 that the probes are no longer independent: a single $U$
 determines all of them. The marginal distributions are identical
 to stratified, so unbiasedness holds, but the joint distribution
 differs---and with it the variance.) ∎
 </div>
 
-#### The counterexample (Douc et al., 2005, §3.4)
+### Systematic can be worse than multinomial (Douc et al., 2005, §3.4)
 
 Systematic has the same marginals as stratified, but the probes
 are **perfectly correlated**. This is usually benign, but becomes
@@ -300,23 +329,30 @@ pathological when $f$ aligns with a periodic weight pattern
 matching the comb spacing.
 
 With alternating weights (high, low, high, low, ...) and
-$f(\state^i) = \mathbf{1}\{i \text{ even}\}$, the comb teeth
+$f(\state^i) = \mathbf{1}[i \text{ even}]$, the comb teeth
 land either all on even or split evenly---producing a
 **bimodal** estimator. The systematic variance is
-$(\wt_{\mathrm{even}}-\tfrac{1}{2})(1-\wt_{\mathrm{even}})$,
+$(\normwt_{\mathrm{even}}-\tfrac{1}{2})(1-\normwt_{\mathrm{even}})$,
 **constant in $\np$**, while multinomial's decreases as
-$\wt_{\mathrm{even}}(1 - \wt_{\mathrm{even}})/\np$.
+$\normwt_{\mathrm{even}}(1 - \normwt_{\mathrm{even}})/\np$.
 
 <div class="control-box">
 <div class="control-row">
-<button id="btn-load-counter">Alternating preset + 1{even}</button>
-<button id="btn-clear-counter" style="font-size:0.9em;">Clear</button>
-<span style="flex:1;"></span>
+<label style="font-size:0.85em; color:#555;">Weights:
+<select id="select-counter-weights" style="padding:2px 4px; border:1px solid #ccc; border-radius:3px; font-size:1em;">
+<option value="alternating">Alternating</option>
+<option value="skewed">Skewed</option>
+<option value="uniform">Uniform</option>
+<option value="degenerate">Nearly degenerate</option>
+</select></label>
 <label><input type="checkbox" id="chk-permute"> Permute first</label>
+<span style="flex:1;"></span>
 <label style="font-size:0.85em; color:#555;">$K$:
 <input type="range" id="slider-K-counter" min="500" max="10000" value="2000" step="500" style="width:90px; vertical-align:middle;">
 <span id="val-K-counter">2000</span></label>
 <button id="btn-run-counter">Run comparison</button>
+<button id="btn-clear-counter" style="font-size:0.9em;">Clear</button>
+<button id="btn-reset-counter-weights" style="font-size:0.9em;">Reset weights</button>
 </div>
 </div>
 
@@ -328,22 +364,24 @@ $\wt_{\mathrm{even}}(1 - \wt_{\mathrm{even}})/\np$.
 Try other test functions (e.g., mean position) to see the effect
 vanish when $f$ isn't aligned with the weight periodicity.
 
+**Note.** This counterexample depends on the particle ordering. Randomly permuting the particles before resampling eliminates the pathology (try the "Permute first" checkbox above).<label for="sn-permute" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-permute" class="margin-toggle"/><span class="sidenote">Douc et al. (2005, §3.4) observe that both stratified and systematic resampling are sensitive to particle ordering: permuting the indices before resampling changes the distribution of the resampled set. After random permutation, systematic resampling becomes empirically similar to residual/stratified. They conclude that the counterexample is likely a "rare" situation, but that it shows systematic resampling is not as robust a variance-reduction method as stratified or residual, and that its theoretical analysis is considerably harder.</span>
+
 ## 4. Residual resampling
 
-A deterministic-stochastic hybrid. Give particle $i$ exactly
-$\lfloor \np\wt^i \rfloor$ copies, then fill the remaining
-$R = \np - \sum_i \lfloor \np\wt^i \rfloor$ slots by resampling
+We could also consider a deterministic-stochastic hybrid, 
+where some particles are deterministically set, and others are allocated randomly. 
+In *residual resampling*, we give particle $i$ exactly
+$\lfloor \np\normwt^i \rfloor$ copies, then fill the remaining
+$R = \np - \sum_i \lfloor \np\normwt^i \rfloor$ slots by resampling
 on the **residual weights**
-$\resid^i = (\np\wt^i - \lfloor \np\wt^i \rfloor)/R$, using
-any of the three CDF methods (select below). The right plot
-shows the residual CDF (solid) overlaid on the original (dotted).
+$\resid^i = (\np\normwt^i - \lfloor \np\normwt^i \rfloor)/R$. This nondeterministic part of the algorithm could be done usinany of the three CDF methods (select below).<label for="mn-resid-var" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-resid-var" class="margin-toggle"/><span class="marginnote">Note $\Var_{\text{resid}} \leq \Var_{\text{mult}}$ always. The deterministic phase removes variance entirely for the integer parts, and the phase-2 choice affects only the residual variance.</span> The right ploshows the residual CDF (solid) overlaid on the original weights CDF (dotted). For highly skewed weights, you can see that first allocating the deterministic weights makes the residual CDF much more even than the original was.
 
-<div class="highlighter-rouge" id="resid-code"><div class="highlight"><pre class="highlight"><code><span class="c1"># Phase 1 (deterministic): guaranteed copies from the integer part</span>
-num_copies = np.floor(N * weights)                  <span class="c1"># ⌊Nwⁱ⌋</span>
+<div class="highlighter-rouge code-sidenote" id="resid-code"><div class="highlight"><pre class="highlight"><code><span class="c1"># Phase 1 (deterministic): guaranteed copies from the integer part</span>
+num_copies = np.floor(N * weights) <span class="c1"># ⌊Nwⁱ⌋</span>
 <span class="c1"># Phase 2 (stochastic): <span id="resid-phase2-comment">multinomial</span> on the fractional remainders</span>
 residual = weights * N - num_copies
-residual /= sum(residual)                           <span class="c1"># normalize residuals</span>
-<span id="resid-phase2-code">positions = random(R)                               <span class="c1"># multinomial: R independent probes</span></span>
+residual /= sum(residual)          <span class="c1"># normalize residuals</span>
+<span id="resid-phase2-code">positions = random(R)              <span class="c1"># multinomial: R independent probes</span></span>
 indexes[k:N] = np.searchsorted(cumsum(residual), positions)</code></pre></div></div>
 
 <label style="font-size:0.85em; color:#555;">Phase 2 method:
@@ -379,22 +417,17 @@ indexes[k:N] = np.searchsorted(cumsum(residual), positions)</code></pre></div></
 
 <div class="proof">
 <span class="proof-label">Unbiasedness.</span>
-Phase 1 gives particle $i$ exactly $\lfloor \np\wt^i \rfloor$
-copies. Phase 2 resamples $R = \np - \sum_j \lfloor \np\wt^j
+Phase 1 gives particle $i$ exactly $\lfloor \np\normwt^i \rfloor$
+copies. Phase 2 resamples $R = \np - \sum_j \lfloor \np\normwt^j
 \rfloor$ particles using normalized residual weights $\resid^i =
-(\np\wt^i - \lfloor \np\wt^i \rfloor)/R$. By the unbiasedness
+(\np\normwt^i - \lfloor \np\normwt^i \rfloor)/R$. By the unbiasedness
 of whichever CDF method is used for phase 2, the expected
 number of phase-2 copies of particle $i$ is $R \cdot \resid^i =
-\np\wt^i - \lfloor \np\wt^i \rfloor$. Adding the two phases:
-$\E[\cnt^i] = \lfloor \np\wt^i \rfloor + (\np\wt^i - \lfloor
-\np\wt^i \rfloor) = \np\,\wt^i$. ∎
+\np\normwt^i - \lfloor \np\normwt^i \rfloor$. Adding the two phases:
+$\E[\cnt^i] = \lfloor \np\normwt^i \rfloor + (\np\normwt^i - \lfloor
+\np\normwt^i \rfloor) = \np\,\normwt^i$. ∎
 </div>
 
-Douc et al. (2005) prove $\Var_{\text{resid}} \leq \Var_{\text{mult}}$
-always---the deterministic phase removes variance entirely for
-the integer parts. The phase-2 choice affects only the residual
-variance; using stratified or systematic for phase 2 can reduce
-it further.
 
 
 ## 5. Head-to-head comparison
@@ -414,6 +447,17 @@ value.
 </div>
 
 <div class="est-section" id="est-comparison">
+
+<div class="control-box">
+<div class="control-row">
+<span style="font-size:0.85em; color:#666;">Presets:</span>
+<button class="comp-preset-btn" data-preset="skewed">Skewed</button>
+<button class="comp-preset-btn" data-preset="uniform">Uniform</button>
+<button class="comp-preset-btn" data-preset="degenerate">Nearly degenerate</button>
+<button class="comp-preset-btn" data-preset="alternating">Alternating</button>
+</div>
+</div>
+
 <canvas id="cv-comparison" class="panel"></canvas>
 
 <div class="testfn-row" style="margin-top:0.8em;">
@@ -436,7 +480,7 @@ Residual <span class="c-residual" id="comp-std-resid"></span>
 | | Multinomial | Stratified | Systematic | Residual |
 |---|---|---|---|---|
 | $\Var \leq \Var_{\text{mult}}$? | baseline | ✓ always | ✗ not guaranteed | ✓ always |
-| $\|\cnt^i - \np\wt^i\|$ bound | up to $\np$ | $\leq 1$ | $\leq 1$ | phase-2 dependent |
+| $\|\cnt^i - \np\normwt^i\|$ bound | up to $\np$ | $\leq 1$ | $\leq 1$ | phase-2 dependent |
 | Random draws | $\np$ | $\np$ | 1 | $R \leq \np$ |
 {:.summary-table}
 
@@ -450,8 +494,8 @@ not the only options.
 
 The methods above all produce exactly $\np$ resampled particles.
 Branch-kill relaxes this: each particle $i$ independently gets
-$\lfloor \np\wt^i \rfloor$ deterministic copies plus one bonus
-copy with probability $\np\wt^i - \lfloor \np\wt^i \rfloor$.
+$\lfloor \np\normwt^i \rfloor$ deterministic copies plus one bonus
+copy with probability $\np\normwt^i - \lfloor \np\normwt^i \rfloor$.
 No shared CDF or residual phase needed.
 
 ```python
@@ -469,10 +513,10 @@ branch-kill naturally suited to parallel hardware.
 
 <div class="proof">
 <span class="proof-label">Unbiasedness.</span>
-Particle $i$ receives $\lfloor \np\wt^i \rfloor$ deterministic
-copies plus one bonus copy with probability $\np\wt^i - \lfloor
-\np\wt^i \rfloor$. So $\E[\cnt^i] = \lfloor \np\wt^i \rfloor +
-(\np\wt^i - \lfloor \np\wt^i \rfloor) = \np\,\wt^i$. ∎
+Particle $i$ receives $\lfloor \np\normwt^i \rfloor$ deterministic
+copies plus one bonus copy with probability $\np\normwt^i - \lfloor
+\np\normwt^i \rfloor$. So $\E[\cnt^i] = \lfloor \np\normwt^i \rfloor +
+(\np\normwt^i - \lfloor \np\normwt^i \rfloor) = \np\,\normwt^i$. ∎
 </div>
 
 <canvas id="cv-bk" class="panel"></canvas>
@@ -502,7 +546,7 @@ copies plus one bonus copy with probability $\np\wt^i - \lfloor
 ### Other extensions
 
 - **Rounding-copy resampling.** Like branch-kill, but fully
-  deterministic: each particle gets $\mathrm{round}(\np\wt^i)$
+  deterministic: each particle gets $\mathrm{round}(\np\normwt^i)$
   copies. This uses zero random draws, but sacrifices the strict
   unbiasedness condition (the bias per particle is at most
   $0.5/\np$, vanishing as $\np$ grows). See Li et al. (2015).

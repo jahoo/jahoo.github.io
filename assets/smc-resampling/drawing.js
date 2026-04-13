@@ -817,12 +817,15 @@
     function drawCounterexample() {
         var cv = document.getElementById('cv-counter');
         var counterData = S.counterData;
-        if (!cv || !counterData) { if (cv) S.resetCanvas(cv); return; }
-        var trueVal = S.weights.reduce(function (s, w, i) { return s + w * S.getTestFnValues()[i]; }, 0);
+        if (!cv || !counterData || !counterData.multi) { if (cv) S.resetCanvas(cv); return; }
+        if (cv.offsetWidth === 0 || cv.offsetHeight === 0) return;
+        var evM = S.evalEstimators(counterData.multi);
+        var evS = S.evalEstimators(counterData.sys);
+        if (!evM || !evS) { S.resetCanvas(cv); return; }
         drawEstimatorDist(cv, [
-            { estimators: counterData.multiEsts, color: S.METHOD_COLORS.multinomial, label: 'Multinomial' },
-            { estimators: counterData.sysEsts,   color: S.METHOD_COLORS.systematic, label: 'Systematic' },
-        ], trueVal);
+            { estimators: evM.estimators, color: S.METHOD_COLORS.multinomial, label: 'Multinomial' },
+            { estimators: evS.estimators, color: S.METHOD_COLORS.systematic, label: 'Systematic' },
+        ], evM.trueVal);
     }
 
     // ================================================================
@@ -833,6 +836,9 @@
         if (!datasets || datasets.every(function (d) { return !d.estimators; })) { S.resetCanvas(canvas); return; }
         var result = S.resetCanvas(canvas);
         var ctx = result.ctx, w = result.w, h = result.h;
+        var nDS = datasets.length;
+        var errBarH = 8;  // height for mean±std error bar per row
+        var rowGap = nDS > 1 ? 4 : 0;
         var margin = { top: 12, right: 12, bottom: 26, left: 12 };
         var pL = margin.left, pR = w - margin.right;
         var pT = margin.top, pB = h - margin.bottom;
@@ -840,57 +846,93 @@
 
         ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
 
-        // Shared range
+        // Shared x range
         var allVals = datasets.reduce(function (acc, d) { return acc.concat(d.estimators || []); }, []);
         if (allVals.length === 0) return;
         var spread = Math.max(0.01, Math.max.apply(null, allVals) - Math.min.apply(null, allVals));
-        var lo = Math.min.apply(null, allVals) - spread * 0.25;
-        var hi = Math.max.apply(null, allVals) + spread * 0.25;
-
-        // Compute KDE for each dataset
-        var nPts = 150;
-        var curves = datasets.map(function (d) {
-            return {
-                points: S.gaussianKDE(d.estimators, nPts, lo, hi),
-                color: d.color,
-                label: d.label,
-            };
-        });
-
-        var maxDensity = Math.max.apply(null, curves.reduce(function (acc, c) {
-            return acc.concat(c.points.map(function (p) { return p.y; }));
-        }, [1e-10]));
+        var lo = Math.min.apply(null, allVals) - spread * 0.15;
+        var hi = Math.max.apply(null, allVals) + spread * 0.15;
 
         function xToCanvas(v) { return pL + ((v - lo) / (hi - lo)) * pW; }
-        function yToCanvas(d) { return pB - (d / maxDensity) * pH * 0.92; }
 
-        // Draw filled KDE curves
-        for (var ci = 0; ci < curves.length; ci++) {
-            var points = curves[ci].points;
-            var color = curves[ci].color;
+        // Build frequency tables + stats for each dataset
+        var histData = datasets.map(function (d) {
+            var freq = {};
+            if (!d.estimators) return { freq: freq, maxCount: 0, mean: 0, std: 0 };
+            var sum = 0, sumSq = 0, n = d.estimators.length;
+            for (var i = 0; i < n; i++) {
+                var key = d.estimators[i].toFixed(8);
+                freq[key] = (freq[key] || 0) + 1;
+                sum += d.estimators[i];
+                sumSq += d.estimators[i] * d.estimators[i];
+            }
+            var maxCount = 0;
+            for (var k in freq) if (freq[k] > maxCount) maxCount = freq[k];
+            var mean = sum / n;
+            var std = Math.sqrt(Math.max(0, sumSq / n - mean * mean));
+            return { freq: freq, maxCount: maxCount, mean: mean, std: std };
+        });
 
-            // Filled area
-            ctx.fillStyle = color;
-            ctx.globalAlpha = 0.2;
-            ctx.beginPath();
-            ctx.moveTo(xToCanvas(points[0].x), pB);
-            for (var pi = 0; pi < points.length; pi++) ctx.lineTo(xToCanvas(points[pi].x), yToCanvas(points[pi].y));
-            ctx.lineTo(xToCanvas(points[points.length - 1].x), pB);
-            ctx.closePath();
-            ctx.fill();
+        // Divide vertical space into rows (one per dataset)
+        var totalErrSpace = nDS * errBarH;
+        var totalGaps = Math.max(0, nDS - 1) * rowGap;
+        var histAreaH = pH - totalErrSpace - totalGaps;
+        var rowH = histAreaH / nDS + errBarH;
+        var rowHistH = rowH - errBarH;
 
-            // Stroke
+        // Draw each dataset in its own row
+        for (var ci = 0; ci < nDS; ci++) {
+            var color = datasets[ci].color;
+            var freq = histData[ci].freq;
+            var rowTop = pT + ci * (rowH + rowGap);
+            var rowHistBot = rowTop + rowHistH;
+            var localMax = Math.max(1, histData[ci].maxCount);
+
+            // Histogram lines
             ctx.strokeStyle = color;
+            ctx.lineWidth = 1;
             ctx.globalAlpha = 0.8;
-            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(xToCanvas(points[0].x), yToCanvas(points[0].y));
-            for (var pi = 0; pi < points.length; pi++) ctx.lineTo(xToCanvas(points[pi].x), yToCanvas(points[pi].y));
+            for (var key in freq) {
+                var v = parseFloat(key);
+                var cx = xToCanvas(v);
+                var by = rowHistBot - (freq[key] / localMax) * rowHistH * 0.9;
+                ctx.moveTo(cx, rowHistBot);
+                ctx.lineTo(cx, by);
+            }
             ctx.stroke();
             ctx.globalAlpha = 1;
+
+            // Row baseline
+            ctx.strokeStyle = '#ddd'; ctx.lineWidth = 0.5;
+            ctx.beginPath(); ctx.moveTo(pL, rowHistBot); ctx.lineTo(pR, rowHistBot); ctx.stroke();
+
+            // Mean ± std error bar below histogram
+            var mean = histData[ci].mean;
+            var std = histData[ci].std;
+            var eby = rowHistBot + errBarH / 2 + 1;
+            var mx = xToCanvas(mean);
+            var loX = xToCanvas(mean - std);
+            var hiX = xToCanvas(mean + std);
+            ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.7;
+            ctx.beginPath();
+            ctx.moveTo(loX, eby); ctx.lineTo(hiX, eby);           // horizontal bar
+            ctx.moveTo(loX, eby - 3); ctx.lineTo(loX, eby + 3);   // left cap
+            ctx.moveTo(hiX, eby - 3); ctx.lineTo(hiX, eby + 3);   // right cap
+            ctx.stroke();
+            // Mean dot
+            ctx.fillStyle = color; ctx.globalAlpha = 0.9;
+            ctx.beginPath(); ctx.arc(mx, eby, 2.5, 0, 2 * Math.PI); ctx.fill();
+            ctx.globalAlpha = 1;
+
+            // Label
+            ctx.fillStyle = color;
+            ctx.font = '9px -apple-system, sans-serif';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            ctx.fillText((datasets[ci].label || '') + ' \u03C3=' + std.toFixed(4), pL + 2, eby);
         }
 
-        // True value line
+        // True value line (spans all rows)
         if (trueVal != null && trueVal >= lo && trueVal <= hi) {
             var tx = xToCanvas(trueVal);
             ctx.strokeStyle = '#333';
@@ -904,7 +946,7 @@
             ctx.fillText('true', tx, pT - 1);
         }
 
-        // X-axis
+        // X-axis (at bottom)
         ctx.strokeStyle = '#bbb'; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(pL, pB); ctx.lineTo(pR, pB); ctx.stroke();
 
@@ -918,20 +960,6 @@
         }
         ctx.fillStyle = '#aaa';
         ctx.fillText('estimator value', pL + pW / 2, pB + 14);
-
-        // Legend (top-right)
-        ctx.font = '10px -apple-system, sans-serif';
-        ctx.textAlign = 'right'; ctx.textBaseline = 'top';
-        var ly = pT + 2;
-        for (var ci = 0; ci < curves.length; ci++) {
-            var color = curves[ci].color;
-            var label = curves[ci].label;
-            ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.globalAlpha = 0.8;
-            ctx.beginPath(); ctx.moveTo(pR - 55, ly + 5); ctx.lineTo(pR - 42, ly + 5); ctx.stroke();
-            ctx.globalAlpha = 1; ctx.fillStyle = '#333';
-            ctx.fillText(label || '', pR - 58, ly);
-            ly += 14;
-        }
     }
 
     // ================================================================
@@ -943,7 +971,41 @@
         var weights = S.weights;
         var compData = S.compData;
         var cv = document.getElementById('cv-comparison');
-        if (!cv || !compData) { if (cv) S.resetCanvas(cv); return; }
+        if (!cv) return;
+        if (!compData) {
+            // No trial data — draw weight bars only (no CDF, no error bars)
+            if (cv.offsetWidth === 0 || cv.offsetHeight === 0) return;
+            var result = S.resetCanvas(cv);
+            var ctx = result.ctx, w = result.w, h = result.h;
+            var margin = { top: 12, right: 12, bottom: 20, left: 12 };
+            var pL = margin.left, pR = w - margin.right;
+            var pT = margin.top, pB = h - margin.bottom;
+            var pH = pB - pT;
+            var rowH = pH / N, barH = rowH * 0.65;
+            var maxProp = Math.max.apply(null, weights) * 1.15;
+            function idxToY(i) { return pB - (i + 0.5) * rowH; }
+            ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+            for (var i = 0; i < N; i++) {
+                var y = idxToY(i);
+                var wBarW = (weights[i] / maxProp) * (pR - pL);
+                ctx.fillStyle = '#ddd';
+                ctx.fillRect(pR - wBarW, y - barH / 2, wBarW, barH);
+                ctx.strokeStyle = '#ccc'; ctx.lineWidth = 0.8;
+                ctx.strokeRect(pR - wBarW, y - barH / 2, wBarW, barH);
+                // Label
+                ctx.fillStyle = S.PALETTE[i];
+                ctx.font = 'bold 11px -apple-system, sans-serif';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(i + 1, pR + 8, y);
+            }
+            cv._L = {
+                histR: pR, histW: pR - pL, histL: pL,
+                barH: barH, idxToY: idxToY, histMaxVal: maxProp,
+                cdfL: Infinity, cdfR: -Infinity,
+                uToX: function () { return -1; },
+            };
+            return;
+        }
         var result = S.resetCanvas(cv);
         var ctx = result.ctx, w = result.w, h = result.h;
         var margin = { top: 12, right: 12, bottom: 20, left: 12 };
@@ -1033,6 +1095,16 @@
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.fillText(i + 1, pR + 8, idxToY(i));
         }
+
+        // Store layout for weight dragging (compatible with initWeightDrag)
+        cv._L = {
+            histR: pR, histW: pR - pL, histL: pL,
+            barH: barH, idxToY: idxToY,
+            histMaxVal: maxProp,
+            // No CDF in this panel
+            cdfL: Infinity, cdfR: -Infinity,
+            uToX: function () { return -1; },
+        };
     }
 
     // ================================================================
@@ -1042,6 +1114,8 @@
     function drawEstDist(canvasId, sec, color, label) {
         var cv = document.getElementById(canvasId);
         if (!cv) return;
+        // Skip if canvas is hidden (zero size) — will be drawn on reveal
+        if (cv.offsetWidth === 0 || cv.offsetHeight === 0) return;
         var hist = sec.hist;
         if (!hist || !hist.allCounts) { S.resetCanvas(cv); return; }
         // Recompute estimator values for current test function (cheap)

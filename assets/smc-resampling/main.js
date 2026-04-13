@@ -73,6 +73,17 @@
             probeColor: '#333',
             hoverU: S.hoverU,
         });
+        // Annotation below plot
+        var L = cvSec2._L;
+        if (L) {
+            var ctx = cvSec2.getContext('2d');
+            ctx.fillStyle = '#999';
+            ctx.globalAlpha = 0.7;
+            ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+            ctx.fillText('Drag bars/endpoints to adjust weights.  Click CDF to place probes.', L.histL + 2, L.plotB + 14);
+            ctx.globalAlpha = 1;
+        }
     }
 
     // ================================================================
@@ -309,7 +320,8 @@
     initSec2Events(cvSec2);
 
     // Attach weight drag to ALL panel canvases
-    [cvSec2, cvSec3, cvSec4, cvSec5, cvSec6, cvBK].forEach(function (c) { if (c) initWeightDrag(c); });
+    var cvComparison = document.getElementById('cv-comparison');
+    [cvSec2, cvSec3, cvSec4, cvSec5, cvSec6, cvBK, cvComparison].forEach(function (c) { if (c) initWeightDrag(c); });
 
     // ---- Section 5 comb drag ----
     (function () {
@@ -435,18 +447,43 @@
     })();
 
     // Section 5 counterexample
-    document.getElementById('btn-load-counter').addEventListener('click', function () {
-        setAlternatingWeights();
-        // Auto-switch to the even/odd test function
-        S.testFnKey = 'evenodd';
-        document.querySelectorAll('.testfn-select').forEach(function (s) { s.value = 'evenodd'; });
-        redrawAll();
-    });
-    document.getElementById('btn-clear-counter').addEventListener('click', function () {
+    var counterPreWeights = null;  // weights before counterexample changed them
+    var COUNTER_PRESETS = {
+        alternating: function () {
+            var w = [];
+            for (var i = 0; i < N; i++) w.push(i % 2 === 0 ? 0.20 : 0.05);
+            S.normalize(w); return w;
+        },
+        skewed: function () { return [0.05, 0.08, 0.12, 0.30, 0.20, 0.12, 0.08, 0.05]; },
+        uniform: function () { return new Array(N).fill(1 / N); },
+        degenerate: function () { return [0.01, 0.01, 0.02, 0.02, 0.02, 0.02, 0.01, 0.89]; },
+    };
+    function clearCounterDisplay() {
         S.counterData = null;
         document.getElementById('var-counter').textContent = '';
         var estEl = document.getElementById('est-counter');
         if (estEl) estEl.classList.remove('visible');
+    }
+    function applyCounterPreset() {
+        var key = document.getElementById('select-counter-weights').value;
+        if (!counterPreWeights) counterPreWeights = S.weights.slice();
+        S.weights = COUNTER_PRESETS[key]();
+        clearCounterDisplay();
+        redrawAll();
+    }
+    document.getElementById('select-counter-weights').addEventListener('change', function () {
+        applyCounterPreset();
+    });
+    document.getElementById('btn-clear-counter').addEventListener('click', function () {
+        clearCounterDisplay();
+        redrawAll();
+    });
+    document.getElementById('btn-reset-counter-weights').addEventListener('click', function () {
+        if (counterPreWeights) {
+            S.weights = counterPreWeights;
+            counterPreWeights = null;
+        }
+        clearCounterDisplay();
         redrawAll();
     });
     (function () {
@@ -455,10 +492,13 @@
         slider.addEventListener('input', function () { valSpan.textContent = slider.value; });
     })();
     document.getElementById('btn-run-counter').addEventListener('click', function () {
+        var key = document.getElementById('select-counter-weights').value;
+        if (!counterPreWeights) counterPreWeights = S.weights.slice();
+        S.weights = COUNTER_PRESETS[key]();
         var K = parseInt(document.getElementById('slider-K-counter').value, 10);
         var perm = document.getElementById('chk-permute').checked;
-        var positions = S.getTestFnValues();
-        var sysEsts = [], multiEsts = [];
+        var sysAllCounts = new Array(K);
+        var multiAllCounts = new Array(K);
         for (var t = 0; t < K; t++) {
             var sIdx;
             if (perm) {
@@ -473,18 +513,14 @@
             } else {
                 sIdx = S.resample.systematic(S.weights);
             }
-            var sc = S.countIndices(sIdx, N);
-            sysEsts.push(sc.reduce(function (s, c, i) { return s + c * positions[i]; }, 0) / N);
-            var mIdx = S.resample.multinomial(S.weights);
-            var mc = S.countIndices(mIdx, N);
-            multiEsts.push(mc.reduce(function (s, c, i) { return s + c * positions[i]; }, 0) / N);
+            sysAllCounts[t] = S.countIndices(sIdx, N);
+            multiAllCounts[t] = S.countIndices(S.resample.multinomial(S.weights), N);
         }
-        var mean = function (arr) { return arr.reduce(function (a, b) { return a + b; }, 0) / arr.length; };
-        var variance = function (arr) { var m = mean(arr); return arr.reduce(function (s, v) { return s + (v - m) * (v - m); }, 0) / arr.length; };
-        S.counterData = { sysEsts: sysEsts, multiEsts: multiEsts, sysVar: variance(sysEsts), multiVar: variance(multiEsts) };
-        setMathHTML('var-counter',
-            S.getTestFnLabel() + '&ensp; Systematic std = ' + Math.sqrt(S.counterData.sysVar).toFixed(4) +
-            ',&ensp; Multinomial std = ' + Math.sqrt(S.counterData.multiVar).toFixed(4));
+        S.counterData = {
+            sys:   { allCounts: sysAllCounts, K: K },
+            multi: { allCounts: multiAllCounts, K: K },
+        };
+        setMathHTML('var-counter', S.getTestFnLabel());
         var estEl = document.getElementById('est-counter');
         if (estEl) estEl.classList.add('visible');
         redrawAll();
@@ -623,20 +659,22 @@
         slider.addEventListener('input', function () { valSpan.textContent = slider.value; });
         document.getElementById('btn-run-all').addEventListener('click', function () {
             var K = parseInt(slider.value, 10);
-            S.compData = {
-                multi: S.runTrials(S.resample.multinomial, K),
-                strat: S.runTrials(S.resample.stratified, K),
-                sys:   S.runTrials(S.resample.systematic, K),
-                resid: S.runTrials(function (w) { return S.resample.residual(w, S.residualPhase2); }, K),
-            };
-            ['multi', 'strat', 'sys', 'resid'].forEach(function (key) {
-                var ev = S.evalEstimators(S.compData[key]);
-                var std = ev ? Math.sqrt(ev.estVar).toFixed(4) : '—';
-                document.getElementById('comp-std-' + key).textContent = std;
-            });
-            var estEl = document.getElementById('est-comparison');
-            if (estEl) estEl.classList.add('visible');
-            redrawAll();
+            setTimeout(function () {
+                S.compData = {
+                    multi: S.runTrials(S.resample.multinomial, K),
+                    strat: S.runTrials(S.resample.stratified, K),
+                    sys:   S.runTrials(S.resample.systematic, K),
+                    resid: S.runTrials(function (w) { return S.resample.residual(w, S.residualPhase2); }, K),
+                };
+                ['multi', 'strat', 'sys', 'resid'].forEach(function (key) {
+                    var ev = S.evalEstimators(S.compData[key]);
+                    var std = ev ? Math.sqrt(ev.estVar).toFixed(4) : '—';
+                    document.getElementById('comp-std-' + key).textContent = std;
+                });
+                var estEl = document.getElementById('est-comparison');
+                if (estEl) estEl.classList.add('visible');
+                redrawAll();
+            }, 0);
         });
     })();
 
@@ -685,10 +723,18 @@
                     }
                 });
             }
-            // Clear counterexample (it stores raw estimator values, not counts)
-            S.counterData = null;
-            document.getElementById('var-counter').textContent = '';
-            redrawAll();
+            // Update counterexample label (data recomputes from stored counts)
+            if (S.counterData) {
+                setMathHTML('var-counter', S.getTestFnLabel());
+            }
+            // Update branch-kill label
+            if (S.secBK.hist) {
+                var evBK = S.evalEstimators(S.secBK.hist);
+                if (evBK) setMathHTML('var-bk',
+                    'std of estimator ' + S.getTestFnLabel() + ' = ' + Math.sqrt(evBK.estVar).toFixed(4) + '  (' + S.secBK.hist.K + ' trials)');
+            }
+            // setTimeout ensures browser composites canvas changes after select dropdown closes
+            setTimeout(redrawAll, 0);
         });
     });
 
@@ -723,6 +769,133 @@
     document.getElementById('btn-clear-probes').addEventListener('click', function () {
         S.probes = []; redrawAll();
     });
+
+    // Generic preset buttons (class="preset-btn" data-preset="...")
+    var PRESETS = {
+        uniform: function () { return new Array(N).fill(1 / N); },
+        skewed: function () { return [0.05, 0.08, 0.12, 0.30, 0.20, 0.12, 0.08, 0.05]; },
+        degenerate: function () { return [0.01, 0.01, 0.02, 0.02, 0.02, 0.02, 0.01, 0.89]; },
+        alternating: function () { var w = []; for (var i = 0; i < N; i++) w.push(i % 2 === 0 ? 0.20 : 0.05); S.normalize(w); return w; },
+    };
+    document.querySelectorAll('.preset-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var key = btn.getAttribute('data-preset');
+            if (PRESETS[key]) { S.weights = PRESETS[key](); clearAll(); redrawAll(); }
+        });
+    });
+
+    // Comparison-section preset buttons: change weights, clear results (must re-run)
+    document.querySelectorAll('.comp-preset-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var key = btn.getAttribute('data-preset');
+            if (PRESETS[key]) {
+                S.weights = PRESETS[key]();
+                S.compData = null;
+                // Clear all section data too since weights changed
+                clearAll();
+                // But keep est-comparison visible so presets + canvas stay shown
+                var estEl = document.getElementById('est-comparison');
+                if (estEl) estEl.classList.add('visible');
+                redrawAll();
+            }
+        });
+    });
+
+    // ================================================================
+    //  STICKY TOOLBAR
+    // ================================================================
+
+    var toolbarEl = document.getElementById('sticky-toolbar');
+    var sparklineCanvas = document.getElementById('toolbar-sparkline');
+    var toolbarPreset = document.getElementById('toolbar-preset');
+    var toolbarTestFn = document.getElementById('toolbar-testfn');
+    var toolbarPhase2 = document.getElementById('toolbar-phase2');
+    var toolbarPhase2Select = document.getElementById('toolbar-phase2-select');
+    var phase2Select = document.getElementById('select-resid-phase2');
+
+    // -- Sparkline drawing --
+    function drawSparkline() {
+        if (!sparklineCanvas) return;
+        var dpr = window.devicePixelRatio || 1;
+        var w = 80, h = 20;
+        sparklineCanvas.width = w * dpr;
+        sparklineCanvas.height = h * dpr;
+        sparklineCanvas.style.width = w + 'px';
+        sparklineCanvas.style.height = h + 'px';
+        var ctx = sparklineCanvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+        var maxW = Math.max.apply(null, S.weights);
+        var barW = w / N - 1;
+        for (var i = 0; i < N; i++) {
+            var bh = (S.weights[i] / maxW) * (h - 2);
+            var x = i * (barW + 1);
+            ctx.fillStyle = S.PALETTE[i];
+            ctx.globalAlpha = 0.6;
+            ctx.fillRect(x, h - 1 - bh, barW, bh);
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    // -- Toolbar preset dropdown --
+    function updateToolbarPreset() {
+        if (!toolbarPreset) return;
+        // Check if current weights match a known preset
+        var match = 'custom';
+        for (var key in PRESETS) {
+            var pw = PRESETS[key]();
+            var same = true;
+            for (var i = 0; i < N; i++) {
+                if (Math.abs(pw[i] - S.weights[i]) > 1e-6) { same = false; break; }
+            }
+            if (same) { match = key; break; }
+        }
+        toolbarPreset.value = match;
+    }
+
+    if (toolbarPreset) {
+        toolbarPreset.addEventListener('change', function () {
+            var key = toolbarPreset.value;
+            if (key !== 'custom' && PRESETS[key]) {
+                S.weights = PRESETS[key]();
+                clearAll();
+                redrawAll();
+            }
+        });
+    }
+
+    // -- Toolbar phase-2 sync --
+    if (toolbarPhase2Select && phase2Select) {
+        toolbarPhase2Select.value = S.residualPhase2;
+        toolbarPhase2Select.addEventListener('change', function () {
+            phase2Select.value = toolbarPhase2Select.value;
+            phase2Select.dispatchEvent(new Event('change'));
+        });
+        phase2Select.addEventListener('change', function () {
+            toolbarPhase2Select.value = phase2Select.value;
+        });
+    }
+
+    // -- Progressive reveal via scroll position --
+    function updateToolbarVisibility() {
+        var testfnTrigger = document.getElementById('btn-run-multi');  // always visible
+        var phase2Trigger = document.getElementById('cv-sec6');        // residual canvas, always visible
+        if (toolbarTestFn && testfnTrigger) {
+            toolbarTestFn.style.display = testfnTrigger.getBoundingClientRect().top < 50 ? 'flex' : 'none';
+        }
+        if (toolbarPhase2 && phase2Trigger) {
+            toolbarPhase2.style.display = phase2Trigger.getBoundingClientRect().top < 50 ? 'flex' : 'none';
+        }
+    }
+    window.addEventListener('scroll', updateToolbarVisibility, { passive: true });
+
+    // -- Hook sparkline + preset into redrawAll --
+    var _origRedrawAll = redrawAll;
+    redrawAll = function () {
+        _origRedrawAll();
+        drawSparkline();
+        updateToolbarPreset();
+    };
 
     // Resize
     var resizeTimer;
