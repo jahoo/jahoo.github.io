@@ -88,6 +88,10 @@ The question is **how to place $\np$ probes** so that particle
 $i$ gets selected $\np\normwt^i$ times on average. Try clicking
 on the CDF plot at right to place probes, and consider what strategy would you use for placing $\np$ probes, in order to have the distribution of resampled particles recreate the weight histogram on average.
 
+The most natural idea, $\np$ independent uniform draws, works and leads to our first
+algorithm. We then see two less obvious strategies that reduce
+variance by spreading probes more evenly.
+
 <canvas id="cv-sec2" class="panel"></canvas>
 
 <div class="control-box">
@@ -96,17 +100,13 @@ on the CDF plot at right to place probes, and consider what strategy would you u
 </div>
 </div>
 
-The most natural idea, $\np$ independent uniform draws, works and leads to our first
-algorithm. We then see two less obvious strategies that reduce
-variance by spreading probes more evenly.
-
 <div id="smc-toolbar" class="smc-toolbar">
 <div class="smc-toolbar-item" id="smc-toolbar-weights">
 <span class="smc-toolbar-label">Weights:</span>
 <div class="smc-toolbar-dropdown" id="smc-toolbar-dropdown">
 <button class="smc-toolbar-dropdown-btn" id="smc-toolbar-dropdown-btn" type="button">
 <canvas id="smc-toolbar-sparkline" width="72" height="48"></canvas>
-<span id="smc-toolbar-dropdown-text">Skewed</span>
+<span id="smc-toolbar-dropdown-text">Choose preset</span>
 <span class="smc-toolbar-dropdown-arrow">▾</span>
 </button>
 <div class="smc-toolbar-dropdown-menu" id="smc-toolbar-dropdown-menu"></div>
@@ -132,7 +132,7 @@ variance by spreading probes more evenly.
 
 Draw $\np$ independent uniforms
 $u_1, \ldots, u_\np \overset{\text{iid}}{\sim} \mathrm{Uniform}(0,1]$
-and map each through the inverse CDF.<label for="sn-pit" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-pit" class="margin-toggle"/><span class="sidenote">This is the *probability integral transform*, applied $\np$ times independently. A while back, I made a [post exploring the continuous case](/2022/09/02/transform-pdf.html). Here we are doing the same thing in the discrete setting: each independent probe $u_k$ is transformed through the discrete quantile function $\invcdf$ to produce a sample from the particle-weight distribution, just as passing a uniform draw through a continuous inverse CDF yields a draw from the corresponding distribution.</span> The counts $(\cnt^1, \ldots, \cnt^\np)$ follow a multinomial distribution.
+and map each through the inverse CDF.<label for="sn-pit" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-pit" class="margin-toggle"/><span class="sidenote">This related to the *probability integral transform*. A while back, I made a [post exploring density transformations](/2022/09/02/transform-pdf.html) in the continuous case. Here we are doing this in a discrete setting: Each uniform-distributed independent probe $u_k$ is transformed through the discrete quantile function $\invcdf$ to produce a sample from the particle-weight distribution, just as passing a uniform draw through a continuous inverse CDF yields a draw from the corresponding distribution.</span> The counts $(\cnt^1, \ldots, \cnt^\np)$ follow a multinomial distribution.
 
 ```python
 # Step 1: build the inverse CDF (shared by all three CDF-based methods)

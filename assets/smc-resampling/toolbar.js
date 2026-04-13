@@ -68,42 +68,22 @@
         ctx.globalAlpha = 1;
     }
 
-    // ---- Detect which preset matches current weights ----
-    function currentPresetKey() {
-        var presets = S.PRESETS;
-        if (!presets) return 'custom';
-        for (var key in presets) {
-            var pw = presets[key]();
-            var same = true;
-            for (var i = 0; i < N; i++) {
-                if (Math.abs(pw[i] - S.weights[i]) > 1e-6) { same = false; break; }
-            }
-            if (same) return key;
-        }
-        return 'custom';
-    }
-
-    // ---- Update sparkline + label ----
+    // ---- Update sparkline (label is static "Choose preset") ----
     var lastJSON = '';
     function updateSparkline() {
         var json = JSON.stringify(S.weights);
         if (json === lastJSON) return;
         lastJSON = json;
         if (sparkline) drawMiniWeights(sparkline, S.weights, 36, 24);
-        if (dropdownText) {
-            var key = currentPresetKey();
-            dropdownText.textContent = (PRESET_LABELS[key] || 'Custom');
-        }
     }
 
     // ---- Build dropdown menu ----
     function buildMenu() {
         if (!dropdownMenu) return;
         dropdownMenu.innerHTML = '';
-        var active = currentPresetKey();
         PRESET_ORDER.forEach(function (key) {
             var row = document.createElement('div');
-            row.className = 'smc-toolbar-dropdown-row' + (key === active ? ' active' : '');
+            row.className = 'smc-toolbar-dropdown-row';
             var cv = document.createElement('canvas');
             drawMiniWeights(cv, PRESETS[key](), 36, 24);
             row.appendChild(cv);
