@@ -253,6 +253,24 @@
             return lineage;
         }
 
+        // Trace ancestors of ALL particles at step clickT (backward only)
+        function traceAllAncestors(clickT) {
+            var lineage = {};
+            // Mark all particles at clickT
+            for (var i = 0; i < nP; i++) lineage[clickT + ',' + i] = true;
+            // Trace each one backward
+            for (var i = 0; i < nP; i++) {
+                var idx = i;
+                for (var t = clickT; t > 0; t--) {
+                    var anc = history[t].ancestors;
+                    var parent = anc ? anc[idx] : idx;
+                    lineage[(t - 1) + ',' + parent] = true;
+                    idx = parent;
+                }
+            }
+            return lineage;
+        }
+
         // Also store layout info for click detection
         var drawLayout = null;
 
@@ -382,7 +400,7 @@
             }
         }
 
-        // Click to highlight lineage
+        // Click to highlight lineage (particle) or all ancestors (timestep label)
         cv.addEventListener('click', function (e) {
             if (!drawLayout || history.length === 0) return;
             var rect = cv.getBoundingClientRect();
@@ -392,13 +410,26 @@
             // Which timestep column?
             var t = Math.floor((x - L.pL) / L.colW);
             if (t < 0 || t >= history.length) { selectedLineage = null; draw(); return; }
-            // Which display row?
+
+            // Click on timestep label area (below plot)?
+            if (y > L.pB) {
+                // Toggle all-ancestors for this timestep
+                if (selectedLineage && selectedLineage._allAncT === t) {
+                    selectedLineage = null;
+                } else {
+                    selectedLineage = traceAllAncestors(t);
+                    selectedLineage._allAncT = t;  // tag to detect re-click
+                }
+                draw();
+                return;
+            }
+
+            // Click on particle bar
             var displayRow = Math.floor((L.pB - y) / L.rowH);
             if (displayRow < 0 || displayRow >= nP) { selectedLineage = null; draw(); return; }
             // Map display row back to particle index
             var i = displayRow;
             if (L.perms && L.perms[t]) {
-                // perms[t][particleIdx] = displayRow, so invert it
                 var perm = L.perms[t];
                 for (var pi = 0; pi < nP; pi++) {
                     if (perm[pi] === displayRow) { i = pi; break; }
