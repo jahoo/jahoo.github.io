@@ -328,7 +328,7 @@
             for (var t = 0; t < nCols; t++) {
                 var cx = pL + (t + 0.5) * colW;
                 ctx.fillStyle = '#999';
-                ctx.fillText(t, cx, pB + 1);
+                ctx.fillText(t + 1, cx, pB + 1);
                 if (t < history.length) {
                     var w = history[t].weights;
                     var ess = 1 / w.reduce(function (s, wi) { return s + wi * wi; }, 0);
