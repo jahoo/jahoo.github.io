@@ -98,42 +98,67 @@
         function run() {
             var doResample = chkResample && chkResample.checked;
             history = [];
-            // t=0: init from prior
-            var states = [], weights = [];
+
+            // Each history entry stores:
+            //   weights:   normalized weights after reweighting at this step
+            //   states:    particle states after propagation at this step
+            //   ancestors: ancestors[i] = index at previous step that particle i
+            //              was resampled from (null at t=0)
+
+            // t=0: sample from prior, reweight by first observation
+            var states = [], logW = [];
             for (var i = 0; i < nP; i++) {
                 states.push(randn() * sigmaProc);
-                weights.push(1 / nP);
+                logW.push(gaussLogLik(yObs, states[i], sigmaObs));
             }
-            history.push({ weights: weights.slice(), states: states.slice(), ancestors: null });
+            var maxLW = Math.max.apply(null, logW);
+            var w0 = logW.map(function (lw) { return Math.exp(lw - maxLW); });
+            var s0 = w0.reduce(function (a, b) { return a + b; }, 0);
+            w0 = w0.map(function (v) { return v / s0; });
+            history.push({ weights: w0, states: states.slice(), ancestors: null });
 
+            // t=1..T: Resample (if SMC) → Propagate → Reweight
             for (var t = 1; t <= T; t++) {
+                var ancestors = null;
+                var curStates = states;
+
+                if (doResample) {
+                    // Resample from previous step's weights
+                    var prevW = history[t - 1].weights;
+                    ancestors = resampleMultinomial(prevW);
+                    curStates = ancestors.map(function (a) { return states[a]; });
+                }
+
                 // Propagate
-                var newStates = states.map(function (x) { return x + randn() * sigmaProc; });
-                // Weight update: w_t^i ∝ w_{t-1}^i * p(y_t | x_t^i)
-                var logW = weights.map(function (wi, i) {
-                    return Math.log(wi) + gaussLogLik(yObs, newStates[i], sigmaObs);
+                var newStates = curStates.map(function (x) {
+                    return x + randn() * sigmaProc;
                 });
+
+                // Reweight
+                var logW;
+                if (doResample) {
+                    // After resampling, weights start uniform; update = just likelihood
+                    logW = newStates.map(function (x) {
+                        return gaussLogLik(yObs, x, sigmaObs);
+                    });
+                } else {
+                    // SIS: cumulative weight update
+                    var prevW = history[t - 1].weights;
+                    logW = prevW.map(function (wi, i) {
+                        return Math.log(wi) + gaussLogLik(yObs, newStates[i], sigmaObs);
+                    });
+                }
                 var maxLW = Math.max.apply(null, logW);
                 var newW = logW.map(function (lw) { return Math.exp(lw - maxLW); });
                 var s = newW.reduce(function (a, b) { return a + b; }, 0);
                 newW = newW.map(function (v) { return v / s; });
 
-                // Store pre-resampling weights for display
-                var displayW = newW.slice();
-                var ancestors = null;
-                if (doResample) {
-                    // Resample based on current weights, then reset to uniform for next step
-                    ancestors = resampleMultinomial(newW);
-                    var resampledStates = ancestors.map(function (a) { return newStates[a]; });
-                    newStates = resampledStates;
-                    // Next step starts with uniform weights (post-resampling)
-                    newW = [];
-                    for (var i = 0; i < nP; i++) newW.push(1 / nP);
-                }
-
-                history.push({ weights: displayW, states: newStates.slice(), ancestors: ancestors });
+                history.push({
+                    weights: newW,
+                    states: newStates.slice(),
+                    ancestors: ancestors   // null for SIS, array for SMC
+                });
                 states = newStates;
-                weights = newW;
             }
             draw();
             updateInfo();
@@ -156,7 +181,7 @@
             if (doResample) {
                 captionSpan.textContent = 'With resampling (SMC): weights stay diverse across steps.';
             } else {
-                captionSpan.textContent = 'Without resampling (SIS): weights concentrate on one particle.';
+                captionSpan.textContent = 'Without resampling (SIS): weights often become degenerate.';
             }
         }
 
