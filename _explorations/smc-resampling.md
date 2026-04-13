@@ -16,7 +16,7 @@ mathjax_macros: >-
     "state":   "\\xi",
     "rstate":  "\\widetilde{\\state}",
     "target":  "\\pi",
-    "impwt":   "u",
+    "impwt":   "\\rho",
     "normwt":  "w",
     "np":      "N",
     "cnt":     "M",
@@ -38,35 +38,41 @@ mathjax_macros: >-
 
 <div class="exploration-meta">Jacob Hoover&ensp;·&ensp;Originally October 2023&ensp;·&ensp;Last updated April 2026</div>
 
-I've been thinking recently about the way in which you do resampling in SMC.<label for="mn-intro" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-intro" class="margin-toggle"/><span class="marginnote">This post was written a few years ago with code for visualizations never finished. I've had Claude reimplement the interactive visualizations.</span>
+I've been thinking recently about the way in which you do resampling in sequential Monte Carlo (SMC).<label for="mn-intro" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-intro" class="margin-toggle"/><span class="marginnote">This post was written a few years ago with code for visualizations never finished. I've had Claude reimplement the interactive visualizations.</span>
 Like many other things, while there are many asymptotically identical methods, in practice it matters which one you choose. In this post, I'm making some visualizations to explore some standard resampling schemes, and get intuitions about why they work, and why you might choose one over another.
 
-## Why care about different resampling methods?
+## 1. Why care about different resampling methods?
+
+SMC relies on importance sampling. So let's start quickly recapping that, and defining some notation. We approximate a target distribution $\pi(\cdot)$ with a weighted family of samples from some surrogate proposal distribution,
+assign each sample an (unnormalized) importance weight
+$\impwt^\idx$ (density ratio of target to proposal). Then the set of weighted particles 
+$(\state^\idx,\impwt^\idx)_{\idx=1}^\np$
+defines an empirical approximation to the current target $\target(\cdot)$:
+
+$$\widehat{\target}(\cdot) \triangleq \sum_{\idx=1}^\np \normwt^\idx \delta_{\state^\idx}(\cdot)$$
+
+where $\normwt^\idx = \impwt^\idx / \sum_j \impwt^j$ are the **normalized weights**.<label for="sn-normwt" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-normwt" class="margin-toggle"/><span class="sidenote">Throughout the rest of this post, "weights" and `weights` in code refer to the normalized weights $\normwt^\idx$. </span>
+For any test function $f$, taking a weighted average of the function applied over the particles
+gives an estimator of its expectation under the target:
+$\widehat{\E_{\target}[f]}\triangleq\E_{\widehat{\target}}[f]=\sum_\idx \normwt^\idx f(\state^\idx)$.
 
 To start, consider the sequential importance sampling (SIS) algorithm, which does not include resampling.
+SIS approximates a sequence of target distributions by evolving
+a population particles. One main issue with SIS is that it can suffer 
+from **weight degeneracy**: When the weights become concentrated and the budget of $\np$ 
+particles effectively behaves as if it were just one sample, defeating the purpose of 
+having multiple particles.<label for="mn-degen" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-degen" class="margin-toggle"/><span class="marginnote"><canvas id="cv-degeneracy" style="width:100%; height:200px; border:1px solid #ddd; border-radius:3px;"></canvas><br><span class="degen-toggle"><span class="degen-toggle-label" id="degen-label-sis">SIS</span><label class="degen-switch"><input type="checkbox" id="chk-degen-resample"><span class="degen-slider"></span></label><span class="degen-toggle-label" id="degen-label-smc">SMC</span></span> <button id="btn-degen-rerun" style="font-size:0.8em;">Re-run</button> <span id="degen-info" style="font-size:0.8em; margin-left:4px;"></span><br>Particle weight evolution illustration. Bars show normalized weights $\normwt_t^\idx$ at each step when running a bootstrap particle filter on a Gaussian random walk model 
+($\state_t \sim \mathcal{N}(\state_{t-1}, 1)$; $y_t \sim \mathcal{N}(\state_t, 0.25)$; $y_t{=}2$). 
+Click a particle to trace its lineage, or click a timestep label to see all ancestors. <span id="degen-caption"></span></span> This weight degeneracy issue is one key motivation for SMC, which generalizes from SIS by the addition of 
+**resampling** steps. Resampling replaces a current set of particles (potentially with degenerate 
+weights) with a new set of samples with weights all set to be equal, duplicating high-weight particles
+and dropping low-weight ones. This addresses weight degeneracy, but introduces a different problem:
+**path degeneracy**.<label for="sn-pathdegen" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-pathdegen" class="margin-toggle"/><span class="sidenote">I'm getting this terminology for the two kinds of degeneracy from the excellent Naesseth et al. (2019, Chapter 2). They note that *adaptive resampling* can be a partial mitigation for path degeneracy. Only resample when the effective sample size $\text{ESS} = 1/\sum_\idx (\normwt^\idx)^2$ (which ranges from 1 when one particle has all the weight to $\np$ when weights are uniform) drops below a threshold (e.g., $\np/2$), rather than at every step. In this post I want to focus just on what happens when we _do_ resample, rather than on when to resample, but the ESS values in the illustration can give a sense of when resampling would be triggered in an adaptive resampling method.</span> 
+After enough steps, all current particles may trace back to a single ancestor at earlier timesteps [click on a timestep label in the illustration].
 
--   SIS approximates a sequence of target distributions by evolving
-    a population of $\np$ samples, termed **particles**. 
+Low-variance resampling methods (like stratified, systematic, or residual) produce more diverse resampled sets than multinomial resampling, which slows ancestry collapse, but doesn't prevent it entirely. This, along with the variance of the filtering estimate, makes the choice of resampling method matter.
 
--   At each step, particles are propagated via a
-    proposal and assigned unnormalized importance weights
-    $\impwt^\idx$ (density ratios of target to proposal). The set of weighted particles 
-    $(\state^\idx,\impwt^\idx)_{\idx=1}^\np$
-    defines an empirical approximation to the current target $\target(\cdot)$:
-
-    $$\widehat{\target}(\cdot) \triangleq \sum_{\idx=1}^\np \normwt^\idx \delta_{\state^\idx}(\cdot)$$
-
-    where $\normwt^\idx = \impwt^\idx / \sum_j \impwt^j$ are the **normalized weights**.<label for="sn-normwt" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-normwt" class="margin-toggle"/><span class="sidenote">Throughout the rest of this post, "weights" and `weights` in code refer to the normalized weights $\normwt^\idx$. </span>
-    
--   For any test function $f$, taking a weighted average of the function applied over the particles
-    gives an estimator of its expectation under the target:
-    $\widehat{\E_{\target}[f]}\triangleq\E_{\widehat{\target}}[f]=\sum_\idx \normwt^\idx f(\state^\idx)$.
-
-Now, one main issue with SIS (inherited from importance sampling) is that it can suffer from **weight degeneracy**: When the weights become concentrated and the budget of $\np$ particles effectively behaves as if it were just one sample, defeating the purpose of having multiple particles.<label for="mn-degen" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-degen" class="margin-toggle"/><span class="marginnote"><canvas id="cv-degeneracy" style="width:100%; height:200px; border:1px solid #ddd; border-radius:3px;"></canvas><br><span class="degen-toggle"><span class="degen-toggle-label" id="degen-label-sis">SIS</span><label class="degen-switch"><input type="checkbox" id="chk-degen-resample"><span class="degen-slider"></span></label><span class="degen-toggle-label" id="degen-label-smc">SMC</span></span> <button id="btn-degen-rerun" style="font-size:0.8em;">Re-run</button> <span id="degen-info" style="font-size:0.8em; margin-left:4px;"></span><br>Bootstrap particle filter on a Gaussian random walk model ($\state_t \sim \mathcal{N}(\state_{t-1}, 1)$; $y_t \sim \mathcal{N}(\state_t, 0.25)$; $y_t{=}2$). Bars show normalized weights $\normwt_t^\idx$ at each step. Click a particle to trace its lineage, or click a timestep label to see all ancestors. <span id="degen-caption"></span></span> This weight degeneracy issue is one key motivation for sequential Monte Carlo (SMC), which improves on SIS by the addition of **resampling** steps. Resampling replaces a current set of particles (potentially with degenerate weights) with a new set of samples with weights all set to be equal, duplicating high-weight particles and dropping low-weight ones. This addresses weight degeneracy, but introduces a different problem: **path degeneracy**.<label for="sn-pathdegen" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-pathdegen" class="margin-toggle"/><span class="sidenote">Naesseth et al. (2019, §2.2.2) discuss path degeneracy in detail. One partial mitigation is *adaptive resampling*: only resample when the effective sample size $\text{ESS} = 1/\sum_\idx (\normwt^\idx)^2$ (which ranges from 1 when one particle has all the weight to $\np$ when weights are uniform) drops below a threshold (e.g., $\np/2$), rather than at every step. We don't explore adaptive resampling here, but the ESS values in the illustration give a sense of when resampling would be triggered.</span> Because resampling duplicates high-weight particles and drops low-weight ones, the ancestry of the particle set progressively collapses: after enough steps, all current particles may trace back to a single ancestor at earlier timesteps. (Try clicking a timestep label in the illustration to see how many distinct ancestors remain.) This makes the "smoothing" estimate for earlier timesteps unreliable.
-
-Low-variance resampling methods (like stratified, systematic, or residual) produce more diverse resampled sets than multinomial resampling, which slows ancestry collapse — but cannot prevent it entirely. This — along with the variance of the filtering estimate — is what makes the choice of resampling method matter.
-
-### The unbiasedness condition
+### Staying unbiased
 
 Let $\cnt^\idx\sim r$ be the number of copies of particle $\idx$ after
 resampling (writing $r$ for the resampling method, some distribution over nonnegative integers, conditioned on the current set of weighted particles). For resampling to be unbiased, the expected number
