@@ -371,6 +371,7 @@ $\resid^\idx = (\np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor)/R$. This nond
 
 <div class="highlighter-rouge code-sidenote" id="resid-code"><div class="highlight"><pre class="highlight"><code><span class="c1"># Phase 1 (deterministic): guaranteed copies from the integer part</span>
 num_copies = np.floor(N * weights) <span class="c1"># ⌊Nwⁱ⌋</span>
+R = N - sum(num_copies)            <span class="c1"># remaining slots</span>
 <span class="c1"># Phase 2 (stochastic): <span id="resid-phase2-comment">multinomial</span> on the fractional remainders</span>
 residual = weights * N - num_copies
 residual /= sum(residual)          <span class="c1"># normalize residuals</span>
