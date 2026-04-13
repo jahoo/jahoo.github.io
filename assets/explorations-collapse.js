@@ -38,7 +38,7 @@
       while (sibling) {
         var next = sibling.nextElementSibling;
         // Skip sticky toolbar — leave as direct child of .exploration-content
-        if (sibling.classList && sibling.classList.contains('sticky-toolbar')) {
+        if (sibling.classList && sibling.classList.contains('smc-toolbar')) {
           sibling = next; continue;
         }
         // Stop at next heading of same or higher level

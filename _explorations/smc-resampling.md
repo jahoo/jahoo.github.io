@@ -8,6 +8,7 @@ js:
   - /assets/smc-resampling/algorithms.js
   - /assets/smc-resampling/drawing.js
   - /assets/smc-resampling/main.js
+  - /assets/smc-resampling/toolbar.js
 mathjax_macros: >-
   {
     "state":   "\\xi",
@@ -99,25 +100,25 @@ The most natural idea, $\np$ independent uniform draws, works and leads to our f
 algorithm. We then see two less obvious strategies that reduce
 variance by spreading probes more evenly.
 
-<div id="sticky-toolbar" class="sticky-toolbar">
-<div class="toolbar-section" id="toolbar-weights">
-<span style="font-size:0.8em; color:#666;">Weights:</span>
-<div class="weight-dropdown" id="weight-dropdown">
-<button class="weight-dropdown-btn" id="weight-dropdown-btn">
-<canvas id="toolbar-sparkline" width="48" height="24"></canvas>
-<span class="weight-dropdown-label" id="weight-dropdown-label">Skewed</span>
-<span class="weight-dropdown-arrow">▾</span>
+<div id="smc-toolbar" class="smc-toolbar">
+<div class="smc-toolbar-item" id="smc-toolbar-weights">
+<span class="smc-toolbar-label">Weights:</span>
+<div class="smc-toolbar-dropdown" id="smc-toolbar-dropdown">
+<button class="smc-toolbar-dropdown-btn" id="smc-toolbar-dropdown-btn" type="button">
+<canvas id="smc-toolbar-sparkline" width="72" height="48"></canvas>
+<span id="smc-toolbar-dropdown-text">Skewed</span>
+<span class="smc-toolbar-dropdown-arrow">▾</span>
 </button>
-<div class="weight-dropdown-panel" id="weight-dropdown-panel"></div>
+<div class="smc-toolbar-dropdown-menu" id="smc-toolbar-dropdown-menu"></div>
 </div>
 </div>
-<div class="toolbar-section" id="toolbar-testfn" style="display:none;">
-<span style="font-size:0.8em; color:#666;">$f$:</span>
-<select class="testfn-select toolbar-testfn-select" style="padding:1px 4px; border:1px solid #ccc; border-radius:3px; font-size:0.85em;"></select>
+<div class="smc-toolbar-item" id="smc-toolbar-testfn" style="display:none;">
+<span class="smc-toolbar-label">$f$:</span>
+<select class="testfn-select" id="smc-toolbar-testfn-select"></select>
 </div>
-<div class="toolbar-section" id="toolbar-phase2" style="display:none;">
-<span style="font-size:0.8em; color:#666;">Phase 2:</span>
-<select id="toolbar-phase2-select" style="padding:1px 4px; border:1px solid #ccc; border-radius:3px; font-size:0.85em;">
+<div class="smc-toolbar-item" id="smc-toolbar-phase2" style="display:none;">
+<span class="smc-toolbar-label">Phase 2:</span>
+<select id="smc-toolbar-phase2-select">
 <option value="multinomial">Multinomial</option>
 <option value="stratified">Stratified</option>
 <option value="systematic">Systematic</option>
@@ -131,7 +132,7 @@ variance by spreading probes more evenly.
 
 Draw $\np$ independent uniforms
 $u_1, \ldots, u_\np \overset{\text{iid}}{\sim} \mathrm{Uniform}(0,1]$
-and map each through the inverse CDF.<label for="sn-pit" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-pit" class="margin-toggle"/><span class="sidenote">This is the *probability integral transform*, applied $\np$ times independently. A while back, I made a [post exploring the continuous case](/2022/09/02/transform-pdf.html)---given a continuous random variable $X$ with density $f$, what is the density of $Y = y(X)$ for some invertible $y$? The answer is the change-of-variables formula $g(y) = f(x(y))\,\lvert\mathrm{d}x/\mathrm{d}y\rvert$. Here we are doing the same thing in the discrete setting: each independent $u_k \sim \mathrm{Uniform}(0,1]$ is transformed through the discrete quantile function $\invcdf$ to produce a sample from the particle-weight distribution---exactly as passing a uniform draw through a continuous inverse CDF yields a draw from the corresponding distribution.</span> The counts $(\cnt^1, \ldots, \cnt^\np)$ follow a multinomial distribution.
+and map each through the inverse CDF.<label for="sn-pit" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-pit" class="margin-toggle"/><span class="sidenote">This is the *probability integral transform*, applied $\np$ times independently. A while back, I made a [post exploring the continuous case](/2022/09/02/transform-pdf.html). Here we are doing the same thing in the discrete setting: each independent probe $u_k$ is transformed through the discrete quantile function $\invcdf$ to produce a sample from the particle-weight distribution, just as passing a uniform draw through a continuous inverse CDF yields a draw from the corresponding distribution.</span> The counts $(\cnt^1, \ldots, \cnt^\np)$ follow a multinomial distribution.
 
 ```python
 # Step 1: build the inverse CDF (shared by all three CDF-based methods)

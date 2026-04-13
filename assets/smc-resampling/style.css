@@ -2,7 +2,7 @@
    Typography and layout come from explorations-base.css. */
 
 /* --- Sticky toolbar --- */
-.sticky-toolbar {
+.smc-toolbar {
     position: sticky;
     top: 0;
     z-index: 20;
@@ -16,17 +16,14 @@
     width: 100% !important;
     box-sizing: border-box;
 }
-.toolbar-section {
+.smc-toolbar-item {
     display: flex;
     align-items: center;
     gap: 5px;
 }
-/* Weight dropdown */
-.weight-dropdown {
-    position: relative;
-    display: inline-block;
-}
-.weight-dropdown-btn {
+.smc-toolbar-label { font-size: 0.8em; color: #666; }
+.smc-toolbar-dropdown { position: relative; display: inline-block; }
+.smc-toolbar-dropdown-btn {
     display: flex;
     align-items: center;
     gap: 5px;
@@ -37,14 +34,13 @@
     cursor: pointer;
     font-size: 0.85em;
     font-family: inherit;
+    line-height: 1;
 }
-.weight-dropdown-btn:hover { border-color: #999; }
-.weight-dropdown-arrow { font-size: 0.7em; color: #888; }
-.weight-dropdown-label { color: #444; }
-#toolbar-sparkline {
-    border-radius: 1px;
-}
-.weight-dropdown-panel {
+.smc-toolbar-dropdown-btn:hover { border-color: #999; }
+.smc-toolbar-dropdown-arrow { font-size: 0.7em; color: #888; }
+#smc-toolbar-dropdown-text { color: #444; }
+#smc-toolbar-sparkline { border-radius: 1px; display: block; }
+.smc-toolbar-dropdown-menu {
     display: none;
     position: absolute;
     top: 100%;
@@ -55,25 +51,22 @@
     border-radius: 4px;
     box-shadow: 0 3px 8px rgba(0,0,0,0.12);
     padding: 4px 0;
-    min-width: 160px;
+    min-width: 180px;
     margin-top: 2px;
 }
-.weight-dropdown-panel.open { display: block; }
-.weight-dropdown-option {
+.smc-toolbar-dropdown-menu.open { display: block; }
+.smc-toolbar-dropdown-row {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 4px 10px;
+    padding: 5px 10px;
     cursor: pointer;
     font-size: 0.85em;
     color: #333;
 }
-.weight-dropdown-option:hover { background: #f0f0f0; }
-.weight-dropdown-option.active { font-weight: bold; color: var(--s-accent, #467); }
-.weight-dropdown-option canvas {
-    border-radius: 1px;
-    flex-shrink: 0;
-}
+.smc-toolbar-dropdown-row:hover { background: #f0f0f0; }
+.smc-toolbar-dropdown-row.active { font-weight: bold; color: var(--s-accent, #467); }
+.smc-toolbar-dropdown-row canvas { border-radius: 1px; flex-shrink: 0; display: block; }
 
 /* --- Break interactive elements out of the 60% content width --- */
 canvas.panel,
