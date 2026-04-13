@@ -58,6 +58,7 @@
         var cv = document.getElementById('cv-degeneracy');
         var btnRerun = document.getElementById('btn-degen-rerun');
         var chkResample = document.getElementById('chk-degen-resample');
+        var chkUntangle = document.getElementById('chk-degen-untangle');
         var infoSpan = document.getElementById('degen-info');
         var captionSpan = document.getElementById('degen-caption');
         if (!cv || !btnRerun) return;
@@ -185,6 +186,40 @@
             }
         }
 
+        // Compute display permutations for untangling.
+        // displayPerms[t][i] = which display row particle i occupies at step t.
+        // At t=0, identity. At t>0, sort particles by their ancestor's display row.
+        function computeDisplayPerms() {
+            var perms = [];  // perms[t] = array where perms[t][i] = display row for particle i
+            // t=0: identity order
+            var perm0 = [];
+            for (var i = 0; i < nP; i++) perm0.push(i);
+            perms.push(perm0);
+
+            for (var t = 1; t < history.length; t++) {
+                var anc = history[t].ancestors;
+                var prevPerm = perms[t - 1];
+                // Build list of {particleIdx, ancestorDisplayRow}
+                var items = [];
+                for (var i = 0; i < nP; i++) {
+                    var parentIdx = anc ? anc[i] : i;
+                    items.push({ idx: i, ancRow: prevPerm[parentIdx] });
+                }
+                // Sort by ancestor display row (stable: secondary sort by particle index)
+                items.sort(function (a, b) {
+                    return a.ancRow !== b.ancRow ? a.ancRow - b.ancRow : a.idx - b.idx;
+                });
+                // Build perm: items[row].idx = which particle is in display row 'row'
+                // We need the inverse: perm[particleIdx] = displayRow
+                var perm = new Array(nP);
+                for (var row = 0; row < nP; row++) {
+                    perm[items[row].idx] = row;
+                }
+                perms.push(perm);
+            }
+            return perms;
+        }
+
         // Trace full lineage from a clicked (t, i): ancestors back + descendants forward
         function traceLineage(clickT, clickI) {
             var lineage = {};
@@ -246,8 +281,17 @@
 
             var colors = S.PALETTE;
 
+            // Display permutations for untangling
+            var doUntangle = chkUntangle && chkUntangle.checked;
+            var perms = doUntangle ? computeDisplayPerms() : null;
+            // Helper: get y position for particle i at step t
+            function particleY(t, i) {
+                var row = perms ? perms[t][i] : i;
+                return pB - (row + 0.5) * rowH;
+            }
+
             // Store layout for click detection
-            drawLayout = { pL: pL, pT: pT, pB: pB, colW: colW, rowH: rowH, nCols: nCols };
+            drawLayout = { pL: pL, pT: pT, pB: pB, colW: colW, rowH: rowH, nCols: nCols, perms: perms };
 
             // Grid lines at each timestep center
             ctx.strokeStyle = '#f0f0f0';
@@ -271,7 +315,7 @@
                 var cx = pL + (t + 0.5) * colW;
 
                 for (var i = 0; i < nP; i++) {
-                    var y = pB - (i + 0.5) * rowH;
+                    var y = particleY(t, i);
                     var bw = globalMaxW > 0 ? (h.weights[i] / globalMaxW) * maxBarW : 0;
                     var inLineage = hasSelection && selectedLineage[t + ',' + i];
                     var dimmed = hasSelection && !inLineage;
@@ -294,8 +338,8 @@
 
                     for (var i = 0; i < nP; i++) {
                         var srcIdx = nextH.ancestors ? nextH.ancestors[i] : i;
-                        var srcY = pB - (srcIdx + 0.5) * rowH;
-                        var dstY = pB - (i + 0.5) * rowH;
+                        var srcY = particleY(t, srcIdx);
+                        var dstY = particleY(t + 1, i);
                         var nextBw = globalMaxW > 0 ? (nextH.weights[i] / globalMaxW) * maxBarW : 0;
                         // Arrow is "in lineage" if source AND dest are both in lineage
                         var arrowInLineage = hasSelection && selectedLineage[t + ',' + srcIdx] && selectedLineage[(t + 1) + ',' + i];
@@ -348,9 +392,18 @@
             // Which timestep column?
             var t = Math.floor((x - L.pL) / L.colW);
             if (t < 0 || t >= history.length) { selectedLineage = null; draw(); return; }
-            // Which particle row?
-            var i = Math.floor((L.pB - y) / L.rowH);
-            if (i < 0 || i >= nP) { selectedLineage = null; draw(); return; }
+            // Which display row?
+            var displayRow = Math.floor((L.pB - y) / L.rowH);
+            if (displayRow < 0 || displayRow >= nP) { selectedLineage = null; draw(); return; }
+            // Map display row back to particle index
+            var i = displayRow;
+            if (L.perms && L.perms[t]) {
+                // perms[t][particleIdx] = displayRow, so invert it
+                var perm = L.perms[t];
+                for (var pi = 0; pi < nP; pi++) {
+                    if (perm[pi] === displayRow) { i = pi; break; }
+                }
+            }
             // Toggle: click same particle again to deselect
             var key = t + ',' + i;
             if (selectedLineage && selectedLineage[key]) {
@@ -364,6 +417,7 @@
 
         btnRerun.addEventListener('click', function () { selectedLineage = null; run(); });
         if (chkResample) chkResample.addEventListener('change', function () { selectedLineage = null; run(); });
+        if (chkUntangle) chkUntangle.addEventListener('change', function () { draw(); });
 
         // Initial run
         run();
