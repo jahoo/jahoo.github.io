@@ -73,39 +73,34 @@
             probeColor: '#333',
             hoverU: S.hoverU,
         });
-        // In-canvas annotations below CDF plot
+        // In-canvas annotations
         var L = cvSec2._L;
         if (L) {
             var ctx = cvSec2.getContext('2d');
-            var annotY = L.plotB + 14;
-            // Left annotation: drag instruction
-            ctx.fillStyle = '#999';
             ctx.globalAlpha = 0.7;
-            ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-            ctx.fillText('Drag bars/endpoints to adjust weights.', L.histL + 2, annotY);
-            // Right annotation: probe instruction + clear button
-            var probeTextY = annotY;
+            ctx.font = '9px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textBaseline = 'top';
+            // Row 1: below x-axis labels (shared line across full width)
+            var row1Y = L.plotB + 28;
+            // Left: drag instruction
+            ctx.fillStyle = '#999';
+            ctx.textAlign = 'left';
+            ctx.fillText('Drag bars to adjust weights', L.histL + 2, row1Y);
+            // Right: probe instruction
             ctx.fillStyle = '#888';
-            ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.textAlign = 'left';
             var instrText = 'Click to place probes x\u1D62';
-            ctx.fillText(instrText, L.cdfL, probeTextY);
-            // "Clear probes" button (only when probes exist)
+            ctx.fillText(instrText, L.cdfL, row1Y);
+            // Clear probes link (after instruction, same line)
+            cvSec2._clearProbeBtn = null;
             if (S.probes.length > 0) {
-                var clearText = '[Clear probes]';
-                var clearX = L.cdfL;
-                var clearY = probeTextY + 13;
-                ctx.fillStyle = 'var(--s-accent, #467)';
-                // Use a solid color since var() doesn't work in canvas
+                var instrW = ctx.measureText(instrText + '  ').width;
+                var clearText = '\u00d7 Clear';
+                var clearX = L.cdfL + instrW;
                 ctx.fillStyle = '#467';
-                ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
-                ctx.fillText(clearText, clearX, clearY);
-                // Store hit region for click detection
+                ctx.fillText(clearText, clearX, row1Y);
                 var tw = ctx.measureText(clearText).width;
-                cvSec2._clearProbeBtn = { x: clearX, y: clearY, w: tw, h: 12 };
-            } else {
-                cvSec2._clearProbeBtn = null;
+                cvSec2._clearProbeBtn = { x: clearX, y: row1Y, w: tw, h: 11 };
             }
             ctx.globalAlpha = 1;
         }
