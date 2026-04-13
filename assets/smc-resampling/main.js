@@ -86,15 +86,14 @@
             ctx.fillStyle = '#555';
             ctx.textAlign = 'left';
             ctx.fillText('Drag bars to adjust weights.', L.histL + 2, line1Y);
-            // Line 2: "Click plot..." left-aligned under CDF
-            var line2Y = L.plotB + 30;
+            // "Click plot..." above the CDF plot area
             ctx.fillStyle = '#555';
-            ctx.fillText('Click plot to place probes.', L.cdfL, line2Y);
+            ctx.fillText('Click plot to place probes.', L.cdfL, L.plotT - 10);
             // Line 3: "× Clear probes" right-aligned under CDF
             cvSec2._clearProbeBtn = null;
             if (S.probes.length > 0) {
                 var clearText = '\u00d7 Clear probes';
-                var line3Y = L.plotB + 42;
+                var line3Y = L.plotB + 30;
                 ctx.globalAlpha = 0.8;
                 ctx.fillStyle = '#467';
                 var tw = ctx.measureText(clearText).width;
