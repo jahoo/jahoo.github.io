@@ -749,58 +749,18 @@
         S.compData = null; S.counterData = null;
         document.querySelectorAll('.var-display').forEach(function (el) { el.textContent = ''; });
     }
-    document.getElementById('btn-uniform').addEventListener('click', function () {
-        S.weights = new Array(N).fill(1 / N); clearAll(); redrawAll();
-    });
-    document.getElementById('btn-skewed').addEventListener('click', function () {
-        S.weights = [0.05, 0.08, 0.12, 0.30, 0.20, 0.12, 0.08, 0.05]; clearAll(); redrawAll();
-    });
-    document.getElementById('btn-degenerate').addEventListener('click', function () {
-        S.weights = [0.01, 0.01, 0.02, 0.02, 0.02, 0.02, 0.01, 0.89]; clearAll(); redrawAll();
-    });
-    function setAlternatingWeights() {
-        S.weights = [];
-        for (var i = 0; i < N; i++) S.weights.push(i % 2 === 0 ? 0.20 : 0.05);
-        S.normalize(S.weights);
-        clearAll(); redrawAll();
-    }
-    document.getElementById('btn-alternating').addEventListener('click', function () {
-        setAlternatingWeights();
-    });
-    document.getElementById('btn-clear-probes').addEventListener('click', function () {
+    var clearProbesBtn = document.getElementById('btn-clear-probes');
+    if (clearProbesBtn) clearProbesBtn.addEventListener('click', function () {
         S.probes = []; redrawAll();
     });
 
-    // Generic preset buttons (class="preset-btn" data-preset="...")
+    // Preset weight configurations (used by toolbar.js via custom events)
     var PRESETS = {
         uniform: function () { return new Array(N).fill(1 / N); },
         skewed: function () { return [0.05, 0.08, 0.12, 0.30, 0.20, 0.12, 0.08, 0.05]; },
         degenerate: function () { return [0.01, 0.01, 0.02, 0.02, 0.02, 0.02, 0.01, 0.89]; },
         alternating: function () { var w = []; for (var i = 0; i < N; i++) w.push(i % 2 === 0 ? 0.20 : 0.05); S.normalize(w); return w; },
     };
-    document.querySelectorAll('.preset-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var key = btn.getAttribute('data-preset');
-            if (PRESETS[key]) { S.weights = PRESETS[key](); clearAll(); redrawAll(); }
-        });
-    });
-
-    // Comparison-section preset buttons: change weights, clear results (must re-run)
-    document.querySelectorAll('.comp-preset-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var key = btn.getAttribute('data-preset');
-            if (PRESETS[key]) {
-                S.weights = PRESETS[key]();
-                S.compData = null;
-                // Clear all section data too since weights changed
-                clearAll();
-                // But keep est-comparison visible so presets + canvas stay shown
-                var estEl = document.getElementById('est-comparison');
-                if (estEl) estEl.classList.add('visible');
-                redrawAll();
-            }
-        });
-    });
 
     // Resize
     var resizeTimer;
@@ -822,12 +782,13 @@
     // Listen for generic redraw requests from toolbar.js
     document.addEventListener('smc-redraw', function () { redrawAll(); });
 
-    // Initial draw — deferred to ensure canvases have layout dimensions
-    // (scripts run before CSS layout is complete on some browsers)
-    if (document.readyState === 'complete') {
-        redrawAll();
+    // Initial draw — defer if DOM not ready yet (scripts at bottom of body
+    // may run before layout is complete)
+    function initialDraw() { redrawAll(); }
+    if (document.readyState !== 'loading') {
+        initialDraw();
     } else {
-        window.addEventListener('load', function () { redrawAll(); });
+        document.addEventListener('DOMContentLoaded', initialDraw);
     }
 
 })();

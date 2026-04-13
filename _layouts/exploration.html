@@ -21,11 +21,11 @@
     <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
 
     <!-- Base exploration styling (et-book typography, sidenotes, collapsible sections) -->
-    <link rel="stylesheet" href="/assets/explorations-base.css">
+    <link rel="stylesheet" href="/assets/explorations-base.css?v={{ site.time | date: '%s' }}">
 
     <!-- Page-specific CSS -->
     {% for css in page.css %}
-    <link rel="stylesheet" href="{{ css }}">
+    <link rel="stylesheet" href="{{ css }}?v={{ site.time | date: '%s' }}">
     {% endfor %}
 </head>
 
@@ -37,11 +37,11 @@
     </div>
 
     <!-- Collapsible sections -->
-    <script src="/assets/explorations-collapse.js"></script>
+    <script src="/assets/explorations-collapse.js?v={{ site.time | date: '%s' }}"></script>
 
     <!-- Page-specific JS -->
     {% for js in page.js %}
-    <script src="{{ js }}"></script>
+    <script src="{{ js }}?v={{ site.time | date: '%s' }}"></script>
     {% endfor %}
 
 </body>
