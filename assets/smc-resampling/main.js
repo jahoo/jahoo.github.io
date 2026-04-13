@@ -146,13 +146,18 @@
         }
 
         function updateCaption() {
-            if (!captionSpan) return;
             var doResample = chkResample && chkResample.checked;
+            // Toggle label styling
+            var sisLabel = document.getElementById('degen-label-sis');
+            var smcLabel = document.getElementById('degen-label-smc');
+            if (sisLabel) sisLabel.className = 'degen-toggle-label' + (doResample ? '' : ' active');
+            if (smcLabel) smcLabel.className = 'degen-toggle-label' + (doResample ? ' active' : '');
+            if (!captionSpan) return;
             if (doResample) {
-                captionSpan.textContent = 'SMC (with multinomial resampling) on the random walk model. '
+                captionSpan.textContent = 'SMC (with multinomial resampling). '
                     + 'Resampling restores weight diversity at each step.';
             } else {
-                captionSpan.textContent = 'SIS (no resampling) on the random walk model. '
+                captionSpan.textContent = 'SIS (no resampling). '
                     + 'Without resampling, one particle quickly dominates.';
             }
         }
