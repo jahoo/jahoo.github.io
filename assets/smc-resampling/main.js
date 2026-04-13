@@ -311,6 +311,8 @@
         S.drawEstDist('cv-est-bk',   S.secBK, S.METHOD_COLORS.branchkill, 'Branch-kill');
         // Section 7 overlaid distributions
         S.drawCompEstDist();
+        // Toolbar updates
+        if (redrawAll._toolbarUpdate) redrawAll._toolbarUpdate();
     }
 
     // ================================================================
@@ -937,10 +939,8 @@
     }
     window.addEventListener('scroll', updateToolbarVisibility, { passive: true });
 
-    // -- Hook toolbar updates into redrawAll --
-    var _origRedrawAll = redrawAll;
-    redrawAll = function () {
-        _origRedrawAll();
+    // Register toolbar update callback
+    redrawAll._toolbarUpdate = function () {
         drawToolbarSparkline();
         updateDropdownLabel();
     };
