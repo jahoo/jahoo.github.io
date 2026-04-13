@@ -73,29 +73,34 @@
             probeColor: '#333',
             hoverU: S.hoverU,
         });
-        // In-canvas caption below plot
+        // In-canvas captions below plot
         var L = cvSec2._L;
         if (L) {
             var ctx = cvSec2.getContext('2d');
             var capFont = '10px -apple-system, BlinkMacSystemFont, sans-serif';
-            var capY = L.plotB + 28;
             ctx.font = capFont;
-            ctx.textAlign = 'left';
             ctx.textBaseline = 'top';
             ctx.globalAlpha = 0.6;
+            // Line 1: "Drag bars..." left-aligned under histogram, same row as "x" label
+            var line1Y = L.plotB + 18;
             ctx.fillStyle = '#555';
-            ctx.fillText('Drag bars to adjust weights. Click plot to place probes.', L.histL + 2, capY);
-            // Clear probes link
+            ctx.textAlign = 'left';
+            ctx.fillText('Drag bars to adjust weights.', L.histL + 2, line1Y);
+            // Line 2: "Click plot..." left-aligned under CDF
+            var line2Y = L.plotB + 30;
+            ctx.fillStyle = '#555';
+            ctx.fillText('Click plot to place probes.', L.cdfL, line2Y);
+            // Line 3: "× Clear probes" right-aligned under CDF
             cvSec2._clearProbeBtn = null;
             if (S.probes.length > 0) {
                 var clearText = '\u00d7 Clear probes';
+                var line3Y = L.plotB + 42;
                 ctx.globalAlpha = 0.8;
                 ctx.fillStyle = '#467';
                 var tw = ctx.measureText(clearText).width;
                 var clearX = L.cdfR - tw;
-                var clearY = capY;
-                ctx.fillText(clearText, clearX, clearY);
-                cvSec2._clearProbeBtn = { x: clearX, y: clearY, w: tw, h: 12 };
+                ctx.fillText(clearText, clearX, line3Y);
+                cvSec2._clearProbeBtn = { x: clearX, y: line3Y, w: tw, h: 12 };
             }
             ctx.globalAlpha = 1;
         }
