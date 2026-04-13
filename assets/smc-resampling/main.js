@@ -73,34 +73,29 @@
             probeColor: '#333',
             hoverU: S.hoverU,
         });
-        // In-canvas annotations
+        // In-canvas caption below plot
         var L = cvSec2._L;
         if (L) {
             var ctx = cvSec2.getContext('2d');
-            ctx.globalAlpha = 0.7;
-            ctx.font = '9px -apple-system, BlinkMacSystemFont, sans-serif';
+            var capFont = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+            var capY = L.plotB + 28;
+            ctx.font = capFont;
+            ctx.textAlign = 'left';
             ctx.textBaseline = 'top';
-            // Row 1: below x-axis labels (shared line across full width)
-            var row1Y = L.plotB + 28;
-            // Left: drag instruction
-            ctx.fillStyle = '#999';
-            ctx.textAlign = 'left';
-            ctx.fillText('Drag bars to adjust weights', L.histL + 2, row1Y);
-            // Right: probe instruction
-            ctx.fillStyle = '#888';
-            ctx.textAlign = 'left';
-            var instrText = 'Click to place probes x\u1D62';
-            ctx.fillText(instrText, L.cdfL, row1Y);
-            // Clear probes link (after instruction, same line)
+            ctx.globalAlpha = 0.6;
+            ctx.fillStyle = '#555';
+            ctx.fillText('Drag bars to adjust weights. Click plot to place probes.', L.histL + 2, capY);
+            // Clear probes link
             cvSec2._clearProbeBtn = null;
             if (S.probes.length > 0) {
-                var instrW = ctx.measureText(instrText + '  ').width;
-                var clearText = '\u00d7 Clear';
-                var clearX = L.cdfL + instrW;
+                var clearText = '\u00d7 Clear probes';
+                var clearX = L.histL + 2;
+                var clearY = capY + 13;
+                ctx.globalAlpha = 0.8;
                 ctx.fillStyle = '#467';
-                ctx.fillText(clearText, clearX, row1Y);
+                ctx.fillText(clearText, clearX, clearY);
                 var tw = ctx.measureText(clearText).width;
-                cvSec2._clearProbeBtn = { x: clearX, y: row1Y, w: tw, h: 11 };
+                cvSec2._clearProbeBtn = { x: clearX, y: clearY, w: tw, h: 12 };
             }
             ctx.globalAlpha = 1;
         }

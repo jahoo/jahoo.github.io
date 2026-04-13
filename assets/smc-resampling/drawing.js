@@ -16,7 +16,7 @@
 
     function panelLayout(w, h) {
         var N = S.N;
-        var margin = { top: 12, bottom: 42, left: 10, right: 10 };
+        var margin = { top: 12, bottom: 46, left: 10, right: 10 };
         var plotT = margin.top;
         var plotB = h - margin.bottom;
         var plotH = plotB - plotT;
