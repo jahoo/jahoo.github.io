@@ -99,6 +99,11 @@
   color: var(--s-text-dim);
   margin: 0.15rem 0;
 }
+.exploration-meta {
+  font-size: 0.9rem;
+  color: var(--s-text-dim);
+  margin-bottom: 1rem;
+}
 #title-block-header .abstract {
   margin-top: 1rem;
   font-size: 0.85rem;
