@@ -81,24 +81,25 @@
             ctx.font = capFont;
             ctx.textBaseline = 'top';
             ctx.globalAlpha = 0.6;
-            // Above histogram: "Drag bars to adjust weights."
+            // Line 1: "Drag bars..." left-aligned under histogram, same row as "x" label
+            var line1Y = L.plotB + 18;
             ctx.fillStyle = '#555';
             ctx.textAlign = 'left';
-            ctx.fillText('Drag bars to adjust weights.', L.histL + 2, L.plotT - 10);
-            // Below CDF, under x label: "Click plot to place probes."
+            ctx.fillText('Drag bars to adjust weights.', L.histL + 2, line1Y);
+            // "Click plot..." above the CDF plot area
             ctx.fillStyle = '#555';
-            ctx.fillText('Click plot to place probes.', L.cdfL, L.plotB + 28);
-            // Same line as x label, right-aligned: "× Clear probes"
+            ctx.fillText('Click plot to place probes.', L.cdfL, L.plotT - 10);
+            // Line 3: "× Clear probes" right-aligned under CDF
             cvSec2._clearProbeBtn = null;
             if (S.probes.length > 0) {
                 var clearText = '\u00d7 Clear probes';
-                var clearY = L.plotB + 18;
+                var line3Y = L.plotB + 18;
                 ctx.globalAlpha = 0.8;
                 ctx.fillStyle = '#467';
                 var tw = ctx.measureText(clearText).width;
                 var clearX = L.cdfR - tw;
-                ctx.fillText(clearText, clearX, clearY);
-                cvSec2._clearProbeBtn = { x: clearX, y: clearY, w: tw, h: 12 };
+                ctx.fillText(clearText, clearX, line3Y);
+                cvSec2._clearProbeBtn = { x: clearX, y: line3Y, w: tw, h: 12 };
             }
             ctx.globalAlpha = 1;
         }
