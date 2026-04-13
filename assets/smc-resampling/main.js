@@ -81,9 +81,12 @@
             ctx.globalAlpha = 0.7;
             ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-            ctx.fillText('Drag bars/endpoints to adjust weights.  Click CDF to place probes.', L.histL + 2, L.plotB + 14);
+            ctx.fillText('Drag bars/endpoints to adjust weights.', L.histL + 2, L.plotB + 14);
             ctx.globalAlpha = 1;
         }
+        // Show/hide clear probes button
+        var clearBtn = document.getElementById('btn-clear-probes');
+        if (clearBtn) clearBtn.style.display = S.probes.length > 0 ? 'inline' : 'none';
     }
 
     // ================================================================

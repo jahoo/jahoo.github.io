@@ -364,7 +364,8 @@
             ctx.strokeStyle = '#999'; ctx.stroke();
         }
         ctx.fillStyle = '#888';
-        ctx.fillText('u', L.cdfL + L.cdfW / 2, L.plotB + 18);
+        ctx.font = 'italic 10px -apple-system, BlinkMacSystemFont, serif';
+        ctx.fillText('x', L.cdfL + L.cdfW / 2, L.plotB + 18);
 
         // Hover ghost probe
         if (opts.hoverU != null) {
@@ -706,7 +707,8 @@
             ctx.strokeStyle = '#999'; ctx.stroke();
         }
         ctx.fillStyle = '#888';
-        ctx.fillText('u', L.cdfL + L.cdfW / 2, L.plotB + 18);
+        ctx.font = 'italic 10px -apple-system, BlinkMacSystemFont, serif';
+        ctx.fillText('x', L.cdfL + L.cdfW / 2, L.plotB + 18);
 
         // Draw each particle's Bernoulli CDF
         // The CDF models P(no bonus) = 1-p_i, so the step is at 1-p_i.

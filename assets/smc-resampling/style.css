@@ -6,8 +6,9 @@
     position: sticky;
     top: 0;
     z-index: 20;
-    background: var(--s-bg, #fefefe);
-    border-bottom: 1px solid var(--s-border, #ddd);
+    background: var(--s-surface, #f6f8fa);
+    border: 1px solid #ddd;
+    border-radius: 6px;
     padding: 6px 12px;
     display: flex;
     align-items: center;

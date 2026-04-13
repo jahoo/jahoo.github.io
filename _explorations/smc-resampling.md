@@ -23,6 +23,7 @@ mathjax_macros: >-
     "Var":     "\\operatorname{Var}",
     "cdf":     "F",
     "invcdf":  "{F^{-1}}",
+    "probe":   "x",
     "resid":   "\\widetilde{\\normwt}"
   }
 ---
@@ -82,7 +83,7 @@ step adds.
 
 Three of the first four methods share the same core idea, mapping random samples on the unit inverval through the inverse CDF of the weight distribution. The
 CDF $\cdf(i) = \sum_{j=1}^{i} \normwt^j$ partitions $[0,1]$ into
-segments of width $\normwt^i$, so it will map a sampled **probe** at position $u$ to a selected (resampled) particle $\invcdf(u)$.<label for="mn-cdf" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-cdf" class="margin-toggle"/><span class="marginnote">The fourth method, residual resampling, uses slightly different two-stage construction (see below).</span>
+segments of width $\normwt^i$, so it will map a sampled **probe** at position $\probe$ to a selected (resampled) particle $\invcdf(\probe)$.<label for="mn-cdf" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-cdf" class="margin-toggle"/><span class="marginnote">The fourth method, residual resampling, uses slightly different two-stage construction (see below).</span>
 
 The question is **how to place $\np$ probes** so that particle
 $i$ gets selected $\np\normwt^i$ times on average. Try clicking
@@ -94,10 +95,9 @@ variance by spreading probes more evenly.
 
 <canvas id="cv-sec2" class="panel"></canvas>
 
-<div class="control-box">
-<div class="control-row">
-<button id="btn-clear-probes">Clear probes</button>
-</div>
+<div id="sec2-probe-controls" style="font-size:0.85em; color:#666; margin-top:2px;">
+<span>Click on CDF plot to place probes $\probe_i$</span>
+<button id="btn-clear-probes" style="display:none; margin-left:8px; font-size:0.9em;">Clear probes</button>
 </div>
 
 <div id="smc-toolbar" class="smc-toolbar">
@@ -131,8 +131,8 @@ variance by spreading probes more evenly.
 ### Multinomial resampling
 
 Draw $\np$ independent uniforms
-$u_1, \ldots, u_\np \overset{\text{iid}}{\sim} \mathrm{Uniform}(0,1]$
-and map each through the inverse CDF.<label for="sn-pit" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-pit" class="margin-toggle"/><span class="sidenote">This related to the *probability integral transform*. A while back, I made a [post exploring density transformations](/2022/09/02/transform-pdf.html) in the continuous case. Here we are doing this in a discrete setting: Each uniform-distributed independent probe $u_k$ is transformed through the discrete quantile function $\invcdf$ to produce a sample from the particle-weight distribution, just as passing a uniform draw through a continuous inverse CDF yields a draw from the corresponding distribution.</span> The counts $(\cnt^1, \ldots, \cnt^\np)$ follow a multinomial distribution.
+$\probe_1, \ldots, \probe_\np \overset{\text{iid}}{\sim} \mathrm{Uniform}(0,1]$
+and map each through the inverse CDF.<label for="sn-pit" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-pit" class="margin-toggle"/><span class="sidenote">This related to the *probability integral transform*. A while back, I made a [post exploring density transformations](/2022/09/02/transform-pdf.html) in the continuous case. Here we are doing this in a discrete setting: Each uniform-distributed independent probe $\probe_k$ is transformed through the discrete quantile function $\invcdf$ to produce a sample from the particle-weight distribution, just as passing a uniform draw through a continuous inverse CDF yields a draw from the corresponding distribution.</span> The counts $(\cnt^1, \ldots, \cnt^\np)$ follow a multinomial distribution.
 
 ```python
 # Step 1: build the inverse CDF (shared by all three CDF-based methods)
@@ -150,9 +150,9 @@ Equivalent to `np.random.choice(N, size=N, replace=True, p=weights)`.
 <details markdown="1" style="font-size:0.85em; color:#555; margin:0.3em 0 0.8em;">
 <summary style="cursor:pointer; color:#444;"><code>searchsorted</code> does inverse-CDF lookup</summary>
 
-For each probe value $u$, `searchsorted` finds the smallest index $j$
-such that `cumulative_sum[j]` $\geq u$. This is the inverse CDF lookup:
-$u$ falls in particle $j$'s segment of $[0,1]$, so particle $j$ gets selected.
+For each probe value $\probe$, `searchsorted` finds the smallest index $j$
+such that `cumulative_sum[j]` $\geq \probe$. This is the inverse CDF lookup:
+$\probe$ falls in particle $j$'s segment of $[0,1]$, so particle $j$ gets selected.
 Internally it uses binary search, but for sorted probes (as in stratified and
 systematic) a single linear pass is equivalent and faster:
 
@@ -200,7 +200,7 @@ $K$ trials** to see means settle toward the weights.
 
 <div class="proof">
 <span class="proof-label">Unbiasedness.</span>
-Each probe $u_k$ is independently $\mathrm{Uniform}(0,1]$, so it
+Each probe $\probe_k$ is independently $\mathrm{Uniform}(0,1]$, so it
 lands in particle $i$'s CDF segment (of width $\normwt^i$) with
 probability $\normwt^i$. With $\np$ independent probes,
 $\cnt^i \sim \mathrm{Binomial}(\np, \normwt^i)$ and
@@ -269,7 +269,7 @@ segment has total length $\normwt^i$. ∎
 
 Stratified still uses $\np$ random draws. Systematic uses just
 **one**: draw $U \sim \mathrm{Uniform}(0, 1/\np)$ and set
-$u_k = U + (k{-}1)/\np$. The probes form an equally-spaced
+$\probe_k = U + (k{-}1)/\np$. The probes form an equally-spaced
 **comb**. **Drag the green handle** to slide it.
 
 ```python
@@ -305,7 +305,7 @@ positions = (random() + np.arange(N)) / N
 <div class="proof">
 <span class="proof-label">Unbiasedness.</span>
 The offset $U$ is $\mathrm{Uniform}(0, 1/\np]$, so each probe
-$u_k = U + (k{-}1)/\np$ is marginally
+$\probe_k = U + (k{-}1)/\np$ is marginally
 $\mathrm{Uniform}\bigl(\frac{k-1}{\np},\, \frac{k}{\np}\bigr]$---the
 same distribution as the stratified probe in stratum $k$. The
 same tiling argument gives $\E[\cnt^i] = \np\,\normwt^i$. (But note
