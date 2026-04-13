@@ -219,6 +219,15 @@
             if (!L) return;
             var pos = S.getPos(canvas, e);
 
+            // Check clear-probes button (drawn in caption area)
+            var cb = canvas._clearProbeBtn;
+            if (cb && pos.x >= cb.x && pos.x <= cb.x + cb.w && pos.y >= cb.y - 2 && pos.y <= cb.y + cb.h + 2) {
+                e.preventDefault();
+                S.probes = [];
+                redrawAll();
+                return;
+            }
+
             if (pos.x <= L.histR + 5) return;
 
             e.preventDefault();
@@ -266,14 +275,6 @@
 
             if (L && downPos) {
                 var pos = S.getPos(canvas, e);
-                // Check if click hit the "Clear probes" button
-                var cb = canvas._clearProbeBtn;
-                if (cb && pos.x >= cb.x && pos.x <= cb.x + cb.w && pos.y >= cb.y - 2 && pos.y <= cb.y + cb.h + 2) {
-                    S.probes = [];
-                    redrawAll();
-                    downPos = null;
-                    return;
-                }
                 if (pos.x >= L.cdfL && pos.x <= L.cdfR) {
                     if (Math.hypot(pos.x - downPos.x, pos.y - downPos.y) < 5) {
                         var u = L.xToU(pos.x);
