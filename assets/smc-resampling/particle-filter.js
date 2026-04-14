@@ -815,14 +815,13 @@ function createPFViz(config) {
         var margin = { top: 12, bottom: 16, left: 22, right: 6 };
         var pL = margin.left, pR = W - margin.right;
         var pW = pR - pL;
-        var halfH = (H - margin.top - margin.bottom) / 2;
         var nCols = T + 1;
 
+        // Only show path degeneracy — ESS is similar across methods since
+        // resampling resets weights; the methods only differ in which particles survive.
         var panels = [
             { title: 'Unique ancestors at t=1 (low \u21d2 path degeneracy)', key: 'anc', maxVal: nP,
-              y0: margin.top, y1: margin.top + halfH - 6, x0: pL, x1: pR, startT: 1 },
-            { title: 'ESS (low \u21d2 weight degeneracy)', key: 'ess', maxVal: nP,
-              y0: margin.top + halfH + 6, y1: H - margin.bottom, x0: pL, x1: pR, startT: 0 }
+              y0: margin.top, y1: H - margin.bottom, x0: pL, x1: pR, startT: 1 }
         ];
 
         for (var p = 0; p < panels.length; p++) {
