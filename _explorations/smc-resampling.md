@@ -570,7 +570,7 @@ To see how the choice of resampling method affects particle diversity in practic
 
 <canvas id="cv-pf-compare" class="panel"></canvas>
 
-<canvas id="cv-pf-diagnostics" style="width:100%; height:120px; border:1px solid #eee; border-radius:3px;"></canvas>
+<canvas id="cv-pf-diagnostics" style="width:100%; height:80px; border:1px solid #eee; border-radius:3px;"></canvas>
 
 ### Comparing methods over many runs
 
@@ -579,10 +579,10 @@ To see the typical behavior rather than a single random run, we can overlay many
 <div class="control-box">
 <div class="control-row">
 <label style="font-size:0.85em; color:#555;">$\np$:
-<input type="range" id="slider-pf-N" min="4" max="64" value="8" step="4" style="width:80px; vertical-align:middle;">
+<input type="range" id="slider-pf-N" min="4" max="256" value="8" step="4" style="width:80px; vertical-align:middle;">
 <span id="val-pf-N">8</span></label>
 <label style="font-size:0.85em; color:#555;">$K$:
-<input type="range" id="slider-pf-K" min="10" max="200" value="50" step="10" style="width:80px; vertical-align:middle;">
+<input type="range" id="slider-pf-K" min="10" max="1000" value="50" step="10" style="width:80px; vertical-align:middle;">
 <span id="val-pf-K">50</span></label>
 <button id="btn-pf-ktrials" style="font-weight:600;">Run K trials (all methods)</button>
 </div>

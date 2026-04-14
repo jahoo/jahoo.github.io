@@ -618,56 +618,45 @@ function createPFViz(config) {
 
         var margin = { left: 22, right: 6, top: 12, bottom: 4 };
         var pL = margin.left, pR = W - margin.right, pW = pR - pL;
-        var halfH = (H - margin.top - margin.bottom) / 2;
         var nCols = nT;
 
-        var essValues = history.map(function (h) {
-            return 1 / h.weights.reduce(function (s, wi) { return s + wi * wi; }, 0);
-        });
+        // Unique ancestors only (ESS is shown in the main PF plot)
         var ancValues = [];
         for (var t = 0; t < nT; t++) ancValues.push(countUniqueAncestors(history, t));
 
-        var panels = [
-            { values: essValues, maxVal: S.N, label: 'ESS (low \u21d2 weight degeneracy)', color: '#c0392b',
-              y0: margin.top, y1: margin.top + halfH - 4, startT: 0 },
-            { values: ancValues, maxVal: S.N, label: 'Unique ancestors at t=1 (low \u21d2 path degeneracy)', color: '#2c3e50',
-              y0: margin.top + halfH + 4, y1: H - margin.bottom, startT: 1 }  // ancestors start at t=2 (index 1)
-        ];
+        var panelTop = margin.top;
+        var panelBot = H - margin.bottom;
+        var pH = panelBot - panelTop;
+        var color = '#2c3e50';
 
-        for (var s = 0; s < panels.length; s++) {
-            var d = panels[s];
-            var panelTop = d.y0;
-            var panelBot = d.y1;
-            var pH = panelBot - panelTop;
+        // Title
+        ctx.fillStyle = color; ctx.font = '9px -apple-system, sans-serif';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+        ctx.fillText('Unique ancestors at t=1 (low \u21d2 path degeneracy)', pL + 2, panelTop - 1);
 
-            // Title
-            ctx.fillStyle = d.color; ctx.font = '9px -apple-system, sans-serif';
-            ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
-            ctx.fillText(d.label, pL + 2, panelTop - 1);
+        // Baseline
+        ctx.strokeStyle = '#eee'; ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.moveTo(pL, panelBot); ctx.lineTo(pR, panelBot); ctx.stroke();
 
-            // Baseline
-            ctx.strokeStyle = '#eee'; ctx.lineWidth = 0.5;
-            ctx.beginPath(); ctx.moveTo(pL, panelBot); ctx.lineTo(pR, panelBot); ctx.stroke();
-
-            // Line + dots (starting from startT)
-            ctx.strokeStyle = d.color; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.8;
-            ctx.beginPath();
-            var first = true;
-            for (var t = d.startT; t < nCols; t++) {
-                var x = pL + (t + 0.5) / nCols * pW;
-                var y = panelBot - (d.values[t] / d.maxVal) * pH;
-                if (first) { ctx.moveTo(x, y); first = false; } else ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-            ctx.fillStyle = d.color;
-            for (var t = d.startT; t < nCols; t++) {
-                var x = pL + (t + 0.5) / nCols * pW;
-                var y = panelBot - (d.values[t] / d.maxVal) * pH;
-                ctx.beginPath(); ctx.arc(x, y, 2.5, 0, 2 * Math.PI); ctx.fill();
-                ctx.font = '7px -apple-system, sans-serif';
-                ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-                ctx.fillText(d.values[t] % 1 === 0 ? d.values[t].toString() : d.values[t].toFixed(1), x, y - 3);
-            }
+        // Line + dots (start at t=2, index 1)
+        ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.8;
+        ctx.beginPath();
+        var first = true;
+        for (var t = 1; t < nCols; t++) {
+            var x = pL + (t + 0.5) / nCols * pW;
+            var y = panelBot - (ancValues[t] / S.N) * pH;
+            if (first) { ctx.moveTo(x, y); first = false; } else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.fillStyle = color;
+        for (var t = 1; t < nCols; t++) {
+            var x = pL + (t + 0.5) / nCols * pW;
+            var y = panelBot - (ancValues[t] / S.N) * pH;
+            ctx.beginPath(); ctx.arc(x, y, 2.5, 0, 2 * Math.PI); ctx.fill();
+            ctx.font = '7px -apple-system, sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+            ctx.fillText(ancValues[t].toString(), x, y - 3);
+        }
             ctx.globalAlpha = 1;
         }
     }
@@ -677,7 +666,7 @@ function createPFViz(config) {
         rerunBtnId: 'btn-pf-rerun',
         getResampleFn: getResampleFn,
         getSeed: getSeed,
-        showESS: false,  // ESS shown in diagnostic plot instead
+        showESS: true,  // shown as bottom row in the PF plot
         nSteps: 8,
         model: { sigmaProc: 1.0, sigmaObs: 0.5, yObs: 2.0 },
         onRun: function (history) { drawDiagnostics(history); }
@@ -819,119 +808,126 @@ function createPFViz(config) {
 
         // Only show path degeneracy — ESS is similar across methods since
         // resampling resets weights; the methods only differ in which particles survive.
-        var panels = [
-            { title: 'Unique ancestors at t=1 (low \u21d2 path degeneracy)', key: 'anc', maxVal: nP,
-              y0: margin.top, y1: H - margin.bottom, x0: pL, x1: pR, startT: 1 }
-        ];
-
-        for (var p = 0; p < panels.length; p++) {
-            var panel = panels[p];
-            var pw = panel.x1 - panel.x0;
-            var colW = pw / nCols;
-            var panelTop = panel.y0;
-            var panelBot = panel.y1;
-            var panelH = panelBot - panelTop;
-
-            // Title
-            ctx.fillStyle = '#666'; ctx.font = '9px -apple-system, sans-serif';
-            ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
-            ctx.fillText(panel.title, panel.x0 + 2, panelTop - 1);
-
-            // Axes
-            ctx.strokeStyle = '#ddd'; ctx.lineWidth = 0.5;
-            ctx.beginPath(); ctx.moveTo(panel.x0, panelBot); ctx.lineTo(panel.x1, panelBot); ctx.stroke();
-
-            // Y reference lines at N and N/2
-            ctx.strokeStyle = '#f0f0f0'; ctx.lineWidth = 0.5;
-            var yN = panelBot - panelH;
-            var yHalf = panelBot - panelH * 0.5;
-            ctx.setLineDash([2, 2]);
-            ctx.beginPath(); ctx.moveTo(panel.x0, yN); ctx.lineTo(panel.x1, yN); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(panel.x0, yHalf); ctx.lineTo(panel.x1, yHalf); ctx.stroke();
-            ctx.setLineDash([]);
-
-            // Y labels
-            ctx.fillStyle = '#bbb'; ctx.font = '7px -apple-system, sans-serif';
-            ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-            ctx.fillText(nP, panel.x0 - 2, yN);
-            ctx.fillText(Math.round(nP / 2), panel.x0 - 2, yHalf);
-
-            // X labels (bottom panel only)
-            if (p === panels.length - 1) {
-                ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-                ctx.fillStyle = '#999';
-                for (var t = 0; t < nCols; t++) {
-                    ctx.fillText(t + 1, panel.x0 + (t + 0.5) * colW, panelBot + 2);
+        // Compute actual max across all data for dynamic y-axis
+        var dataMax = 0;
+        for (var m = 0; m < results.length; m++) {
+            for (var k = 0; k < K; k++) {
+                for (var t = 1; t < nCols; t++) {  // start at t=1 (startT)
+                    var v = results[m].runs[k].anc[t];
+                    if (v > dataMax) dataMax = v;
                 }
             }
+        }
+        // maxY: at least N/2, at most N, scaled to show data
+        var maxY = Math.max(nP / 2, Math.min(nP, dataMax * 1.1));
 
-            // Mean dots + SD bars for each method (offset horizontally to avoid overlap)
-            var nMethods = results.length;
-            var dotSpread = colW * 0.6;  // total spread for all methods within a column
-            var dotStep = nMethods > 1 ? dotSpread / (nMethods - 1) : 0;
-            var startT = panel.startT || 0;
+        var colW = pW / nCols;
+        var panelTop = margin.top;
+        var panelBot = H - margin.bottom;
+        var panelH = panelBot - panelTop;
+        var startT = 1;  // ancestors start at t=2
 
-            for (var m = 0; m < nMethods; m++) {
-                var r = results[m];
-                var xOff = -dotSpread / 2 + m * dotStep;
+        // Title
+        ctx.fillStyle = '#666'; ctx.font = '9px -apple-system, sans-serif';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+        ctx.fillText('Unique ancestors at t=1, as proportion of N (low \u21d2 path degeneracy)', pL + 2, panelTop - 1);
 
-                // Compute mean and SD at each timestep
-                for (var t = startT; t < nCols; t++) {
-                    var vals = [];
-                    for (var k = 0; k < K; k++) {
-                        vals.push(panel.key === 'anc' ? r.runs[k].anc[t] : r.runs[k].ess[t]);
-                    }
-                    var sum = 0; for (var k = 0; k < K; k++) sum += vals[k];
-                    var mean = sum / K;
-                    var sumSq = 0; for (var k = 0; k < K; k++) sumSq += (vals[k] - mean) * (vals[k] - mean);
-                    var sd = Math.sqrt(sumSq / K);
+        // Axes
+        ctx.strokeStyle = '#ddd'; ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.moveTo(pL, panelBot); ctx.lineTo(pR, panelBot); ctx.stroke();
 
-                    var x = panel.x0 + (t + 0.5) * colW + xOff;
-                    var yMean = panelBot - (mean / panel.maxVal) * panelH;
-                    var yLo = panelBot - (Math.max(0, mean - sd) / panel.maxVal) * panelH;
-                    var yHi = panelBot - (Math.min(panel.maxVal, mean + sd) / panel.maxVal) * panelH;
+        // Y reference lines as proportions
+        ctx.strokeStyle = '#f0f0f0'; ctx.lineWidth = 0.5;
+        ctx.setLineDash([2, 2]);
+        var yTicks = [0.25, 0.5, 0.75, 1.0];
+        for (var yi = 0; yi < yTicks.length; yi++) {
+            var propVal = yTicks[yi] * nP;
+            if (propVal > maxY) continue;
+            var yy = panelBot - (propVal / maxY) * panelH;
+            ctx.beginPath(); ctx.moveTo(pL, yy); ctx.lineTo(pR, yy); ctx.stroke();
+        }
+        ctx.setLineDash([]);
 
-                    // SD bar
-                    ctx.strokeStyle = r.color;
-                    ctx.lineWidth = 1;
-                    ctx.globalAlpha = 0.4;
-                    ctx.beginPath();
-                    ctx.moveTo(x, yLo); ctx.lineTo(x, yHi);
-                    ctx.moveTo(x - 2, yLo); ctx.lineTo(x + 2, yLo);
-                    ctx.moveTo(x - 2, yHi); ctx.lineTo(x + 2, yHi);
-                    ctx.stroke();
+        // Y labels (proportions)
+        ctx.fillStyle = '#bbb'; ctx.font = '7px -apple-system, sans-serif';
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        for (var yi = 0; yi < yTicks.length; yi++) {
+            var propVal = yTicks[yi] * nP;
+            if (propVal > maxY) continue;
+            var yy = panelBot - (propVal / maxY) * panelH;
+            ctx.fillText((yTicks[yi] * 100).toFixed(0) + '%', pL - 2, yy);
+        }
+        ctx.fillText('0%', pL - 2, panelBot);
 
-                    // Mean dot
-                    ctx.fillStyle = r.color;
-                    ctx.globalAlpha = 0.9;
-                    ctx.beginPath(); ctx.arc(x, yMean, 3, 0, 2 * Math.PI); ctx.fill();
-                    ctx.globalAlpha = 1;
-                }
+        // X labels
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillStyle = '#999';
+        for (var t = 0; t < nCols; t++) {
+            ctx.fillText(t + 1, pL + (t + 0.5) * colW, panelBot + 2);
+        }
 
-                // Connect means with a line
+        // Mean dots + SD bars for each method (offset horizontally to avoid overlap)
+        var nMethods = results.length;
+        var dotSpread = colW * 0.6;
+        var dotStep = nMethods > 1 ? dotSpread / (nMethods - 1) : 0;
+
+        for (var m = 0; m < nMethods; m++) {
+            var r = results[m];
+            var xOff = -dotSpread / 2 + m * dotStep;
+
+            for (var t = startT; t < nCols; t++) {
+                var vals = [];
+                for (var k = 0; k < K; k++) vals.push(r.runs[k].anc[t]);
+                var sum = 0; for (var k = 0; k < K; k++) sum += vals[k];
+                var mean = sum / K;
+                var sumSq = 0; for (var k = 0; k < K; k++) sumSq += (vals[k] - mean) * (vals[k] - mean);
+                var sd = Math.sqrt(sumSq / K);
+
+                var x = pL + (t + 0.5) * colW + xOff;
+                var yMean = panelBot - (mean / maxY) * panelH;
+                var yLo = panelBot - (Math.max(0, mean - sd) / maxY) * panelH;
+                var yHi = panelBot - (Math.min(maxY, mean + sd) / maxY) * panelH;
+
+                // SD bar
                 ctx.strokeStyle = r.color;
-                ctx.lineWidth = 1.5;
-                ctx.globalAlpha = 0.6;
+                ctx.lineWidth = 1;
+                ctx.globalAlpha = 0.4;
                 ctx.beginPath();
-                var first = true;
-                for (var t = startT; t < nCols; t++) {
-                    var sum = 0;
-                    for (var k = 0; k < K; k++) sum += (panel.key === 'anc' ? r.runs[k].anc[t] : r.runs[k].ess[t]);
-                    var mean = sum / K;
-                    var x = panel.x0 + (t + 0.5) * colW + xOff;
-                    var y = panelBot - (mean / panel.maxVal) * panelH;
-                    if (first) { ctx.moveTo(x, y); first = false; } else ctx.lineTo(x, y);
-                }
+                ctx.moveTo(x, yLo); ctx.lineTo(x, yHi);
+                ctx.moveTo(x - 2, yLo); ctx.lineTo(x + 2, yLo);
+                ctx.moveTo(x - 2, yHi); ctx.lineTo(x + 2, yHi);
                 ctx.stroke();
+
+                // Mean dot
+                ctx.fillStyle = r.color;
+                ctx.globalAlpha = 0.9;
+                ctx.beginPath(); ctx.arc(x, yMean, 3, 0, 2 * Math.PI); ctx.fill();
                 ctx.globalAlpha = 1;
             }
+
+            // Connect means with a line
+            ctx.strokeStyle = r.color;
+            ctx.lineWidth = 1.5;
+            ctx.globalAlpha = 0.6;
+            ctx.beginPath();
+            var first = true;
+            for (var t = startT; t < nCols; t++) {
+                var sum = 0;
+                for (var k = 0; k < K; k++) sum += r.runs[k].anc[t];
+                var mean = sum / K;
+                var x = pL + (t + 0.5) * colW + xOff;
+                var y = panelBot - (mean / maxY) * panelH;
+                if (first) { ctx.moveTo(x, y); first = false; } else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.globalAlpha = 1;
         }
 
         // Legend (top-right)
         ctx.font = '8px -apple-system, sans-serif';
         ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
         for (var m = 0; m < results.length; m++) {
-            var ly = panels[0].y0 + 4 + m * 11;
+            var ly = panelTop + 4 + m * 11;
             ctx.strokeStyle = results[m].color; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(pR - 60, ly); ctx.lineTo(pR - 48, ly); ctx.stroke();
             ctx.fillStyle = '#333'; ctx.textAlign = 'left';
