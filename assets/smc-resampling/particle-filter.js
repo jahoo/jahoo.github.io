@@ -868,7 +868,7 @@ function createPFViz(config) {
 
         // Mean dots + SD bars for each method (offset horizontally to avoid overlap)
         var nMethods = results.length;
-        var dotSpread = colW * 0.6;
+        var dotSpread = colW * 0.3;
         var dotStep = nMethods > 1 ? dotSpread / (nMethods - 1) : 0;
 
         for (var m = 0; m < nMethods; m++) {
