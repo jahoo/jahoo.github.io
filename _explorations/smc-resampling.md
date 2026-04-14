@@ -375,7 +375,7 @@ In *residual resampling*, we give particle $\idx$ exactly
 $\lfloor \np\normwt^\idx \rfloor$ copies, then fill the remaining
 $R = \np - \sum_\idx \lfloor \np\normwt^\idx \rfloor$ slots by resampling
 on the **residual weights**
-$\resid^\idx = (\np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor)/R$. This nondeterministic part of the algorithm could be done usinany of the three CDF methods (select below).<label for="mn-resid-var" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-resid-var" class="margin-toggle"/><span class="marginnote">Note $\Var_{\text{resid}} \leq \Var_{\text{mult}}$ always. The deterministic phase removes variance entirely for the integer parts, and the phase-2 choice affects only the residual variance.</span> The right ploshows the residual CDF (solid) overlaid on the original weights CDF (dotted). For highly skewed weights, you can see that first allocating the deterministic weights makes the residual CDF much more even than the original was.
+$\resid^\idx = (\np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor)/R$. This nondeterministic part of the algorithm could be done usinany of the three CDF methods (select below).<label for="mn-resid-var" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-resid-var" class="margin-toggle"/><span class="marginnote">$\Var_{\text{resid}} \leq \Var_{\text{mult}}$ when phase 2 uses multinomial or stratified resampling (Douc et al., 2005). The deterministic phase removes variance for the integer parts; the phase-2 choice affects only the residual variance. Note that residual-systematic does not have this guarantee, since systematic resampling can hit the same counterexample on the residual weights.</span> The right ploshows the residual CDF (solid) overlaid on the original weights CDF (dotted). For highly skewed weights, you can see that first allocating the deterministic weights makes the residual CDF much more even than the original was.
 
 
 <div class="highlighter-rouge code-sidenote" id="resid-code"><div class="highlight"><pre class="highlight"><code><span class="c1"># Phase 1 (deterministic): guaranteed copies from the integer part</span>
@@ -469,7 +469,7 @@ Residual <span class="c-residual" id="comp-std-resid"></span>
 
 | | Multinomial | Stratified | Systematic | Residual |
 |---|---|---|---|---|
-| $\Var \leq \Var_{\text{mult}}$? | baseline | ✓ always | ✗ not guaranteed | ✓ always |
+| $\Var \leq \Var_{\text{mult}}$? | baseline | ✓ always | ✗ not guaranteed | ✓ mult/strat phase 2; ✗ syst |
 | $\|\cnt^\idx - \np\normwt^\idx\|$ bound | up to $\np$ | $\leq 1$ | $\leq 1$ | phase-2 dependent |
 | Random draws | $\np$ | $\np$ | 1 | $R \leq \np$ |
 {:.summary-table}
@@ -559,7 +559,7 @@ To see how the choice of resampling method affects particle diversity in practic
 <option value="multinomial">Multinomial</option>
 <option value="stratified">Stratified</option>
 <option value="systematic">Systematic</option>
-<option value="residual">Residual</option>
+<option value="residual">Residual-multinomial</option>
 </select></label>
 <label style="font-size:0.85em; color:#555; margin-left:8px;"><input type="checkbox" id="chk-pf-seed"> Fix seed:
 <input type="number" id="input-pf-seed" value="42" min="1" max="9999" style="width:50px; display:none; font-size:0.9em;">

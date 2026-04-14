@@ -1157,7 +1157,7 @@
             { estimators: evM.estimators, color: S.METHOD_COLORS.multinomial, label: 'Multinomial' },
             { estimators: evS.estimators, color: S.METHOD_COLORS.stratified, label: 'Stratified' },
             { estimators: evY.estimators, color: S.METHOD_COLORS.systematic, label: 'Systematic' },
-            { estimators: evR.estimators, color: S.METHOD_COLORS.residual,   label: 'Residual' },
+            { estimators: evR.estimators, color: S.METHOD_COLORS.residual,   label: 'Resid-' + ({multinomial:'Multi',stratified:'Strat',systematic:'Syst'}[S.residualPhase2] || 'Multi') },
         ], evM.trueVal);
     }
 

@@ -345,7 +345,9 @@
         S.drawEstDist('cv-est-multi', S.sec3, S.METHOD_COLORS.multinomial, 'Multinomial');
         S.drawEstDist('cv-est-strat', S.sec4, S.METHOD_COLORS.stratified, 'Stratified');
         S.drawEstDist('cv-est-sys',   S.sec5, S.METHOD_COLORS.systematic, 'Systematic');
-        S.drawEstDist('cv-est-resid', S.sec6, S.METHOD_COLORS.residual,   'Residual');
+        var p2 = S.residualPhase2 || 'multinomial';
+        var p2Short = { multinomial: 'Multi', stratified: 'Strat', systematic: 'Syst' };
+        S.drawEstDist('cv-est-resid', S.sec6, S.METHOD_COLORS.residual, 'Resid-' + (p2Short[p2] || p2));
         S.drawEstDist('cv-est-bk',   S.secBK, S.METHOD_COLORS.branchkill, 'Branch-kill');
         // Section 7 overlaid distributions
         S.drawCompEstDist();
