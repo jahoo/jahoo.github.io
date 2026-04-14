@@ -37,11 +37,11 @@
     <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
 
     <!-- Base exploration styling (et-book typography, sidenotes, collapsible sections) -->
-    <link rel="stylesheet" href="/assets/explorations-base.css?v=1776187796">
+    <link rel="stylesheet" href="/assets/explorations-base.css?v=1776204860">
 
     <!-- Page-specific CSS -->
     
-    <link rel="stylesheet" href="/assets/smc-resampling/style.css?v=1776187796">
+    <link rel="stylesheet" href="/assets/smc-resampling/style.css?v=1776204860">
     
 </head>
 
@@ -491,10 +491,12 @@ not the only options.</p>
 <h3 id="branch-kill-resampling">Branch-kill resampling</h3>
 
 <p>The methods above all produce exactly $\np$ resampled particles.
-Branch-kill relaxes this: each particle $\idx$ independently gets
+Branch-kill relaxes this: Each particle $\idx$ independently gets
 $\lfloor \np\normwt^\idx \rfloor$ deterministic copies plus one bonus
 copy with probability $\np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor$.
-No shared CDF or residual phase needed.</p>
+No shared CDF or residual phase needed.
+The total $\sum_\idx \cnt^\idx$ fluctuates around $\np$ rather than
+equalling it exactly.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># For each particle independently:
 </span><span class="n">num_copies</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">floor</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">weights</span><span class="p">)</span>
@@ -503,10 +505,6 @@ No shared CDF or residual phase needed.</p>
 </span><span class="n">bonus</span> <span class="o">=</span> <span class="p">(</span><span class="n">u</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">p_bonus</span><span class="p">)</span>    <span class="c1"># inverse CDF: right of step → bonus
 </span><span class="n">num_copies</span> <span class="o">+=</span> <span class="n">bonus</span> <span class="c1"># total may differ from N
 </span></code></pre></div></div>
-
-<p>The total $\sum_\idx \cnt^\idx$ fluctuates around $\np$ rather than
-equalling it exactly. The per-particle independence makes
-branch-kill naturally suited to parallel hardware.</p>
 
 <div class="proof">
 <span class="proof-label">Unbiasedness.</span>
@@ -602,6 +600,8 @@ Weight update $\normwt_t^\idx \propto p(y_t \mid \state_t^\idx)$ (after resampli
 
 <p>To see the typical behavior rather than a single random run, we can see what happens over many runs of the same method. The plot below shows path degeneracy (unique ancestors at t=1) over $K$ runs for all four methods. You can also the number of particles $\np$ (which we’ve fixed at $8$ for everything above).</p>
 
+<p>We should see multinomial show worse path degeneracy than the lower-variance alternatives.</p>
+
 <div class="control-box">
 <div class="control-row">
 <label style="font-size:0.85em; color:#555;">$\np$:
@@ -635,19 +635,19 @@ sequential Monte Carlo. <em>Foundations and Trends in Machine Learning</em>,
     </div>
 
     <!-- Collapsible sections -->
-    <script src="/assets/explorations-collapse.js?v=1776187796"></script>
+    <script src="/assets/explorations-collapse.js?v=1776204860"></script>
 
     <!-- Page-specific JS -->
     
-    <script src="/assets/smc-resampling/algorithms.js?v=1776187796"></script>
+    <script src="/assets/smc-resampling/algorithms.js?v=1776204860"></script>
     
-    <script src="/assets/smc-resampling/drawing.js?v=1776187796"></script>
+    <script src="/assets/smc-resampling/drawing.js?v=1776204860"></script>
     
-    <script src="/assets/smc-resampling/main.js?v=1776187796"></script>
+    <script src="/assets/smc-resampling/main.js?v=1776204860"></script>
     
-    <script src="/assets/smc-resampling/particle-filter.js?v=1776187796"></script>
+    <script src="/assets/smc-resampling/particle-filter.js?v=1776204860"></script>
     
-    <script src="/assets/smc-resampling/toolbar.js?v=1776187796"></script>
+    <script src="/assets/smc-resampling/toolbar.js?v=1776204860"></script>
     
 
 </body>
