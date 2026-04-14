@@ -629,8 +629,8 @@ function createPFViz(config) {
         for (var t = 0; t < nT; t++) ancValues.push(countUniqueAncestors(history, t));
 
         var series = [
-            { values: essValues, maxVal: S.N, label: 'ESS', color: '#c0392b' },
-            { values: ancValues, maxVal: S.N, label: 'Unique ancestors (at t=1)', color: '#2c3e50' }
+            { values: essValues, maxVal: S.N, label: 'ESS (low \u21d2 weight degeneracy)', color: '#c0392b' },
+            { values: ancValues, maxVal: S.N, label: 'Unique ancestors at t=1 (low \u21d2 path degeneracy)', color: '#2c3e50' }
         ];
 
         for (var s = 0; s < series.length; s++) {
@@ -664,10 +664,10 @@ function createPFViz(config) {
             }
             ctx.globalAlpha = 1;
 
-            // Row label
+            // Row label (left-aligned inside plot area)
             ctx.fillStyle = d.color; ctx.font = '8px -apple-system, sans-serif';
-            ctx.textAlign = 'right'; ctx.textBaseline = 'top';
-            ctx.fillText(d.label, pL - 3, rowTop);
+            ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+            ctx.fillText(d.label, pL + 2, rowTop - 7);
         }
     }
 
