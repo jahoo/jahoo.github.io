@@ -814,34 +814,39 @@ function createPFViz(config) {
 
         var margin = { top: 12, bottom: 16, left: 22, right: 6 };
         var pL = margin.left, pR = W - margin.right;
-        var pT = margin.top, pB = H - margin.bottom;
-        var halfW = (pR - pL) / 2;
+        var pW = pR - pL;
+        var halfH = (H - margin.top - margin.bottom) / 2;
         var nCols = T + 1;
 
-        // Two panels: left = unique ancestors (path degeneracy), right = ESS (weight degeneracy)
+        // Two panels: top = unique ancestors (path degeneracy), bottom = ESS (weight degeneracy)
         var panels = [
-            { title: 'Unique ancestors at t=1', key: 'anc', maxVal: nP, x0: pL, x1: pL + halfW - 8 },
-            { title: 'ESS', key: 'ess', maxVal: nP, x0: pL + halfW + 8, x1: pR }
+            { title: 'Unique ancestors at t=1 (low \u21d2 path degeneracy)', key: 'anc', maxVal: nP,
+              y0: margin.top, y1: margin.top + halfH - 6, x0: pL, x1: pR },
+            { title: 'ESS (low \u21d2 weight degeneracy)', key: 'ess', maxVal: nP,
+              y0: margin.top + halfH + 6, y1: H - margin.bottom, x0: pL, x1: pR }
         ];
 
         for (var p = 0; p < panels.length; p++) {
             var panel = panels[p];
             var pw = panel.x1 - panel.x0;
             var colW = pw / nCols;
+            var panelTop = panel.y0;
+            var panelBot = panel.y1;
+            var panelH = panelBot - panelTop;
 
             // Title
             ctx.fillStyle = '#666'; ctx.font = '9px -apple-system, sans-serif';
-            ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-            ctx.fillText(panel.title, panel.x0, 1);
+            ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+            ctx.fillText(panel.title, panel.x0 + 2, panelTop - 1);
 
             // Axes
             ctx.strokeStyle = '#ddd'; ctx.lineWidth = 0.5;
-            ctx.beginPath(); ctx.moveTo(panel.x0, pB); ctx.lineTo(panel.x1, pB); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(panel.x0, panelBot); ctx.lineTo(panel.x1, panelBot); ctx.stroke();
 
             // Y reference lines at N and N/2
             ctx.strokeStyle = '#f0f0f0'; ctx.lineWidth = 0.5;
-            var yN = pB - 1.0 * (pB - pT);
-            var yHalf = pB - 0.5 * (pB - pT);
+            var yN = panelBot - panelH;
+            var yHalf = panelBot - panelH * 0.5;
             ctx.setLineDash([2, 2]);
             ctx.beginPath(); ctx.moveTo(panel.x0, yN); ctx.lineTo(panel.x1, yN); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(panel.x0, yHalf); ctx.lineTo(panel.x1, yHalf); ctx.stroke();
@@ -853,10 +858,13 @@ function createPFViz(config) {
             ctx.fillText(nP, panel.x0 - 2, yN);
             ctx.fillText(Math.round(nP / 2), panel.x0 - 2, yHalf);
 
-            // X labels
-            ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-            for (var t = 0; t < nCols; t++) {
-                ctx.fillText(t + 1, panel.x0 + (t + 0.5) * colW, pB + 2);
+            // X labels (bottom panel only)
+            if (p === panels.length - 1) {
+                ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+                ctx.fillStyle = '#999';
+                for (var t = 0; t < nCols; t++) {
+                    ctx.fillText(t + 1, panel.x0 + (t + 0.5) * colW, panelBot + 2);
+                }
             }
 
             // Overlaid lines for each method
@@ -871,7 +879,7 @@ function createPFViz(config) {
                     ctx.beginPath();
                     for (var t = 0; t < nCols; t++) {
                         var x = panel.x0 + (t + 0.5) * colW;
-                        var y = pB - (data[t] / panel.maxVal) * (pB - pT);
+                        var y = panelBot - (data[t] / panel.maxVal) * panelH;
                         if (t === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
                     }
                     ctx.stroke();
@@ -890,7 +898,7 @@ function createPFViz(config) {
                     }
                     var mean = sum / K;
                     var x = panel.x0 + (t + 0.5) * colW;
-                    var y = pB - (mean / panel.maxVal) * (pB - pT);
+                    var y = panelBot - (mean / panel.maxVal) * panelH;
                     if (t === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
                 }
                 ctx.stroke();
@@ -898,16 +906,15 @@ function createPFViz(config) {
             }
         }
 
-        // Legend
+        // Legend (top-right)
         ctx.font = '8px -apple-system, sans-serif';
-        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-        var lx = pL + halfW - 60;
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
         for (var m = 0; m < results.length; m++) {
-            var ly = pT + 2 + m * 11;
+            var ly = panels[0].y0 + 4 + m * 11;
             ctx.strokeStyle = results[m].color; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + 12, ly); ctx.stroke();
-            ctx.fillStyle = '#333';
-            ctx.fillText(results[m].name, lx + 15, ly);
+            ctx.beginPath(); ctx.moveTo(pR - 60, ly); ctx.lineTo(pR - 48, ly); ctx.stroke();
+            ctx.fillStyle = '#333'; ctx.textAlign = 'left';
+            ctx.fillText(results[m].name, pR - 45, ly);
         }
     }
 
