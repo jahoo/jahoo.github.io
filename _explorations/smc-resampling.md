@@ -527,7 +527,22 @@ copies plus one bonus copy with probability $\np\normwt^\idx - \lfloor
 
 ## 7. Resampling methods in action
 
-To see how the choice of resampling method affects particle diversity in practice, here is the same random walk model from the introduction, now with a method selector. 
+To see how the choice of resampling method affects particle diversity in practice, here is the same random walk model from the introduction, now with a method selector.
+
+<details style="font-size:0.85em; color:#555; margin:0.3em 0 0.8em;">
+<summary style="cursor:pointer; color:#444;">Model details</summary>
+<p style="margin:0.4em 0;">
+<strong>State-space model</strong> (Gaussian random walk):
+Transition $\state_t \mid \state_{t-1} \sim \mathcal{N}(\state_{t-1},\, 1)$.
+Observation $y_t \mid \state_t \sim \mathcal{N}(\state_t,\, 0.25)$.
+All observations fixed at $y_t = 2$.
+</p>
+<p style="margin:0.4em 0;">
+<strong>Bootstrap particle filter</strong>:
+Proposal $= $ transition (prior).
+Weight update $\normwt_t^\idx \propto p(y_t \mid \state_t^\idx)$ (after resampling resets weights to $1/\np$).
+</p>
+</details>
 
 <div class="control-box">
 <div class="control-row">
