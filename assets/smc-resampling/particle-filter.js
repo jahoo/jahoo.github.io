@@ -944,4 +944,7 @@ function createPFViz(config) {
     var toolbarP2 = document.getElementById('smc-toolbar-phase2-select');
     if (mainP2) mainP2.addEventListener('change', triggerRun);
     if (toolbarP2) toolbarP2.addEventListener('change', triggerRun);
+
+    // Auto-run on page load
+    triggerRun();
 })();
