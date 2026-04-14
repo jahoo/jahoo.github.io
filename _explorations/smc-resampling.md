@@ -37,9 +37,9 @@ mathjax_macros: >-
 
 *Exploring some standard resampling schemes*
 
-<div class="exploration-meta">Jacob Hoover&ensp;·&ensp;Originally October 2023&ensp;·&ensp;Last updated April 2026</div>
+<div class="exploration-meta">Jacob Hoover Vigly&ensp;·&ensp;Originally October 2023&ensp;·&ensp;Last updated April 2026</div>
 
-I've been thinking recently about the way in which you do resampling in sequential Monte Carlo (SMC).<label for="mn-intro" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-intro" class="margin-toggle"/><span class="marginnote">This post was written a few years ago with code for visualizations never finished. It's structured pedagogically as a standalone introduction to these concepts aimed at my own understanding. Now I've had Claude reimplement and vastly improve the visualizations with interactivity, and thought it was worth sharing.</span>
+I've been thinking recently about the way in which you do resampling in sequential Monte Carlo (SMC).<label for="mn-intro" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-intro" class="margin-toggle"/><span class="marginnote">This post was written a few years ago with code for visualizations never finished. It's structured pedagogically as a standalone introduction to these concepts aimed at my own understanding. Now I've had Claude reimplement and vastly improve the visualizations with interactivity, and thought it was worth sharing ...with a vibe-coding disclaimer.</span>
 Like many other things, while there are many asymptotically identical methods, in practice it matters which one you choose. In this post, I'm making some visualizations to explore some standard resampling schemes, and get intuitions about why they work, and why you might choose one over another.
 
 ## 1. Why and how to resample
@@ -337,35 +337,18 @@ $(\normwt_{\mathrm{even}}-\tfrac{1}{2})(1-\normwt_{\mathrm{even}})$,
 **constant in $\np$**, while multinomial's decreases as
 $\normwt_{\mathrm{even}}(1 - \normwt_{\mathrm{even}})/\np$.
 
-<div class="control-box">
+To see this in action, set $f$ to $\mathbf{1}[\idx \text{ even}]$ and weights to "Alternating" in the head-to-head comparison (§5), and observe that the systematic estimator variance is larger than multinomial's.
+
+<div class="control-box" style="font-size:0.85em;">
 <div class="control-row">
-<label style="font-size:0.85em; color:#555;">Weights:
-<select id="select-counter-weights" style="padding:2px 4px; border:1px solid #ccc; border-radius:3px; font-size:1em;">
-<option value="alternating">Alternating</option>
-<option value="skewed">Skewed</option>
-<option value="uniform">Uniform</option>
-<option value="degenerate">Nearly degenerate</option>
-</select></label>
-<label><input type="checkbox" id="chk-permute"> Permute first</label>
-<span style="flex:1;"></span>
-<label style="font-size:0.85em; color:#555;">$K$:
-<input type="range" id="slider-K-counter" min="500" max="10000" value="2000" step="500" style="width:90px; vertical-align:middle;">
-<span id="val-K-counter">2000</span></label>
-<button id="btn-run-counter">Run comparison</button>
-<button id="btn-clear-counter" style="font-size:0.9em;">Clear</button>
-<button id="btn-reset-counter-weights" style="font-size:0.9em;">Reset weights</button>
+<button id="btn-set-counterexample">Set weights + f for Douc et al.'s counterexample</button>
+<button id="btn-reset-counterexample" style="display:none;">Reset weights + f</button>
 </div>
 </div>
 
-<div class="est-section" id="est-counter">
-<canvas id="cv-counter" class="panel panel-short"></canvas>
-<div class="var-display" id="var-counter"></div>
-</div>
+Try switching to other test functions (e.g., mean position) to see the effect vanish when $f$ is not aligned with the weight periodicity.
 
-Try other test functions (e.g., mean position) to see the effect
-vanish when $f$ isn't aligned with the weight periodicity.
-
-**Note.** This counterexample depends on the particle ordering. Randomly permuting the particles before resampling eliminates the pathology (try the "Permute first" checkbox above).<label for="sn-permute" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-permute" class="margin-toggle"/><span class="sidenote">Douc et al. (2005, §3.4) observe that both stratified and systematic resampling are sensitive to particle ordering: permuting the indices before resampling changes the distribution of the resampled set. After random permutation, systematic resampling becomes empirically similar to residual/stratified. They conclude that the counterexample is likely a "rare" situation, but that it shows systematic resampling is not as robust a variance-reduction method as stratified or residual, and that its theoretical analysis is considerably harder.</span>
+**Note.** This counterexample depends on the particle ordering.<label for="sn-permute" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-permute" class="margin-toggle"/><span class="sidenote">Douc et al. (2005, §3.4) observe that both stratified and systematic resampling are sensitive to particle ordering: permuting the indices before resampling changes the distribution of the resampled set. After random permutation, systematic resampling becomes empirically similar to residual/stratified. They conclude that the counterexample is likely a "rare" situation, but that it shows systematic resampling is not as robust a variance-reduction method as stratified or residual, and that its theoretical analysis is considerably harder.</span>
 
 ## 4. Residual resampling
 

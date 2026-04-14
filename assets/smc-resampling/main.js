@@ -27,9 +27,6 @@
     S.sec4 = { probes: [], counts: null, hist: null, mode: 'none' };
     S.sec5 = { probes: [], counts: null, hist: null, mode: 'none', offset: Math.random() / N, dragging: false };
 
-    // Section 5 counterexample
-    S.counterData = null;
-
     // Section 6 residual
     S.sec6 = { detCounts: null, stoCounts: null, totalCounts: null, residualProbes: [], hist: null, mode: 'none' };
 
@@ -334,7 +331,7 @@
         S.sec5.probes = sysProbes;
         S.drawMethodSection(cvSec5, S.sec5, S.METHOD_COLORS.systematic, { comb: true, strata: true, strataColor: 'rgba(39,174,96,' });
         // Section 5 counterexample
-        S.drawCounterexample();
+        // counterexample plot removed — uses head-to-head comparison instead
         // Section 6
         S.drawResidualSection();
         // Branch-kill
@@ -487,76 +484,41 @@
         });
     })();
 
-    // Section 5 counterexample
-    var counterPreWeights = null;  // weights before counterexample changed them
-    // PRESETS removed — uses PRESETS (defined below, available at call time)
-    function clearCounterDisplay() {
-        S.counterData = null;
-        document.getElementById('var-counter').textContent = '';
-        var estEl = document.getElementById('est-counter');
-        if (estEl) estEl.classList.remove('visible');
+    // Counterexample buttons: set/reset weights + test function
+    var counterPreWeights = null;
+    var counterPreTestFn = null;
+    var btnSetCounter = document.getElementById('btn-set-counterexample');
+    var btnResetCounter = document.getElementById('btn-reset-counterexample');
+    if (btnSetCounter) {
+        btnSetCounter.addEventListener('click', function () {
+            // Save current state
+            counterPreWeights = S.weights.slice();
+            counterPreTestFn = S.testFnKey;
+            // Set alternating weights + evenodd test function
+            S.weights = PRESETS.alternating();
+            S.testFnKey = 'evenodd';
+            document.querySelectorAll('.testfn-select').forEach(function (s) { s.value = 'evenodd'; });
+            clearAll();
+            redrawAll();
+            if (btnResetCounter) btnResetCounter.style.display = 'inline';
+        });
     }
-    function applyCounterPreset() {
-        var key = document.getElementById('select-counter-weights').value;
-        if (!counterPreWeights) counterPreWeights = S.weights.slice();
-        S.weights = PRESETS[key]();
-        clearCounterDisplay();
-        redrawAll();
-    }
-    document.getElementById('select-counter-weights').addEventListener('change', function () {
-        applyCounterPreset();
-    });
-    document.getElementById('btn-clear-counter').addEventListener('click', function () {
-        clearCounterDisplay();
-        redrawAll();
-    });
-    document.getElementById('btn-reset-counter-weights').addEventListener('click', function () {
-        if (counterPreWeights) {
-            S.weights = counterPreWeights;
-            counterPreWeights = null;
-        }
-        clearCounterDisplay();
-        redrawAll();
-    });
-    (function () {
-        var slider = document.getElementById('slider-K-counter');
-        var valSpan = document.getElementById('val-K-counter');
-        slider.addEventListener('input', function () { valSpan.textContent = slider.value; });
-    })();
-    document.getElementById('btn-run-counter').addEventListener('click', function () {
-        var key = document.getElementById('select-counter-weights').value;
-        if (!counterPreWeights) counterPreWeights = S.weights.slice();
-        S.weights = PRESETS[key]();
-        var K = parseInt(document.getElementById('slider-K-counter').value, 10);
-        var perm = document.getElementById('chk-permute').checked;
-        var sysAllCounts = new Array(K);
-        var multiAllCounts = new Array(K);
-        for (var t = 0; t < K; t++) {
-            var sIdx;
-            if (perm) {
-                var order = Array.from({ length: N }, function (_, i) { return i; });
-                for (var i = N - 1; i > 0; i--) {
-                    var j = Math.floor(Math.random() * (i + 1));
-                    var tmp = order[i]; order[i] = order[j]; order[j] = tmp;
-                }
-                var permW = order.map(function (i) { return S.weights[i]; });
-                var rawIdx = S.resample.systematic(permW);
-                sIdx = rawIdx.map(function (i) { return order[i]; });
-            } else {
-                sIdx = S.resample.systematic(S.weights);
+    if (btnResetCounter) {
+        btnResetCounter.addEventListener('click', function () {
+            if (counterPreWeights) {
+                S.weights = counterPreWeights;
+                counterPreWeights = null;
             }
-            sysAllCounts[t] = S.countIndices(sIdx, N);
-            multiAllCounts[t] = S.countIndices(S.resample.multinomial(S.weights), N);
-        }
-        S.counterData = {
-            sys:   { allCounts: sysAllCounts, K: K },
-            multi: { allCounts: multiAllCounts, K: K },
-        };
-        setMathHTML('var-counter', S.getTestFnLabel());
-        var estEl = document.getElementById('est-counter');
-        if (estEl) estEl.classList.add('visible');
-        redrawAll();
-    });
+            if (counterPreTestFn) {
+                S.testFnKey = counterPreTestFn;
+                document.querySelectorAll('.testfn-select').forEach(function (s) { s.value = counterPreTestFn; });
+                counterPreTestFn = null;
+            }
+            clearAll();
+            redrawAll();
+            btnResetCounter.style.display = 'none';
+        });
+    }
 
     // Section 6 residual
     document.getElementById('btn-resample-resid').addEventListener('click', function () {
@@ -755,10 +717,6 @@
                     }
                 });
             }
-            // Update counterexample label (data recomputes from stored counts)
-            if (S.counterData) {
-                setMathHTML('var-counter', S.getTestFnLabel());
-            }
             // Update branch-kill label
             if (S.secBK.hist) {
                 var evBK = S.evalEstimators(S.secBK.hist);
@@ -777,7 +735,7 @@
             s.probes = []; s.counts = null; s.hist = null; s.mode = 'none';
             if (s.offset !== undefined) s.offset = 0.5 / N;
         });
-        S.compData = null; S.counterData = null;
+        S.compData = null;
         document.querySelectorAll('.var-display').forEach(function (el) { el.textContent = ''; });
     }
     // Clear probes button is now drawn inside the canvas (see drawSection2)

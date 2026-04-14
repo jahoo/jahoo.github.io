@@ -827,22 +827,7 @@
     }
 
     // ================================================================
-    //  DRAW: COUNTEREXAMPLE (section 5 sub)
-    // ================================================================
-
-    function drawCounterexample() {
-        var cv = document.getElementById('cv-counter');
-        var counterData = S.counterData;
-        if (!cv || !counterData || !counterData.multi) { if (cv) S.resetCanvas(cv); return; }
-        if (cv.offsetWidth === 0 || cv.offsetHeight === 0) return;
-        var evM = S.evalEstimators(counterData.multi);
-        var evS = S.evalEstimators(counterData.sys);
-        if (!evM || !evS) { S.resetCanvas(cv); return; }
-        drawEstimatorDist(cv, [
-            { estimators: evM.estimators, color: S.METHOD_COLORS.multinomial, label: 'Multinomial' },
-            { estimators: evS.estimators, color: S.METHOD_COLORS.systematic, label: 'Systematic' },
-        ], evM.trueVal);
-    }
+    // (counterexample plot removed — uses head-to-head comparison instead)
 
     // ================================================================
     //  DRAW: ESTIMATOR DISTRIBUTION (KDE)
@@ -1175,7 +1160,7 @@
     S.drawMethodSection = drawMethodSection;
     S.drawResidualSection = drawResidualSection;
     S.drawBranchKillSection = drawBranchKillSection;
-    S.drawCounterexample = drawCounterexample;
+    // S.drawCounterexample removed
     S.drawEstimatorDist = drawEstimatorDist;
     S.drawComparisonPanel = drawComparisonPanel;
     S.drawEstDist = drawEstDist;
