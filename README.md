@@ -15,3 +15,6 @@ Push to `source`. A GitHub Actions workflow will automatically build the site (`
 - `master` — built HTML output (deployed automatically, do not edit directly!)
 
 GitHub may show these branches as "ahead/behind" each other — this is normal. They have independent commit histories: `source` has source-code commits that aren't on `master`, and `master` has deploy commits (built HTML) that aren't on `source`.
+
+#### Explorations
+Interactive essays live in `_explorations/` and use a custom formatting stack: the `exploration` layout (`_layouts/exploration.html`) loads `assets/explorations-base.css` (Tufte-inspired sidenote layout, collapsible sections via `assets/explorations-collapse.js`) and MathJax with per-page macro definitions via `mathjax_macros` front matter. Each exploration has its own JS/CSS in `assets/<slug>/`. This setup is tied to Jekyll + kramdown and would need reworking if the blog migrates to another renderer.
