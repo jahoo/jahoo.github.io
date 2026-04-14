@@ -597,17 +597,85 @@ function createPFViz(config) {
         return Object.keys(ancestors).length;
     }
 
-    function updateInfo(history) {
-        if (!infoDiv) return;
-        var method = methodSelect.value;
-        var T = history.length - 1;
-        var parts = [method.charAt(0).toUpperCase() + method.slice(1) + ':'];
-        // Show unique ancestors at t=1 for each timestep
-        for (var t = 0; t < history.length; t++) {
-            var n = countUniqueAncestors(history, t);
-            parts.push('t=' + (t + 1) + ': ' + n);
+    // Diagnostic mini-plots
+    var cvEss = document.getElementById('cv-pf-ess');
+    var cvAnc = document.getElementById('cv-pf-ancestors');
+
+    function drawDiagnostic(cv, values, maxVal, label, color, integerY) {
+        if (!cv) return;
+        var dpr = window.devicePixelRatio || 1;
+        var W = cv.clientWidth, H = cv.clientHeight;
+        if (W === 0 || H === 0) return;
+        cv.width = Math.round(W * dpr);
+        cv.height = Math.round(H * dpr);
+        var ctx = cv.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, W, H);
+
+        var margin = { top: 8, bottom: 14, left: 28, right: 8 };
+        var pL = margin.left, pR = W - margin.right;
+        var pT = margin.top, pB = H - margin.bottom;
+        var pW = pR - pL, pH = pB - pT;
+        var n = values.length;
+        if (n === 0) return;
+
+        // Axes
+        ctx.strokeStyle = '#ddd'; ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.moveTo(pL, pB); ctx.lineTo(pR, pB); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(pL, pT); ctx.lineTo(pL, pB); ctx.stroke();
+
+        // Data line + dots
+        ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.8;
+        ctx.beginPath();
+        for (var t = 0; t < n; t++) {
+            var x = pL + (t + 0.5) / n * pW;
+            var y = pB - (values[t] / maxVal) * pH;
+            if (t === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         }
-        infoDiv.textContent = 'Unique ancestors at t=1: ' + parts.join('  ');
+        ctx.stroke();
+        // Dots
+        ctx.fillStyle = color;
+        for (var t = 0; t < n; t++) {
+            var x = pL + (t + 0.5) / n * pW;
+            var y = pB - (values[t] / maxVal) * pH;
+            ctx.beginPath(); ctx.arc(x, y, 2, 0, 2 * Math.PI); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        // Y-axis labels
+        ctx.fillStyle = '#999'; ctx.font = '7px -apple-system, sans-serif';
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        ctx.fillText(integerY ? maxVal.toString() : maxVal.toFixed(1), pL - 3, pT);
+        ctx.fillText(integerY ? '0' : '0', pL - 3, pB);
+
+        // X-axis: t labels
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        for (var t = 0; t < n; t++) {
+            ctx.fillText(t + 1, pL + (t + 0.5) / n * pW, pB + 1);
+        }
+
+        // Title
+        ctx.fillStyle = '#666'; ctx.font = '8px -apple-system, sans-serif';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+        ctx.fillText(label, pL + 2, 1);
+    }
+
+    function updateDiagnostics(history) {
+        var nT = history.length;
+        // ESS at each step
+        var essValues = history.map(function (h) {
+            return 1 / h.weights.reduce(function (s, wi) { return s + wi * wi; }, 0);
+        });
+        drawDiagnostic(cvEss, essValues, S.N, 'ESS (weight degeneracy)', '#c0392b', false);
+
+        // Unique ancestors at t=1 for each step
+        var ancValues = [];
+        for (var t = 0; t < nT; t++) {
+            ancValues.push(countUniqueAncestors(history, t));
+        }
+        drawDiagnostic(cvAnc, ancValues, S.N, 'Unique ancestors at t=1 (path degeneracy)', '#2c3e50', true);
     }
 
     var viz = createPFViz({
@@ -617,7 +685,7 @@ function createPFViz(config) {
         getSeed: getSeed,
         nSteps: 8,
         model: { sigmaProc: 1.0, sigmaObs: 0.5, yObs: 2.0 },
-        onRun: function (history) { updateInfo(history); }
+        onRun: function (history) { updateDiagnostics(history); }
     });
 
     if (!viz) return;

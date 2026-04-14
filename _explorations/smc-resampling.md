@@ -570,7 +570,10 @@ To see how the choice of resampling method affects particle diversity in practic
 
 <canvas id="cv-pf-compare" class="panel"></canvas>
 
-<div id="pf-compare-info" class="var-display" style="font-size:0.85em;"></div>
+<div style="display:flex; gap:12px; margin-top:4px;">
+<canvas id="cv-pf-ess" style="flex:1; height:60px; border:1px solid #eee; border-radius:3px;"></canvas>
+<canvas id="cv-pf-ancestors" style="flex:1; height:60px; border:1px solid #eee; border-radius:3px;"></canvas>
+</div>
 
 
 ## References
