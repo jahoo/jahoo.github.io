@@ -337,16 +337,7 @@ $(\normwt_{\mathrm{even}}-\tfrac{1}{2})(1-\normwt_{\mathrm{even}})$,
 **constant in $\np$**, while multinomial's decreases as
 $\normwt_{\mathrm{even}}(1 - \normwt_{\mathrm{even}})/\np$.
 
-To see this in action, set $f$ to $\mathbf{1}[\idx \text{ even}]$ and weights to "Alternating" in the head-to-head comparison (§5), and observe that the systematic estimator variance is larger than multinomial's.
-
-<div class="control-box" style="font-size:0.85em;">
-<div class="control-row">
-<button id="btn-set-counterexample">Set weights + f for Douc et al.'s counterexample</button>
-<button id="btn-reset-counterexample" style="display:none;">Reset weights + f</button>
-</div>
-</div>
-
-Try switching to other test functions (e.g., mean position) to see the effect vanish when $f$ is not aligned with the weight periodicity.
+To see this in action, set $f$ to $\mathbf{1}[\idx \text{ even}]$ and weights to "Alternating" in the head-to-head comparison (§5), and observe that the systematic estimator variance is larger than multinomial's. Try switching to other test functions (e.g., mean position) to see the effect vanish when $f$ is not aligned with the weight periodicity.
 
 **Note.** This counterexample depends on the particle ordering.<label for="sn-permute" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-permute" class="margin-toggle"/><span class="sidenote">Douc et al. (2005, §3.4) observe that both stratified and systematic resampling are sensitive to particle ordering: permuting the indices before resampling changes the distribution of the resampled set. After random permutation, systematic resampling becomes empirically similar to residual/stratified. They conclude that the counterexample is likely a "rare" situation, but that it shows systematic resampling is not as robust a variance-reduction method as stratified or residual, and that its theoretical analysis is considerably harder.</span>
 
@@ -427,6 +418,9 @@ mean count ± 1 std over $K$ trials.
 <input type="range" id="slider-K-all" min="100" max="10000" value="1000" step="100" style="width:120px; vertical-align:middle;">
 <span id="val-K-all">1000</span></label>
 <button id="btn-run-all" style="font-weight:600;">Run all four</button>
+<span style="flex:1;"></span>
+<button id="btn-set-counterexample" style="font-size:0.85em;">Douc et al. counterexample</button>
+<button id="btn-reset-counterexample" style="font-size:0.85em; display:none;">Reset</button>
 </div>
 </div>
 

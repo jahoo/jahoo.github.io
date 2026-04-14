@@ -657,8 +657,7 @@ function createPFViz(config) {
             ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
             ctx.fillText(ancValues[t].toString(), x, y - 3);
         }
-            ctx.globalAlpha = 1;
-        }
+        ctx.globalAlpha = 1;
     }
 
     var viz = createPFViz({
