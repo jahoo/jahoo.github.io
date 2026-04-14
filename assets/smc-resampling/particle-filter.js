@@ -1,34 +1,44 @@
 // ================================================================
 //  SMC Resampling — particle-filter.js
-//  Bootstrap particle filter visualization.
-//  Gaussian random walk model with SIS/SMC toggle,
-//  lineage tracing, and ancestry highlighting.
-//  Self-contained: reads S.PALETTE and S.N from window.SMC.
+//  Bootstrap particle filter visualization factory.
+//  Gaussian random walk model with lineage tracing, ancestry
+//  highlighting, and mouseover tooltips.
+//  Reads S.PALETTE and S.N from window.SMC.
+//
+//  Usage:
+//    createPFViz({
+//      canvasId: 'cv-degeneracy',
+//      rerunBtnId: 'btn-degen-rerun',
+//      getResampleFn: function() { return null; },  // null = SIS
+//      onRun: function(history) { ... },  // optional callback
+//      nSteps: 8,
+//      model: { sigmaProc: 1, sigmaObs: 0.5, yObs: 2 }
+//    });
 // ================================================================
 
-(function () {
+function createPFViz(config) {
     'use strict';
 
     var S = window.SMC;
-    if (!S) return;
+    if (!S) return null;
 
-    var cv = document.getElementById('cv-degeneracy');
-    var btnRerun = document.getElementById('btn-degen-rerun');
-    var chkResample = document.getElementById('chk-degen-resample');
-    var infoSpan = document.getElementById('degen-info');
-    var captionSpan = document.getElementById('degen-caption');
-    if (!cv || !btnRerun) return;
+    var cv = document.getElementById(config.canvasId);
+    if (!cv) return null;
 
     var nP = S.N;
-    var T = 8;
-    var selectedLineage = null;  // Set of "t,i" strings that are highlighted
-    var sigmaProc = 1.0;
-    var sigmaObs = 0.5;
-    var yObs = 2.0;
+    var T = config.nSteps || 8;
+    var model = config.model || { sigmaProc: 1.0, sigmaObs: 0.5, yObs: 2.0 };
+    var sigmaProc = model.sigmaProc;
+    var sigmaObs = model.sigmaObs;
+    var yObs = model.yObs;
+
+    var selectedLineage = null;
     var history = [];  // [{weights, states, ancestors}]
+    var drawLayout = null;
+    var hoverInfo = null;  // {t, i} of particle under mouse
 
     // ================================================================
-    //  MODEL: Gaussian random walk with Gaussian observations
+    //  MODEL
     // ================================================================
 
     function randn() {
@@ -41,7 +51,7 @@
         return -0.5 * z * z;
     }
 
-    // Multinomial resampling: returns ancestor indices
+    // Default multinomial resampling (used if no external fn provided)
     function resampleMultinomial(weights) {
         var cs = [weights[0]];
         for (var i = 1; i < nP; i++) cs.push(cs[i - 1] + weights[i]);
@@ -61,8 +71,10 @@
     // ================================================================
 
     function run() {
-        var doResample = chkResample && chkResample.checked;
+        var resampleFn = config.getResampleFn ? config.getResampleFn() : null;
         history = [];
+        selectedLineage = null;
+        hoverInfo = null;
 
         // t=0: sample from prior, reweight by first observation
         var states = [], logW = [];
@@ -76,25 +88,23 @@
         w0 = w0.map(function (v) { return v / s0; });
         history.push({ weights: w0, states: states.slice(), ancestors: null });
 
-        // t=1..T: Resample (if SMC) → Propagate → Reweight
+        // t=1..T: Resample → Propagate → Reweight
         for (var t = 1; t <= T; t++) {
             var ancestors = null;
             var curStates = states;
 
-            if (doResample) {
+            if (resampleFn) {
                 var prevW = history[t - 1].weights;
-                ancestors = resampleMultinomial(prevW);
+                ancestors = resampleFn(prevW);
                 curStates = ancestors.map(function (a) { return states[a]; });
             }
 
-            // Propagate
             var newStates = curStates.map(function (x) {
                 return x + randn() * sigmaProc;
             });
 
-            // Reweight
             var logW;
-            if (doResample) {
+            if (resampleFn) {
                 logW = newStates.map(function (x) {
                     return gaussLogLik(yObs, x, sigmaObs);
                 });
@@ -117,39 +127,18 @@
             states = newStates;
         }
         draw();
-        updateInfo();
-        updateCaption();
-    }
-
-    function updateInfo() {
-        if (infoSpan) infoSpan.textContent = '';
-    }
-
-    function updateCaption() {
-        var doResample = chkResample && chkResample.checked;
-        var sisLabel = document.getElementById('degen-label-sis');
-        var smcLabel = document.getElementById('degen-label-smc');
-        if (sisLabel) sisLabel.className = 'degen-toggle-label' + (doResample ? '' : ' active');
-        if (smcLabel) smcLabel.className = 'degen-toggle-label' + (doResample ? ' active' : '');
-        if (!captionSpan) return;
-        if (doResample) {
-            captionSpan.textContent = 'With resampling (SMC), we avoid weight degeneracy.';
-        } else {
-            captionSpan.textContent = 'Without resampling (SIS), weights often become degenerate.';
-        }
+        if (config.onRun) config.onRun(history);
     }
 
     // ================================================================
     //  LINEAGE TRACING
     // ================================================================
 
-    // Display permutations: sort particles by ancestor's display row
     function computeDisplayPerms() {
         var perms = [];
         var perm0 = [];
         for (var i = 0; i < nP; i++) perm0.push(i);
         perms.push(perm0);
-
         for (var t = 1; t < history.length; t++) {
             var anc = history[t].ancestors;
             var prevPerm = perms[t - 1];
@@ -170,7 +159,6 @@
         return perms;
     }
 
-    // Trace ancestors + descendants from a single particle
     function traceLineage(clickT, clickI) {
         var lineage = {};
         lineage[clickT + ',' + clickI] = true;
@@ -201,7 +189,6 @@
         return lineage;
     }
 
-    // Trace ancestors of ALL particles at a timestep (backward only)
     function traceAllAncestors(clickT) {
         var lineage = {};
         for (var i = 0; i < nP; i++) lineage[clickT + ',' + i] = true;
@@ -218,10 +205,71 @@
     }
 
     // ================================================================
-    //  DRAWING
+    //  HIT TESTING (shared by click and mousemove)
     // ================================================================
 
-    var drawLayout = null;
+    function hitTest(x, y) {
+        if (!drawLayout || history.length === 0) return null;
+        var L = drawLayout;
+        var t = Math.floor((x - L.pL) / L.colW);
+        if (t < 0 || t >= history.length) return null;
+        if (y > L.pB) return { type: 'timestep', t: t };
+        var displayRow = Math.floor((L.pB - y) / L.rowH);
+        if (displayRow < 0 || displayRow >= nP) return null;
+        var i = displayRow;
+        if (L.perms && L.perms[t]) {
+            var perm = L.perms[t];
+            for (var pi = 0; pi < nP; pi++) {
+                if (perm[pi] === displayRow) { i = pi; break; }
+            }
+        }
+        return { type: 'particle', t: t, i: i };
+    }
+
+    // ================================================================
+    //  TOOLTIP
+    // ================================================================
+
+    var tooltip = document.createElement('div');
+    tooltip.className = 'pf-tooltip';
+    tooltip.style.cssText = 'display:none; position:fixed; z-index:100; ' +
+        'background:rgba(255,255,255,0.95); border:1px solid #ccc; border-radius:4px; ' +
+        'padding:4px 7px; font-size:10px; font-family:-apple-system,sans-serif; ' +
+        'color:#333; pointer-events:none; box-shadow:0 2px 6px rgba(0,0,0,0.1); ' +
+        'line-height:1.4; max-width:180px;';
+    document.body.appendChild(tooltip);
+
+    function showTooltip(e, t, i) {
+        if (t < 0 || t >= history.length || i < 0 || i >= nP) {
+            tooltip.style.display = 'none';
+            return;
+        }
+        var h = history[t];
+        var lines = [];
+        lines.push('<b>t=' + (t + 1) + ', particle ' + (i + 1) + '</b>');
+        lines.push('state: ' + h.states[i].toFixed(3));
+        lines.push('weight: ' + h.weights[i].toFixed(4));
+        if (h.ancestors && h.ancestors[i] !== undefined) {
+            lines.push('ancestor: particle ' + (h.ancestors[i] + 1) + ' at t=' + t);
+        }
+        // Count children at next step
+        if (t < history.length - 1) {
+            var nextAnc = history[t + 1].ancestors;
+            if (nextAnc) {
+                var nChildren = 0;
+                for (var c = 0; c < nP; c++) if (nextAnc[c] === i) nChildren++;
+                lines.push('children: ' + nChildren);
+            }
+        }
+        tooltip.innerHTML = lines.join('<br>');
+        tooltip.style.display = 'block';
+        tooltip.style.left = (e.clientX + 12) + 'px';
+        tooltip.style.top = (e.clientY - 10) + 'px';
+    }
+
+    // ================================================================
+    //  DRAWING
+    // ================================================================
 
     function draw() {
         var dpr = window.devicePixelRatio || 1;
@@ -248,11 +296,9 @@
 
         var colors = S.PALETTE;
 
-        // Display permutations (always untangle)
         var perms = computeDisplayPerms();
         function particleY(t, i) {
-            var row = perms[t][i];
-            return pB - (row + 0.5) * rowH;
+            return pB - (perms[t][i] + 0.5) * rowH;
         }
 
         drawLayout = { pL: pL, pT: pT, pB: pB, colW: colW, rowH: rowH, nCols: nCols, perms: perms };
@@ -265,14 +311,14 @@
             ctx.beginPath(); ctx.moveTo(gx, pT); ctx.lineTo(gx, pB); ctx.stroke();
         }
 
-        // Global max weight (absolute scale)
+        // Global max weight
         var globalMaxW = 0;
         for (var t = 0; t < history.length; t++) {
             var mw = Math.max.apply(null, history[t].weights);
             if (mw > globalMaxW) globalMaxW = mw;
         }
 
-        // Weight bars + ancestor arrows
+        // Weight bars + arrows
         var hasSelection = selectedLineage !== null;
         for (var t = 0; t < history.length; t++) {
             var h = history[t];
@@ -283,18 +329,18 @@
                 var bw = globalMaxW > 0 ? (h.weights[i] / globalMaxW) * maxBarW : 0;
                 var inLineage = hasSelection && selectedLineage[t + ',' + i];
                 var dimmed = hasSelection && !inLineage;
+                var isHovered = hoverInfo && hoverInfo.t === t && hoverInfo.i === i;
 
                 ctx.fillStyle = colors[i % colors.length];
                 ctx.globalAlpha = dimmed ? 0.1 : (inLineage ? 0.7 : 0.45);
                 ctx.fillRect(cx - bw, y - barH / 2, bw, barH);
-                ctx.strokeStyle = colors[i % colors.length];
-                ctx.globalAlpha = dimmed ? 0.15 : (inLineage ? 1 : 0.7);
-                ctx.lineWidth = inLineage ? 1.2 : 0.7;
+                ctx.strokeStyle = isHovered ? '#333' : colors[i % colors.length];
+                ctx.globalAlpha = dimmed ? 0.15 : (inLineage || isHovered ? 1 : 0.7);
+                ctx.lineWidth = isHovered ? 1.5 : (inLineage ? 1.2 : 0.7);
                 ctx.strokeRect(cx - bw, y - barH / 2, bw, barH);
                 ctx.globalAlpha = 1;
             }
 
-            // Arrows to next step
             if (t < history.length - 1) {
                 var nextH = history[t + 1];
                 var nextCx = pL + (t + 1.5) * colW;
@@ -322,14 +368,13 @@
             }
         }
 
-        // Row labels on the left
+        // X-axis labels + ESS
         ctx.font = '7px -apple-system, sans-serif';
         ctx.textAlign = 'right';
         ctx.textBaseline = 'top';
         ctx.fillStyle = '#999';
         ctx.fillText('t', pL - 3, pB + 1);
         ctx.fillText('ESS', pL - 3, pB + 10);
-        // Per-step values
         ctx.textAlign = 'center';
         for (var t = 0; t < nCols; t++) {
             var cx = pL + (t + 0.5) * colW;
@@ -349,56 +394,108 @@
     // ================================================================
 
     cv.addEventListener('click', function (e) {
-        if (!drawLayout || history.length === 0) return;
         var rect = cv.getBoundingClientRect();
-        var x = e.clientX - rect.left;
-        var y = e.clientY - rect.top;
-        var L = drawLayout;
-        var t = Math.floor((x - L.pL) / L.colW);
-        if (t < 0 || t >= history.length) { selectedLineage = null; draw(); return; }
+        var hit = hitTest(e.clientX - rect.left, e.clientY - rect.top);
+        if (!hit) { selectedLineage = null; draw(); return; }
 
-        // Click on timestep label area (below plot)?
-        if (y > L.pB) {
-            if (selectedLineage && selectedLineage._allAncT === t) {
+        if (hit.type === 'timestep') {
+            if (selectedLineage && selectedLineage._allAncT === hit.t) {
                 selectedLineage = null;
             } else {
-                selectedLineage = traceAllAncestors(t);
-                selectedLineage._allAncT = t;
+                selectedLineage = traceAllAncestors(hit.t);
+                selectedLineage._allAncT = hit.t;
             }
-            draw();
-            return;
-        }
-
-        // Click on particle bar
-        var displayRow = Math.floor((L.pB - y) / L.rowH);
-        if (displayRow < 0 || displayRow >= nP) { selectedLineage = null; draw(); return; }
-        var i = displayRow;
-        if (L.perms && L.perms[t]) {
-            var perm = L.perms[t];
-            for (var pi = 0; pi < nP; pi++) {
-                if (perm[pi] === displayRow) { i = pi; break; }
-            }
-        }
-        var key = t + ',' + i;
-        if (selectedLineage && selectedLineage[key]) {
-            selectedLineage = null;
         } else {
-            selectedLineage = traceLineage(t, i);
+            var key = hit.t + ',' + hit.i;
+            if (selectedLineage && selectedLineage[key]) {
+                selectedLineage = null;
+            } else {
+                selectedLineage = traceLineage(hit.t, hit.i);
+            }
         }
         draw();
     });
-    cv.style.cursor = 'pointer';
 
-    btnRerun.addEventListener('click', function () { selectedLineage = null; run(); });
-    if (chkResample) chkResample.addEventListener('change', function () { selectedLineage = null; run(); });
+    cv.addEventListener('mousemove', function (e) {
+        var rect = cv.getBoundingClientRect();
+        var hit = hitTest(e.clientX - rect.left, e.clientY - rect.top);
+        if (hit && hit.type === 'particle') {
+            if (!hoverInfo || hoverInfo.t !== hit.t || hoverInfo.i !== hit.i) {
+                hoverInfo = { t: hit.t, i: hit.i };
+                draw();
+            }
+            showTooltip(e, hit.t, hit.i);
+            cv.style.cursor = 'pointer';
+        } else {
+            if (hoverInfo) { hoverInfo = null; draw(); }
+            tooltip.style.display = 'none';
+            cv.style.cursor = hit ? 'pointer' : 'default';
+        }
+    });
+
+    cv.addEventListener('mouseleave', function () {
+        if (hoverInfo) { hoverInfo = null; draw(); }
+        tooltip.style.display = 'none';
+    });
+
+    // Re-run button
+    var btnRerun = config.rerunBtnId ? document.getElementById(config.rerunBtnId) : null;
+    if (btnRerun) btnRerun.addEventListener('click', function () { run(); });
+
+    // Resize
+    window.addEventListener('resize', function () { draw(); });
 
     // Initial run
     run();
-    window.addEventListener('resize', function () { draw(); });
-    // Redraw when marginnote toggle reveals the canvas (narrow mode)
-    var toggle = document.getElementById('mn-degen');
-    if (toggle) toggle.addEventListener('change', function () {
-        setTimeout(draw, 50);
+
+    // Return public API
+    return { run: run, draw: draw, getHistory: function () { return history; } };
+}
+
+// ================================================================
+//  INTRO INSTANCE (SIS/SMC toggle in marginnote)
+// ================================================================
+
+(function () {
+    var chkResample = document.getElementById('chk-degen-resample');
+    var captionSpan = document.getElementById('degen-caption');
+
+    function updateCaption() {
+        var doResample = chkResample && chkResample.checked;
+        var sisLabel = document.getElementById('degen-label-sis');
+        var smcLabel = document.getElementById('degen-label-smc');
+        if (sisLabel) sisLabel.className = 'degen-toggle-label' + (doResample ? '' : ' active');
+        if (smcLabel) smcLabel.className = 'degen-toggle-label' + (doResample ? ' active' : '');
+        if (!captionSpan) return;
+        captionSpan.textContent = doResample
+            ? 'With resampling (SMC), we avoid weight degeneracy.'
+            : 'Without resampling (SIS), weights often become degenerate.';
+    }
+
+    var viz = createPFViz({
+        canvasId: 'cv-degeneracy',
+        rerunBtnId: 'btn-degen-rerun',
+        getResampleFn: function () {
+            if (chkResample && chkResample.checked) {
+                return function (w) { return window.SMC.resample.multinomial(w); };
+            }
+            return null;
+        },
+        nSteps: 8,
+        model: { sigmaProc: 1.0, sigmaObs: 0.5, yObs: 2.0 },
+        onRun: updateCaption
     });
 
+    if (!viz) return;
+    updateCaption();
+
+    if (chkResample) {
+        chkResample.addEventListener('change', function () { viz.run(); });
+    }
+
+    // Redraw when marginnote toggle reveals canvas (narrow mode)
+    var toggle = document.getElementById('mn-degen');
+    if (toggle) toggle.addEventListener('change', function () {
+        setTimeout(function () { viz.draw(); }, 50);
+    });
 })();
