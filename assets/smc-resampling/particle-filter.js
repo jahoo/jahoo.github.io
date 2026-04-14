@@ -614,7 +614,7 @@ function createPFViz(config) {
         ctx.fillStyle = '#fff';
         ctx.fillRect(0, 0, W, H);
 
-        var margin = { top: 8, bottom: 14, left: 28, right: 8 };
+        var margin = { top: 8, bottom: 14, left: 22, right: 6 };  // match PF plot margins
         var pL = margin.left, pR = W - margin.right;
         var pT = margin.top, pB = H - margin.bottom;
         var pW = pR - pL, pH = pB - pT;
