@@ -588,7 +588,7 @@ To see the typical behavior rather than a single random run, we can overlay many
 </div>
 </div>
 
-<canvas id="cv-pf-ktrials" style="width:100%; height:250px; border:1px solid #ddd; border-radius:4px;"></canvas>
+<canvas id="cv-pf-ktrials" style="width:100%; height:400px; border:1px solid #ddd; border-radius:4px;"></canvas>
 
 
 ## References
