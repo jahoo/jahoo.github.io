@@ -700,3 +700,218 @@ function createPFViz(config) {
     var toolbarP2 = document.getElementById('smc-toolbar-phase2-select');
     if (toolbarP2) toolbarP2.addEventListener('change', function () { updateResidualLabel(); });
 })();
+
+// ================================================================
+//  K-TRIALS COMPARISON (all methods, overlaid diagnostics)
+// ================================================================
+
+(function () {
+    'use strict';
+
+    var S = window.SMC;
+    if (!S || !S.resample) return;
+
+    var cvK = document.getElementById('cv-pf-ktrials');
+    var btnRun = document.getElementById('btn-pf-ktrials');
+    var sliderN = document.getElementById('slider-pf-N');
+    var sliderK = document.getElementById('slider-pf-K');
+    var valN = document.getElementById('val-pf-N');
+    var valK = document.getElementById('val-pf-K');
+    if (!cvK || !btnRun) return;
+
+    if (sliderN) sliderN.addEventListener('input', function () { valN.textContent = sliderN.value; });
+    if (sliderK) sliderK.addEventListener('input', function () { valK.textContent = sliderK.value; });
+
+    var T = 8;
+    var sigmaProc = 1.0, sigmaObs = 0.5, yObs = 2.0;
+
+    function randn() {
+        var u1 = Math.random(), u2 = Math.random();
+        return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    }
+    function gaussLogLik(x, mu, sigma) {
+        var z = (x - mu) / sigma; return -0.5 * z * z;
+    }
+
+    // Run one PF, return {essPerStep, uniqueAncPerStep}
+    function runOnePF(nP, resampleFn) {
+        var states = [], logW = [];
+        for (var i = 0; i < nP; i++) {
+            states.push(randn() * sigmaProc);
+            logW.push(gaussLogLik(yObs, states[i], sigmaObs));
+        }
+        var maxLW = Math.max.apply(null, logW);
+        var w = logW.map(function (lw) { return Math.exp(lw - maxLW); });
+        var s = w.reduce(function (a, b) { return a + b; }, 0);
+        w = w.map(function (v) { return v / s; });
+
+        var history = [{ weights: w, ancestors: null }];
+
+        for (var t = 1; t <= T; t++) {
+            var ancestors = resampleFn(w);
+            var curStates = ancestors.map(function (a) { return states[a]; });
+            var newStates = curStates.map(function (x) { return x + randn() * sigmaProc; });
+            var logW = newStates.map(function (x) { return gaussLogLik(yObs, x, sigmaObs); });
+            var maxLW = Math.max.apply(null, logW);
+            var newW = logW.map(function (lw) { return Math.exp(lw - maxLW); });
+            var s = newW.reduce(function (a, b) { return a + b; }, 0);
+            newW = newW.map(function (v) { return v / s; });
+            history.push({ weights: newW, ancestors: ancestors });
+            states = newStates;
+            w = newW;
+        }
+
+        // Compute diagnostics
+        var essPerStep = [], ancPerStep = [];
+        for (var t = 0; t <= T; t++) {
+            var wt = history[t].weights;
+            essPerStep.push(1 / wt.reduce(function (s, wi) { return s + wi * wi; }, 0));
+            // Unique ancestors at t=0
+            var ancs = {};
+            for (var i = 0; i < nP; i++) {
+                var idx = i;
+                for (var tt = t; tt > 0; tt--) {
+                    idx = history[tt].ancestors[idx];
+                }
+                ancs[idx] = true;
+            }
+            ancPerStep.push(Object.keys(ancs).length);
+        }
+        return { ess: essPerStep, anc: ancPerStep };
+    }
+
+    function runAllMethods() {
+        var nP = parseInt(sliderN.value, 10) || 8;
+        var K = parseInt(sliderK.value, 10) || 50;
+
+        var methods = [
+            { name: 'Multinomial', color: S.METHOD_COLORS.multinomial, fn: function (w) { return S.resample.multinomial(w); } },
+            { name: 'Stratified', color: S.METHOD_COLORS.stratified, fn: function (w) { return S.resample.stratified(w); } },
+            { name: 'Systematic', color: S.METHOD_COLORS.systematic, fn: function (w) { return S.resample.systematic(w); } },
+            { name: 'Residual', color: S.METHOD_COLORS.residual, fn: function (w) { return S.resample.residual(w, S.residualPhase2 || 'multinomial'); } },
+        ];
+
+        // Run K trials per method
+        var results = methods.map(function (m) {
+            var runs = [];
+            for (var k = 0; k < K; k++) runs.push(runOnePF(nP, m.fn));
+            return { name: m.name, color: m.color, runs: runs };
+        });
+
+        drawKTrials(results, nP, K);
+    }
+
+    function drawKTrials(results, nP, K) {
+        var dpr = window.devicePixelRatio || 1;
+        var W = cvK.clientWidth, H = cvK.clientHeight;
+        if (W === 0 || H === 0) return;
+        cvK.width = Math.round(W * dpr);
+        cvK.height = Math.round(H * dpr);
+        var ctx = cvK.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, W, H);
+
+        var margin = { top: 12, bottom: 16, left: 22, right: 6 };
+        var pL = margin.left, pR = W - margin.right;
+        var pT = margin.top, pB = H - margin.bottom;
+        var halfW = (pR - pL) / 2;
+        var nCols = T + 1;
+
+        // Two panels: left = unique ancestors (path degeneracy), right = ESS (weight degeneracy)
+        var panels = [
+            { title: 'Unique ancestors at t=1', key: 'anc', maxVal: nP, x0: pL, x1: pL + halfW - 8 },
+            { title: 'ESS', key: 'ess', maxVal: nP, x0: pL + halfW + 8, x1: pR }
+        ];
+
+        for (var p = 0; p < panels.length; p++) {
+            var panel = panels[p];
+            var pw = panel.x1 - panel.x0;
+            var colW = pw / nCols;
+
+            // Title
+            ctx.fillStyle = '#666'; ctx.font = '9px -apple-system, sans-serif';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+            ctx.fillText(panel.title, panel.x0, 1);
+
+            // Axes
+            ctx.strokeStyle = '#ddd'; ctx.lineWidth = 0.5;
+            ctx.beginPath(); ctx.moveTo(panel.x0, pB); ctx.lineTo(panel.x1, pB); ctx.stroke();
+
+            // Y reference lines at N and N/2
+            ctx.strokeStyle = '#f0f0f0'; ctx.lineWidth = 0.5;
+            var yN = pB - 1.0 * (pB - pT);
+            var yHalf = pB - 0.5 * (pB - pT);
+            ctx.setLineDash([2, 2]);
+            ctx.beginPath(); ctx.moveTo(panel.x0, yN); ctx.lineTo(panel.x1, yN); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(panel.x0, yHalf); ctx.lineTo(panel.x1, yHalf); ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Y labels
+            ctx.fillStyle = '#bbb'; ctx.font = '7px -apple-system, sans-serif';
+            ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+            ctx.fillText(nP, panel.x0 - 2, yN);
+            ctx.fillText(Math.round(nP / 2), panel.x0 - 2, yHalf);
+
+            // X labels
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+            for (var t = 0; t < nCols; t++) {
+                ctx.fillText(t + 1, panel.x0 + (t + 0.5) * colW, pB + 2);
+            }
+
+            // Overlaid lines for each method
+            for (var m = 0; m < results.length; m++) {
+                var r = results[m];
+                ctx.strokeStyle = r.color;
+                ctx.lineWidth = 1;
+                ctx.globalAlpha = Math.max(0.05, Math.min(0.3, 5 / K));
+
+                for (var k = 0; k < K; k++) {
+                    var data = panel.key === 'anc' ? r.runs[k].anc : r.runs[k].ess;
+                    ctx.beginPath();
+                    for (var t = 0; t < nCols; t++) {
+                        var x = panel.x0 + (t + 0.5) * colW;
+                        var y = pB - (data[t] / panel.maxVal) * (pB - pT);
+                        if (t === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                }
+                ctx.globalAlpha = 1;
+
+                // Mean line (solid, thicker)
+                ctx.strokeStyle = r.color;
+                ctx.lineWidth = 2;
+                ctx.globalAlpha = 0.9;
+                ctx.beginPath();
+                for (var t = 0; t < nCols; t++) {
+                    var sum = 0;
+                    for (var k = 0; k < K; k++) {
+                        sum += (panel.key === 'anc' ? r.runs[k].anc[t] : r.runs[k].ess[t]);
+                    }
+                    var mean = sum / K;
+                    var x = panel.x0 + (t + 0.5) * colW;
+                    var y = pB - (mean / panel.maxVal) * (pB - pT);
+                    if (t === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // Legend
+        ctx.font = '8px -apple-system, sans-serif';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        var lx = pL + halfW - 60;
+        for (var m = 0; m < results.length; m++) {
+            var ly = pT + 2 + m * 11;
+            ctx.strokeStyle = results[m].color; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + 12, ly); ctx.stroke();
+            ctx.fillStyle = '#333';
+            ctx.fillText(results[m].name, lx + 15, ly);
+        }
+    }
+
+    btnRun.addEventListener('click', function () {
+        setTimeout(runAllMethods, 0);  // defer for UI responsiveness
+    });
+})();
