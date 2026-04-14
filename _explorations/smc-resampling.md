@@ -39,7 +39,7 @@ mathjax_macros: >-
 
 <div class="exploration-meta">Jacob Hoover&ensp;·&ensp;Originally October 2023&ensp;·&ensp;Last updated April 2026</div>
 
-I've been thinking recently about the way in which you do resampling in sequential Monte Carlo (SMC).<label for="mn-intro" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-intro" class="margin-toggle"/><span class="marginnote">This post was written a few years ago with code for visualizations never finished. I've had Claude reimplement the interactive visualizations.</span>
+I've been thinking recently about the way in which you do resampling in sequential Monte Carlo (SMC).<label for="mn-intro" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-intro" class="margin-toggle"/><span class="marginnote">This post was written a few years ago with code for visualizations never finished. It's structured pedagogically as a standalone introduction to these concepts aimed at my own understanding. Now I've had Claude reimplement and vastly improve the visualizations with interactivity, and thought it was worth sharing.</span>
 Like many other things, while there are many asymptotically identical methods, in practice it matters which one you choose. In this post, I'm making some visualizations to explore some standard resampling schemes, and get intuitions about why they work, and why you might choose one over another.
 
 ## 1. Why and how to resample
@@ -71,18 +71,18 @@ After enough steps, all current particles may trace back to a single ancestor at
 
 Adding resampling can keep our particle approximation useful (fixing SIS's weight degeneracy problem), but the method we use to resample can affect both the variance of our estimates and how quickly path diversity is lost. The rest of this post explores several resampling methods, visualizes their differences, to help build intuition for why some would perform better than others.
 
-### The unbiasedness requirement
+### The first-moment (unbiasedness) condition
 
 For any resampling method to be unbiased, the expected number of copies made of each particle must be proportional to its weight. That is, $\cnt^\idx\sim r$ be the number of copies of particle $\idx$ after
 resampling (writing $r$ for the resampling method, some distribution over nonnegative integers, conditioned on the current set of weighted particles)
 
 $$\E_{r}[\cnt^\idx] = \np \normwt^\idx \quad \text{for all } \idx$$
 
-This ensures that the equally-weighted resampled estimate
-$\sum_{\idx=1}^{\np} \frac{1}{\np} f(\rstate^\idx)$ is unbiased for
-$\sum_\idx \normwt^\idx f(\state^\idx)$. The different methods we'll look at in this post all satisfy this
-condition, but they differ in how much variance the resampling
-step adds. We'll look in detail at four standard methods --- **multinomial**, **stratified**, **systematic**, and **residual** resampling --- and then briefly discuss **branch-kill** and other extensions.
+This ensures that the equally-weighted resampled particles
+$\sum_{\idx=1}^{\np} \frac{1}{\np} f(\rstate^\idx)$ form an unbiased estimator of the original weighted sum
+$\sum_\idx \normwt^\idx f(\state^\idx)$.
+
+We'll focus on visualizing and understanding four canonical methods: **multinomial**, **stratified**, **systematic**, and **residual** resampling.<label for="sn-unbiased" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-unbiased" class="margin-toggle"/><span class="sidenote">These methods all satisfy this 'first-moment condition.' However, higher moments can differ greatly between schemes (as we'll see, looking at variance).</span>
 
 
 ## 2. Inverse transform sampling
@@ -128,8 +128,8 @@ on the CDF plot at right to place probes, and consider what strategy would you u
 ## 3. Multinomial, stratified, and systematic resampling
 
 You may have found that the most natural idea is to use $\np$ independent draws from the uniform distribution.<label for="sn-pit" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-pit" class="margin-toggle"/><span class="sidenote">That is, inverse transform sampling. A little while ago, I made another [post exploring density transformations](/2022/09/02/transform-pdf.html) in the continuous case. Here we are doing this in a discrete setting: Each uniform-distributed independent probe $\probe_k$ is transformed through the discrete quantile function $\invcdf$ to produce a sample from the particle-weight distribution, just as passing a uniform draw through a continuous inverse CDF yields a draw from the corresponding distribution.</span>
-This works, and leads to our first algorithm, **multinomial resampling**.
-We will then look at two other strategies that reduce variance by removing independence and spreading probes more evenly for lower variance.
+This works, and leads to the first standard algorithm, **multinomial resampling**.
+We will then look at two other common strategies that reduce variance by spreading probes more evenly for lower variance.
 
 ### Multinomial resampling
 
@@ -212,10 +212,10 @@ $\E[\cnt^\idx] = \np\,\normwt^\idx$. ∎
 
 ### Stratified resampling
 
-You may have noticed that multinomial probes can cluster and leave gaps.
-Stratified resampling spreads them more evenly: Partition $[0,1]$ into $\np$ equal
+You may have noticed that because the probes are all independently sampled in multinomial resampling, they can cluster and leave gaps. This leads to undesirable extra variance. 
+*Stratified resampling* introduces a technique to spread them more evenly: Partition $[0,1]$ into $\np$ equal
 **strata** $\bigl(\frac{k-1}{\np},\, \frac{k}{\np}\bigr)_{k=1}^{\np}$
-and draw one independent uniform within each.
+and draw one independent uniform within each, resulting in lower variance.<label for="sn-strat-var" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-strat-var" class="margin-toggle"/><span class="sidenote">See Douc et al. (2005) for proof that $\Var_{\text{strat}} \leq \Var_{\text{mult}}$.</span>
 
 ```python
 # Steps 1 & 3 as above; only step 2 changes:
@@ -224,9 +224,8 @@ positions = (random(N) + range(N)) / N
 ```
 
 <div class="insight">
-Each stratum gets exactly one probe, so
+Each stratum gets exactly one probe, so we can bound the counts
 $\lfloor \np\normwt^\idx \rfloor \leq \cnt^\idx \leq \lceil \np\normwt^\idx \rceil$.
-Douc et al. (2005) prove $\Var_{\text{strat}} \leq \Var_{\text{mult}}$ always.
 </div>
 
 <canvas id="cv-sec4" class="panel"></canvas>
@@ -269,10 +268,10 @@ segment has total length $\normwt^\idx$. ∎
 
 ### Systematic resampling
 
-Stratified still uses $\np$ random draws. Systematic uses just
-**one**: draw $U \sim \mathrm{Uniform}(0, 1/\np)$ and set
-$\probe_k = U + (k{-}1)/\np$. The probes form an equally-spaced
-**comb**. **Drag the green handle** to slide it.
+Notice that stratified resampling still uses $\np$ random draws to place the probe in each stratum. Another standard technique called *systematic resampling* uses just **one** random value, and places all the probes based on that single offset: Draw $U \sim \mathrm{Uniform}(0, 1/\np)$ and set
+$\probe_k = U + (k{-}1)/\np$. 
+
+The probes form an equally-spaced comb. **Drag the green handle** to slide it, or click **Random offset** to sample.
 
 ```python
 # Steps 1 & 3 as above; only step 2 changes:
@@ -308,14 +307,15 @@ positions = (random() + np.arange(N)) / N
 <span class="proof-label">Unbiasedness.</span>
 The offset $U$ is $\mathrm{Uniform}(0, 1/\np)$, so each probe
 $\probe_k = U + (k{-}1)/\np$ is marginally
-$\mathrm{Uniform}\bigl(\frac{k-1}{\np},\, \frac{k}{\np}\bigr)$---the
+$\mathrm{Uniform}\bigl(\frac{k-1}{\np},\, \frac{k}{\np}\bigr)$, the
 same distribution as the stratified probe in stratum $k$. The
-same tiling argument gives $\E[\cnt^\idx] = \np\,\normwt^\idx$. (But note
-that the probes are no longer independent: a single $U$
+same tiling argument gives $\E[\cnt^\idx] = \np\,\normwt^\idx$.∎
+</div>
+
+Note that the probes are no longer independent. A single $U$
 determines all of them. The marginal distributions are identical
 to stratified, so unbiasedness holds, but the joint distribution
-differs---and with it the variance.) ∎
-</div>
+differs (and so also the variance).
 
 ### Systematic can be worse than multinomial (Douc et al., 2005, §3.4)
 
@@ -541,6 +541,26 @@ copies plus one bonus copy with probability $\np\normwt^\idx - \lfloor
   problem, minimizing the expected distance between the original
   and resampled particle positions. This preserves spatial
   structure better than CDF-based methods but is more expensive.
+
+
+## 7. Resampling methods in action
+
+To see how the choice of resampling method affects particle diversity in practice, here is the same random walk model from the introduction, now with a method selector. Try each method and click timestep labels to compare how quickly ancestry collapses.
+
+<div class="control-box">
+<div class="control-row">
+<label style="font-size:0.85em; color:#555;">Resampling method:
+<select id="select-pf-method" style="padding:2px 4px; border:1px solid #ccc; border-radius:3px; font-size:1em;">
+<option value="multinomial">Multinomial</option>
+<option value="stratified">Stratified</option>
+<option value="systematic">Systematic</option>
+<option value="residual">Residual</option>
+</select></label>
+<button id="btn-pf-rerun">Re-run</button>
+</div>
+</div>
+
+<canvas id="cv-pf-compare" class="panel"></canvas>
 
 
 ## References

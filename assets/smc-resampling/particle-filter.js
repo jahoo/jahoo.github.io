@@ -499,3 +499,37 @@ function createPFViz(config) {
         setTimeout(function () { viz.draw(); }, 50);
     });
 })();
+
+// ================================================================
+//  END-OF-POST INSTANCE (method comparison)
+// ================================================================
+
+(function () {
+    var methodSelect = document.getElementById('select-pf-method');
+    if (!methodSelect) return;
+
+    var S = window.SMC;
+    if (!S || !S.resample) return;
+
+    function getResampleFn() {
+        var method = methodSelect.value;
+        switch (method) {
+            case 'stratified':  return function (w) { return S.resample.stratified(w); };
+            case 'systematic':  return function (w) { return S.resample.systematic(w); };
+            case 'residual':    return function (w) { return S.resample.residual(w, 'multinomial'); };
+            default:            return function (w) { return S.resample.multinomial(w); };
+        }
+    }
+
+    var viz = createPFViz({
+        canvasId: 'cv-pf-compare',
+        rerunBtnId: 'btn-pf-rerun',
+        getResampleFn: getResampleFn,
+        nSteps: 8,
+        model: { sigmaProc: 1.0, sigmaObs: 0.5, yObs: 2.0 }
+    });
+
+    if (!viz) return;
+
+    methodSelect.addEventListener('change', function () { viz.run(); });
+})();
