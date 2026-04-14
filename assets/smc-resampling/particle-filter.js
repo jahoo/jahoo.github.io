@@ -38,11 +38,40 @@ function createPFViz(config) {
     var hoverInfo = null;  // {t, i} of particle under mouse
 
     // ================================================================
+    //  SEEDABLE PRNG (xorshift128)
+    // ================================================================
+
+    var rngState = null;  // null = use Math.random
+
+    function seedRng(seed) {
+        // Initialize xorshift128 state from a single integer seed
+        seed = seed | 0 || 1;
+        rngState = [seed, seed * 2654435761 | 0, seed * 0x01000193 | 0, seed * 2246822519 | 0];
+        // Warm up
+        for (var i = 0; i < 20; i++) rngNext();
+    }
+
+    function rngNext() {
+        // xorshift128
+        var s = rngState;
+        var t = s[3];
+        t ^= t << 11; t ^= t >>> 8;
+        s[3] = s[2]; s[2] = s[1]; s[1] = s[0];
+        t ^= s[0]; t ^= s[0] >>> 19;
+        s[0] = t;
+        return (t >>> 0) / 4294967296;  // [0, 1)
+    }
+
+    function random() {
+        return rngState ? rngNext() : Math.random();
+    }
+
+    // ================================================================
     //  MODEL
     // ================================================================
 
     function randn() {
-        var u1 = Math.random(), u2 = Math.random();
+        var u1 = random() || 1e-10, u2 = random();
         return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
     }
 
@@ -51,14 +80,14 @@ function createPFViz(config) {
         return -0.5 * z * z;
     }
 
-    // Default multinomial resampling (used if no external fn provided)
+    // Default multinomial resampling (uses seedable random())
     function resampleMultinomial(weights) {
         var cs = [weights[0]];
         for (var i = 1; i < nP; i++) cs.push(cs[i - 1] + weights[i]);
         cs[nP - 1] = 1.0;
         var ancestors = [];
         for (var k = 0; k < nP; k++) {
-            var u = Math.random();
+            var u = random();
             var j = 0;
             while (j < nP - 1 && u > cs[j]) j++;
             ancestors.push(j);
@@ -70,7 +99,21 @@ function createPFViz(config) {
     //  SIMULATION
     // ================================================================
 
-    function run() {
+    function run(optSeed) {
+        // Seed RNG if provided (for reproducible runs)
+        var useSeed = false;
+        if (optSeed !== undefined) {
+            seedRng(optSeed); useSeed = true;
+        } else if (config.getSeed) {
+            var seed = config.getSeed();
+            if (seed !== null) { seedRng(seed); useSeed = true; }
+            else rngState = null;
+        } else {
+            rngState = null;
+        }
+        // When seeded, also override Math.random so external resamplers are deterministic
+        var origMathRandom = Math.random;
+        if (useSeed) Math.random = random;
         var resampleFn = config.getResampleFn ? config.getResampleFn() : null;
         history = [];
         selectedLineage = null;
@@ -126,6 +169,8 @@ function createPFViz(config) {
             });
             states = newStates;
         }
+        // Restore Math.random
+        if (useSeed) Math.random = origMathRandom;
         draw();
         if (config.onRun) config.onRun(history);
     }
@@ -506,10 +551,20 @@ function createPFViz(config) {
 
 (function () {
     var methodSelect = document.getElementById('select-pf-method');
+    var chkSeed = document.getElementById('chk-pf-seed');
+    var inputSeed = document.getElementById('input-pf-seed');
+    var infoDiv = document.getElementById('pf-compare-info');
     if (!methodSelect) return;
 
     var S = window.SMC;
     if (!S || !S.resample) return;
+
+    // Show/hide seed input
+    if (chkSeed && inputSeed) {
+        chkSeed.addEventListener('change', function () {
+            inputSeed.style.display = chkSeed.checked ? 'inline' : 'none';
+        });
+    }
 
     function getResampleFn() {
         var method = methodSelect.value;
@@ -521,15 +576,52 @@ function createPFViz(config) {
         }
     }
 
+    function getSeed() {
+        if (chkSeed && chkSeed.checked && inputSeed) {
+            return parseInt(inputSeed.value, 10) || 42;
+        }
+        return null;
+    }
+
+    // Count unique ancestors at t=0 for all particles at step t
+    function countUniqueAncestors(history, targetT) {
+        var ancestors = {};
+        for (var i = 0; i < S.N; i++) {
+            var idx = i;
+            for (var t = targetT; t > 0; t--) {
+                var anc = history[t].ancestors;
+                idx = anc ? anc[idx] : idx;
+            }
+            ancestors[idx] = true;
+        }
+        return Object.keys(ancestors).length;
+    }
+
+    function updateInfo(history) {
+        if (!infoDiv) return;
+        var method = methodSelect.value;
+        var T = history.length - 1;
+        var parts = [method.charAt(0).toUpperCase() + method.slice(1) + ':'];
+        // Show unique ancestors at t=1 for each timestep
+        for (var t = 0; t < history.length; t++) {
+            var n = countUniqueAncestors(history, t);
+            parts.push('t=' + (t + 1) + ': ' + n);
+        }
+        infoDiv.textContent = 'Unique ancestors at t=1: ' + parts.join('  ');
+    }
+
     var viz = createPFViz({
         canvasId: 'cv-pf-compare',
         rerunBtnId: 'btn-pf-rerun',
         getResampleFn: getResampleFn,
+        getSeed: getSeed,
         nSteps: 8,
-        model: { sigmaProc: 1.0, sigmaObs: 0.5, yObs: 2.0 }
+        model: { sigmaProc: 1.0, sigmaObs: 0.5, yObs: 2.0 },
+        onRun: function (history) { updateInfo(history); }
     });
 
     if (!viz) return;
 
     methodSelect.addEventListener('change', function () { viz.run(); });
+    if (inputSeed) inputSeed.addEventListener('change', function () { viz.run(); });
 })();

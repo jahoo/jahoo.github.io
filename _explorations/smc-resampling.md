@@ -317,12 +317,17 @@ determines all of them. The marginal distributions are identical
 to stratified, so unbiasedness holds, but the joint distribution
 differs (and so also the variance).
 
-### Systematic can be worse than multinomial (Douc et al., 2005, §3.4)
+### ⚠︎ Systematic can be higher variance than multinomial
 
 Systematic has the same marginals as stratified, but the probes
-are **perfectly correlated**. This is usually benign, but becomes
-pathological when $f$ aligns with a periodic weight pattern
-matching the comb spacing.
+are **perfectly correlated**. What does this mean for variance?
+
+Douc et al. (2005, §3.4) give the following counterexample to the 
+"frequently encountered conjecture that systematic resampling 
+dominates multinomial resampling in terms of conditional variance."
+It's an example showing that the correlation becomes pathological when 
+$f$ aligns with a periodic weight pattern matching the comb spacing.
+
 
 With alternating weights (high, low, high, low, ...) and
 $f(\state^\idx) = \mathbf{1}[\idx \text{ even}]$, the comb teeth
@@ -545,7 +550,7 @@ copies plus one bonus copy with probability $\np\normwt^\idx - \lfloor
 
 ## 7. Resampling methods in action
 
-To see how the choice of resampling method affects particle diversity in practice, here is the same random walk model from the introduction, now with a method selector. Try each method and click timestep labels to compare how quickly ancestry collapses.
+To see how the choice of resampling method affects particle diversity in practice, here is the same random walk model from the introduction, now with a method selector. 
 
 <div class="control-box">
 <div class="control-row">
@@ -556,11 +561,16 @@ To see how the choice of resampling method affects particle diversity in practic
 <option value="systematic">Systematic</option>
 <option value="residual">Residual</option>
 </select></label>
+<label style="font-size:0.85em; color:#555; margin-left:8px;"><input type="checkbox" id="chk-pf-seed"> Fix seed:
+<input type="number" id="input-pf-seed" value="42" min="1" max="9999" style="width:50px; display:none; font-size:0.9em;">
+</label>
 <button id="btn-pf-rerun">Re-run</button>
 </div>
 </div>
 
 <canvas id="cv-pf-compare" class="panel"></canvas>
+
+<div id="pf-compare-info" class="var-display" style="font-size:0.85em;"></div>
 
 
 ## References
