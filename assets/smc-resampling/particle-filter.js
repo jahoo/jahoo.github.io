@@ -572,7 +572,7 @@ function createPFViz(config) {
         switch (method) {
             case 'stratified':  return function (w) { return S.resample.stratified(w); };
             case 'systematic':  return function (w) { return S.resample.systematic(w); };
-            case 'residual':    return function (w) { return S.resample.residual(w, 'multinomial'); };
+            case 'residual':    return function (w) { return S.resample.residual(w, S.residualPhase2 || 'multinomial'); };
             default:            return function (w) { return S.resample.multinomial(w); };
         }
     }
@@ -687,4 +687,16 @@ function createPFViz(config) {
 
     methodSelect.addEventListener('change', function () { viz.run(); });
     if (inputSeed) inputSeed.addEventListener('change', function () { viz.run(); });
+
+    // Keep residual option label in sync with phase-2 selector
+    var p2Short = { multinomial: 'Multi', stratified: 'Strat', systematic: 'Syst' };
+    function updateResidualLabel() {
+        var opt = methodSelect.querySelector('option[value="residual"]');
+        if (opt) opt.textContent = 'Residual-' + (p2Short[S.residualPhase2] || 'Multi');
+    }
+    updateResidualLabel();
+    var mainP2 = document.getElementById('select-resid-phase2');
+    if (mainP2) mainP2.addEventListener('change', function () { updateResidualLabel(); });
+    var toolbarP2 = document.getElementById('smc-toolbar-phase2-select');
+    if (toolbarP2) toolbarP2.addEventListener('change', function () { updateResidualLabel(); });
 })();
