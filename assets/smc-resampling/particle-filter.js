@@ -413,19 +413,20 @@ function createPFViz(config) {
             }
         }
 
-        // X-axis labels + ESS
+        // X-axis labels
+        var showESS = config.showESS !== false;  // default true
         ctx.font = '7px -apple-system, sans-serif';
         ctx.textAlign = 'right';
         ctx.textBaseline = 'top';
         ctx.fillStyle = '#999';
         ctx.fillText('t', pL - 3, pB + 1);
-        ctx.fillText('ESS', pL - 3, pB + 10);
+        if (showESS) ctx.fillText('ESS', pL - 3, pB + 10);
         ctx.textAlign = 'center';
         for (var t = 0; t < nCols; t++) {
             var cx = pL + (t + 0.5) * colW;
             ctx.fillStyle = '#999';
             ctx.fillText(t + 1, cx, pB + 1);
-            if (t < history.length) {
+            if (showESS && t < history.length) {
                 var w = history[t].weights;
                 var ess = 1 / w.reduce(function (s, wi) { return s + wi * wi; }, 0);
                 ctx.fillStyle = ess < nP * 0.3 ? '#c0392b' : '#999';
@@ -635,8 +636,8 @@ function createPFViz(config) {
 
         for (var s = 0; s < series.length; s++) {
             var d = series[s];
-            var rowTop = s * rowH + 8;
-            var rowBot = (s + 1) * rowH - 3;
+            var rowTop = s * rowH + 14;  // leave room for title
+            var rowBot = (s + 1) * rowH - 2;
             var pH = rowBot - rowTop;
 
             // Baseline
@@ -676,6 +677,7 @@ function createPFViz(config) {
         rerunBtnId: 'btn-pf-rerun',
         getResampleFn: getResampleFn,
         getSeed: getSeed,
+        showESS: false,  // ESS shown in diagnostic plot instead
         nSteps: 8,
         model: { sigmaProc: 1.0, sigmaObs: 0.5, yObs: 2.0 },
         onRun: function (history) { drawDiagnostics(history); }
