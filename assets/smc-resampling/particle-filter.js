@@ -776,7 +776,8 @@ function createPFViz(config) {
             { name: 'Multinomial', color: S.METHOD_COLORS.multinomial, fn: function (w) { return S.resample.multinomial(w); } },
             { name: 'Stratified', color: S.METHOD_COLORS.stratified, fn: function (w) { return S.resample.stratified(w); } },
             { name: 'Systematic', color: S.METHOD_COLORS.systematic, fn: function (w) { return S.resample.systematic(w); } },
-            { name: 'Residual', color: S.METHOD_COLORS.residual, fn: function (w) { return S.resample.residual(w, S.residualPhase2 || 'multinomial'); } },
+            { name: 'Resid-' + ({multinomial:'Multi',stratified:'Strat',systematic:'Syst'}[S.residualPhase2] || 'Multi'),
+              color: S.METHOD_COLORS.residual, fn: function (w) { return S.resample.residual(w, S.residualPhase2 || 'multinomial'); } },
         ];
 
         // Run K trials per method

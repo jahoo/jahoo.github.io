@@ -318,7 +318,6 @@ window.SMC = (function () {
         sec6: null,
         secBK: null,
         compData: null,
-        counterData: null,
     };
 
 })();

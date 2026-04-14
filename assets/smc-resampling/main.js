@@ -331,7 +331,6 @@
         S.sec5.probes = sysProbes;
         S.drawMethodSection(cvSec5, S.sec5, S.METHOD_COLORS.systematic, { comb: true, strata: true, strataColor: 'rgba(39,174,96,' });
         // Section 5 counterexample
-        // counterexample plot removed — uses head-to-head comparison instead
         // Section 6
         S.drawResidualSection();
         // Branch-kill

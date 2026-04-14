@@ -827,8 +827,6 @@
     }
 
     // ================================================================
-    // (counterexample plot removed — uses head-to-head comparison instead)
-
     // ================================================================
     //  DRAW: ESTIMATOR DISTRIBUTION (KDE)
     // ================================================================
@@ -1160,7 +1158,6 @@
     S.drawMethodSection = drawMethodSection;
     S.drawResidualSection = drawResidualSection;
     S.drawBranchKillSection = drawBranchKillSection;
-    // S.drawCounterexample removed
     S.drawEstimatorDist = drawEstimatorDist;
     S.drawComparisonPanel = drawComparisonPanel;
     S.drawEstDist = drawEstDist;
