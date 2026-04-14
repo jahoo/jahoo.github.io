@@ -93,6 +93,31 @@
   poster = {https://underline.io/events/489/posters/20440/poster/119457-}
 }
 
+@online{chan.r:2026arxiv,
+  title       = {Ensembling {{Language Models}} with {{Sequential Monte Carlo}}},
+  author      = {Chan, Robin Shing Moon and Liu, Tianyu and Kiegeland, Samuel and Pasti, Clemente and Vigly, Jacob Hoover and O'Donnell, Timothy J. and Cotterell, Ryan and Vieira, Tim},
+  year        = {2026},
+  month       = {03},
+  day         = {05},
+  eprint      = {2603.05432},
+  eprinttype  = {arXiv},
+  eprintclass = {cs},
+  arxiv       = {2603.05432},
+  abstract    = {Practitioners have access to an abundance of language models and prompting strategies for solving many language modeling tasks; yet prior work shows that modeling performance is highly sensitive to both choices. Classical machine learning ensembling techniques offer a principled approach: aggregate predictions from multiple sources to achieve better performance than any single one. However, applying ensembling to language models during decoding is challenging: naively aggregating next-token probabilities yields samples from a locally normalized, biased approximation of the generally intractable ensemble distribution over strings. In this work, we introduce a unified framework for composing $K$ language models into $f$-ensemble distributions for a wide range of functions $f\colon\mathbb{R}_{\geq 0}^{K}\to\mathbb{R}_{\geq 0}$. To sample from these distributions, we propose a byte-level sequential Monte Carlo (SMC) algorithm that operates in a shared character space, enabling ensembles of models with mismatching vocabularies and consistent sampling in the limit. We evaluate a family of $f$-ensembles across prompt and model combinations for various structured text generation tasks, highlighting the benefits of alternative aggregation strategies over traditional probability averaging, and showing that better posterior approximations can yield better ensemble performance.},
+  pubstate    = {prepublished}
+}
+
+@online{vigly.j:2025psyarxiv,
+  title      = {Comprehension Effort as the Cost of Inference},
+  author     = {Vigly, Jacob Hoover and Qian, Peng and Sonderegger, Morgan and O'Donnell, Timothy J.},
+  year       = {2025},
+  month      = {06},
+  day        = {18},
+  url        = {https://osf.io/2498w},
+  eprinttype = {psyArXiv},
+  abstract   = {As you read this text, word by word, you build an understanding of its meaning. What cognitive mechanisms underlie this ability?  An influential approach to answering this question comes from viewing comprehension as probabilistic inference over potential interpretations given linguistic input. Motivated within this perspective, a wealth of previous literature in psycholinguistics has focused on an important empirical relationship made precise by surprisal theory (Hale, 2001; Levy, 2008a), the hypothesis that the effort required to process a word scales in its negative log probability, in context. However, the standard derivation of surprisal within the inference framework relies on a crucial assumption: that there is a deterministic relationship between the latent interpretations targeted by inference and the observable input. In this work we propose relaxing this assumption and formalize inference cost directly as the amount of change in probabilistic beliefs. This proposal forms a nontrivial generalization of standard surprisal theory, which provides a more direct connection to algorithmic theories, and naturally explains phenomena where unpredictable input requires little processing effort. To test this framework against surprisal theory, we conduct a self-paced reading time study targeting words with orthographic errors, a specific setting where our approach predicts substantially different patterns. We find that processing effort follows the predictions of belief-update rather than surprisal, in a noisy-channel model of comprehension as inference about intended words. These results demonstrate a clear case where surface surprisal cannot explain human processing cost, and provide further support for models of language comprehension as rational inference.}
+}
+
 @misc{lipkin.b:2025,
   title = {Fast Controlled Generation from Language Models with Adaptive Weighted Rejection Sampling},
   howpublished = {Second Conference on Language Modeling ({{COLM}})},

@@ -12,14 +12,6 @@ published: true
   {% endif %}
 </ul>
 
-### Preprints
-
-{% bibliography --file preprints %}
-
-### Selected publications
-
-<!-- {% bibliography_count -f pubs %} -->
-
 {% bibliography --file pubs %}
 
 -------
