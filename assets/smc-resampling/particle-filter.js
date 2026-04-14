@@ -1,7 +1,8 @@
 // ================================================================
-//  SMC Resampling — degeneracy.js
-//  Weight degeneracy / path degeneracy illustration.
-//  Bootstrap particle filter on a Gaussian random walk model.
+//  SMC Resampling — particle-filter.js
+//  Bootstrap particle filter visualization.
+//  Gaussian random walk model with SIS/SMC toggle,
+//  lineage tracing, and ancestry highlighting.
 //  Self-contained: reads S.PALETTE and S.N from window.SMC.
 // ================================================================
 
@@ -132,9 +133,9 @@
         if (smcLabel) smcLabel.className = 'degen-toggle-label' + (doResample ? ' active' : '');
         if (!captionSpan) return;
         if (doResample) {
-            captionSpan.textContent = 'With resampling (SMC): weights remain diverse across steps.';
+            captionSpan.textContent = 'With resampling (SMC), we avoid weight degeneracy.';
         } else {
-            captionSpan.textContent = 'Without resampling (SIS): weights often become degenerate.';
+            captionSpan.textContent = 'Without resampling (SIS), weights often become degenerate.';
         }
     }
 

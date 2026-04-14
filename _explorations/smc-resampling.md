@@ -10,7 +10,7 @@ js:
   - /assets/smc-resampling/algorithms.js
   - /assets/smc-resampling/drawing.js
   - /assets/smc-resampling/main.js
-  - /assets/smc-resampling/degeneracy.js
+  - /assets/smc-resampling/particle-filter.js
   - /assets/smc-resampling/toolbar.js
 mathjax_macros: >-
   {
@@ -42,7 +42,7 @@ mathjax_macros: >-
 I've been thinking recently about the way in which you do resampling in sequential Monte Carlo (SMC).<label for="mn-intro" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-intro" class="margin-toggle"/><span class="marginnote">This post was written a few years ago with code for visualizations never finished. I've had Claude reimplement the interactive visualizations.</span>
 Like many other things, while there are many asymptotically identical methods, in practice it matters which one you choose. In this post, I'm making some visualizations to explore some standard resampling schemes, and get intuitions about why they work, and why you might choose one over another.
 
-## 1. Why care about different resampling methods?
+## 1. Why and how to resample
 
 SMC relies on importance sampling. So let's start quickly recapping that, and defining some notation. We approximate a target distribution $\target(\cdot)$ with a set of samples from some surrogate proposal distribution, by assigning each sample an importance weight
 $\impwt^\idx$ (proportional to the density ratio of target to proposal). Then the set of weighted particles 
@@ -61,14 +61,13 @@ iteratively propagating and reweighting.
 One main issue with SIS is that it can suffer 
 from **weight degeneracy**: When the weights become concentrated and the budget of $\np$ 
 particles effectively behaves as if it were just one sample, defeating the purpose of 
-having multiple particles.<label for="mn-degen" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-degen" class="margin-toggle"/><span class="marginnote"><canvas id="cv-degeneracy" style="width:100%; height:200px; border:1px solid #ddd; border-radius:3px;"></canvas><br><span class="degen-toggle"><span class="degen-toggle-label" id="degen-label-sis">SIS</span><label class="degen-switch"><input type="checkbox" id="chk-degen-resample"><span class="degen-slider"></span></label><span class="degen-toggle-label" id="degen-label-smc">SMC</span></span> <button id="btn-degen-rerun" style="font-size:0.8em;">Re-run</button> <span id="degen-info" style="font-size:0.8em; margin-left:4px;"></span><br>Particle weight evolution illustration. Bars show normalized weights $\normwt_t^\idx$ at each step when running a bootstrap particle filter on a Gaussian random walk model 
-($\state_t \sim \mathcal{N}(\state_{t-1}, 1)$; $y_t \sim \mathcal{N}(\state_t, 0.25)$; $y_t{=}2$). 
-Click a particle to trace its lineage, or click a timestep label to see all ancestors. <span id="degen-caption"></span></span> This weight degeneracy issue is one key motivation for SMC, which generalizes from SIS by the addition of 
+having multiple particles.<label for="mn-degen" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-degen" class="margin-toggle"/><span class="marginnote"><canvas id="cv-degeneracy" style="width:100%; height:200px; border:1px solid #ddd; border-radius:3px;"></canvas><br><span class="degen-toggle"><span class="degen-toggle-label" id="degen-label-sis">SIS</span><label class="degen-switch"><input type="checkbox" id="chk-degen-resample"><span class="degen-slider"></span></label><span class="degen-toggle-label" id="degen-label-smc">SMC</span></span> <button id="btn-degen-rerun" style="font-size:0.8em;">Re-run</button> <span id="degen-info" style="font-size:0.8em; margin-left:4px;"></span><br>**Particle weight evolution.**<br>Bars show normalized weights $\normwt_t^\idx$ at each step $t$ in a bootstrap particle filter on a Gaussian random walk model ($\state_t \sim \mathcal{N}(\state_{t-1}, 1)$; $y_t \sim \mathcal{N}(\state_t, 0.25)$; $y_t{=}2$). 
+<br>*Click a particle to trace its lineage, or click a timestep label to see all ancestors.*<br><span id="degen-caption"></span></span> This weight degeneracy issue is one key motivation for SMC, which generalizes from SIS by the addition of 
 **resampling** steps. Resampling replaces a current set of particles (potentially with degenerate 
 weights) with a new set of samples with weights all set to be equal, duplicating high-weight particles
 and dropping low-weight ones. This addresses weight degeneracy, but introduces a different problem:
 **path degeneracy**.<label for="sn-pathdegen" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-pathdegen" class="margin-toggle"/><span class="sidenote">I'm getting this terminology for the two kinds of degeneracy from the excellent Naesseth et al. (2019, Chapter 2). They note that *adaptive resampling* can be a partial mitigation for path degeneracy. Only resample when the effective sample size $\text{ESS} = 1/\sum_\idx (\normwt^\idx)^2$ (which ranges from 1 when one particle has all the weight to $\np$ when weights are uniform) drops below a threshold (e.g., $\np/2$), rather than at every step. In this post I want to focus just on what happens when we _do_ resample, rather than on when to resample, but the ESS values in the illustration can give a sense of when resampling would be triggered in an adaptive resampling method.</span> 
-After enough steps, all current particles may trace back to a single ancestor at earlier timesteps [click on a timestep label in the illustration].
+After enough steps, all current particles may trace back to a single ancestor at earlier timesteps [*click on a timestep label in the illustration to see ancestry*].
 
 Adding resampling can keep our particle approximation useful (fixing SIS's weight degeneracy problem), but the method we use to resample can affect both the variance of our estimates and how quickly path diversity is lost. The rest of this post explores several resampling methods, visualizes their differences, to help build intuition for why some would perform better than others.
 
@@ -88,13 +87,15 @@ step adds. We'll look in detail at four standard methods --- **multinomial**, **
 
 ## 2. Inverse transform sampling
 
-The first methods we'll look at share the same core idea of inverse transform sampling. The
-CDF of the weight distribution $\cdf(\idx) = \sum_{j=1}^{\idx} \normwt^j$ partitions $[0,1]$ into
-segments of width $\normwt^\idx$, so it will map a sampled **probe** at position $\probe$ to a selected (resampled) particle $\invcdf(\probe)$.
+The first methods we'll look at share the same core idea of [inverse transform sampling](https://en.wikipedia.org/wiki/Inverse_transform_sampling). We can think of partitioning the unit interval into
+segments of width $\normwt^\idx$, and mapping from 'probe' locations on the unit interval to determine the resampled particles.
+More precisely, the cumulative distribution function (CDF) of the discrete distribution defined by the weights, $\cdf(\idx) = \sum_{j=1}^{\idx} \normwt^j$, defines this partition, and its inverse (the quantile function) it will map a value $\probe\in(0,1]$ to a selected (resampled) particle $\invcdf(\probe)$.
 
-The question is **how to place $\np$ probes** so that particle
+If you haven't heard of inverse transform sampling before, this is actually a nice way to build the intuition. Think about **how to randomly place $\np$ probes** so that any particle
 $i$ gets selected $\np\normwt^\idx$ times on average. Try clicking
 on the CDF plot at right to place probes, and consider what strategy would you use for placing $\np$ probes, in order to have the distribution of resampled particles recreate the weight histogram on average.
+
+**Drag bars** on left to change weights, or choose preset from dropdown. **Click on plot** to place 'probes.'
 
 <canvas id="cv-sec2" class="panel"></canvas>
 
@@ -126,9 +127,9 @@ on the CDF plot at right to place probes, and consider what strategy would you u
 
 ## 3. Multinomial, stratified, and systematic resampling
 
-You may have found that the most natural idea is to use $\np$ independent draws from the uniform distribution.<label for="sn-pit" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-pit" class="margin-toggle"/><span class="sidenote">This is [inverse transform sampling](https://en.wikipedia.org/wiki/Inverse_transform_sampling). A little while ago, I made another [post exploring density transformations](/2022/09/02/transform-pdf.html) in the continuous case. Here we are doing this in a discrete setting: Each uniform-distributed independent probe $\probe_k$ is transformed through the discrete quantile function $\invcdf$ to produce a sample from the particle-weight distribution, just as passing a uniform draw through a continuous inverse CDF yields a draw from the corresponding distribution.</span>
-This works, and leads to our first algorithm, multinomial resampling.
-We then see two other strategies that reduce variance by removing independence and spreading probes more evenly, resulting in lower variance.
+You may have found that the most natural idea is to use $\np$ independent draws from the uniform distribution.<label for="sn-pit" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-pit" class="margin-toggle"/><span class="sidenote">That is, inverse transform sampling. A little while ago, I made another [post exploring density transformations](/2022/09/02/transform-pdf.html) in the continuous case. Here we are doing this in a discrete setting: Each uniform-distributed independent probe $\probe_k$ is transformed through the discrete quantile function $\invcdf$ to produce a sample from the particle-weight distribution, just as passing a uniform draw through a continuous inverse CDF yields a draw from the corresponding distribution.</span>
+This works, and leads to our first algorithm, **multinomial resampling**.
+We will then look at two other strategies that reduce variance by removing independence and spreading probes more evenly for lower variance.
 
 ### Multinomial resampling
 
@@ -148,7 +149,7 @@ indices = np.searchsorted(cumulative_sum, positions)
 
 Equivalent to `np.random.choice(N, size=N, replace=True, p=weights)`.
 {:.small-note}
-
+<!-- 
 <details markdown="1" style="font-size:0.85em; color:#555; margin:0.3em 0 0.8em;">
 <summary style="cursor:pointer; color:#444;"><code>searchsorted</code> does inverse-CDF lookup</summary>
 
@@ -170,10 +171,9 @@ while i < N:
 
 Both pointers only advance forward, so this is $O(\np)$.
 
-</details>
+</details> -->
 
-Because the draws are independent, probes can cluster and leave
-gaps. Click **Resample once** to see the counts fluctuate; **Run
+Click **Resample once** to see the counts fluctuate; **Run
 $K$ trials** to see means settle toward the weights.
 
 <canvas id="cv-sec3" class="panel"></canvas>
@@ -212,8 +212,8 @@ $\E[\cnt^\idx] = \np\,\normwt^\idx$. ∎
 
 ### Stratified resampling
 
-Multinomial probes can cluster and leave gaps. Stratified
-resampling spreads them: partition $[0,1]$ into $\np$ equal
+You may have noticed that multinomial probes can cluster and leave gaps.
+Stratified resampling spreads them more evenly: Partition $[0,1]$ into $\np$ equal
 **strata** $\bigl(\frac{k-1}{\np},\, \frac{k}{\np}\bigr)_{k=1}^{\np}$
 and draw one independent uniform within each.
 

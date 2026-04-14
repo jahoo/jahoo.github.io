@@ -169,13 +169,13 @@ window.SMC = (function () {
             values: () => Array.from({length: N}, (_, i) => (i + 1) / N),
         },
         indicator: {
-            label: () => `f(\u03BEi) = 1{i=${indicatorK + 1}}`,
-            latexLabel: () => `$f(\\xi^i)=\\mathbf{1}\\{i=${indicatorK + 1}\\}$`,
+            label: () => `f(\u03BEi) = 1[i=${indicatorK + 1}]`,
+            latexLabel: () => `$f(\\xi^i)=\\mathbf{1}[i=${indicatorK + 1}]$`,
             values: () => Array.from({length: N}, (_, i) => i === indicatorK ? 1 : 0),
         },
         tail: {
-            label: 'f(\u03BEi) = 1{i\u22655}',
-            latexLabel: '$f(\\xi^i)=\\mathbf{1}\\{i\\geq 5\\}$',
+            label: 'f(\u03BEi) = 1[i\u22655]',
+            latexLabel: '$f(\\xi^i)=\\mathbf{1}[i\\geq 5]$',
             values: () => Array.from({length: N}, (_, i) => i >= 4 ? 1 : 0),
         },
         square: {
@@ -184,8 +184,8 @@ window.SMC = (function () {
             values: () => Array.from({length: N}, (_, i) => ((i + 1) / N) ** 2),
         },
         evenodd: {
-            label: 'f(\u03BEi) = 1{i even}',
-            latexLabel: '$f(\\xi^i)=\\mathbf{1}\\{i\\text{ even}\\}$',
+            label: 'f(\u03BEi) = 1[i even]',
+            latexLabel: '$f(\\xi^i)=\\mathbf{1}[i\\text{ even}]$',
             values: () => Array.from({length: N}, (_, i) => i % 2 === 0 ? 1 : 0),
         },
     };

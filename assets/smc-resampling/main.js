@@ -50,7 +50,7 @@
     var cvSec6 = document.getElementById('cv-sec6');
     var cvBK   = document.getElementById('cv-bk');
 
-    // Degeneracy illustration is in degeneracy.js
+    // Particle filter illustration is in particle-filter.js
 
     // ================================================================
     //  SECTION 2 — DRAWING
@@ -711,10 +711,10 @@
     // Test function selectors — populate all .testfn-select elements and sync them
     var testFnOptions = [
         { value: 'position', label: 'i/N  (mean position)' },
-        { value: 'indicator', label: '1{i=k}  (particle count)' },
-        { value: 'tail', label: '1{i\u22655}  (upper tail)' },
+        { value: 'indicator', label: '1[i=4]  (single particle)' },
+        { value: 'tail', label: '1[i\u22655]  (upper tail)' },
         { value: 'square', label: '(i/N)\u00B2  (squared position)' },
-        { value: 'evenodd', label: '1{i even}  (even/odd class)' },
+        { value: 'evenodd', label: '1[i even]  (even/odd class)' },
     ];
     var allTestFnSelects = document.querySelectorAll('.testfn-select');
     allTestFnSelects.forEach(function (sel) {
