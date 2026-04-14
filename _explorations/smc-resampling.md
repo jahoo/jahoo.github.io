@@ -460,10 +460,12 @@ not the only options.
 ### Branch-kill resampling
 
 The methods above all produce exactly $\np$ resampled particles.
-Branch-kill relaxes this: each particle $\idx$ independently gets
+Branch-kill relaxes this: Each particle $\idx$ independently gets
 $\lfloor \np\normwt^\idx \rfloor$ deterministic copies plus one bonus
 copy with probability $\np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor$.
 No shared CDF or residual phase needed.
+The total $\sum_\idx \cnt^\idx$ fluctuates around $\np$ rather than
+equalling it exactly.
 
 ```python
 # For each particle independently:
@@ -474,9 +476,7 @@ bonus = (u >= 1 - p_bonus)    # inverse CDF: right of step → bonus
 num_copies += bonus # total may differ from N
 ```
 
-The total $\sum_\idx \cnt^\idx$ fluctuates around $\np$ rather than
-equalling it exactly. The per-particle independence makes
-branch-kill naturally suited to parallel hardware.
+
 
 <div class="proof">
 <span class="proof-label">Unbiasedness.</span>
@@ -567,6 +567,8 @@ Weight update $\normwt_t^\idx \propto p(y_t \mid \state_t^\idx)$ (after resampli
 ### Comparing methods over many runs
 
 To see the typical behavior rather than a single random run, we can see what happens over many runs of the same method. The plot below shows path degeneracy (unique ancestors at t=1) over $K$ runs for all four methods. You can also the number of particles $\np$ (which we've fixed at $8$ for everything above).
+
+We should see multinomial show worse path degeneracy than the lower-variance alternatives.
 
 <div class="control-box">
 <div class="control-row">
