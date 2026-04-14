@@ -939,4 +939,9 @@ function createPFViz(config) {
     btnRun.addEventListener('click', triggerRun);
     if (sliderN) sliderN.addEventListener('change', triggerRun);
     if (sliderK) sliderK.addEventListener('change', triggerRun);
+    // Re-run when residual phase-2 changes (affects the residual method's results)
+    var mainP2 = document.getElementById('select-resid-phase2');
+    var toolbarP2 = document.getElementById('smc-toolbar-phase2-select');
+    if (mainP2) mainP2.addEventListener('change', triggerRun);
+    if (toolbarP2) toolbarP2.addEventListener('change', triggerRun);
 })();
