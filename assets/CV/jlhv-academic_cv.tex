@@ -63,6 +63,22 @@ url=false,%isbn=false,eprint=false%don't print the arxiv eprint info, since I'll
 \plauthorname[Jacob]{Hoover}
 \plauthorname[Jacob Hoover]{Vigly}
 \plauthorname[Jacob]{Vigly}
+% Suppress redundant links:
+% 1. arXiv DOIs + URLs (the eprint field already links to the paper)
+% 2. URLs when a DOI is present (DOI is the persistent link)
+\DeclareSourcemap{
+  \maps[datatype=bibtex]{
+    \map{
+      \step[fieldsource=doi, match={10.48550/arXiv}, final]
+      \step[fieldset=doi, null]
+      \step[fieldset=url, null]
+    }
+    \map{
+      \step[fieldsource=doi, final]
+      \step[fieldset=url, null]
+    }
+  }
+}
 \addbibresource{/Users/v/Library/texmf/bibtex/bib/all-biblatex.bib}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
