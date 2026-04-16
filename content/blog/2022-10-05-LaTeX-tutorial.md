@@ -1,0 +1,11 @@
+---
+title: LaTeX for Linguistics tutorial
+date: 2022-10-05
+author: Jacob Louis Hoover
+tags: [note]
+---
+
+I'm leading a short workshop on '$\LaTeX{}$ for Linguistics' today. Resources are 
+
+- in an [Overleaf document here](https://www.overleaf.com/read/qvdscvjbtjxr)
+- and [on GitHub here](https://github.com/postylem/latex-tutorial)

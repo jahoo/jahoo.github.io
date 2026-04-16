@@ -2,6 +2,7 @@
 title: Resampling in Sequential Monte Carlo
 date: 2026-04-08
 author: Jacob Hoover Vigly
+tags: [exploration]
 js:
   - smc-resampling
 css:

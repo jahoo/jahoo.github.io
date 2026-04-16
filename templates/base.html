@@ -21,11 +21,13 @@ $endif$
     src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
 
   <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/post.css">
+  <link rel="stylesheet" href="/assets/css/site.css">
 $for(css)$
   <link rel="stylesheet" href="/assets/css/$css$">
 $endfor$
 </head>
-<body>
+<body class="page-style-$if(page-style)$$page-style$$else$post$endif$">
 
   <header class="site-header">
     <div class="wrapper">
@@ -38,7 +40,7 @@ $endfor$
     </div>
   </header>
 
-  <main class="page-content">
+  <main class="page-content$if(no-sidenotes)$ no-sidenotes$endif$">
     <div class="wrapper">
       <article>
 $if(title)$
@@ -49,6 +51,9 @@ $if(date)$
             <time>$date$</time>
 $if(author)$
             · $author$
+$endif$
+$if(tags)$
+            · <span class="post-tags">$for(tags)$$tags$$sep$, $endfor$</span>
 $endif$
           </p>
 $endif$
@@ -63,9 +68,7 @@ $body$
   </main>
 
   <footer class="site-footer">
-    <div class="wrapper">
-      <span>&copy; $author$</span>
-    </div>
+    <div class="wrapper"></div>
   </footer>
 
   <script src="/assets/js/collapse.js"></script>

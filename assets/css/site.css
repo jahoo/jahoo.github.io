@@ -1,0 +1,262 @@
+/* Site style — Linux Biolinum/Libertine, wider content, no sidenote column.
+   Active when body has class "page-style-site". */
+
+/* ── Linux Biolinum @font-face ─────────────────────── */
+
+@font-face {
+  font-family: 'Linux Biolinum';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Linux Biolinum Regular'), url('../fonts/LinBiolinum/LinBiolinum_R.woff') format('woff');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Linux Biolinum';
+  font-style: italic;
+  font-weight: normal;
+  src: local('Linux Biolinum Italic'), url('../fonts/LinBiolinum/LinBiolinum_RI.woff') format('woff');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Linux Biolinum';
+  font-style: normal;
+  font-weight: bold;
+  src: local('Linux Biolinum Bold'), url('../fonts/LinBiolinum/LinBiolinum_RB.woff') format('woff');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Linux Biolinum Outline';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Linux Biolinum Outline Regular'), url('../fonts/LinBiolinum/LinBiolinum_aU.woff') format('woff');
+  font-display: swap;
+}
+
+/* ── Linux Libertine @font-face ────────────────────── */
+
+@font-face {
+  font-family: 'Linux Libertine';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Linux Libertine'), url('../fonts/LinLibertine/LinLibertine_Re-4.1_.8_.woff') format('woff');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Linux Libertine';
+  font-style: italic;
+  font-weight: normal;
+  src: local('Linux Libertine Italic'), url('../fonts/LinLibertine/LinLibertine_It-4.0_.3_.woff') format('woff');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Linux Libertine';
+  font-style: normal;
+  font-weight: bold;
+  src: local('Linux Libertine Bold'), url('../fonts/LinLibertine/LinLibertine_Bd-4.0_.2_.woff') format('woff');
+  font-display: swap;
+}
+
+/* ── Body styling ──────────────────────────────────── */
+
+body.page-style-site {
+  font-family: 'Linux Biolinum', 'Computer Modern Serif', Times, serif;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: #111;
+}
+
+/* ── Nav overrides for site style ──────────────────── */
+
+body.page-style-site .site-header {
+  border-top: 5px solid #424242;
+}
+body.page-style-site .site-title {
+  font-family: 'Linux Biolinum Outline';
+  font-size: 2.75rem;
+  letter-spacing: -3px;
+  color: #828282;
+  line-height: 1.5;
+}
+body.page-style-site .site-title:hover {
+  color: #424242;
+}
+body.page-style-site .site-nav {
+  font-family: 'Linux Libertine', 'Computer Modern Concrete', Times, serif;
+  font-size: 1.5rem;
+  line-height: 1.5;
+}
+body.page-style-site .site-nav .page-link {
+  font-family: inherit;
+  font-size: inherit;
+  color: #424242;
+  text-transform: none;
+}
+body.page-style-site .site-nav .page-link:hover {
+  color: #000;
+}
+
+/* ── Content width: 800px max ──────────────────────── */
+
+body.page-style-site .page-content {
+  padding: 2rem 2rem 4rem 2rem;
+}
+
+body.page-style-site .post-content > p,
+body.page-style-site .post-content > ul,
+body.page-style-site .post-content > ol,
+body.page-style-site .post-content > dl,
+body.page-style-site .post-content > blockquote,
+body.page-style-site .post-content > pre,
+body.page-style-site .post-content > figure,
+body.page-style-site .post-content > table,
+body.page-style-site .post-content > header,
+body.page-style-site .post-content > div.sourceCode,
+body.page-style-site .post-content > div.highlighter-rouge,
+body.page-style-site .post-content > mjx-container[display="true"],
+body.page-style-site .post-content section > p,
+body.page-style-site .post-content section > ul,
+body.page-style-site .post-content section > ol,
+body.page-style-site .post-content section > dl,
+body.page-style-site .post-content section > blockquote,
+body.page-style-site .post-content section > pre,
+body.page-style-site .post-content section > figure,
+body.page-style-site .post-content section > table,
+body.page-style-site .post-content section > div.sourceCode,
+body.page-style-site .post-content section > div.highlighter-rouge,
+body.page-style-site .post-content section > mjx-container[display="true"],
+body.page-style-site .post-content h1,
+body.page-style-site .post-content h2,
+body.page-style-site .post-content h3,
+body.page-style-site .post-content h4,
+body.page-style-site .post-content h5,
+body.page-style-site .post-content h6 {
+  width: 100%;
+  max-width: 800px;
+}
+
+/* ── Code block widths ─────────────────────────────── */
+
+body.page-style-site .post-content > pre,
+body.page-style-site .post-content > div.sourceCode,
+body.page-style-site .post-content > div.highlighter-rouge,
+body.page-style-site .post-content section > pre,
+body.page-style-site .post-content section > div.sourceCode,
+body.page-style-site .post-content section > div.highlighter-rouge {
+  width: 100%;
+  max-width: 800px;
+}
+body.page-style-site .post-content div.sourceCode pre,
+body.page-style-site .post-content div.highlighter-rouge pre {
+  width: 100%;
+}
+
+/* ── Title block ───────────────────────────────────── */
+
+body.page-style-site .post-header {
+  width: 100% !important;
+  max-width: 800px;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--s-border);
+}
+body.page-style-site .post-title {
+  font-family: 'Linux Libertine', 'Computer Modern Concrete', Times, serif;
+  font-size: 2.25rem;
+  font-weight: 400;
+  color: #424242;
+  letter-spacing: -0.1rem;
+  margin: 0 0 0.2rem;
+}
+body.page-style-site .post-meta {
+  font-family: 'Linux Biolinum', 'Computer Modern Serif', Times, serif;
+  font-size: 15.75px;
+  color: #828282;
+  margin: 0.15rem 0;
+}
+
+/* ── Heading typography ────────────────────────────── */
+
+body.page-style-site .post-content h1,
+body.page-style-site .post-content h2,
+body.page-style-site .post-content h3,
+body.page-style-site .post-content h4,
+body.page-style-site .post-content h5,
+body.page-style-site .post-content h6 {
+  font-family: 'Linux Libertine', 'Computer Modern Serif', Times, serif;
+  font-weight: 400;
+  color: #424242;
+  letter-spacing: -0.1rem;
+  line-height: 1.2;
+}
+
+body.page-style-site .post-content h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+body.page-style-site .post-content h2 {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin-top: 1.5rem;
+}
+body.page-style-site .post-content h3 {
+  font-size: 1.625rem;
+  margin-top: 1.5rem;
+}
+body.page-style-site .post-content h4 {
+  font-size: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+/* ── Links ─────────────────────────────────────────── */
+
+body.page-style-site .post-content a {
+  color: #2a7ae2;
+  text-decoration: none;
+}
+body.page-style-site .post-content a:hover {
+  color: #0d3568;
+}
+
+/* ── Sidenotes: not used in site style, collapse inline ── */
+
+body.page-style-site .sidenote,
+body.page-style-site .marginnote {
+  display: none;
+}
+body.page-style-site input.margin-toggle { display: none; }
+body.page-style-site label.margin-toggle:not(.sidenote-number) {
+  display: inline;
+  cursor: pointer;
+  color: var(--s-accent);
+  font-size: 0.75rem;
+  vertical-align: super;
+  line-height: 0;
+}
+body.page-style-site .sidenote-number {
+  cursor: pointer;
+  color: var(--s-accent);
+}
+body.page-style-site .margin-toggle:checked + .sidenote,
+body.page-style-site .margin-toggle:checked + .marginnote {
+  display: block;
+  float: none;
+  clear: both;
+  width: 100%;
+  max-width: 800px;
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
+  text-indent: 0;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--s-border);
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* ── Footer ────────────────────────────────────────── */
+
+body.page-style-site .site-footer {
+  font-family: 'Linux Biolinum', 'Computer Modern Serif', Times, serif;
+}

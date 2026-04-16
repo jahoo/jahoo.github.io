@@ -28,6 +28,56 @@ mathjax-macros: assets/my-topic/macros.json     # custom LaTeX macros for MathJa
 
 All fields except `title` are optional. A simple blog post needs only `title` and `date`.
 
+### Page styles
+
+Pages use one of two visual styles, controlled by `page-style`:
+
+- **Default (omit `page-style`)** — et-book Tufte style with sidenotes, 60% content width. Use for blog posts and explorations.
+- **`page-style: site`** — Linux Biolinum/Libertine fonts, wider content column (800px). Use for the index, listing, publications, and other site-chrome pages.
+
+The template adds `page-style-{value}` as a class on `<body>`, so all visual differences are CSS-only.
+
+### Highlighted posts
+
+To highlight a post in the blog listing (bold title), add:
+
+```yaml
+highlighted: true
+```
+
+Posts tagged `paper` or `dissertation` typically get this.
+
+### Tags
+
+Preserve tags for categorization. Use inline list format:
+
+```yaml
+tags: [note, paper]
+```
+
+### External content
+
+Not all content is rendered by Pandoc. Some pages are standalone HTML, pre-rendered notebooks, or frozen output from another tool. Every piece of listable content has a `.md` stub in `content/` — even if the actual content lives elsewhere. The `external` field tells the listing generator where to link:
+
+```yaml
+# Standalone HTML exploration
+external: /explorations/interactive-divergence-fitting.html
+
+# Frozen Klipse post (rendered by Jekyll, served as static HTML)
+external: /assets/frozen/klipse-clojure.html
+```
+
+The Pandoc-rendered stub serves as a landing page (brief description + link). Source files for frozen content are kept in `assets/frozen/` for future re-rendering.
+
+Content types and how they work:
+
+| Type | Rendered by | `external` field? | Example |
+|------|------------|-------------------|---------|
+| Normal post/exploration | Pandoc | no | smc-resampling |
+| Standalone HTML | not rendered | yes — points to HTML | interactive-divergence-fitting |
+| Frozen post | Jekyll/other tool | yes — points to frozen HTML | klipse-clojure |
+| Notebook (iframe) | Pandoc wraps iframe | no — Pandoc page is the landing | rejection-sampling-expo |
+
 ## Math
 
 Write LaTeX math directly — Pandoc handles it correctly (no underscore bugs):
@@ -199,10 +249,20 @@ Pandoc's `--section-divs` wraps each heading and its content in a `<section>` el
 
 Hash links (e.g., `#section-name`) auto-uncollapse ancestor sections when navigated to.
 
+## Blog listing
+
+The listing page at `/posts.html` is auto-generated from post front matter by `scripts/build-index.lua`. It runs automatically as part of `make`. To regenerate manually:
+
+```bash
+pandoc lua scripts/build-index.lua
+```
+
+The script scans `content/posts/` and `content/explorations/`, reads front matter, and writes `_generated/posts.md`.
+
 ## Build commands
 
 ```bash
-make            # full parallel build (content + JS + assets)
+make            # full parallel build (generate listing + content + JS + assets)
 make serve      # dev server with live reload
 make content    # rebuild only markdown → HTML
 make js         # rebundle only JS

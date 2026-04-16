@@ -1,0 +1,183 @@
+-- scripts/build-index.lua
+-- Blog listing generator: scans content posts and explorations,
+-- emits _generated/posts.md with a formatted listing page.
+-- Run via: pandoc lua scripts/build-index.lua
+
+local system = pandoc.system
+
+------------------------------------------------------------
+-- Minimal YAML front matter parser
+------------------------------------------------------------
+
+-- Strip surrounding quotes from a string value
+local function unquote(s)
+  if not s then return s end
+  s = s:match("^%s*(.-)%s*$") -- trim
+  local q = s:sub(1,1)
+  if (q == '"' or q == "'") and s:sub(-1) == q then
+    return s:sub(2, -2)
+  end
+  return s
+end
+
+-- Parse a scalar value (string, boolean, number, inline list)
+local function parse_value(raw)
+  if not raw then return nil end
+  raw = raw:match("^%s*(.-)%s*$") -- trim
+
+  -- boolean
+  if raw == "true" then return true end
+  if raw == "false" then return false end
+
+  -- inline list: [item1, item2]
+  if raw:sub(1,1) == "[" and raw:sub(-1) == "]" then
+    local items = {}
+    for item in raw:sub(2,-2):gmatch("[^,]+") do
+      items[#items+1] = unquote(item)
+    end
+    return items
+  end
+
+  -- number
+  local num = tonumber(raw)
+  if num then return num end
+
+  -- string (possibly quoted)
+  return unquote(raw)
+end
+
+-- Parse YAML front matter from file content string.
+-- Returns a table of key-value pairs, or nil if no front matter found.
+local function parse_front_matter(text)
+  -- Must start with ---
+  if not text:match("^%-%-%-\n") then return nil end
+
+  -- Extract block between first --- and next ---
+  local block = text:match("^%-%-%-\n(.-)%-%-%-")
+  if not block then return nil end
+
+  local meta = {}
+  local current_key = nil  -- for multi-line list values
+
+  for line in (block .. "\n"):gmatch("(.-)\n") do
+    -- Indented list item (continuation of previous key)
+    local indent_item = line:match("^%s+%-%s+(.*)")
+    if indent_item and current_key then
+      if type(meta[current_key]) ~= "table" then
+        meta[current_key] = {}
+      end
+      meta[current_key][#meta[current_key]+1] = unquote(indent_item)
+    else
+      -- Key: value line
+      local key, val = line:match("^([%w_%-]+):%s*(.*)")
+      if key then
+        current_key = key
+        if val == "" then
+          -- Value might follow as indented list
+          meta[key] = {}
+        else
+          meta[key] = parse_value(val)
+        end
+      else
+        current_key = nil
+      end
+    end
+  end
+
+  return meta
+end
+
+------------------------------------------------------------
+-- Collect posts from a content directory
+------------------------------------------------------------
+
+-- Scan a directory for .md files and extract front matter.
+-- url_prefix: e.g. "/posts" or "/explorations"
+local function collect_entries(dir, url_prefix)
+  local entries = {}
+  local ok, files = pcall(system.list_directory, dir)
+  if not ok then return entries end
+
+  for _, name in ipairs(files) do
+    if name:match("%.md$") then
+      local path = dir .. "/" .. name
+      local text = system.read_file(path)
+      if text then
+        local meta = parse_front_matter(text)
+        if meta and meta.published ~= false then
+          local slug = name:gsub("%.md$", "")
+          local entry = {
+            title = meta.title or slug,
+            date  = meta.date or "0000-00-00",
+            tags  = meta.tags or {},
+            highlighted = meta.highlighted or false,
+            external = meta.external or nil,
+            url   = url_prefix .. "/" .. slug .. "/",
+          }
+          -- If external, link to external URL instead
+          if entry.external then
+            entry.url = entry.external
+          end
+          entries[#entries+1] = entry
+        end
+      end
+    end
+  end
+  return entries
+end
+
+------------------------------------------------------------
+-- Main
+------------------------------------------------------------
+
+local entries = {}
+
+-- Collect from content/blog/
+local blog = collect_entries("content/blog", "/blog")
+for _, e in ipairs(blog) do entries[#entries+1] = e end
+
+-- Sort by date descending
+table.sort(entries, function(a, b) return a.date > b.date end)
+
+-- Build output as raw HTML for richer formatting
+local lines = {}
+lines[#lines+1] = "---"
+lines[#lines+1] = "title: blog"
+lines[#lines+1] = "---"
+lines[#lines+1] = ""
+lines[#lines+1] = "```{=html}"
+lines[#lines+1] = '<ul class="post-list">'
+
+for _, e in ipairs(entries) do
+  local cls = e.highlighted and "post-link-highlighted" or "post-link"
+  lines[#lines+1] = "  <li>"
+  lines[#lines+1] = string.format('    <h3><a class="%s" href="%s">%s</a></h3>', cls, e.url, e.title)
+  -- Format date nicely: YYYY-MM-DD → "D Mon YYYY"
+  local y, m, d = e.date:match("(%d+)-(%d+)-(%d+)")
+  local months = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"}
+  local datestr = e.date
+  if y and m and d then
+    datestr = tonumber(d) .. " " .. (months[tonumber(m)] or m) .. " " .. y
+  end
+  local meta_parts = { datestr }
+  if e.tags and #e.tags > 0 then
+    meta_parts[#meta_parts+1] = '<span class="post-tags">' .. table.concat(e.tags, ", ") .. '</span>'
+  end
+  lines[#lines+1] = string.format('    <span class="post-meta">%s</span>', table.concat(meta_parts, " · "))
+  lines[#lines+1] = "  </li>"
+end
+
+lines[#lines+1] = "</ul>"
+lines[#lines+1] = "```"
+lines[#lines+1] = ""
+
+local output = table.concat(lines, "\n")
+
+-- Ensure _generated/ directory exists
+pcall(system.make_directory, "_generated", true)
+
+-- Write output
+local outpath = "_generated/blog.md"
+system.write_file(outpath, output)
+
+io.write("Generated: " .. outpath .. " (" .. #entries .. " entries)\n")

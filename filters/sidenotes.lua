@@ -154,6 +154,12 @@ local function coerceToInline(blocks)
     accumulateInlines(inlines, blocks[i])
   end
 
+  -- Para blocks append two LineBreaks as paragraph separators; drop any
+  -- trailing ones so sidenotes don't end with stray <br><br>.
+  while #inlines > 0 and inlines[#inlines].tag == "LineBreak" do
+    inlines[#inlines] = nil
+  end
+
   return inlines
 end
 

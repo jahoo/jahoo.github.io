@@ -1,5 +1,5 @@
-/* Base styles — Tufte-inspired layout for Pandoc + Make site.
-   Adapted from explorations-base.css for the new template structure. */
+/* Base styles — shared chrome (nav, footer, layout, callouts, code).
+   Loaded by all pages regardless of page-style. */
 
 @font-face {
   font-family: "et-book";
@@ -24,7 +24,7 @@
 }
 
 :root {
-  --s-bg: #fefefe;
+  --s-bg: #fffffc;
   --s-surface: #f6f8fa;
   --s-card: #fff;
   --s-card-hover: #f0efe8;
@@ -45,10 +45,6 @@
 
 body {
   margin: 0;
-  font-family: var(--s-body);
-  font-size: 1.1rem;
-  line-height: 1.7;
-  color: var(--s-text);
   background: var(--s-bg);
 }
 
@@ -104,353 +100,7 @@ body {
   overflow-x: clip;
 }
 
-/* Content elements: leave right margin for sidenotes */
-.post-content > p,
-.post-content > ul, .post-content > ol, .post-content > dl,
-.post-content > blockquote,
-.post-content > pre, .post-content > figure,
-.post-content > table,
-.post-content > header,
-.post-content > div.sourceCode, .post-content > div.highlighter-rouge,
-.post-content > mjx-container[display="true"],
-.post-content section > p,
-.post-content section > ul, .post-content section > ol, .post-content section > dl,
-.post-content section > blockquote,
-.post-content section > pre, .post-content section > figure,
-.post-content section > table,
-.post-content section > div.sourceCode, .post-content section > div.highlighter-rouge,
-.post-content section > mjx-container[display="true"],
-.post-content h1, .post-content h2, .post-content h3,
-.post-content h4, .post-content h5, .post-content h6 {
-  width: 60%;
-}
-
-/* ── Title block ───────────────────────────────────── */
-
-.post-header {
-  width: 100% !important;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--s-border);
-}
-.post-title {
-  font-size: 2.4rem;
-  font-weight: 400;
-  margin: 0 0 0.2rem;
-}
-.post-meta {
-  font-size: 0.9rem;
-  color: var(--s-text-dim);
-  margin: 0.15rem 0;
-}
-
-#title-block-header {
-  width: 100% !important;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--s-border);
-}
-#title-block-header .title { margin-bottom: 0.2rem; }
-#title-block-header .subtitle {
-  font-size: 1.2rem;
-  color: var(--s-text-dim);
-  margin-top: 0;
-}
-#title-block-header .author,
-#title-block-header .date {
-  font-size: 0.9rem;
-  color: var(--s-text-dim);
-  margin: 0.15rem 0;
-}
-.exploration-meta {
-  font-size: 0.9rem;
-  color: var(--s-text-dim);
-  margin-bottom: 1rem;
-}
-#title-block-header .abstract {
-  margin-top: 1rem;
-  font-size: 0.85rem;
-  line-height: 1.35;
-}
-#title-block-header .abstract-title {
-  font-weight: 600;
-  margin-bottom: 0.3rem;
-}
-
-/* ── Sidenotes (Tufte-style) ────────────────────────── */
-
-.sidenote, .marginnote {
-  float: right;
-  clear: right;
-  margin-right: -62%;
-  width: 55%;
-  margin-top: 0.3rem;
-  margin-bottom: 1rem;
-  font-size: 0.85rem;
-  line-height: 1.4;
-  color: #555;
-}
-
-.sidenote {
-  padding-top: 0.1rem;
-  text-indent: -0.8em;
-  padding-left: 0.8em;
-}
-.marginnote {
-  padding-left: 0.8em;
-}
-
-/* Block-level marginnotes (from ::: {.marginnote} fenced divs) live inside
-   <section> which is wider than <p>. Override percentages to match the
-   content column width so they land in the margin, not off-screen. */
-div.marginnote {
-  width: 33%;
-  margin-right: 3%;
-}
-
-/* Sidenote counter */
-.post-content { counter-reset: sidenote-counter; }
-
-.sidenote-number { counter-increment: sidenote-counter; }
-.sidenote-number::after {
-  content: counter(sidenote-counter);
-  font-size: 0.75rem;
-  vertical-align: super;
-  line-height: 0;
-}
-/* Hanging number at the start of the sidenote */
-.sidenote::before {
-  content: counter(sidenote-counter) "\2002";
-  font-size: 0.75rem;
-  vertical-align: super;
-  line-height: 0;
-  color: #aaa;
-}
-
-/* Sidenote numbers (in main text and in margin) */
-.sidenote-number,
-.sidenote > sup {
-  font-size: 0.75rem;
-  vertical-align: super;
-  line-height: 0;
-  cursor: default;
-  color: #aaa;
-}
-
-/* Margin note toggle symbol */
-label.margin-toggle:not(.sidenote-number) {
-  display: none;
-  font-size: 0.75rem;
-  vertical-align: super;
-  line-height: 0;
-  cursor: pointer;
-}
-
-/* Always hide the checkbox */
-input.margin-toggle { display: none; }
-
-/* ── Responsive: narrow mode at <= 800px ── */
-
-@media (max-width: 800px) {
-  .site-header {
-    padding: 0.8rem 1rem;
-  }
-  .page-content {
-    padding: 2rem 25px 4rem 25px;
-  }
-  .post-content > p, .post-content > ul,
-  .post-content > ol, .post-content > dl,
-  .post-content > blockquote, .post-content > pre,
-  .post-content > figure, .post-content > table,
-  .post-content > header, .post-content > div.sourceCode, .post-content > div.highlighter-rouge,
-  .post-content > mjx-container[display="true"],
-  .post-content section > p, .post-content section > ul,
-  .post-content section > ol, .post-content section > dl,
-  .post-content section > blockquote, .post-content section > pre,
-  .post-content section > figure, .post-content section > table,
-  .post-content section > div.sourceCode, .post-content section > div.highlighter-rouge,
-  .post-content section > mjx-container[display="true"],
-  .post-content h1, .post-content h2, .post-content h3,
-  .post-content h4, .post-content h5, .post-content h6 {
-    width: 100%;
-  }
-  /* Sidenotes: hidden by default, expand inline on click */
-  .post-content .sidenote,
-  .post-content .marginnote {
-    display: none;
-  }
-  .post-content .margin-toggle:checked + .sidenote,
-  .post-content .margin-toggle:checked + .marginnote {
-    display: block;
-    float: none;
-    clear: both;
-    width: 100%;
-    margin: 0.5rem 0;
-    padding: 0.5rem 0.75rem;
-    text-indent: 0;
-    padding-left: 0.75rem;
-    border-left: 2px solid var(--s-border);
-    font-size: 0.9rem;
-  }
-  .post-content .sidenote > sup {
-    display: none;
-  }
-  .post-content label.margin-toggle:not(.sidenote-number) {
-    display: inline;
-    cursor: pointer;
-    color: var(--s-accent);
-    font-size: 0.75rem;
-    vertical-align: super;
-    line-height: 0;
-  }
-  .post-content .sidenote-number {
-    cursor: pointer;
-    color: var(--s-accent);
-  }
-}
-
-/* ── No-sidenotes mode ── */
-
-.page-content.no-sidenotes {
-  padding: 2rem 2rem 4rem 2rem;
-}
-.no-sidenotes .post-content > p, .no-sidenotes .post-content > ul,
-.no-sidenotes .post-content > ol, .no-sidenotes .post-content > dl,
-.no-sidenotes .post-content > blockquote, .no-sidenotes .post-content > pre,
-.no-sidenotes .post-content > figure, .no-sidenotes .post-content > table,
-.no-sidenotes .post-content > header, .no-sidenotes .post-content > div.sourceCode,
-.no-sidenotes .post-content section > p, .no-sidenotes .post-content section > ul,
-.no-sidenotes .post-content section > ol, .no-sidenotes .post-content section > dl,
-.no-sidenotes .post-content section > blockquote, .no-sidenotes .post-content section > pre,
-.no-sidenotes .post-content section > figure, .no-sidenotes .post-content section > table,
-.no-sidenotes .post-content section > div.sourceCode,
-.no-sidenotes .post-content h1, .no-sidenotes .post-content h2, .no-sidenotes .post-content h3,
-.no-sidenotes .post-content h4, .no-sidenotes .post-content h5, .no-sidenotes .post-content h6 {
-  width: 100%;
-  max-width: 800px;
-}
-.no-sidenotes .post-content .sidenote,
-.no-sidenotes .post-content .marginnote {
-  display: none;
-}
-.no-sidenotes .post-content .margin-toggle:checked + .sidenote,
-.no-sidenotes .post-content .margin-toggle:checked + .marginnote {
-  display: block;
-  float: none;
-  clear: both;
-  width: 100%;
-  max-width: 800px;
-  margin: 0.5rem 0;
-  padding: 0.5rem 0.75rem;
-  text-indent: 0;
-  padding-left: 0.75rem;
-  border-left: 2px solid var(--s-border);
-  font-size: 0.9rem;
-}
-.no-sidenotes .post-content .sidenote::before {
-  display: none;
-}
-.no-sidenotes .post-content label.margin-toggle:not(.sidenote-number) {
-  display: inline;
-  cursor: pointer;
-  color: var(--s-accent);
-  font-size: 0.75rem;
-  vertical-align: super;
-  line-height: 0;
-}
-.no-sidenotes .post-content .sidenote-number {
-  cursor: pointer;
-  color: var(--s-accent);
-}
-
-/* ── Document typography ────────────────────────────── */
-
-.post-content h1, .post-content h2, .post-content h3,
-.post-content h4, .post-content h5, .post-content h6 {
-  font-weight: 400;
-  color: var(--s-text);
-  line-height: 1.2;
-}
-
-.post-content h1 {
-  font-size: 2.2rem;
-  margin-top: 2rem;
-  margin-bottom: 0.5rem;
-}
-.post-content section > h1 {
-  font-size: 1.8rem;
-  margin-left: -0.8rem;
-  padding-left: calc(0.8rem - 3px);
-  border-left: 3px solid var(--s-accent);
-}
-.post-content h2 {
-  font-size: 1.5rem;
-  font-style: italic;
-  margin-top: 2rem;
-  margin-left: -0.8rem;
-  padding-left: calc(0.8rem - 3px);
-  border-left: 3px solid var(--s-accent);
-}
-.post-content h3 {
-  font-size: 1.2rem;
-  font-style: italic;
-  margin-top: 1.5rem;
-  margin-left: -0.8rem;
-  padding-left: calc(0.8rem - 2px);
-  border-left: 2px solid var(--s-border);
-}
-.post-content h4, .post-content h5, .post-content h6 {
-  margin-left: -0.8rem;
-  padding-left: calc(0.8rem - 2px);
-  border-left: 2px solid var(--s-border);
-}
-
-/* ── Collapsible sections ──────────────────────────── */
-
-.post-content section > h1,
-.post-content section > h2,
-.post-content section > h3,
-.post-content section > h4 {
-  cursor: pointer;
-  position: relative;
-}
-.post-content section > h1::after,
-.post-content section > h2::after,
-.post-content section > h3::after,
-.post-content section > h4::after {
-  content: '';
-  display: inline-block;
-  width: 0.4em;
-  height: 0.4em;
-  border-right: 2px solid var(--s-text-dim);
-  border-bottom: 2px solid var(--s-text-dim);
-  transform: rotate(45deg);
-  margin-left: 0.5em;
-  vertical-align: middle;
-  transition: transform 0.2s;
-  opacity: 0;
-}
-.post-content section > h1:hover::after,
-.post-content section > h2:hover::after,
-.post-content section > h3:hover::after,
-.post-content section > h4:hover::after {
-  opacity: 0.5;
-}
-.post-content section.collapsed > h1::after,
-.post-content section.collapsed > h2::after,
-.post-content section.collapsed > h3::after,
-.post-content section.collapsed > h4::after {
-  transform: rotate(-45deg);
-  opacity: 0.5;
-}
-.post-content section.collapsed > :not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) {
-  display: none !important;
-}
-.post-content section.collapsed > section {
-  display: none !important;
-}
-
-/* ── Paragraph ─────────────────────────────────────── */
+/* ── Document typography (shared) ──────────────────── */
 
 .post-content p { margin: 1rem 0; }
 
@@ -475,32 +125,12 @@ input.margin-toggle { display: none; }
   line-height: 1.45;
   font-size: 0.85rem;
 }
-/* Code blocks span full width by default */
-.post-content > pre,
-.post-content > div.sourceCode, .post-content > div.highlighter-rouge,
-.post-content section > pre,
-.post-content section > div.sourceCode, .post-content section > div.highlighter-rouge {
-  width: 100%;
-}
-.post-content > div.code-sidenote,
-.post-content > pre.code-sidenote,
-.post-content section > div.code-sidenote,
-.post-content section > pre.code-sidenote { width: 60%; }
-@media (max-width: 800px) {
-  .post-content > div.code-sidenote,
-  .post-content > pre.code-sidenote,
-  .post-content section > div.code-sidenote,
-  .post-content section > pre.code-sidenote { width: 100%; }
-}
-/* Pre inside div.sourceCode: fill the width-constrained parent */
-.post-content div.sourceCode pre,
-.post-content div.highlighter-rouge pre {
-  width: 100%;
-}
 .post-content pre code {
   background: none;
   padding: 0;
 }
+
+div.sourceCode { position: relative; }
 
 /* ── Pandoc syntax highlighting (pygments) ─────────── */
 
@@ -562,10 +192,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
 .highlight .err                                                { color: #a61717; background-color: #e3d2d2; }
 .highlight .w                                                  { color: #bbb; }
 
-/* ── Code block chrome ─────────────────────────────── */
-
-div.sourceCode { position: relative; }
-
 /* ── Blockquote ────────────────────────────────────── */
 
 .post-content blockquote {
@@ -606,6 +232,25 @@ div.sourceCode { position: relative; }
 /* ── Images ────────────────────────────────────────── */
 
 .post-content img { max-width: 100%; }
+.post-content figure { margin-inline: 0; }
+.post-content figcaption {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #555;
+  margin-top: 0.4em;
+}
+
+/* Centered blocks (from ::: {.center} fenced divs).
+   Shrink-wrap figures so the caption aligns with the image's edges. */
+.post-content div.center > p { text-align: center; }
+.post-content div.center > figure {
+  display: table;
+  margin-inline: auto;
+}
+.post-content div.center > figure > figcaption {
+  display: table-caption;
+  caption-side: bottom;
+}
 
 /* ── Horizontal rule ───────────────────────────────── */
 
@@ -684,7 +329,15 @@ div.sourceCode { position: relative; }
   justify-content: space-between;
 }
 
+/* ── Responsive: nav and footer ───────────────────── */
+
 @media (max-width: 800px) {
+  .site-header {
+    padding: 0.8rem 1rem;
+  }
+  .page-content {
+    padding: 2rem 25px 4rem 25px;
+  }
   .site-footer {
     padding: 1rem;
   }

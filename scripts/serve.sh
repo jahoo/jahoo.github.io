@@ -53,6 +53,12 @@ PIDS+=($!)
             target="_site/$(echo "$rel" | sed 's|^content/||; s|\.md$|.html|')"
             echo "Content changed: $rel -> building $target"
             make "$target" 2>&1 | grep -v '^make\[' || true
+            # Posts/explorations also affect the blog index listing
+            case "$rel" in
+                content/posts/*|content/explorations/*)
+                    make _site/posts.html 2>&1 | grep -v '^make\[' || true
+                    ;;
+            esac
             ;;
         *.lua|*.html)
             echo "Template/filter changed: $changed -> rebuilding all content"

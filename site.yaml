@@ -10,8 +10,8 @@ nav:
   - text: home
     url: /
   - text: publications
-    url: /pubs.html
-  - text: posts
-    url: /posts.html
+    url: /pubs/
+  - text: blog
+    url: /blog/
   - text: cv
     url: /assets/CV/jlhv-academic_cv.pdf
