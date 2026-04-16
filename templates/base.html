@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>$if(title)$$title$ — $site-title$$else$$site-title$$endif$</title>
+
+  <!-- MathJax v4: Pandoc emits \(...\) and \[...\] inside <span class="math"> -->
+  <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['\\(', '\\)'], ['$$', '$$']],
+      displayMath: [['\\[', '\\]'], ['$$$$', '$$$$']]
+$if(mathjax-macros-json)$
+      , macros: $mathjax-macros-json$
+$endif$
+    }
+  };
+  </script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+
+  <link rel="stylesheet" href="/assets/css/base.css">
+$for(css)$
+  <link rel="stylesheet" href="/assets/css/$css$">
+$endfor$
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrapper">
+      <a class="site-title" href="/">$site-title$</a>
+      <nav class="site-nav">
+$for(nav)$
+        <a class="page-link" href="$nav.url$"$if(nav.external)$ target="_blank"$endif$>$nav.text$</a>
+$endfor$
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="wrapper">
+      <article>
+$if(title)$
+        <header class="post-header">
+          <h1 class="post-title">$title$</h1>
+$if(date)$
+          <p class="post-meta">
+            <time>$date$</time>
+$if(author)$
+            · $author$
+$endif$
+          </p>
+$endif$
+        </header>
+$endif$
+
+        <div class="post-content">
+$body$
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrapper">
+      <span>&copy; $author$</span>
+    </div>
+  </footer>
+
+  <script src="/assets/js/collapse.js"></script>
+$for(js)$
+  <script src="/assets/js/$js$.bundle.js"></script>
+$endfor$
+</body>
+</html>

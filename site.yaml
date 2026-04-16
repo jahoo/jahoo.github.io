@@ -1,0 +1,17 @@
+site-title: jacob hoover vigly
+url: https://jahoo.github.io
+author: Jacob Hoover Vigly
+description: >
+  Scientific Program Coordinator at CHI FRO, LLC.
+  Formerly Postdoc at MIT, Department of Brain and Cognitive Sciences.
+  PhD in Linguistics from McGill University.
+bibliography: assets/bibliography/default.bib
+nav:
+  - text: home
+    url: /
+  - text: publications
+    url: /pubs.html
+  - text: posts
+    url: /posts.html
+  - text: cv
+    url: /assets/CV/jlhv-academic_cv.pdf

@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/**/*.test.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "browser-sync": "^3.0.0"
+  }
+}
