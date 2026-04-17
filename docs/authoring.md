@@ -259,12 +259,69 @@ pandoc lua scripts/build-index.lua
 
 The script scans `content/posts/` and `content/explorations/`, reads front matter, and writes `_generated/posts.md`.
 
+## Adding a publication
+
+The publications page is generated from `pubs.yaml` at the repo root.
+
+Add a new entry at the top of the list:
+
+```yaml
+- id: surname.f:YEARkey              # unique; used as BibTeX cite key
+  title: "Paper Title with {Braces} around Proper Nouns"
+  authors:
+    - First Last
+    - First Middle Last
+  year: 2026
+  month: 4                           # integer or name; optional but used for sort
+  type: inproceedings                # article | inproceedings | thesis | misc | online
+  venue: ACL 2026                    # short label shown on the page
+  venue_full: "Proceedings of …"     # full name for BibTeX
+  venue_url: https://…               # link for the venue label
+  pages: "123--145"
+  publisher: …
+  note: "Outstanding Paper Award"    # optional; shown in parens after venue
+  status: preprint                   # optional; shown as a small tag
+  equal_contribution: [0, 1]         # optional; 0-based author indices
+  links:
+    url: https://…                   # primary link for the title
+    arxiv: "2603.05432"              # bare id or full URL
+    code: https://github.com/…
+    slides: talk-slides.pdf          # bare filename → /assets/pdfs/; URL passes through
+    poster: poster.pdf
+    pdf: paper.pdf
+    preprint: https://…
+    openreview: https://…
+    lingbuzz: "000371"
+    video: https://…
+    other:
+      - label: "explorer"
+        url: https://…
+```
+
+Braces in `title` protect words from BibTeX capitalization rules; they're stripped for HTML display.
+
+Run `make` (or save while `make serve` is running) to regenerate the page.
+
+The build also writes `assets/bibliography/pubs.bib` — readers click the "BibTeX" link at the top of the page to download it.
+
+### Validation
+
+`scripts/build-pubs.js` validates the YAML:
+
+- Required fields present (`id`, `title`, `authors`, `year`, `type`, `venue`)
+- `type` is one of the allowed values
+- `equal_contribution` indices are in range
+- `links.other` entries have both `label` and `url`
+
+It also warns (not errors) if `pdf` / `slides` / `poster` / `handout` reference a file not found under `assets/pdfs/`.
+
 ## Build commands
 
 ```bash
-make            # full parallel build (generate listing + content + JS + assets)
+make            # full parallel build (generate listing + pubs + content + JS + assets)
 make serve      # dev server with live reload
 make content    # rebuild only markdown → HTML
+make pubs       # regenerate pubs.md + pubs.bib from pubs.yaml
 make js         # rebundle only JS
 make assets     # sync only static assets (CSS, fonts, images)
 make test       # run JS tests
