@@ -11,7 +11,7 @@ page-style: site
 ```{=html}
 <ul class="pub-list">
 <li class="pub">
-  <a class="pub-title" href="https://arxiv.org/abs/2603.05432">Ensembling Language Models with Sequential Monte Carlo</a>
+  <a class="pub-title" href="http://arxiv.org/abs/2603.05432">Ensembling Language Models with Sequential Monte Carlo</a>
   <span class="pub-author">Robin Shing Moon Chan, Tianyu Liu, Samuel Kiegeland, Clemente Pasti, Jacob Hoover Vigly, Timothy J. O&#39;Donnell, Ryan Cotterell, Tim Vieira</span>
   <span class="pub-venue">arXiv</span> <span class="pub-status">preprint</span>
   <div class="pub-extras">
@@ -22,35 +22,46 @@ page-style: site
 <li class="pub">
   <a class="pub-title" href="https://openreview.net/forum?id=3BmPSFAdq3">Fast Controlled Generation from Language Models with Adaptive Weighted Rejection Sampling</a>
   <span class="pub-author">Ben Lipkin, Benjamin LeBrun, Jacob Hoover Vigly, João Loula, David R. MacIver, Li Du, Jason Eisner, Ryan Cotterell, Vikash Mansinghka, Timothy J. O&#39;Donnell, Alexander K. Lew, Tim Vieira</span>
-  <span class="pub-venue">CoLM 2025</span> (Outstanding Paper Award)
+  <a class="pub-venue" href="https://colmweb.org/">CoLM 2025</a> (Outstanding Paper Award)
   <div class="pub-extras">
-    <a class="extra arxiv" href="https://arxiv.org/abs/2504.05410">arXiv</a>
     <a class="extra openreview" href="https://openreview.net/forum?id=3BmPSFAdq3">OpenReview</a>
   </div>
 
 </li>
 <li class="pub">
-  <span class="pub-title">When Unpredictable Does Not Mean Difficult to Process</span>
+  <a class="pub-title" href="https://underline.io/events/489/posters/20440/poster/119457-">When Unpredictable Does Not Mean Difficult to Process</a>
   <span class="pub-author">Jacob Hoover Vigly, Peng Qian, Morgan Sonderegger, Timothy J. O&#39;Donnell</span>
   <span class="pub-venue">CogSci 2025</span>
-  <div class="pub-extras">
-    <a class="extra poster" href="https://underline.io/events/489/posters/20440/poster/119457-">poster</a>
-  </div>
+
+</li>
+<li class="pub">
+  <a class="pub-title" href="https://escholarship.org/uc/item/9kr1b1gm">A Model of Approximate and Incremental Noisy-Channel Language Processing</a>
+  <span class="pub-author">Thomas Hikaru Clark, Jacob Hoover Vigly, Edward Gibson, Roger Levy</span>
+  <span class="pub-venue">CogSci 2025</span>
 
 </li>
 <li class="pub">
   <a class="pub-title" href="https://osf.io/2498w">Comprehension Effort as the Cost of Inference</a>
   <span class="pub-author">Jacob Hoover Vigly, Peng Qian, Morgan Sonderegger, Timothy J. O&#39;Donnell</span>
   <span class="pub-venue">PsyArXiv</span> <span class="pub-status">preprint</span>
-  <div class="pub-extras">
-    <a class="extra preprint" href="https://osf.io/2498w">preprint</a>
-  </div>
+
+</li>
+<li class="pub">
+  <a class="pub-title" href="https://hsp2025.github.io/abstracts/254.pdf">Implicit Gender Bias in Linguistic Descriptions for Expected Events: The Case of the 2024 United States Presidential Election</a>
+  <span class="pub-author">Jacob Hoover Vigly, Veronica Boyce, Michaela Socolof, James Michaelov, Titus von der Malsburg, Roger Levy</span>
+  <span class="pub-venue">HSP 2025</span>
+
+</li>
+<li class="pub">
+  <a class="pub-title" href="https://hsp2025.github.io/abstracts/187.pdf">Modeling Human Inferences and Reading Behavior with an Incremental, Resource-Rational Model of Noisy-Channel Language Processing</a>
+  <span class="pub-author">Thomas Hikaru Clark, Jacob Hoover Vigly, Edward Gibson, Roger Levy</span>
+  <span class="pub-venue">HSP 2025</span>
 
 </li>
 <li class="pub">
   <a class="pub-title" href="https://escholarship.mcgill.ca/concern/theses/r494vr42w">The Cost of Information: Looking beyond Predictability in Language Processing</a>
   <span class="pub-author">Jacob Louis Hoover</span>
-  <span class="pub-venue">McGill University</span>
+  <span class="pub-venue">McGill University</span> <span class="pub-status">dissertation</span>
   <div class="pub-extras">
     <a class="extra pdf" href="/assets/pdfs/dissertation.pdf">pdf</a>
     <a class="extra other" href="/assets/pdfs/dissertation_precis.pdf">précis</a>
@@ -58,9 +69,15 @@ page-style: site
 
 </li>
 <li class="pub">
-  <a class="pub-title" href="https://doi.org/10.31234/osf.io/qjnpv">The Plausibility of Sampling as an Algorithmic Theory of Sentence Processing</a>
-  <span class="pub-author">Jacob Louis Hoover, Morgan Sonderegger, Steven T. Piantadosi, Timothy J. O&#39;Donnell</span>
-  <a class="pub-venue" href="https://doi.org/10.1162/opmi_a_00086">Open Mind</a>
+  <a class="pub-title" href="https://aclanthology.org/2024.findings-eacl.123">Contextualized Topic Coherence Metrics</a>
+  <span class="pub-author">Hamed Rahimi, David Mimno, Jacob Hoover, Hubert Naacke, Camelia Constantin, Bernd Amann</span>
+  <span class="pub-venue">Findings of ACL: EACL 2024</span>
+
+</li>
+<li class="pub">
+  <a class="pub-title" href="https://doi.org/10.1162/opmi_a_00086">The Plausibility of Sampling as an Algorithmic Theory of Sentence Processing</a>
+  <span class="pub-author">Jacob Louis Hoover, Morgan Sonderegger, Steven T. Piantadosi, Timothy J. O’Donnell</span>
+  <span class="pub-venue">Open Mind</span>
   <div class="pub-extras">
     <a class="extra preprint" href="https://doi.org/10.31234/osf.io/qjnpv">preprint</a>
     <a class="extra code" href="https://github.com/mcqll/plausibility-sampling-processing/">code</a>
@@ -69,15 +86,21 @@ page-style: site
 
 </li>
 <li class="pub">
-  <span class="pub-title">Measuring Morphological Fusion Using Partial Information Decomposition</span>
+  <a class="pub-title" href="https://aclanthology.org/2022.coling-1.5">Measuring Morphological Fusion Using Partial Information Decomposition</a>
   <span class="pub-author">Michaela Socolof, Jacob Louis Hoover, Richard Futrell, Alessandro Sordoni, Timothy J. O&#39;Donnell</span>
-  <a class="pub-venue" href="https://aclanthology.org/2022.coling-1.5">COLING 2022</a>
+  <span class="pub-venue">COLING 2022</span>
 
 </li>
 <li class="pub">
-  <span class="pub-title">Linguistic Dependencies and Statistical Dependence</span>
+  <a class="pub-title" href="https://virtual.oxfordabstracts.com/#/event/3067/submission/297">With Better Language Models, Processing Time Is Superlinear in Surprisal</a>
+  <span class="pub-author">Jacob Louis Hoover, Morgan Sonderegger, Timothy J. O&#39;Donnell</span>
+  <span class="pub-venue">Architectures and Mechanisms for Language Processing (AMLaP 28)</span>
+
+</li>
+<li class="pub">
+  <a class="pub-title" href="https://aclanthology.org/2021.emnlp-main.234">Linguistic Dependencies and Statistical Dependence</a>
   <span class="pub-author">Jacob Louis Hoover, Wenyu Du, Alessandro Sordoni, Timothy J. O&#39;Donnell</span>
-  <a class="pub-venue" href="https://aclanthology.org/2021.emnlp-main.234">EMNLP 2021</a>
+  <span class="pub-venue">EMNLP 2021</span>
   <div class="pub-extras">
     <a class="extra code" href="https://github.com/mcqll/cpmi-dependencies">code</a>
     <a class="extra slides" href="/assets/pdfs/2021.10.11.EMNLP.talk-slides.pdf">slides</a>
@@ -86,9 +109,9 @@ page-style: site
 
 </li>
 <li class="pub">
-  <span class="pub-title">Accounting for Variation in Number Agreement in Icelandic Dative-Nominative Constructions</span>
+  <a class="pub-title" href="http://www.lingref.com/cpp/wccfl/38/abstract3568.html">Accounting for Variation in Number Agreement in Icelandic Dative-Nominative Constructions</a>
   <span class="pub-author">Jacob Louis Hoover</span>
-  <a class="pub-venue" href="http://www.lingref.com/cpp/wccfl/38/abstract3568.html">WCCFL 38</a>
+  <span class="pub-venue">WCCFL 38</span>
   <div class="pub-extras">
     <a class="extra pdf" href="/assets/pdfs/wccfl2020-cascadilla-paper3568-proof.pdf">pdf</a>
     <a class="extra handout" href="/assets/pdfs/wccfl2020-handout.pdf">handout</a>

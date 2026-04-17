@@ -261,99 +261,87 @@ The script scans `content/posts/` and `content/explorations/`, reads front matte
 
 ## Adding a publication
 
-The publications page is generated from `pubs.yaml` at the repo root.
+The publications page at `/pubs/` is generated from two inputs:
 
-Add a new entry at the top of the list:
+1. **`source.bib`** at the repo root — a gitignored symlink pointing at your local BibLaTeX file (the bibliographic source of truth). Create it once:
+
+   ```bash
+   ln -s ~/all-biblatex.bib source.bib
+   ```
+
+   Wherever on the right-hand side your bib actually lives; `source.bib` is what the build reads. The file must be in BibLaTeX format — Zotero's "Better BibLaTeX" export works; classic BibTeX largely works modulo a few field-name differences. If the symlink is missing or broken, `node scripts/build-pubs.js` exits with a clear error pointing at this command.
+
+2. **`pubs.yaml`** at the repo root — a list of the bib keys to include, with only website-specific extras layered on top. Bibliographic data (title, authors, year, venue_full, DOI, URL, arxiv ID) is pulled from the bib; you don't retype it.
+
+### `pubs.yaml` entry schema
 
 ```yaml
-- id: surname.f:YEARkey              # unique; used as BibTeX cite key
-  title: "Paper Title with {Braces} around Proper Nouns"
-  authors:
-    - First Last
-    - First Middle Last
-  year: 2026
-  month: 4                           # integer or name; optional but used for sort
-  type: inproceedings                # article | inproceedings | thesis | misc | online
-  venue: ACL 2026                    # short label shown on the page
-  venue_full: "Proceedings of …"     # full name for BibTeX
-  venue_url: https://…               # link for the venue label
-  pages: "123--145"
-  publisher: …
-  note: "Outstanding Paper Award"    # optional; shown in parens after venue
-  status: preprint                   # optional; shown as a small tag
-  equal_contribution: [0, 1]         # optional; 0-based author indices
+- key: surname.f:YEARkey           # required; must exist in source.bib
+  venue: SHORT 2024                # optional: short display label
+                                   #   (falls back to bib shortjournal/eventtitle/
+                                   #    container-title; "arXiv" for arxiv-only
+                                   #    preprints with no other venue info)
+  venue_url: https://…             # optional: link for the venue label
+  note: "Outstanding Paper Award"  # optional: shown in parens after venue
+  status: preprint                 # optional: small tag (preprint | dissertation |
+                                   #   forthcoming | in-press | submitted | …)
+  equal_contribution: [0, 1]       # optional: 0-based author indices get a *
   links:
-    url: https://…                   # primary link for the title
-    arxiv: "2603.05432"              # bare id or full URL
-    code: https://github.com/…
-    slides: talk-slides.pdf          # bare filename → /assets/pdfs/; URL passes through
-    poster: poster.pdf
-    pdf: paper.pdf
+    url: https://…                 # optional: override the primary title link
+    code: https://…                # link buttons — any subset of:
+    slides: talk.pdf               #   code, slides, poster, handout, pdf
+    poster: poster.pdf             #   (bare filename → /assets/pdfs/; URL passes through)
+    handout: handout.pdf           #   preprint, openreview, video, lingbuzz (URL)
+    pdf: paper.pdf                 #   other: [{label, url}, ...] for custom buttons
     preprint: https://…
     openreview: https://…
-    lingbuzz: "000371"
     video: https://…
+    lingbuzz: "000371"
     other:
-      - label: "explorer"
+      - label: "surprisal explorer"
         url: https://…
 ```
 
-Braces in `title` protect words from BibTeX capitalization rules; they're stripped for HTML display.
+### Merge rules (bib + extras)
 
-Run `make` (or save while `make serve` is running) to regenerate the page.
+| Entry field | Source |
+|---|---|
+| `title`, `authors`, `year`, `month`, `day`, `type` | from bib |
+| `venue` | extras override; else bib short-form; else full container-title; else "arXiv" for arxiv-only |
+| `venue_full`, `pages`, `publisher`, `address`, `doi`, `editor` | from bib |
+| `venue_url`, `status`, `equal_contribution` | extras only |
+| `note` | extras override; else bib note |
+| `links.url` | extras override; else bib URL |
+| `links.doi_url` | derived from bib DOI |
+| `links.arxiv` | derived from bib's `eprint`+`eprinttype=arXiv` (citation-js drops these, so we regex-scan the raw bib for them) |
+| `links.{code, preprint, slides, poster, handout, video, openreview, lingbuzz, pdf, other}` | extras only |
 
-The build also writes `assets/bibliography/pubs.bib` — readers click the "BibTeX" link at the top of the page to download it.
+Primary URL priority for the title link: `links.url` → `links.doi_url` → `links.arxiv` → `links.openreview` → `links.preprint`. The canonical DOI wins over any preprint when a paper is published.
+
+### Running the build
+
+Save `pubs.yaml` (or `source.bib`) with `make serve` running and the page regenerates automatically. Otherwise run `make pubs` (just the pubs build) or `make` (full site).
+
+The build also writes `assets/bibliography/pubs.bib` — a verbatim extract of the entries you listed, with Zotero's private `file` field (and other internal metadata like `abstract`, `keywords`, `urldate`) stripped. The BibTeX link at the top of the page points at this download.
 
 ### Validation
 
-`scripts/build-pubs.js` validates the YAML:
+`scripts/build-pubs.js` checks:
 
-- Required fields present (`id`, `title`, `authors`, `year`, `type`, `venue`)
+- All `key`s exist in `source.bib` (errors with a list of missing keys)
 - `type` is one of the allowed values
 - `equal_contribution` indices are in range
 - `links.other` entries have both `label` and `url`
 
-It also warns (not errors) if `pdf` / `slides` / `poster` / `handout` reference a file not found under `assets/pdfs/`.
-
-### Bib-ground-truth variant (exploration)
-
-A parallel experiment at `/pubs-bib/` uses a BibLaTeX file as the bibliographic source of truth instead of duplicating bib data in `pubs.yaml`. It's live alongside the YAML variant during a comparison phase; one will be chosen and the other removed.
-
-**Setup.** Create a gitignored symlink at the repo root pointing at your local bib file (which must be in BibLaTeX format — Zotero's "Better BibLaTeX" export works; classic BibTeX largely works modulo a few field-name differences):
-
-```bash
-ln -s ~/all-biblatex.bib source.bib
-```
-
-The path on the right-hand side is wherever your bib actually lives; `source.bib` is what the build reads. If the symlink is missing or broken, `node scripts/build-pubs-bib.js` exits with a clear error pointing at this command.
-
-**Config file (`pubs-bib.yaml`).** Lists entries by bib key, with only website-specific extras:
-
-```yaml
-- key: surname.f:2024key           # required; must exist in source.bib
-  venue: SHORT 2024                # optional: short display label
-  venue_url: https://…             # optional: link for the venue label
-  note: "Outstanding Paper Award"  # optional: shown in parens
-  status: preprint                 # optional: small tag (preprint | forthcoming | …)
-  equal_contribution: [0, 1]       # optional: 0-based author indices
-  links:
-    code: https://…                # link buttons — other types:
-    slides: talk.pdf               #   preprint, openreview, video, lingbuzz,
-    poster: poster.pdf             #   handout, pdf, other: [{label, url}]
-```
-
-Bibliographic fields (title, authors, year, venue_full, DOI, URL, arxiv ID) are pulled from the bib. The `venue` overlay is a short display label; without it, the page falls back to the bib's `container-title-short` / `eventtitle` / `container-title`, in that order (and "arXiv" for arxiv preprints that have no other venue info).
-
-**Differences from the YAML variant.** `/pubs/` (from `pubs.yaml`) duplicates bib data in YAML; `/pubs-bib/` (from `pubs-bib.yaml` + source.bib) keeps bib data canonical in the bib and overlays only extras. Same renderer, different data source. See `docs/specs/2026-04-17-phase3-alt-bib-ground-truth.md`.
+It warns (not errors) if `pdf` / `slides` / `poster` / `handout` reference a file not found under `assets/pdfs/`.
 
 ## Build commands
 
 ```bash
-make            # full parallel build (generate listing + pubs + pubs-bib + content + JS + assets)
+make            # full parallel build (generate listing + pubs + content + JS + assets)
 make serve      # dev server with live reload
 make content    # rebuild only markdown → HTML
-make pubs       # regenerate pubs.md + pubs.bib from pubs.yaml
-make pubs-bib   # regenerate pubs-bib.md + pubs-bib.bib from pubs-bib.yaml + source.bib
+make pubs       # regenerate pubs.md + pubs.bib from pubs.yaml + source.bib
 make js         # rebundle only JS
 make assets     # sync only static assets (CSS, fonts, images)
 make test       # run JS tests

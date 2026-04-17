@@ -43,16 +43,11 @@ PIDS+=($!)
 
 # 3. Content/asset watcher using fswatch
 "$FSWATCH" -r --event Updated \
-    content/ filters/ templates/ assets/css/ assets/fonts/ site.yaml pubs.yaml pubs-bib.yaml source.bib scripts/ \
+    content/ filters/ templates/ assets/css/ assets/fonts/ site.yaml pubs.yaml source.bib scripts/ \
     2>/dev/null \
 | while IFS= read -r changed; do
     case "$changed" in
-        *pubs-bib.yaml|*build-pubs-bib.js|*source.bib|*all-biblatex.bib)
-            echo "Pubs-bib changed — regenerating pubs-bib.md + pubs-bib.bib"
-            node scripts/build-pubs-bib.js || true
-            bash scripts/build-content.sh 2>&1 || true
-            ;;
-        *pubs.yaml|*build-pubs.js)
+        *pubs.yaml|*build-pubs.js|*source.bib|*all-biblatex.bib)
             echo "Pubs changed — regenerating pubs.md + pubs.bib"
             node scripts/build-pubs.js || true
             bash scripts/build-content.sh 2>&1 || true

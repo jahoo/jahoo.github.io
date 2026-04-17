@@ -1,18 +1,31 @@
 #!/usr/bin/env node
 // scripts/build-pubs.js
-// Reads pubs.yaml and emits:
-//   - _generated/pubs.md (Pandoc markdown for the publications page)
-//   - assets/bibliography/pubs.bib (generated BibTeX for download)
 //
-// Pure formatting functions are exported for unit testing.
+// Builds the publications page at /pubs/ from:
+//   - source.bib (symlink to the user's global biblatex file — the canonical
+//     source of bibliographic data)
+//   - pubs.yaml (a short list of bib keys with website-specific extras:
+//     short venue labels, custom link buttons, awards, status tags,
+//     equal-contribution marks)
+//
+// Emits:
+//   - _generated/pubs.md            (Pandoc markdown; compiled into /pubs/)
+//   - assets/bibliography/pubs.bib  (filter of source.bib — verbatim entries
+//                                    for the keys listed in pubs.yaml, with
+//                                    Zotero's local-path `file` field and
+//                                    other private metadata stripped)
+//
+// All pure helpers are exported for unit testing.
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
+import { homedir } from 'node:os';
 import yaml from 'js-yaml';
+import { Cite } from '@citation-js/core';
+import '@citation-js/plugin-bibtex';
 
 // ------------------------------------------------------------
-// Pure helpers (exported for testing)
+// Rendering helpers (pure; exported for testing)
 // ------------------------------------------------------------
 
 export function stripTitleBraces(title) {
@@ -28,43 +41,11 @@ export function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => HTML_ESCAPES[c]);
 }
 
-const LATEX_ESCAPES = {
-  'ü': '{\\"u}', 'ö': '{\\"o}', 'ä': '{\\"a}', 'Ü': '{\\"U}', 'Ö': '{\\"O}', 'Ä': '{\\"A}',
-  'é': "{\\'e}", 'É': "{\\'E}", 'á': "{\\'a}", 'Á': "{\\'A}", 'í': "{\\'i}", 'ó': "{\\'o}", 'ú': "{\\'u}",
-  'è': '{\\`e}', 'à': '{\\`a}', 'ì': '{\\`i}', 'ò': '{\\`o}', 'ù': '{\\`u}',
-  'ã': '{\\~a}', 'ñ': '{\\~n}', 'õ': '{\\~o}',
-  'ç': '{\\c{c}}', 'Ç': '{\\c{C}}',
-  'æ': '{\\ae}', 'Æ': '{\\AE}', 'ø': '{\\o}', 'Ø': '{\\O}',
-};
-
-export function latexEscape(s) {
-  if (!s) return s;
-  return s.replace(/./g, (c) => LATEX_ESCAPES[c] ?? c);
-}
-
 export function formatAuthorsHtml(authors, equalContribution = []) {
   const marked = authors.map((a, i) =>
     equalContribution.includes(i) ? `${a}*` : a
   );
   return marked.join(', ');
-}
-
-const SURNAME_PREFIXES = new Set(['Van', 'Von', 'De', 'Di', 'Le', 'La', 'El', 'Al', 'Mc', "O'"]);
-
-export function formatAuthorsBibtex(authors) {
-  const parts = authors.map((a) => {
-    const tokens = a.split(/\s+/);
-    if (tokens.length === 1) return tokens[0];
-    // Find where the surname starts, scanning backward across prefix words.
-    let split = tokens.length - 1;
-    while (split > 1 && SURNAME_PREFIXES.has(tokens[split - 1])) {
-      split -= 1;
-    }
-    const last = tokens.slice(split).join(' ');
-    const first = tokens.slice(0, split).join(' ');
-    return `${last}, ${first}`;
-  });
-  return parts.join(' and ');
 }
 
 export function buildPdfUrl(path) {
@@ -226,69 +207,12 @@ export function generateHtmlEntry(paper) {
   ].join('\n');
 }
 
-// Strip characters from the supplementary-multilingual-plane range used by most
-// emoji (covers 🏆 and similar). Does not strip BMP-range symbols.
-const EMOJI_RE = /[\u{1F300}-\u{1FAFF}]/gu;
-function stripEmoji(s) {
-  return s.replace(EMOJI_RE, '').trim();
-}
-
-const BIBTEX_TYPE_MAP = {
-  thesis: 'phdthesis',
-  // others are identity
-};
-
-export function generateBibtexEntry(paper) {
-  const btype = BIBTEX_TYPE_MAP[paper.type] ?? paper.type;
-  const lines = [`@${btype}{${paper.id},`];
-  const push = (key, value) => {
-    if (value == null || value === '') return;
-    lines.push(`  ${key} = {${value}},`);
-  };
-
-  // Title: keep braces for capitalization protection.
-  push('title', latexEscape(paper.title));
-  push('author', latexEscape(formatAuthorsBibtex(paper.authors)));
-
-  if (paper.type === 'article') {
-    push('journal', latexEscape(paper.venue_full ?? paper.venue));
-  } else if (paper.type === 'inproceedings') {
-    push('booktitle', latexEscape(paper.venue_full ?? paper.venue));
-  } else if (paper.type === 'thesis') {
-    push('school', latexEscape(paper.venue_full ?? paper.venue));
-  } else {
-    // misc / online — howpublished uses the venue_full label if distinct from URL.
-    if (paper.venue_full) push('howpublished', latexEscape(paper.venue_full));
-  }
-
-  push('year', paper.year);
-  push('month', paper.month);
-  push('day', paper.day);
-  push('pages', paper.pages);
-  push('publisher', latexEscape(paper.publisher));
-  push('address', latexEscape(paper.address));
-  push('editor', latexEscape(paper.editor));
-  push('doi', paper.doi);
-
-  const primaryUrl = getPrimaryUrl(paper.links);
-  push('url', primaryUrl);
-
-  if (paper.note) {
-    const cleanNote = stripEmoji(paper.note);
-    if (cleanNote) push('note', latexEscape(cleanNote));
-  }
-
-  lines.push('}');
-  return lines.join('\n');
-}
-
 const GOOGLE_SCHOLAR_URL =
   'https://scholar.google.com/citations?user=koLi2TwAAAAJ';
 
 const NAME_NOTE = `*Note on my name:* My surname is Vigly. Prior to September 2024, my surname was Hoover, which is now a middle name.`;
 
-export function generateMarkdown(entries, options = {}) {
-  const bibHref = options.bibHref ?? '/assets/bibliography/pubs.bib';
+export function generateMarkdown(entries) {
   const hasEqual = entries.some(
     (e) => e.equal_contribution && e.equal_contribution.length > 0
   );
@@ -302,7 +226,7 @@ export function generateMarkdown(entries, options = {}) {
     '',
     '<ul class="social-media-list">',
     `  <li><a href="${GOOGLE_SCHOLAR_URL}">Google Scholar</a></li>`,
-    `  <li><a href="${bibHref}">BibTeX</a></li>`,
+    '  <li><a href="/assets/bibliography/pubs.bib">BibTeX</a></li>',
     '</ul>',
     '',
     '```{=html}',
@@ -319,8 +243,260 @@ export function generateMarkdown(entries, options = {}) {
   return parts.join('\n');
 }
 
-export function generateBibtexFile(entries) {
-  return entries.map(generateBibtexEntry).join('\n\n') + '\n';
+// ------------------------------------------------------------
+// Bib-source helpers (pure; exported for testing)
+// ------------------------------------------------------------
+
+export function expandHome(path) {
+  if (path.startsWith('~/') || path === '~') {
+    return homedir() + path.slice(1);
+  }
+  return path;
+}
+
+export function loadBibSource(path) {
+  const resolved = expandHome(path);
+  // existsSync follows symlinks, so broken symlinks return false.
+  if (!existsSync(resolved)) {
+    throw new Error(
+      `source.bib not found at ${resolved}\n` +
+      `Create a symlink to your bib file, e.g.:\n` +
+      `  ln -s ~/all-biblatex.bib source.bib`
+    );
+  }
+  return readFileSync(resolved, 'utf8');
+}
+
+export function parseBib(text) {
+  return new Cite(text).data;
+}
+
+export function indexByKey(entries) {
+  return new Map(entries.map((e) => [e.id, e]));
+}
+
+// Regex for a single biblatex entry. Non-greedy, close on \n\s*\}.
+const ENTRY_RE = /@(\w+)\s*\{\s*([^,\s]+)\s*,([\s\S]*?)\n\s*\}/g;
+
+function getBibField(body, fieldName) {
+  const re = new RegExp(
+    `\\b${fieldName}\\s*=\\s*(?:\\{([^{}]*)\\}|"([^"]*)")`,
+    'i'
+  );
+  const m = body.match(re);
+  return m ? (m[1] ?? m[2]) : null;
+}
+
+// citation-js silently drops biblatex's eprint/eprinttype/archiveprefix fields
+// when mapping to CSL-JSON. For arxiv preprints we recover the ID by scanning
+// the raw bib text. Returns Map<citeKey, eprintId>.
+export function extractArxivEprints(bibText) {
+  const map = new Map();
+  const re = new RegExp(ENTRY_RE.source, 'g');
+  let m;
+  while ((m = re.exec(bibText)) !== null) {
+    const key = m[2];
+    const body = m[3];
+    const eprint = getBibField(body, 'eprint');
+    if (!eprint) continue;
+    const eprinttype = getBibField(body, 'eprinttype');
+    const archiveprefix = getBibField(body, 'archiveprefix');
+    const isArxiv =
+      (eprinttype && /arxiv/i.test(eprinttype)) ||
+      (archiveprefix && /arxiv/i.test(archiveprefix));
+    if (isArxiv) {
+      map.set(key, eprint);
+    }
+  }
+  return map;
+}
+
+// Extract raw biblatex entries verbatim (preserving original cite keys and
+// formatting) for the given set of keys. Used to emit the downloadable
+// pubs.bib — citation-js's serializer rewrites cite keys, which we don't
+// want for this download.
+export function extractEntriesByKey(bibText, keys) {
+  const wanted = new Set(keys);
+  const pieces = [];
+  const re = new RegExp(ENTRY_RE.source, 'g');
+  let m;
+  while ((m = re.exec(bibText)) !== null) {
+    if (wanted.has(m[2])) {
+      pieces.push(m[0]);
+    }
+  }
+  return pieces.length === 0 ? '' : pieces.join('\n\n') + '\n';
+}
+
+// Fields stripped from entries before writing the downloadable bib.
+// - `file`: Zotero writes absolute local paths — would leak private filesystem layout.
+// - `abstract`, `keywords`, `urldate`, `langid`, `pubstate`, `eprintclass`: internal
+//   Zotero metadata not useful for readers who want to cite the work.
+const LEAKY_BIB_FIELDS = new Set([
+  'file', 'abstract', 'keywords', 'urldate', 'langid', 'pubstate', 'eprintclass',
+]);
+
+// Remove leaky fields from biblatex text, handling brace-balanced multi-line
+// field values (needed for abstracts with nested braces or long paragraphs).
+//
+// The field-start regex uses [ \t]* (same-line indent only), NOT \s* — otherwise
+// greedy \s* would swallow the preceding newline as "leading whitespace," and
+// stripping would collapse the previous line's terminator against the next
+// surviving field's indent.
+export function stripLeakyFields(bibText) {
+  const out = [];
+  let i = 0;
+  const FIELD_START_RE = /^([ \t]*)(\w+)[ \t]*=[ \t]*\{/;
+  while (i < bibText.length) {
+    const rest = bibText.slice(i);
+    const m = rest.match(FIELD_START_RE);
+    if (m && LEAKY_BIB_FIELDS.has(m[2].toLowerCase())) {
+      // Walk brace-balanced to find the end of this field value.
+      const valStart = i + m[0].length;
+      let depth = 1;
+      let j = valStart;
+      while (j < bibText.length && depth > 0) {
+        const c = bibText[j];
+        if (c === '{') depth++;
+        else if (c === '}') depth--;
+        j++;
+      }
+      // Skip trailing comma and following whitespace through newline.
+      let endPos = j;
+      if (bibText[endPos] === ',') endPos++;
+      while (endPos < bibText.length && /[^\S\n]/.test(bibText[endPos])) endPos++;
+      if (bibText[endPos] === '\n') endPos++;
+      i = endPos;
+    } else {
+      out.push(bibText[i]);
+      i++;
+    }
+  }
+  return out.join('');
+}
+
+// Map CSL-JSON type strings (what citation-js emits) to our entry type enum.
+// Observed mappings:
+//   @inproceedings → paper-conference
+//   @article       → article-journal
+//   @thesis        → thesis
+//   @online        → webpage     (biblatex preprints come through here)
+//   @misc          → document
+const CSL_TYPE_MAP = {
+  'article-journal': 'article',
+  'paper-conference': 'inproceedings',
+  'thesis': 'thesis',
+  'webpage': 'online',
+  'post': 'online',
+  'post-weblog': 'online',
+  'manuscript': 'online',
+};
+
+export function mapCslType(cslType) {
+  return CSL_TYPE_MAP[cslType] ?? 'misc';
+}
+
+// Convert CSL-JSON's structured author objects (one of {given, family,
+// non-dropping-particle, dropping-particle, suffix} or {literal}) to
+// "First Last" strings matching the input format of formatAuthorsHtml.
+export function cslAuthorsToStrings(authors) {
+  if (!authors) return [];
+  return authors.map((a) => {
+    if (a.literal) return a.literal;
+    const parts = [];
+    if (a.given) parts.push(a.given);
+    if (a['dropping-particle']) parts.push(a['dropping-particle']);
+    if (a['non-dropping-particle']) parts.push(a['non-dropping-particle']);
+    if (a.family) parts.push(a.family);
+    if (a.suffix) parts.push(a.suffix);
+    return parts.join(' ');
+  });
+}
+
+// Extract year/month/day from CSL-JSON's issued field.
+function extractDate(issued) {
+  if (!issued || !issued['date-parts'] || !issued['date-parts'][0]) {
+    return { year: null, month: null, day: null };
+  }
+  const [year, month, day] = issued['date-parts'][0];
+  return {
+    year: year ?? null,
+    month: month ?? null,
+    day: day ?? null,
+  };
+}
+
+// Build our entry shape (what generateHtmlEntry consumes) by pulling
+// bibliographic data from the CSL-JSON entry and overlaying the extras.
+//
+// arxivEprints is a Map<key, eprintId> produced by extractArxivEprints;
+// citation-js drops biblatex's eprint/eprinttype fields, so we pass this
+// in as a third argument and use it to populate links.arxiv.
+export function adaptEntry(csl, extras = {}, arxivEprints = new Map()) {
+  const { year, month, day } = extractDate(csl.issued);
+  const type = mapCslType(csl.type);
+
+  const containerTitle =
+    csl['container-title'] || csl.journal || csl.booktitle || undefined;
+  const eventTitle = csl['event-title'] || csl['event'] || undefined;
+
+  // Links: bib-derived fill in first, extras override
+  const bibUrl = csl.URL || undefined;
+  const doiUrl = csl.DOI ? `https://doi.org/${csl.DOI}` : undefined;
+  const arxivId = arxivEprints.get(csl.id) || undefined;
+
+  // venue: extras override; else short forms; else event-title;
+  // else container-title; else (for theses) publisher;
+  // else (for arxiv preprints without other venue info) "arXiv"
+  const venue =
+    extras.venue ??
+    csl['container-title-short'] ??
+    eventTitle ??
+    containerTitle ??
+    (type === 'thesis' ? csl.publisher : undefined) ??
+    (arxivId ? 'arXiv' : undefined);
+
+  // venue_full — for theses, the publisher is the school (our venue_full)
+  const venueFull = containerTitle ?? (type === 'thesis' ? csl.publisher : undefined);
+
+  const links = { ...(extras.links ?? {}) };
+  if (!links.url && bibUrl) links.url = bibUrl;
+  if (!links.doi_url && doiUrl) links.doi_url = doiUrl;
+  if (!links.arxiv && arxivId) links.arxiv = arxivId;
+
+  const entry = {
+    id: csl.id,
+    title: csl.title,
+    authors: cslAuthorsToStrings(csl.author),
+    year,
+    type,
+    venue,
+  };
+  if (month != null) entry.month = month;
+  if (day != null) entry.day = day;
+  if (venueFull) entry.venue_full = venueFull;
+  if (extras.venue_url) entry.venue_url = extras.venue_url;
+  if (csl.page) entry.pages = csl.page;
+  // For thesis: CSL stores school in publisher; keep it as venue_full only,
+  // don't duplicate as entry.publisher.
+  if (csl.publisher && type !== 'thesis') entry.publisher = csl.publisher;
+  const address = csl['event-place'] || csl['publisher-place'];
+  if (address) entry.address = address;
+  if (csl.DOI) entry.doi = csl.DOI;
+  if (csl.editor) {
+    entry.editor = cslAuthorsToStrings(csl.editor).join(', ');
+  }
+
+  // note: extras wins, else bib note
+  const note = extras.note ?? csl.note;
+  if (note) entry.note = note;
+
+  if (extras.status) entry.status = extras.status;
+  if (extras.equal_contribution) entry.equal_contribution = extras.equal_contribution;
+
+  if (Object.keys(links).length > 0) entry.links = links;
+
+  return entry;
 }
 
 // ------------------------------------------------------------
@@ -346,12 +522,61 @@ function warnMissingPdfs(entries) {
 }
 
 function main() {
-  const raw = readFileSync('pubs.yaml', 'utf8');
-  const entries = yaml.load(raw);
-  if (!Array.isArray(entries)) {
-    console.error('pubs.yaml must be a list of entries');
+  // 1. Read site.yaml, resolve bib-source path.
+  const siteMeta = yaml.load(readFileSync('site.yaml', 'utf8'));
+  const bibSourcePath = siteMeta['bib-source'];
+  if (!bibSourcePath) {
+    console.error('site.yaml must define bib-source: source.bib');
     process.exit(1);
   }
+
+  // 2. Load + parse the global bib.
+  let bibText;
+  try {
+    bibText = loadBibSource(bibSourcePath);
+  } catch (err) {
+    console.error(err.message);
+    process.exit(1);
+  }
+  const cslAll = parseBib(bibText);
+  const index = indexByKey(cslAll);
+  const arxivMap = extractArxivEprints(bibText);
+
+  // 3. Read pubs.yaml.
+  if (!existsSync('pubs.yaml')) {
+    console.error('pubs.yaml not found at repo root');
+    process.exit(1);
+  }
+  const overlays = yaml.load(readFileSync('pubs.yaml', 'utf8'));
+  if (!Array.isArray(overlays)) {
+    console.error('pubs.yaml must be a list of {key, ...extras} objects');
+    process.exit(1);
+  }
+
+  // 4. For each requested key: find in bib, adapt, validate.
+  const entries = [];
+  const missing = [];
+  for (const overlay of overlays) {
+    const { key, ...extras } = overlay;
+    if (!key) {
+      console.error(`pubs.yaml entry missing required 'key': ${JSON.stringify(overlay)}`);
+      process.exit(1);
+    }
+    const csl = index.get(key);
+    if (!csl) {
+      missing.push(key);
+      continue;
+    }
+    entries.push(adaptEntry(csl, extras, arxivMap));
+  }
+  if (missing.length > 0) {
+    console.error(
+      `The following keys were not found in source.bib:\n` +
+      missing.map(k => `  - ${k}`).join('\n')
+    );
+    process.exit(1);
+  }
+
   try {
     entries.forEach(validateEntry);
   } catch (err) {
@@ -360,18 +585,21 @@ function main() {
   }
   warnMissingPdfs(entries);
 
+  // 5. Sort + render markdown.
   const sorted = sortEntries(entries);
-
   ensureDir('_generated');
   writeFileSync('_generated/pubs.md', generateMarkdown(sorted));
   console.log(`Generated: _generated/pubs.md (${sorted.length} entries)`);
 
+  // 6. Extract requested entries verbatim from the source bib, then strip
+  // Zotero's local filesystem paths and other private metadata before writing.
+  const selectedKeys = sorted.map(e => e.id);
+  const biblatex = stripLeakyFields(extractEntriesByKey(bibText, selectedKeys));
   ensureDir('assets/bibliography');
-  writeFileSync('assets/bibliography/pubs.bib', generateBibtexFile(sorted));
+  writeFileSync('assets/bibliography/pubs.bib', biblatex);
   console.log(`Generated: assets/bibliography/pubs.bib (${sorted.length} entries)`);
 }
 
-// Run if invoked directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }

@@ -1,23 +1,39 @@
 // test/build-pubs.test.js
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { stripTitleBraces, latexEscape } from '../scripts/build-pubs.js';
-import { formatAuthorsHtml, formatAuthorsBibtex } from '../scripts/build-pubs.js';
 import {
-  buildPdfUrl, buildArxivUrl, buildLingbuzzUrl, buildDoiUrl, getPrimaryUrl
+  readFileSync, writeFileSync, mkdirSync, symlinkSync, rmSync,
+} from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+
+import {
+  stripTitleBraces,
+  escapeHtml,
+  formatAuthorsHtml,
+  buildPdfUrl, buildArxivUrl, buildLingbuzzUrl, buildDoiUrl, getPrimaryUrl,
+  sortEntries,
+  validateEntry,
+  generateHtmlEntry,
+  generateMarkdown,
+  expandHome, loadBibSource,
+  parseBib, indexByKey, extractArxivEprints, extractEntriesByKey,
+  mapCslType,
+  cslAuthorsToStrings,
+  adaptEntry,
+  stripLeakyFields,
 } from '../scripts/build-pubs.js';
-import { sortEntries } from '../scripts/build-pubs.js';
-import { validateEntry } from '../scripts/build-pubs.js';
-import { generateHtmlEntry } from '../scripts/build-pubs.js';
-import { generateBibtexEntry } from '../scripts/build-pubs.js';
-import { generateMarkdown, generateBibtexFile } from '../scripts/build-pubs.js';
-import { escapeHtml } from '../scripts/build-pubs.js';
 
-// Imports will be added as functions are implemented.
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const SAMPLE_BIB = readFileSync(
+  resolve(__dirname, 'fixtures/sample.bib'),
+  'utf8'
+);
 
-test('scaffold loads', () => {
-  assert.ok(true);
-});
+// ------------------------------------------------------------
+// Text helpers
+// ------------------------------------------------------------
 
 test('stripTitleBraces: removes braces', () => {
   assert.equal(
@@ -34,19 +50,18 @@ test('stripTitleBraces: nested/multiple braces', () => {
   assert.equal(stripTitleBraces('{ACL} {2021}: {Good} Stuff'), 'ACL 2021: Good Stuff');
 });
 
-test('latexEscape: common diacritics', () => {
-  assert.equal(latexEscape('Benjamin Van Dürme'), 'Benjamin Van D{\\"u}rme');
-  assert.equal(latexEscape('João'), 'Jo{\\~a}o');
-  assert.equal(latexEscape('José'), "Jos{\\'e}");
-  assert.equal(latexEscape('Montréal'), "Montr{\\'e}al");
+test('escapeHtml: escapes <, >, &, ", \'', () => {
+  assert.equal(escapeHtml('a & b'), 'a &amp; b');
+  assert.equal(escapeHtml('<script>'), '&lt;script&gt;');
+  assert.equal(escapeHtml('"quoted"'), '&quot;quoted&quot;');
+  assert.equal(escapeHtml("it's"), 'it&#39;s');
+  assert.equal(escapeHtml('plain text'), 'plain text');
+  assert.equal(escapeHtml(''), '');
 });
 
-test('latexEscape: ASCII unchanged', () => {
-  assert.equal(latexEscape('Plain ASCII text'), 'Plain ASCII text');
-});
-
-test('latexEscape: empty string', () => {
-  assert.equal(latexEscape(''), '');
+test('escapeHtml: null/undefined passes through', () => {
+  assert.equal(escapeHtml(null), null);
+  assert.equal(escapeHtml(undefined), undefined);
 });
 
 test('formatAuthorsHtml: single author', () => {
@@ -67,34 +82,9 @@ test('formatAuthorsHtml: equal contribution markers', () => {
   );
 });
 
-test('formatAuthorsBibtex: single author', () => {
-  assert.equal(formatAuthorsBibtex(['Jacob Louis Hoover']), 'Hoover, Jacob Louis');
-});
-
-test('formatAuthorsBibtex: two authors joined with "and"', () => {
-  assert.equal(
-    formatAuthorsBibtex(['Alice Smith', 'Bob Jones']),
-    'Smith, Alice and Jones, Bob'
-  );
-});
-
-test('formatAuthorsBibtex: surname prefix (Van Durme)', () => {
-  assert.equal(
-    formatAuthorsBibtex(['Benjamin Van Durme']),
-    'Van Durme, Benjamin'
-  );
-});
-
-test('formatAuthorsBibtex: single-name author', () => {
-  assert.equal(formatAuthorsBibtex(['Plato']), 'Plato');
-});
-
-test('formatAuthorsBibtex: apostrophe in surname', () => {
-  assert.equal(
-    formatAuthorsBibtex(["Timothy J. O'Donnell"]),
-    "O'Donnell, Timothy J."
-  );
-});
+// ------------------------------------------------------------
+// URL builders
+// ------------------------------------------------------------
 
 test('buildPdfUrl: relative filename → /assets/pdfs/', () => {
   assert.equal(buildPdfUrl('dissertation.pdf'), '/assets/pdfs/dissertation.pdf');
@@ -140,7 +130,7 @@ test('getPrimaryUrl: falls back to arxiv', () => {
   assert.equal(getPrimaryUrl({ arxiv: '1234' }), 'https://arxiv.org/abs/1234');
 });
 
-test('getPrimaryUrl: falls back through preprint, doi_url, openreview', () => {
+test('getPrimaryUrl: preprint/doi_url/openreview each resolve alone', () => {
   assert.equal(getPrimaryUrl({ preprint: 'http://p' }), 'http://p');
   assert.equal(getPrimaryUrl({ doi_url: 'http://d' }), 'http://d');
   assert.equal(getPrimaryUrl({ openreview: 'http://o' }), 'http://o');
@@ -164,6 +154,10 @@ test('getPrimaryUrl: returns null if no known link', () => {
   assert.equal(getPrimaryUrl({ code: 'http://c' }), null);
   assert.equal(getPrimaryUrl({}), null);
 });
+
+// ------------------------------------------------------------
+// Sort + validate
+// ------------------------------------------------------------
 
 test('sortEntries: reverse chronological by year, month, day', () => {
   const entries = [
@@ -239,6 +233,10 @@ test('validateEntry: rejects links.other entry missing label or url', () => {
     /links\.other/
   );
 });
+
+// ------------------------------------------------------------
+// HTML entry rendering
+// ------------------------------------------------------------
 
 const htmlFixture = {
   id: 'hoover.j:2021emnlp',
@@ -316,99 +314,28 @@ test('generateHtmlEntry: renders links.other list', () => {
   assert.match(html, /surprisal explorer/);
 });
 
-test('generateBibtexEntry: inproceedings entry', () => {
-  const bib = generateBibtexEntry({
-    id: 'hoover.j:2021emnlp',
-    title: 'Linguistic Dependencies and Statistical Dependence',
-    authors: ['Jacob Louis Hoover', 'Wenyu Du'],
-    year: 2021,
-    month: 11,
-    type: 'inproceedings',
-    venue: 'EMNLP 2021',
-    venue_full: 'Proceedings of the 2021 Conference on EMNLP',
-    pages: '2941--2963',
-    publisher: 'Association for Computational Linguistics',
-    links: { url: 'https://aclanthology.org/2021.emnlp-main.234' },
-  });
-  assert.match(bib, /^@inproceedings\{hoover\.j:2021emnlp,/);
-  assert.match(bib, /title = \{Linguistic Dependencies and Statistical Dependence\}/);
-  assert.match(bib, /author = \{Hoover, Jacob Louis and Du, Wenyu\}/);
-  assert.match(bib, /booktitle = \{Proceedings of the 2021 Conference on EMNLP\}/);
-  assert.match(bib, /pages = \{2941--2963\}/);
-  assert.match(bib, /publisher = \{Association for Computational Linguistics\}/);
-  assert.match(bib, /url = \{https:\/\/aclanthology\.org\/2021\.emnlp-main\.234\}/);
-  assert.match(bib, /year = \{2021\}/);
-  assert.match(bib, /month = \{11\}/);
-  assert.match(bib, /\n\}$/);
+test('generateHtmlEntry: escapes HTML-unsafe chars in title', () => {
+  const entry = { ...htmlFixture, title: 'p < 0.05 & q > 0' };
+  const html = generateHtmlEntry(entry);
+  assert.match(html, /p &lt; 0\.05 &amp; q &gt; 0/);
+  assert.doesNotMatch(html, /p < 0\.05/);
 });
 
-test('generateBibtexEntry: article with doi', () => {
-  const bib = generateBibtexEntry({
-    id: 'hoover.j:2023',
-    title: 'The Plausibility of Sampling',
-    authors: ['Jacob Louis Hoover'],
-    year: 2023,
-    type: 'article',
-    venue: 'Open Mind',
-    venue_full: 'Open Mind: Discoveries in Cognitive Science',
-    doi: '10.1162/opmi_a_00086',
-  });
-  assert.match(bib, /^@article\{hoover\.j:2023,/);
-  assert.match(bib, /journal = \{Open Mind: Discoveries in Cognitive Science\}/);
-  assert.match(bib, /doi = \{10\.1162\/opmi_a_00086\}/);
+test('generateHtmlEntry: escapes HTML-unsafe chars in venue', () => {
+  const entry = { ...htmlFixture, venue: 'A & B Conference', venue_url: undefined };
+  const html = generateHtmlEntry(entry);
+  assert.match(html, /A &amp; B Conference/);
 });
 
-test('generateBibtexEntry: thesis → @phdthesis with school', () => {
-  const bib = generateBibtexEntry({
-    id: 'hoover.j:2024phd',
-    title: 'The Cost of Information',
-    authors: ['Jacob Louis Hoover'],
-    year: 2024,
-    type: 'thesis',
-    venue: 'McGill University',
-    venue_full: 'McGill University',
-  });
-  assert.match(bib, /^@phdthesis\{hoover\.j:2024phd,/);
-  assert.match(bib, /school = \{McGill University\}/);
+test('generateHtmlEntry: escapes HTML-unsafe chars in author names', () => {
+  const entry = { ...htmlFixture, authors: ['Alice & Co'] };
+  const html = generateHtmlEntry(entry);
+  assert.match(html, /Alice &amp; Co/);
 });
 
-test('generateBibtexEntry: preserves title braces for capitalization', () => {
-  const bib = generateBibtexEntry({
-    id: 'chan.r:2026',
-    title: 'Ensembling Language Models with Sequential {Monte Carlo}',
-    authors: ['Robin Chan'],
-    year: 2026,
-    type: 'online',
-    venue: 'arXiv',
-  });
-  assert.match(bib, /title = \{Ensembling Language Models with Sequential \{Monte Carlo\}\}/);
-});
-
-test('generateBibtexEntry: strips emoji from note', () => {
-  const bib = generateBibtexEntry({
-    id: 'x',
-    title: 'T',
-    authors: ['A B'],
-    year: 2025,
-    type: 'misc',
-    venue: 'V',
-    note: 'Outstanding Paper Award 🏆',
-  });
-  assert.match(bib, /note = \{Outstanding Paper Award\}/);
-  assert.doesNotMatch(bib, /🏆/);
-});
-
-test('generateBibtexEntry: escapes diacritics in author names', () => {
-  const bib = generateBibtexEntry({
-    id: 'x',
-    title: 'T',
-    authors: ['Benjamin Van Dürme'],
-    year: 2024,
-    type: 'misc',
-    venue: 'V',
-  });
-  assert.match(bib, /author = \{Van D\{\\"u\}rme, Benjamin\}/);
-});
+// ------------------------------------------------------------
+// Document wrapper
+// ------------------------------------------------------------
 
 const docEntries = [
   {
@@ -438,54 +365,530 @@ test('generateMarkdown: equal-contribution footnote only when used', () => {
   assert.doesNotMatch(mdNoEq, /\* Equal contribution/);
 });
 
-test('generateBibtexFile: concatenates entries separated by blank lines', () => {
-  const bib = generateBibtexFile(docEntries);
-  assert.match(bib, /^@article\{a,/);
-  assert.match(bib, /@misc\{b,/);
-  const chunks = bib.trim().split(/\n\n/);
-  assert.equal(chunks.length, 2);
+// ------------------------------------------------------------
+// Bib source loading
+// ------------------------------------------------------------
+
+test('expandHome: leading ~ expands to homedir', () => {
+  const result = expandHome('~/foo/bar');
+  assert.notEqual(result, '~/foo/bar');
+  assert.match(result, /\/foo\/bar$/);
 });
 
-test('generateMarkdown: respects bibHref option', () => {
-  const md = generateMarkdown(docEntries, { bibHref: '/assets/bibliography/alt.bib' });
-  assert.match(md, /href="\/assets\/bibliography\/alt\.bib"/);
-  assert.doesNotMatch(md, /href="\/assets\/bibliography\/pubs\.bib"/);
+test('expandHome: no ~ returns unchanged', () => {
+  assert.equal(expandHome('/abs/path'), '/abs/path');
+  assert.equal(expandHome('rel/path'), 'rel/path');
 });
 
-test('generateMarkdown: default bibHref unchanged', () => {
-  const md = generateMarkdown(docEntries);
-  assert.match(md, /href="\/assets\/bibliography\/pubs\.bib"/);
+test('loadBibSource: reads file contents from resolved path', () => {
+  const dir = `${tmpdir()}/pubs-bib-test-${Date.now()}-load`;
+  mkdirSync(dir, { recursive: true });
+  const bibPath = `${dir}/test.bib`;
+  writeFileSync(bibPath, '@article{x, title={T}, author={A B}, year={2025}}');
+  const text = loadBibSource(bibPath);
+  assert.match(text, /@article\{x/);
+  rmSync(dir, { recursive: true, force: true });
 });
 
-test('escapeHtml: escapes <, >, &, ", \'', () => {
-  assert.equal(escapeHtml('a & b'), 'a &amp; b');
-  assert.equal(escapeHtml('<script>'), '&lt;script&gt;');
-  assert.equal(escapeHtml('"quoted"'), '&quot;quoted&quot;');
-  assert.equal(escapeHtml("it's"), 'it&#39;s');
-  assert.equal(escapeHtml('plain text'), 'plain text');
-  assert.equal(escapeHtml(''), '');
+test('loadBibSource: missing file throws with actionable message', () => {
+  const missing = `${tmpdir()}/definitely-does-not-exist-${Date.now()}.bib`;
+  assert.throws(
+    () => loadBibSource(missing),
+    /not found[\s\S]*ln -s/
+  );
 });
 
-test('escapeHtml: null/undefined passes through', () => {
-  assert.equal(escapeHtml(null), null);
-  assert.equal(escapeHtml(undefined), undefined);
+test('loadBibSource: broken symlink throws with actionable message', () => {
+  const dir = `${tmpdir()}/pubs-bib-test-${Date.now()}-broken`;
+  mkdirSync(dir, { recursive: true });
+  const linkPath = `${dir}/broken.bib`;
+  symlinkSync(`${dir}/nonexistent-target.bib`, linkPath);
+  assert.throws(
+    () => loadBibSource(linkPath),
+    /not found[\s\S]*ln -s/
+  );
+  rmSync(dir, { recursive: true, force: true });
 });
 
-test('generateHtmlEntry: escapes HTML-unsafe chars in title', () => {
-  const entry = { ...htmlFixture, title: 'p < 0.05 & q > 0' };
-  const html = generateHtmlEntry(entry);
-  assert.match(html, /p &lt; 0\.05 &amp; q &gt; 0/);
-  assert.doesNotMatch(html, /p < 0\.05/);
+// ------------------------------------------------------------
+// citation-js parsing + bib-text helpers
+// ------------------------------------------------------------
+
+test('parseBib: returns CSL-JSON array for sample bib', () => {
+  const data = parseBib(SAMPLE_BIB);
+  assert.ok(Array.isArray(data));
+  assert.equal(data.length, 5);
+  const ids = data.map(e => e.id);
+  assert.deepEqual(ids.sort(), [
+    'bar:2023journal', 'baz:2024phd', 'foo:2021conf', 'quux:2022poster', 'qux:2025arxiv',
+  ]);
 });
 
-test('generateHtmlEntry: escapes HTML-unsafe chars in venue', () => {
-  const entry = { ...htmlFixture, venue: 'A & B Conference', venue_url: undefined };
-  const html = generateHtmlEntry(entry);
-  assert.match(html, /A &amp; B Conference/);
+test('parseBib: preserves type, title, issued', () => {
+  const data = parseBib(SAMPLE_BIB);
+  const foo = data.find(e => e.id === 'foo:2021conf');
+  assert.ok(foo);
+  assert.equal(foo.type, 'paper-conference');
+  assert.equal(foo.title, 'A Paper About Things');
+  assert.ok(foo.issued);
+  assert.equal(foo.issued['date-parts'][0][0], 2021);
 });
 
-test('generateHtmlEntry: escapes HTML-unsafe chars in author names', () => {
-  const entry = { ...htmlFixture, authors: ['Alice & Co'] };
-  const html = generateHtmlEntry(entry);
-  assert.match(html, /Alice &amp; Co/);
+test('indexByKey: maps id → entry', () => {
+  const data = parseBib(SAMPLE_BIB);
+  const index = indexByKey(data);
+  assert.ok(index instanceof Map);
+  assert.equal(index.size, 5);
+  assert.equal(index.get('foo:2021conf').title, 'A Paper About Things');
+  assert.equal(index.get('nonexistent'), undefined);
+});
+
+test('extractArxivEprints: captures eprint + eprinttype=arxiv', () => {
+  const text = '@online{foo:2024,\n  eprint = {2401.12345},\n  eprinttype = {arxiv}\n}';
+  const map = extractArxivEprints(text);
+  assert.equal(map.get('foo:2024'), '2401.12345');
+});
+
+test('extractArxivEprints: captures archiveprefix=arXiv variant', () => {
+  const text = '@article{bar:2023,\n  archiveprefix = {arXiv},\n  eprint = {2303.01234}\n}';
+  const map = extractArxivEprints(text);
+  assert.equal(map.get('bar:2023'), '2303.01234');
+});
+
+test('extractArxivEprints: case-insensitive arxiv matching', () => {
+  const text = '@online{x,\n  eprint = {1234.5678},\n  eprinttype = {ArXiv}\n}';
+  const map = extractArxivEprints(text);
+  assert.equal(map.get('x'), '1234.5678');
+});
+
+test('extractArxivEprints: ignores non-arxiv eprints', () => {
+  const text = '@misc{baz,\n  eprint = {12345},\n  eprinttype = {pubmed}\n}';
+  const map = extractArxivEprints(text);
+  assert.equal(map.size, 0);
+});
+
+test('extractArxivEprints: ignores entries without eprint', () => {
+  const text = '@article{qux,\n  title = {T},\n  year = {2023}\n}';
+  const map = extractArxivEprints(text);
+  assert.equal(map.size, 0);
+});
+
+test('extractArxivEprints: on sample fixture, captures qux:2025arxiv', () => {
+  const map = extractArxivEprints(SAMPLE_BIB);
+  assert.equal(map.get('qux:2025arxiv'), '2501.12345');
+});
+
+test('extractEntriesByKey: preserves raw entries with original cite keys', () => {
+  const result = extractEntriesByKey(SAMPLE_BIB, ['foo:2021conf', 'bar:2023journal']);
+  assert.match(result, /^@inproceedings\{foo:2021conf/m);
+  assert.match(result, /^@article\{bar:2023journal/m);
+  assert.doesNotMatch(result, /baz:2024phd/);
+  assert.doesNotMatch(result, /qux:2025arxiv/);
+});
+
+test('extractEntriesByKey: preserves the order of requested keys as encountered in bib', () => {
+  const result = extractEntriesByKey(SAMPLE_BIB, ['bar:2023journal', 'foo:2021conf']);
+  const fooIdx = result.indexOf('foo:2021conf');
+  const barIdx = result.indexOf('bar:2023journal');
+  assert.ok(fooIdx < barIdx, 'entries should appear in source-bib order, not requested order');
+});
+
+test('extractEntriesByKey: empty requested set yields empty output', () => {
+  assert.equal(extractEntriesByKey(SAMPLE_BIB, []).trim(), '');
+});
+
+test('extractEntriesByKey: unknown keys are silently skipped', () => {
+  const result = extractEntriesByKey(SAMPLE_BIB, ['foo:2021conf', 'nonexistent:2099']);
+  assert.match(result, /foo:2021conf/);
+  assert.doesNotMatch(result, /nonexistent/);
+});
+
+test('stripLeakyFields: removes file field with local paths', () => {
+  const input = `@article{x,
+  title = {T},
+  file = {/Users/v/Zotero/file.pdf;/Users/v/other/file2.pdf},
+  author = {A B},
+  year = {2025}
+}`;
+  const result = stripLeakyFields(input);
+  assert.doesNotMatch(result, /\/Users\/v/);
+  assert.doesNotMatch(result, /\bfile\s*=/);
+  assert.match(result, /title = \{T\}/);
+  assert.match(result, /author = \{A B\}/);
+});
+
+test('stripLeakyFields: handles nested braces in abstract', () => {
+  const input = `@article{x,
+  title = {T},
+  abstract = {Some {nested} braces and $math_{sub}$ here.},
+  year = {2025}
+}`;
+  const result = stripLeakyFields(input);
+  assert.doesNotMatch(result, /abstract/);
+  assert.doesNotMatch(result, /nested/);
+  assert.match(result, /title = \{T\}/);
+  assert.match(result, /year = \{2025\}/);
+});
+
+test('stripLeakyFields: handles multiline field values', () => {
+  const input = `@article{x,
+  title = {T},
+  abstract = {First line of abstract.
+    Second line here.
+    Third line concludes.},
+  year = {2025}
+}`;
+  const result = stripLeakyFields(input);
+  assert.doesNotMatch(result, /abstract/);
+  assert.doesNotMatch(result, /Second line/);
+  assert.match(result, /title = \{T\}/);
+});
+
+test('stripLeakyFields: removes all designated leaky fields', () => {
+  const input = `@article{x,
+  title = {T},
+  keywords = {tag1,tag2},
+  urldate = {2024-11-15},
+  langid = {en-US},
+  pubstate = {prepublished},
+  eprintclass = {cs.CL},
+  year = {2025}
+}`;
+  const result = stripLeakyFields(input);
+  for (const field of ['keywords', 'urldate', 'langid', 'pubstate', 'eprintclass']) {
+    assert.doesNotMatch(result, new RegExp(`\\b${field}\\b`), `${field} should be stripped`);
+  }
+  assert.match(result, /title = \{T\}/);
+  assert.match(result, /year = \{2025\}/);
+});
+
+test('stripLeakyFields: leaves non-leaky fields intact', () => {
+  const input = `@article{x,
+  title = {T},
+  author = {A B},
+  doi = {10.1000/xyz},
+  url = {https://example.com},
+  year = {2025}
+}`;
+  const result = stripLeakyFields(input);
+  assert.match(result, /title = \{T\}/);
+  assert.match(result, /author = \{A B\}/);
+  assert.match(result, /doi = \{10\.1000\/xyz\}/);
+  assert.match(result, /url = \{https:\/\/example\.com\}/);
+  assert.match(result, /year = \{2025\}/);
+});
+
+test('stripLeakyFields: does not munge entry header', () => {
+  const input = `@article{x,
+  file = {/path},
+  year = {2025}
+}`;
+  const result = stripLeakyFields(input);
+  assert.match(result, /^@article\{x,/);
+});
+
+// ------------------------------------------------------------
+// CSL-JSON type + author adapters
+// ------------------------------------------------------------
+
+test('mapCslType: article-journal → article', () => {
+  assert.equal(mapCslType('article-journal'), 'article');
+});
+
+test('mapCslType: paper-conference → inproceedings', () => {
+  assert.equal(mapCslType('paper-conference'), 'inproceedings');
+});
+
+test('mapCslType: thesis → thesis', () => {
+  assert.equal(mapCslType('thesis'), 'thesis');
+});
+
+test('mapCslType: webpage → online (biblatex @online maps here)', () => {
+  assert.equal(mapCslType('webpage'), 'online');
+});
+
+test('mapCslType: post/post-weblog/manuscript → online', () => {
+  assert.equal(mapCslType('post'), 'online');
+  assert.equal(mapCslType('post-weblog'), 'online');
+  assert.equal(mapCslType('manuscript'), 'online');
+});
+
+test('mapCslType: document → misc (biblatex @misc maps here)', () => {
+  assert.equal(mapCslType('document'), 'misc');
+});
+
+test('mapCslType: anything else → misc', () => {
+  assert.equal(mapCslType('book'), 'misc');
+  assert.equal(mapCslType('chapter'), 'misc');
+  assert.equal(mapCslType('report'), 'misc');
+  assert.equal(mapCslType('article-magazine'), 'misc');
+  assert.equal(mapCslType('unknown'), 'misc');
+  assert.equal(mapCslType(undefined), 'misc');
+});
+
+test('cslAuthorsToStrings: simple given + family', () => {
+  assert.deepEqual(
+    cslAuthorsToStrings([{ given: 'First', family: 'Last' }]),
+    ['First Last']
+  );
+});
+
+test('cslAuthorsToStrings: multiple authors', () => {
+  assert.deepEqual(
+    cslAuthorsToStrings([
+      { given: 'Alice', family: 'Smith' },
+      { given: 'Bob', family: 'Jones' },
+    ]),
+    ['Alice Smith', 'Bob Jones']
+  );
+});
+
+test('cslAuthorsToStrings: non-dropping particle kept with family', () => {
+  assert.deepEqual(
+    cslAuthorsToStrings([
+      { given: 'Ludwig', 'non-dropping-particle': 'van', family: 'Beethoven' },
+    ]),
+    ['Ludwig van Beethoven']
+  );
+});
+
+test('cslAuthorsToStrings: dropping particle placed after given', () => {
+  assert.deepEqual(
+    cslAuthorsToStrings([
+      { given: 'Charles', 'dropping-particle': 'de', family: 'Gaulle' },
+    ]),
+    ['Charles de Gaulle']
+  );
+});
+
+test('cslAuthorsToStrings: suffix appended', () => {
+  assert.deepEqual(
+    cslAuthorsToStrings([
+      { given: 'John', family: 'Smith', suffix: 'Jr.' },
+    ]),
+    ['John Smith Jr.']
+  );
+});
+
+test('cslAuthorsToStrings: literal name (single string)', () => {
+  assert.deepEqual(
+    cslAuthorsToStrings([{ literal: 'An Organization' }]),
+    ['An Organization']
+  );
+});
+
+test('cslAuthorsToStrings: only family (single-name authors)', () => {
+  assert.deepEqual(
+    cslAuthorsToStrings([{ family: 'Plato' }]),
+    ['Plato']
+  );
+});
+
+test('cslAuthorsToStrings: undefined/null returns empty array', () => {
+  assert.deepEqual(cslAuthorsToStrings(undefined), []);
+  assert.deepEqual(cslAuthorsToStrings(null), []);
+});
+
+// ------------------------------------------------------------
+// adaptEntry
+// ------------------------------------------------------------
+
+const cslInproceedings = {
+  id: 'foo:2021conf',
+  type: 'paper-conference',
+  title: 'A Paper About Things',
+  author: [
+    { given: 'First', family: 'Last' },
+    { given: 'Another', family: 'Person' },
+  ],
+  'container-title': 'Proceedings of the First Conference on Things',
+  'event-title': 'FCoT',
+  issued: { 'date-parts': [[2021, 11]] },
+  page: '1-10',
+  publisher: 'Some Publisher',
+  'publisher-place': 'Somewhere',
+  DOI: '10.1000/abc',
+  URL: 'https://example.com/abc',
+};
+
+test('adaptEntry: basic inproceedings, no extras', () => {
+  const e = adaptEntry(cslInproceedings, {});
+  assert.equal(e.id, 'foo:2021conf');
+  assert.equal(e.title, 'A Paper About Things');
+  assert.deepEqual(e.authors, ['First Last', 'Another Person']);
+  assert.equal(e.year, 2021);
+  assert.equal(e.month, 11);
+  assert.equal(e.type, 'inproceedings');
+  assert.equal(e.venue_full, 'Proceedings of the First Conference on Things');
+  assert.equal(e.venue, 'FCoT');
+  assert.equal(e.pages, '1-10');
+  assert.equal(e.publisher, 'Some Publisher');
+  assert.equal(e.address, 'Somewhere');
+  assert.equal(e.doi, '10.1000/abc');
+  assert.equal(e.links.url, 'https://example.com/abc');
+  assert.equal(e.links.doi_url, 'https://doi.org/10.1000/abc');
+});
+
+test('adaptEntry: venue fallback chain', () => {
+  const e1 = adaptEntry(cslInproceedings, { venue: 'Short Label' });
+  assert.equal(e1.venue, 'Short Label');
+  const { 'event-title': _, ...noEvent } = cslInproceedings;
+  const e2 = adaptEntry(noEvent, {});
+  assert.equal(e2.venue, 'Proceedings of the First Conference on Things');
+});
+
+test('adaptEntry: article → journal as container-title', () => {
+  const cslArticle = {
+    id: 'bar:2023',
+    type: 'article-journal',
+    title: 'Another Thing',
+    author: [{ given: 'Solo', family: 'Author' }],
+    'container-title': 'Journal of Stuff',
+    issued: { 'date-parts': [[2023, 7]] },
+    DOI: '10.1000/def',
+  };
+  const e = adaptEntry(cslArticle, {});
+  assert.equal(e.type, 'article');
+  assert.equal(e.venue_full, 'Journal of Stuff');
+  assert.equal(e.venue, 'Journal of Stuff');
+  assert.equal(e.links.doi_url, 'https://doi.org/10.1000/def');
+});
+
+test('adaptEntry: thesis uses publisher as school (not duplicated)', () => {
+  const cslThesis = {
+    id: 'baz:2024phd',
+    type: 'thesis',
+    title: 'My Dissertation',
+    author: [{ given: 'The', family: 'Graduate' }],
+    publisher: 'Some University',
+    issued: { 'date-parts': [[2024]] },
+    URL: 'https://example.com/thesis',
+  };
+  const e = adaptEntry(cslThesis, {});
+  assert.equal(e.type, 'thesis');
+  assert.equal(e.venue, 'Some University');
+  assert.equal(e.venue_full, 'Some University');
+  assert.equal(e.publisher, undefined);
+  assert.equal(e.links.url, 'https://example.com/thesis');
+});
+
+test('adaptEntry: extras note + status + equal_contribution', () => {
+  const e = adaptEntry(cslInproceedings, {
+    note: 'Best Paper',
+    status: 'preprint',
+    equal_contribution: [0, 1],
+  });
+  assert.equal(e.note, 'Best Paper');
+  assert.equal(e.status, 'preprint');
+  assert.deepEqual(e.equal_contribution, [0, 1]);
+});
+
+test('adaptEntry: links merge — extras add to bib-derived', () => {
+  const e = adaptEntry(cslInproceedings, {
+    links: {
+      code: 'https://github.com/foo',
+      slides: 'talk.pdf',
+    },
+  });
+  assert.equal(e.links.url, 'https://example.com/abc');
+  assert.equal(e.links.doi_url, 'https://doi.org/10.1000/abc');
+  assert.equal(e.links.code, 'https://github.com/foo');
+  assert.equal(e.links.slides, 'talk.pdf');
+});
+
+test('adaptEntry: extras.links.url overrides bib URL', () => {
+  const e = adaptEntry(cslInproceedings, {
+    links: { url: 'https://override.com' },
+  });
+  assert.equal(e.links.url, 'https://override.com');
+});
+
+test('adaptEntry: extras.venue_url only from extras', () => {
+  const e = adaptEntry(cslInproceedings, { venue_url: 'https://fcot.org' });
+  assert.equal(e.venue_url, 'https://fcot.org');
+});
+
+test('adaptEntry: extras.note overrides bib note', () => {
+  const withBibNote = { ...cslInproceedings, note: 'bib note' };
+  const e1 = adaptEntry(withBibNote, {});
+  assert.equal(e1.note, 'bib note');
+  const e2 = adaptEntry(withBibNote, { note: 'extras note' });
+  assert.equal(e2.note, 'extras note');
+});
+
+test('adaptEntry: links.arxiv from arxivEprints map (3rd arg)', () => {
+  const cslWebpage = {
+    id: 'qux:2025arxiv',
+    type: 'webpage',
+    title: 'A Preprint',
+    author: [{ given: 'Preprint', family: 'Writer' }],
+    issued: { 'date-parts': [[2025]] },
+  };
+  const arxivMap = new Map([['qux:2025arxiv', '2501.12345']]);
+  const e = adaptEntry(cslWebpage, {}, arxivMap);
+  assert.equal(e.links.arxiv, '2501.12345');
+});
+
+test('adaptEntry: extras.links.arxiv overrides map', () => {
+  const cslWebpage = {
+    id: 'qux:2025arxiv',
+    type: 'webpage',
+    title: 'A Preprint',
+    author: [{ given: 'P', family: 'W' }],
+    issued: { 'date-parts': [[2025]] },
+  };
+  const arxivMap = new Map([['qux:2025arxiv', '2501.12345']]);
+  const e = adaptEntry(cslWebpage, { links: { arxiv: '2600.99999' } }, arxivMap);
+  assert.equal(e.links.arxiv, '2600.99999');
+});
+
+test('adaptEntry: no arxivMap → no links.arxiv', () => {
+  const cslWebpage = {
+    id: 'xyz',
+    type: 'webpage',
+    title: 'T',
+    author: [{ given: 'A', family: 'B' }],
+    issued: { 'date-parts': [[2025]] },
+  };
+  const e = adaptEntry(cslWebpage, {});
+  assert.equal(e.links?.arxiv, undefined);
+});
+
+test('adaptEntry: venue defaults to "arXiv" for arxiv entries with no other venue info', () => {
+  const cslArxiv = {
+    id: 'chan:2026',
+    type: 'webpage',
+    title: 'Paper',
+    author: [{ given: 'A', family: 'B' }],
+    issued: { 'date-parts': [[2026]] },
+  };
+  const arxivMap = new Map([['chan:2026', '2603.05432']]);
+  const e = adaptEntry(cslArxiv, {}, arxivMap);
+  assert.equal(e.venue, 'arXiv');
+});
+
+test('adaptEntry: editor from bib', () => {
+  const cslWithEditor = {
+    ...cslInproceedings,
+    editor: [
+      { given: 'Ed', family: 'One' },
+      { given: 'Ed', family: 'Two' },
+    ],
+  };
+  const e = adaptEntry(cslWithEditor, {});
+  assert.equal(e.editor, 'Ed One, Ed Two');
+});
+
+test('adaptEntry: misc type (document) passes through', () => {
+  const cslMisc = {
+    id: 'quux:2022poster',
+    type: 'document',
+    title: 'A Poster',
+    author: [{ given: 'P', family: 'P' }],
+    issued: { 'date-parts': [[2022]] },
+    publisher: 'Poster at Some Meeting',
+  };
+  const e = adaptEntry(cslMisc, {});
+  assert.equal(e.type, 'misc');
+  assert.equal(e.publisher, 'Poster at Some Meeting');
 });
