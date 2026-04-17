@@ -267,6 +267,46 @@ export function generateBibtexEntry(paper) {
   return lines.join('\n');
 }
 
+const GOOGLE_SCHOLAR_URL =
+  'https://scholar.google.com/citations?user=tfaTOlEAAAAJ';
+
+const NAME_NOTE = `*Note on my name:* My surname is Vigly. Prior to September 2024, my surname was Hoover, which is now a middle name.`;
+
+export function generateMarkdown(entries) {
+  const hasEqual = entries.some(
+    (e) => e.equal_contribution && e.equal_contribution.length > 0
+  );
+  const items = entries.map((e) => generateHtmlEntry(e)).join('\n');
+
+  const parts = [
+    '---',
+    'title: research',
+    'page-style: site',
+    '---',
+    '',
+    '<ul class="social-media-list">',
+    `  <li><a href="${GOOGLE_SCHOLAR_URL}">Google Scholar</a></li>`,
+    '  <li><a href="/assets/bibliography/pubs.bib">BibTeX</a></li>',
+    '</ul>',
+    '',
+    '```{=html}',
+    '<ul class="pub-list">',
+    items,
+    '</ul>',
+    '```',
+    '',
+  ];
+  if (hasEqual) {
+    parts.push('<p class="pub-footnote">* Equal contribution</p>', '');
+  }
+  parts.push('---', '', NAME_NOTE, '');
+  return parts.join('\n');
+}
+
+export function generateBibtexFile(entries) {
+  return entries.map(generateBibtexEntry).join('\n\n') + '\n';
+}
+
 // ------------------------------------------------------------
 // Main
 // ------------------------------------------------------------

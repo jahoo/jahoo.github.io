@@ -10,6 +10,7 @@ import { sortEntries } from '../scripts/build-pubs.js';
 import { validateEntry } from '../scripts/build-pubs.js';
 import { generateHtmlEntry } from '../scripts/build-pubs.js';
 import { generateBibtexEntry } from '../scripts/build-pubs.js';
+import { generateMarkdown, generateBibtexFile } from '../scripts/build-pubs.js';
 
 // Imports will be added as functions are implemented.
 
@@ -392,4 +393,40 @@ test('generateBibtexEntry: escapes diacritics in author names', () => {
     venue: 'V',
   });
   assert.match(bib, /author = \{Van D\{\\"u\}rme, Benjamin\}/);
+});
+
+const docEntries = [
+  {
+    id: 'a', title: 'A', authors: ['X Y'], year: 2023, type: 'article',
+    venue: 'V', links: { url: 'http://a' },
+  },
+  {
+    id: 'b', title: 'B', authors: ['P Q', 'R S'], year: 2022, type: 'misc',
+    venue: 'W', equal_contribution: [0, 1],
+  },
+];
+
+test('generateMarkdown: has front matter and pub-list', () => {
+  const md = generateMarkdown(docEntries);
+  assert.match(md, /^---\ntitle: research\npage-style: site\n---/);
+  assert.match(md, /<ul class="pub-list">/);
+  assert.match(md, /<li class="pub">/);
+  assert.match(md, /scholar\.google\.com/);
+  assert.match(md, /href="\/assets\/bibliography\/pubs\.bib"/);
+  assert.match(md, /surname is Vigly/);
+});
+
+test('generateMarkdown: equal-contribution footnote only when used', () => {
+  const md = generateMarkdown(docEntries);
+  assert.match(md, /\* Equal contribution/);
+  const mdNoEq = generateMarkdown([docEntries[0]]);
+  assert.doesNotMatch(mdNoEq, /\* Equal contribution/);
+});
+
+test('generateBibtexFile: concatenates entries separated by blank lines', () => {
+  const bib = generateBibtexFile(docEntries);
+  assert.match(bib, /^@article\{a,/);
+  assert.match(bib, /@misc\{b,/);
+  const chunks = bib.trim().split(/\n\n/);
+  assert.equal(chunks.length, 2);
 });
