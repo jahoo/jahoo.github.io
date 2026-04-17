@@ -3,7 +3,7 @@ title: home
 page-style: site
 ---
 
-## about
+# about
 
 Hi. [I](/assets/j2024.jpeg)'m Jacob. Some things I'm interested in are human language processing and inference algorithms. My research builds on probabilistic models of cognition, using information theory, algorithmic complexity, and tools from linguistics and machine learning.
 
@@ -13,7 +13,7 @@ I'm also a dancer, formerly with Festival Ballet Providence (now [Ballet RI](htt
 
 Here is my [CV](/assets/CV/jlhv-academic_cv.pdf).
 
-## publications
+# publications
 
 <ul class="social-media-list">
   <li><a href="https://scholar.google.com/citations?user=koLi2TwAAAAJ">Google Scholar</a></li>

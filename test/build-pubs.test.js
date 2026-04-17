@@ -540,9 +540,9 @@ const SAMPLE_ABOUT = 'Hi, I am someone. Some [link](https://example.com) content
 test('generateHomepage: has front matter, about section, publications section', () => {
   const md = generateHomepage(SAMPLE_ABOUT, docEntries);
   assert.match(md, /^---\ntitle: home\npage-style: site\n---/);
-  assert.match(md, /## about/);
+  assert.match(md, /^# about$/m);
   assert.match(md, /Hi, I am someone/);
-  assert.match(md, /## publications/);
+  assert.match(md, /^# publications$/m);
   assert.match(md, /<ul class="pub-list">/);
   assert.match(md, /<li class="pub">/);
   assert.match(md, /scholar\.google\.com/);
@@ -552,7 +552,7 @@ test('generateHomepage: has front matter, about section, publications section', 
 
 test('generateHomepage: about section precedes publications section', () => {
   const md = generateHomepage(SAMPLE_ABOUT, docEntries);
-  assert.ok(md.indexOf('## about') < md.indexOf('## publications'));
+  assert.ok(md.indexOf('# about') < md.indexOf('# publications'));
 });
 
 test('generateHomepage: equal-contribution footnote only when used', () => {
