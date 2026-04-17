@@ -56,6 +56,7 @@ static-html:
 		mkdir -p "$(OUTDIR)/$$d" && \
 		rsync -a --quiet "$$d/" "$(OUTDIR)/$$d/"; \
 	done
+	@touch $(OUTDIR)/.nojekyll
 	@echo "Static HTML copied"
 
 serve:
