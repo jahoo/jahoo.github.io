@@ -427,3 +427,33 @@ test('adaptEntry: misc type (document) passes through', () => {
   assert.equal(e.type, 'misc');
   assert.equal(e.publisher, 'Poster at Some Meeting');
 });
+
+import { extractEntriesByKey } from '../scripts/build-pubs-bib.js';
+
+test('extractEntriesByKey: preserves raw entries with original cite keys', () => {
+  const result = extractEntriesByKey(SAMPLE_BIB, ['foo:2021conf', 'bar:2023journal']);
+  assert.match(result, /^@inproceedings\{foo:2021conf/m);
+  assert.match(result, /^@article\{bar:2023journal/m);
+  // Should not contain the other entries
+  assert.doesNotMatch(result, /baz:2024phd/);
+  assert.doesNotMatch(result, /qux:2025arxiv/);
+});
+
+test('extractEntriesByKey: preserves the order of requested keys as encountered in bib', () => {
+  // Source bib order: foo, bar, baz, qux, quux
+  const result = extractEntriesByKey(SAMPLE_BIB, ['bar:2023journal', 'foo:2021conf']);
+  const fooIdx = result.indexOf('foo:2021conf');
+  const barIdx = result.indexOf('bar:2023journal');
+  // foo comes before bar in source.bib
+  assert.ok(fooIdx < barIdx, 'entries should appear in source-bib order, not requested order');
+});
+
+test('extractEntriesByKey: empty requested set yields empty output', () => {
+  assert.equal(extractEntriesByKey(SAMPLE_BIB, []).trim(), '');
+});
+
+test('extractEntriesByKey: unknown keys are silently skipped', () => {
+  const result = extractEntriesByKey(SAMPLE_BIB, ['foo:2021conf', 'nonexistent:2099']);
+  assert.match(result, /foo:2021conf/);
+  assert.doesNotMatch(result, /nonexistent/);
+});

@@ -89,6 +89,23 @@ export function extractArxivEprints(bibText) {
   return map;
 }
 
+// Extract raw biblatex entries verbatim (preserving original cite keys and
+// formatting) for the given set of keys. Used to emit the downloadable
+// pubs-bib.bib — citation-js's serializer rewrites cite keys, which we
+// don't want for this download.
+export function extractEntriesByKey(bibText, keys) {
+  const wanted = new Set(keys);
+  const pieces = [];
+  const re = new RegExp(ENTRY_RE.source, 'g');
+  let m;
+  while ((m = re.exec(bibText)) !== null) {
+    if (wanted.has(m[2])) {
+      pieces.push(m[0]);
+    }
+  }
+  return pieces.length === 0 ? '' : pieces.join('\n\n') + '\n';
+}
+
 // Map CSL-JSON type strings (what citation-js emits) to our entry type enum.
 // Observed in Task 1 smoke-test against a biblatex fixture:
 //   @inproceedings → paper-conference
@@ -215,8 +232,90 @@ export function adaptEntry(csl, extras = {}, arxivEprints = new Map()) {
 // Main
 // ------------------------------------------------------------
 
+function ensureDir(path) {
+  mkdirSync(path, { recursive: true });
+}
+
 function main() {
-  console.log('build-pubs-bib: not yet implemented');
+  // 1. Read site.yaml, resolve bib-source path.
+  const siteMeta = yaml.load(readFileSync('site.yaml', 'utf8'));
+  const bibSourcePath = siteMeta['bib-source'];
+  if (!bibSourcePath) {
+    console.error('site.yaml must define bib-source: source.bib');
+    process.exit(1);
+  }
+
+  // 2. Load + parse the global bib.
+  let bibText;
+  try {
+    bibText = loadBibSource(bibSourcePath);
+  } catch (err) {
+    console.error(err.message);
+    process.exit(1);
+  }
+  const cslAll = parseBib(bibText);
+  const index = indexByKey(cslAll);
+  const arxivMap = extractArxivEprints(bibText);
+
+  // 3. Read pubs-bib.yaml.
+  if (!existsSync('pubs-bib.yaml')) {
+    console.error('pubs-bib.yaml not found at repo root');
+    process.exit(1);
+  }
+  const overlays = yaml.load(readFileSync('pubs-bib.yaml', 'utf8'));
+  if (!Array.isArray(overlays)) {
+    console.error('pubs-bib.yaml must be a list of {key, ...extras} objects');
+    process.exit(1);
+  }
+
+  // 4. For each requested key: find in bib, adapt, validate.
+  const entries = [];
+  const missing = [];
+  for (const overlay of overlays) {
+    const { key, ...extras } = overlay;
+    if (!key) {
+      console.error(`pubs-bib.yaml entry missing required 'key': ${JSON.stringify(overlay)}`);
+      process.exit(1);
+    }
+    const csl = index.get(key);
+    if (!csl) {
+      missing.push(key);
+      continue;
+    }
+    entries.push(adaptEntry(csl, extras, arxivMap));
+  }
+  if (missing.length > 0) {
+    console.error(
+      `The following keys were not found in source.bib:\n` +
+      missing.map(k => `  - ${k}`).join('\n')
+    );
+    process.exit(1);
+  }
+
+  try {
+    entries.forEach(validateEntry);
+  } catch (err) {
+    console.error(err.message);
+    process.exit(1);
+  }
+
+  // 5. Sort + render markdown.
+  const sorted = sortEntries(entries);
+  ensureDir('_generated');
+  writeFileSync(
+    '_generated/pubs-bib.md',
+    generateMarkdown(sorted, { bibHref: '/assets/bibliography/pubs-bib.bib' })
+  );
+  console.log(`Generated: _generated/pubs-bib.md (${sorted.length} entries)`);
+
+  // 6. Extract requested entries verbatim from the source bib for download.
+  // Preserves original cite keys and field formatting (citation-js's own
+  // serializer rewrites keys, which we don't want here).
+  const selectedKeys = sorted.map(e => e.id);
+  const biblatex = extractEntriesByKey(bibText, selectedKeys);
+  ensureDir('assets/bibliography');
+  writeFileSync('assets/bibliography/pubs-bib.bib', biblatex);
+  console.log(`Generated: assets/bibliography/pubs-bib.bib (${sorted.length} entries)`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
