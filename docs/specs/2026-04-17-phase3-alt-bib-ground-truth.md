@@ -226,7 +226,23 @@ source.bib
 
 ## Authoring guide update
 
-Add a short "Bib-ground-truth variant (exploration)" section to `docs/authoring.md` explaining the symlink setup, the config file shape, and how it differs from the YAML variant. Removed when the comparison concludes and one version is chosen.
+Add a short "Bib-ground-truth variant (exploration)" section to `docs/authoring.md` covering:
+
+- **Setup:** create a gitignored symlink `source.bib` at the repo root pointing at your local bib file. The file must be in BibLaTeX format (Zotero's "Better BibLaTeX" export works; classic BibTeX largely works too, modulo a few field-name differences).
+
+  ```bash
+  ln -s ~/all-biblatex.bib source.bib
+  ```
+
+  The path on the right-hand side is wherever your bib actually lives; `source.bib` is what the build reads. If missing, `node scripts/build-pubs-bib.js` fails with a clear message (same command as the example above).
+
+- **Adding a publication:** append an entry to `pubs-bib.yaml` with the bib `key` and any website-specific extras (short `venue` label, `venue_url`, `note`, `status`, `equal_contribution`, `links.{code, slides, poster, ...}`). All bibliographic data is pulled from the bib.
+
+- **Config file shape:** brief example block.
+
+- **Differences from the YAML variant:** one short paragraph noting which one builds `/pubs/` vs. `/pubs-bib/` during the comparison, and a pointer to this spec.
+
+This section gets removed when the comparison concludes and one version is chosen.
 
 ## Open questions
 
