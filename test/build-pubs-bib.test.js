@@ -164,3 +164,68 @@ test('mapCslType: anything else → misc', () => {
   assert.equal(mapCslType('unknown'), 'misc');
   assert.equal(mapCslType(undefined), 'misc');
 });
+
+import { cslAuthorsToStrings } from '../scripts/build-pubs-bib.js';
+
+test('cslAuthorsToStrings: simple given + family', () => {
+  assert.deepEqual(
+    cslAuthorsToStrings([{ given: 'First', family: 'Last' }]),
+    ['First Last']
+  );
+});
+
+test('cslAuthorsToStrings: multiple authors', () => {
+  assert.deepEqual(
+    cslAuthorsToStrings([
+      { given: 'Alice', family: 'Smith' },
+      { given: 'Bob', family: 'Jones' },
+    ]),
+    ['Alice Smith', 'Bob Jones']
+  );
+});
+
+test('cslAuthorsToStrings: non-dropping particle kept with family', () => {
+  assert.deepEqual(
+    cslAuthorsToStrings([
+      { given: 'Ludwig', 'non-dropping-particle': 'van', family: 'Beethoven' },
+    ]),
+    ['Ludwig van Beethoven']
+  );
+});
+
+test('cslAuthorsToStrings: dropping particle placed after given', () => {
+  assert.deepEqual(
+    cslAuthorsToStrings([
+      { given: 'Charles', 'dropping-particle': 'de', family: 'Gaulle' },
+    ]),
+    ['Charles de Gaulle']
+  );
+});
+
+test('cslAuthorsToStrings: suffix appended', () => {
+  assert.deepEqual(
+    cslAuthorsToStrings([
+      { given: 'John', family: 'Smith', suffix: 'Jr.' },
+    ]),
+    ['John Smith Jr.']
+  );
+});
+
+test('cslAuthorsToStrings: literal name (single string)', () => {
+  assert.deepEqual(
+    cslAuthorsToStrings([{ literal: 'An Organization' }]),
+    ['An Organization']
+  );
+});
+
+test('cslAuthorsToStrings: only family (single-name authors)', () => {
+  assert.deepEqual(
+    cslAuthorsToStrings([{ family: 'Plato' }]),
+    ['Plato']
+  );
+});
+
+test('cslAuthorsToStrings: undefined/null returns empty array', () => {
+  assert.deepEqual(cslAuthorsToStrings(undefined), []);
+  assert.deepEqual(cslAuthorsToStrings(null), []);
+});

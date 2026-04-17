@@ -110,6 +110,23 @@ export function mapCslType(cslType) {
   return CSL_TYPE_MAP[cslType] ?? 'misc';
 }
 
+// Convert CSL-JSON's structured author objects (one of {given, family,
+// non-dropping-particle, dropping-particle, suffix} or {literal}) to
+// "First Last" strings matching the input format of formatAuthorsHtml.
+export function cslAuthorsToStrings(authors) {
+  if (!authors) return [];
+  return authors.map((a) => {
+    if (a.literal) return a.literal;
+    const parts = [];
+    if (a.given) parts.push(a.given);
+    if (a['dropping-particle']) parts.push(a['dropping-particle']);
+    if (a['non-dropping-particle']) parts.push(a['non-dropping-particle']);
+    if (a.family) parts.push(a.family);
+    if (a.suffix) parts.push(a.suffix);
+    return parts.join(' ');
+  });
+}
+
 // ------------------------------------------------------------
 // Main
 // ------------------------------------------------------------
