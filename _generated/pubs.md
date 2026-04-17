@@ -33,7 +33,7 @@ page-style: site
 <li class="pub">
   <a class="pub-title" href="https://openreview.net/forum?id=3BmPSFAdq3">Fast Controlled Generation from Language Models with Adaptive Weighted Rejection Sampling</a>
   <span class="pub-author">Ben Lipkin, Benjamin LeBrun, Jacob Hoover Vigly, João Loula, David R. MacIver, Li Du, Jason Eisner, Ryan Cotterell, Vikash Mansinghka, Timothy J. O&#39;Donnell, Alexander K. Lew, Tim Vieira</span>
-  <a class="pub-venue" href="https://colmweb.org/">CoLM 2025</a> (Outstanding Paper Award)
+  <a class="pub-venue" href="https://colmweb.org/">CoLM 2025</a> <span class="pub-note">(Outstanding Paper Award)</span>
   <div class="pub-extras">
     <a class="extra openreview" href="https://openreview.net/forum?id=3BmPSFAdq3">OpenReview</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>

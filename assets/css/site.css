@@ -284,6 +284,12 @@ body.page-style-site .pub-venue {
   color: #333;
   font-size: 0.95rem;
 }
+/* Note (awards, etc.) sits inline after the venue — same size and color,
+   but roman (not italic). */
+body.page-style-site .pub-note {
+  color: #333;
+  font-size: 0.95rem;
+}
 /* Venue links: subtle dashed gray underline; do not adopt the standard
    link color or the underline from the generic post-content a rule. */
 body.page-style-site .pub-list a.pub-venue,

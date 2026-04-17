@@ -204,7 +204,9 @@ export function generateHtmlEntry(paper) {
     ? `<a class="pub-venue" href="${escapeHtml(paper.venue_url)}">${venue}</a>`
     : `<span class="pub-venue">${venue}</span>`;
 
-  const noteHtml = paper.note ? ` (${escapeHtml(paper.note)})` : '';
+  const noteHtml = paper.note
+    ? ` <span class="pub-note">(${escapeHtml(paper.note)})</span>`
+    : '';
   const statusHtml = paper.status
     ? ` <span class="pub-status">${escapeHtml(paper.status)}</span>`
     : '';
