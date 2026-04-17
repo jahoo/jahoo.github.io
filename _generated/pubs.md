@@ -55,7 +55,7 @@ page-style: site
   <span class="pub-author">Jacob Hoover Vigly, Peng Qian, Morgan Sonderegger, Timothy J. O&#39;Donnell</span>
   <span class="pub-venue">CogSci 2025</span>
   <div class="pub-extras">
-    <a class="extra link" href="https://underline.io/events/489/posters/20440/poster/119457-">Underline</a>
+    <a class="extra link" href="https://underline.io/events/489/posters/20440/poster/119457-">link</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
 <div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@unpublished</span>{<span class="ot">vigly</span>.<span class="ot">j:2025cogsci</span>,</span>
 <span>  <span class="dt">type</span> = {Poster},</span>
@@ -76,7 +76,7 @@ page-style: site
   <span class="pub-author">Thomas Hikaru Clark, Jacob Hoover Vigly, Edward Gibson, Roger Levy</span>
   <span class="pub-venue">CogSci 2025</span>
   <div class="pub-extras">
-    <a class="extra link" href="https://escholarship.org/uc/item/9kr1b1gm">eScholarship</a>
+    <a class="extra link" href="https://escholarship.org/uc/item/9kr1b1gm">link</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
 <div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@inproceedings</span>{<span class="ot">clark</span>.<span class="ot">t:2025cogsci</span>,</span>
 <span>  <span class="dt">title</span> = {A Model of Approximate and Incremental Noisy-Channel Language Processing},</span>
@@ -154,7 +154,7 @@ page-style: site
   <span class="pub-author">Jacob Louis Hoover</span>
   <span class="pub-venue">McGill University</span> <span class="pub-status">dissertation</span>
   <div class="pub-extras">
-    <a class="extra link" href="https://escholarship.mcgill.ca/concern/theses/r494vr42w">eScholarship</a>
+    <a class="extra link" href="https://escholarship.mcgill.ca/concern/theses/r494vr42w">link</a>
     <a class="extra pdf" href="/assets/pdfs/dissertation.pdf">pdf</a>
     <a class="extra other" href="/assets/pdfs/dissertation_precis.pdf">précis</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
@@ -302,7 +302,7 @@ page-style: site
   <span class="pub-author">Jacob Louis Hoover</span>
   <a class="pub-venue" href="https://wccfl2020.linguistics.ubc.ca/">WCCFL 38</a>
   <div class="pub-extras">
-    <a class="extra link" href="http://www.lingref.com/cpp/wccfl/38/abstract3568.html">lingref</a>
+    <a class="extra link" href="http://www.lingref.com/cpp/wccfl/38/abstract3568.html">link</a>
     <a class="extra pdf" href="/assets/pdfs/wccfl2020-cascadilla-paper3568-proof.pdf">pdf</a>
     <a class="extra handout" href="/assets/pdfs/wccfl2020-handout.pdf">handout</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>

@@ -175,15 +175,18 @@ test('labelForUrl: PsyArXiv via doi.org/10.31234', () => {
 test('labelForUrl: generic doi.org → DOI', () => {
   assert.equal(labelForUrl('https://doi.org/10.1162/opmi_a_00086'), 'DOI');
 });
-test('labelForUrl: eScholarship (both .org and mcgill.ca)', () => {
-  assert.equal(labelForUrl('https://escholarship.org/uc/item/9kr1b1gm'), 'eScholarship');
-  assert.equal(labelForUrl('https://escholarship.mcgill.ca/concern/theses/r494vr42w'), 'eScholarship');
+test('labelForUrl: eScholarship falls through to default ("link")', () => {
+  assert.equal(labelForUrl('https://escholarship.org/uc/item/9kr1b1gm'), 'link');
+  assert.equal(labelForUrl('https://escholarship.mcgill.ca/concern/theses/r494vr42w'), 'link');
 });
-test('labelForUrl: OSF, bioRxiv, Underline, lingref', () => {
+test('labelForUrl: OSF, bioRxiv', () => {
   assert.equal(labelForUrl('https://osf.io/2498w'), 'OSF');
   assert.equal(labelForUrl('https://www.biorxiv.org/content/xyz'), 'bioRxiv');
-  assert.equal(labelForUrl('https://underline.io/events/489/poster'), 'Underline');
-  assert.equal(labelForUrl('http://www.lingref.com/cpp/wccfl/38/abstract3568.html'), 'lingref');
+});
+
+test('labelForUrl: underline.io and lingref fall through to default', () => {
+  assert.equal(labelForUrl('https://underline.io/events/489/poster'), 'link');
+  assert.equal(labelForUrl('http://www.lingref.com/cpp/wccfl/38/abstract3568.html'), 'link');
 });
 test('labelForUrl: .pdf extension → pdf', () => {
   assert.equal(labelForUrl('https://example.com/paper.pdf'), 'pdf');
@@ -448,6 +451,25 @@ test('generateHtmlEntry: DOI primary yields [DOI] button when no prefix match', 
   };
   const html = generateHtmlEntry(e);
   assert.match(html, /<a class="extra link" href="https:\/\/doi\.org\/[^"]+">DOI<\/a>/);
+});
+
+test('generateHtmlEntry: link_label overrides the auto-derived label', () => {
+  const e = {
+    ...htmlFixture,
+    link_label: 'Open Mind',
+    links: { doi_url: 'https://doi.org/10.1162/opmi_a_00086' },
+  };
+  const html = generateHtmlEntry(e);
+  assert.match(
+    html,
+    /<a class="extra link" href="https:\/\/doi\.org\/[^"]+">Open Mind<\/a>/
+  );
+  assert.doesNotMatch(html, />DOI</);
+});
+
+test('adaptEntry: copies extras.link_label onto entry', () => {
+  const e = adaptEntry(cslInproceedings, { link_label: 'Proceedings' });
+  assert.equal(e.link_label, 'Proceedings');
 });
 
 // ------------------------------------------------------------

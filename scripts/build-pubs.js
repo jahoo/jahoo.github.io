@@ -85,9 +85,6 @@ const URL_LABEL_RULES = [
   [/^https?:\/\/(www\.)?psyarxiv\.com\//i, 'PsyArXiv'],
   [/^https?:\/\/(www\.)?biorxiv\.org\//i, 'bioRxiv'],
   [/^https?:\/\/(www\.)?osf\.io\//i, 'OSF'],
-  [/^https?:\/\/(www\.)?escholarship(\.org|\.mcgill\.ca)\//i, 'eScholarship'],
-  [/^https?:\/\/(www\.)?underline\.io\//i, 'Underline'],
-  [/^https?:\/\/(www\.)?lingref\.com\//i, 'lingref'],
 ];
 
 export function labelForUrl(url, fallback = 'link') {
@@ -207,7 +204,7 @@ function normalizeUrl(url) {
     .replace(/#.*$/, '');
 }
 
-function renderExtras(links, bibHtml) {
+function renderExtras(links, bibHtml, linkLabelOverride) {
   const buttons = [];
   if (links) {
     const regular = [];
@@ -224,13 +221,14 @@ function renderExtras(links, bibHtml) {
       return `<a class="extra other" href="${escapeHtml(o.url)}">${escapeHtml(o.label)}</a>`;
     });
 
-    // Primary-URL button, labeled by domain — goes first in the row.
-    // Skipped if another button already shows the same URL (e.g. the arxiv
-    // or openreview button, or a user-specified `other`).
+    // Primary-URL button, labeled by domain (or by an explicit link_label
+    // override from the entry) — goes first in the row. Skipped if another
+    // button already shows the same URL.
     const primaryUrl = getPrimaryUrl(links);
     if (primaryUrl && !hrefs.has(normalizeUrl(primaryUrl))) {
+      const label = linkLabelOverride ?? labelForUrl(primaryUrl);
       buttons.push(
-        `<a class="extra link" href="${escapeHtml(primaryUrl)}">${escapeHtml(labelForUrl(primaryUrl))}</a>`
+        `<a class="extra link" href="${escapeHtml(primaryUrl)}">${escapeHtml(label)}</a>`
       );
     }
     buttons.push(...regular, ...others);
@@ -277,7 +275,7 @@ export function generateHtmlEntry(paper) {
     `  ${titleHtml}`,
     `  <span class="pub-author">${authors}</span>`,
     `  ${venueHtml}${statusHtml}${noteHtml}`,
-    renderExtras(paper.links, paper.bibHtml),
+    renderExtras(paper.links, paper.bibHtml, paper.link_label),
     '</li>',
   ].join('\n');
 }
@@ -568,6 +566,7 @@ export function adaptEntry(csl, extras = {}, arxivEprints = new Map()) {
 
   if (extras.status) entry.status = extras.status;
   if (extras.equal_contribution) entry.equal_contribution = extras.equal_contribution;
+  if (extras.link_label) entry.link_label = extras.link_label;
 
   if (Object.keys(links).length > 0) entry.links = links;
 

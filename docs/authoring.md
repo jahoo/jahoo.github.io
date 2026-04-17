@@ -286,6 +286,14 @@ The publications page at `/pubs/` is generated from two inputs:
   status: preprint                 # optional: small tag (preprint | dissertation |
                                    #   forthcoming | in-press | submitted | …)
   equal_contribution: [0, 1]       # optional: 0-based author indices get a *
+  link_label: "Open Mind"          # optional: override the auto-derived label
+                                   #   on the first link button (the one going
+                                   #   to the primary URL). By default the label
+                                   #   is inferred from the URL — known
+                                   #   publishers / preprint servers get a name
+                                   #   like [ACL Anthology], [arXiv], [PsyArXiv],
+                                   #   [OpenReview], [OSF], [bioRxiv], [DOI];
+                                   #   everything else falls back to [link].
   links:
     url: https://…                 # optional: override the primary title link
     code: https://…                # link buttons — any subset of:
