@@ -211,6 +211,62 @@ export function generateHtmlEntry(paper) {
   ].join('\n');
 }
 
+// Strip characters from the supplementary-multilingual-plane range used by most
+// emoji (covers 🏆 and similar). Does not strip BMP-range symbols.
+const EMOJI_RE = /[\u{1F300}-\u{1FAFF}]/gu;
+function stripEmoji(s) {
+  return s.replace(EMOJI_RE, '').trim();
+}
+
+const BIBTEX_TYPE_MAP = {
+  thesis: 'phdthesis',
+  // others are identity
+};
+
+export function generateBibtexEntry(paper) {
+  const btype = BIBTEX_TYPE_MAP[paper.type] ?? paper.type;
+  const lines = [`@${btype}{${paper.id},`];
+  const push = (key, value) => {
+    if (value == null || value === '') return;
+    lines.push(`  ${key} = {${value}},`);
+  };
+
+  // Title: keep braces for capitalization protection.
+  push('title', latexEscape(paper.title));
+  push('author', latexEscape(formatAuthorsBibtex(paper.authors)));
+
+  if (paper.type === 'article') {
+    push('journal', latexEscape(paper.venue_full ?? paper.venue));
+  } else if (paper.type === 'inproceedings') {
+    push('booktitle', latexEscape(paper.venue_full ?? paper.venue));
+  } else if (paper.type === 'thesis') {
+    push('school', latexEscape(paper.venue_full ?? paper.venue));
+  } else {
+    // misc / online — howpublished uses the venue_full label if distinct from URL.
+    if (paper.venue_full) push('howpublished', latexEscape(paper.venue_full));
+  }
+
+  push('year', paper.year);
+  push('month', paper.month);
+  push('day', paper.day);
+  push('pages', paper.pages);
+  push('publisher', latexEscape(paper.publisher));
+  push('address', latexEscape(paper.address));
+  push('editor', latexEscape(paper.editor));
+  push('doi', paper.doi);
+
+  const primaryUrl = getPrimaryUrl(paper.links);
+  push('url', primaryUrl);
+
+  if (paper.note) {
+    const cleanNote = stripEmoji(paper.note);
+    if (cleanNote) push('note', latexEscape(cleanNote));
+  }
+
+  lines.push('}');
+  return lines.join('\n');
+}
+
 // ------------------------------------------------------------
 // Main
 // ------------------------------------------------------------

@@ -9,6 +9,7 @@ import {
 import { sortEntries } from '../scripts/build-pubs.js';
 import { validateEntry } from '../scripts/build-pubs.js';
 import { generateHtmlEntry } from '../scripts/build-pubs.js';
+import { generateBibtexEntry } from '../scripts/build-pubs.js';
 
 // Imports will be added as functions are implemented.
 
@@ -297,4 +298,98 @@ test('generateHtmlEntry: renders links.other list', () => {
   const html = generateHtmlEntry(withOther);
   assert.match(html, /href="https:\/\/s\.io"/);
   assert.match(html, /surprisal explorer/);
+});
+
+test('generateBibtexEntry: inproceedings entry', () => {
+  const bib = generateBibtexEntry({
+    id: 'hoover.j:2021emnlp',
+    title: 'Linguistic Dependencies and Statistical Dependence',
+    authors: ['Jacob Louis Hoover', 'Wenyu Du'],
+    year: 2021,
+    month: 11,
+    type: 'inproceedings',
+    venue: 'EMNLP 2021',
+    venue_full: 'Proceedings of the 2021 Conference on EMNLP',
+    pages: '2941--2963',
+    publisher: 'Association for Computational Linguistics',
+    links: { url: 'https://aclanthology.org/2021.emnlp-main.234' },
+  });
+  assert.match(bib, /^@inproceedings\{hoover\.j:2021emnlp,/);
+  assert.match(bib, /title = \{Linguistic Dependencies and Statistical Dependence\}/);
+  assert.match(bib, /author = \{Hoover, Jacob Louis and Du, Wenyu\}/);
+  assert.match(bib, /booktitle = \{Proceedings of the 2021 Conference on EMNLP\}/);
+  assert.match(bib, /pages = \{2941--2963\}/);
+  assert.match(bib, /publisher = \{Association for Computational Linguistics\}/);
+  assert.match(bib, /url = \{https:\/\/aclanthology\.org\/2021\.emnlp-main\.234\}/);
+  assert.match(bib, /year = \{2021\}/);
+  assert.match(bib, /month = \{11\}/);
+  assert.match(bib, /\n\}$/);
+});
+
+test('generateBibtexEntry: article with doi', () => {
+  const bib = generateBibtexEntry({
+    id: 'hoover.j:2023',
+    title: 'The Plausibility of Sampling',
+    authors: ['Jacob Louis Hoover'],
+    year: 2023,
+    type: 'article',
+    venue: 'Open Mind',
+    venue_full: 'Open Mind: Discoveries in Cognitive Science',
+    doi: '10.1162/opmi_a_00086',
+  });
+  assert.match(bib, /^@article\{hoover\.j:2023,/);
+  assert.match(bib, /journal = \{Open Mind: Discoveries in Cognitive Science\}/);
+  assert.match(bib, /doi = \{10\.1162\/opmi_a_00086\}/);
+});
+
+test('generateBibtexEntry: thesis → @phdthesis with school', () => {
+  const bib = generateBibtexEntry({
+    id: 'hoover.j:2024phd',
+    title: 'The Cost of Information',
+    authors: ['Jacob Louis Hoover'],
+    year: 2024,
+    type: 'thesis',
+    venue: 'McGill University',
+    venue_full: 'McGill University',
+  });
+  assert.match(bib, /^@phdthesis\{hoover\.j:2024phd,/);
+  assert.match(bib, /school = \{McGill University\}/);
+});
+
+test('generateBibtexEntry: preserves title braces for capitalization', () => {
+  const bib = generateBibtexEntry({
+    id: 'chan.r:2026',
+    title: 'Ensembling Language Models with Sequential {Monte Carlo}',
+    authors: ['Robin Chan'],
+    year: 2026,
+    type: 'online',
+    venue: 'arXiv',
+  });
+  assert.match(bib, /title = \{Ensembling Language Models with Sequential \{Monte Carlo\}\}/);
+});
+
+test('generateBibtexEntry: strips emoji from note', () => {
+  const bib = generateBibtexEntry({
+    id: 'x',
+    title: 'T',
+    authors: ['A B'],
+    year: 2025,
+    type: 'misc',
+    venue: 'V',
+    note: 'Outstanding Paper Award 🏆',
+  });
+  assert.match(bib, /note = \{Outstanding Paper Award\}/);
+  assert.doesNotMatch(bib, /🏆/);
+});
+
+test('generateBibtexEntry: escapes diacritics in author names', () => {
+  const bib = generateBibtexEntry({
+    id: 'x',
+    title: 'T',
+    authors: ['Benjamin Van Dürme'],
+    year: 2024,
+    type: 'misc',
+    venue: 'V',
+  });
+  assert.match(bib, /author = \{Van D\{\\"u\}rme, Benjamin\}/);
 });
