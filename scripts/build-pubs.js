@@ -58,6 +58,36 @@ export function formatAuthorsBibtex(authors) {
   return parts.join(' and ');
 }
 
+export function buildPdfUrl(path) {
+  if (/^https?:\/\//.test(path)) return path;
+  return `/assets/pdfs/${path}`;
+}
+
+export function buildArxivUrl(input) {
+  if (/^https?:\/\//.test(input)) return input;
+  return `https://arxiv.org/abs/${input}`;
+}
+
+export function buildLingbuzzUrl(id) {
+  if (/^https?:\/\//.test(id)) return id;
+  return `https://ling.auf.net/lingbuzz/${id}`;
+}
+
+export function buildDoiUrl(doi) {
+  if (/^https?:\/\//.test(doi)) return doi;
+  return `https://doi.org/${doi}`;
+}
+
+export function getPrimaryUrl(links) {
+  if (!links) return null;
+  if (links.url) return links.url;
+  if (links.arxiv) return buildArxivUrl(links.arxiv);
+  if (links.preprint) return links.preprint;
+  if (links.doi_url) return links.doi_url;
+  if (links.openreview) return links.openreview;
+  return null;
+}
+
 // ------------------------------------------------------------
 // Main
 // ------------------------------------------------------------

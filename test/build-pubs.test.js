@@ -3,6 +3,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { stripTitleBraces, latexEscape } from '../scripts/build-pubs.js';
 import { formatAuthorsHtml, formatAuthorsBibtex } from '../scripts/build-pubs.js';
+import {
+  buildPdfUrl, buildArxivUrl, buildLingbuzzUrl, buildDoiUrl, getPrimaryUrl
+} from '../scripts/build-pubs.js';
 
 // Imports will be added as functions are implemented.
 
@@ -85,4 +88,59 @@ test('formatAuthorsBibtex: apostrophe in surname', () => {
     formatAuthorsBibtex(["Timothy J. O'Donnell"]),
     "O'Donnell, Timothy J."
   );
+});
+
+test('buildPdfUrl: relative filename → /assets/pdfs/', () => {
+  assert.equal(buildPdfUrl('dissertation.pdf'), '/assets/pdfs/dissertation.pdf');
+});
+
+test('buildPdfUrl: absolute URL passes through', () => {
+  assert.equal(
+    buildPdfUrl('https://example.com/p.pdf'),
+    'https://example.com/p.pdf'
+  );
+});
+
+test('buildArxivUrl: bare id → full URL', () => {
+  assert.equal(buildArxivUrl('2603.05432'), 'https://arxiv.org/abs/2603.05432');
+});
+
+test('buildArxivUrl: full URL passes through', () => {
+  assert.equal(
+    buildArxivUrl('https://arxiv.org/abs/2603.05432'),
+    'https://arxiv.org/abs/2603.05432'
+  );
+});
+
+test('buildLingbuzzUrl: bare id → full URL', () => {
+  assert.equal(
+    buildLingbuzzUrl('000371'),
+    'https://ling.auf.net/lingbuzz/000371'
+  );
+});
+
+test('buildDoiUrl: bare doi → doi.org URL', () => {
+  assert.equal(
+    buildDoiUrl('10.1162/opmi_a_00086'),
+    'https://doi.org/10.1162/opmi_a_00086'
+  );
+});
+
+test('getPrimaryUrl: prefers links.url', () => {
+  assert.equal(getPrimaryUrl({ url: 'http://x', arxiv: '1234' }), 'http://x');
+});
+
+test('getPrimaryUrl: falls back to arxiv', () => {
+  assert.equal(getPrimaryUrl({ arxiv: '1234' }), 'https://arxiv.org/abs/1234');
+});
+
+test('getPrimaryUrl: falls back through preprint, doi_url, openreview', () => {
+  assert.equal(getPrimaryUrl({ preprint: 'http://p' }), 'http://p');
+  assert.equal(getPrimaryUrl({ doi_url: 'http://d' }), 'http://d');
+  assert.equal(getPrimaryUrl({ openreview: 'http://o' }), 'http://o');
+});
+
+test('getPrimaryUrl: returns null if no known link', () => {
+  assert.equal(getPrimaryUrl({ code: 'http://c' }), null);
+  assert.equal(getPrimaryUrl({}), null);
 });
