@@ -15,7 +15,23 @@ import yaml from 'js-yaml';
 // Pure helpers (exported for testing)
 // ------------------------------------------------------------
 
-// stubs — filled in by later tasks
+export function stripTitleBraces(title) {
+  return title.replace(/[{}]/g, '');
+}
+
+const LATEX_ESCAPES = {
+  'ü': '{\\"u}', 'ö': '{\\"o}', 'ä': '{\\"a}', 'Ü': '{\\"U}', 'Ö': '{\\"O}', 'Ä': '{\\"A}',
+  'é': "{\\'e}", 'É': "{\\'E}", 'á': "{\\'a}", 'Á': "{\\'A}", 'í': "{\\'i}", 'ó': "{\\'o}", 'ú': "{\\'u}",
+  'è': '{\\`e}', 'à': '{\\`a}', 'ì': '{\\`i}', 'ò': '{\\`o}', 'ù': '{\\`u}',
+  'ã': '{\\~a}', 'ñ': '{\\~n}', 'õ': '{\\~o}',
+  'ç': '{\\c{c}}', 'Ç': '{\\c{C}}',
+  'æ': '{\\ae}', 'Æ': '{\\AE}', 'ø': '{\\o}', 'Ø': '{\\O}',
+};
+
+export function latexEscape(s) {
+  if (!s) return s;
+  return s.replace(/./g, (c) => LATEX_ESCAPES[c] ?? c);
+}
 
 // ------------------------------------------------------------
 // Main
