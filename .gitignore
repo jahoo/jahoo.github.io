@@ -6,3 +6,12 @@ _site
 _explorations/*-notes*
 node_modules
 source.bib
+
+# LaTeX build artifacts (e.g. from compiling the CV)
+*.aux
+*.bcf
+*.bpx
+*.log
+*.out
+*.run.xml
+*.synctex.gz
