@@ -235,3 +235,74 @@ body.page-style-site .margin-toggle:checked + .marginnote {
 body.page-style-site .site-footer {
   font-family: 'Linux Biolinum', 'Computer Modern Serif', Times, serif;
 }
+
+/* ── Publications list ──────────────────────────────── */
+
+body.page-style-site .pub-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+}
+body.page-style-site .pub-list li.pub {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--s-border);
+}
+body.page-style-site .pub-list li.pub:last-child {
+  border-bottom: none;
+}
+body.page-style-site .pub-title {
+  font-family: 'Linux Libertine', 'Computer Modern Serif', Times, serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  display: block;
+  margin-bottom: 0.2rem;
+  color: var(--s-accent-warm, #424242);
+}
+body.page-style-site a.pub-title:hover {
+  text-decoration: underline;
+}
+body.page-style-site .pub-author {
+  display: block;
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 0.2rem;
+}
+body.page-style-site .pub-venue {
+  font-style: italic;
+  color: #333;
+}
+body.page-style-site .pub-status {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0 0.4rem;
+  background: #eee;
+  color: #555;
+  font-size: 0.75rem;
+  border-radius: 2px;
+  text-transform: lowercase;
+}
+body.page-style-site .pub-extras {
+  margin-top: 0.3rem;
+  font-size: 0.875rem;
+}
+body.page-style-site .pub-extras .extra {
+  margin-right: 0.25rem;
+  color: #2a7ae2;
+}
+body.page-style-site .pub-extras .extra::before { content: '['; color: #888; }
+body.page-style-site .pub-extras .extra::after  { content: ']'; color: #888; }
+body.page-style-site .pub-footnote {
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 0.5rem;
+}
+body.page-style-site ul.social-media-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+body.page-style-site ul.social-media-list li {
+  display: inline-block;
+  margin-right: 0.75rem;
+}
