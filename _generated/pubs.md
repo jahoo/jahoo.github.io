@@ -33,7 +33,7 @@ page-style: site
 <li class="pub">
   <a class="pub-title" href="https://openreview.net/forum?id=3BmPSFAdq3">Fast Controlled Generation from Language Models with Adaptive Weighted Rejection Sampling</a>
   <span class="pub-author">Ben Lipkin, Benjamin LeBrun, Jacob Hoover Vigly, João Loula, David R. MacIver, Li Du, Jason Eisner, Ryan Cotterell, Vikash Mansinghka, Timothy J. O&#39;Donnell, Alexander K. Lew, Tim Vieira</span>
-  <a class="pub-venue" href="https://colmweb.org/">CoLM 2025</a> <span class="pub-note">(Outstanding Paper Award)</span>
+  <a class="pub-venue" href="https://colmweb.org/2025/">CoLM 2025</a> <span class="pub-note">(Outstanding Paper Award)</span>
   <div class="pub-extras">
     <a class="extra openreview" href="https://openreview.net/forum?id=3BmPSFAdq3">OpenReview</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
@@ -55,6 +55,7 @@ page-style: site
   <span class="pub-author">Jacob Hoover Vigly, Peng Qian, Morgan Sonderegger, Timothy J. O&#39;Donnell</span>
   <span class="pub-venue">CogSci 2025</span>
   <div class="pub-extras">
+    <a class="extra link" href="https://underline.io/events/489/posters/20440/poster/119457-">Underline</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
 <div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@unpublished</span>{<span class="ot">vigly</span>.<span class="ot">j:2025cogsci</span>,</span>
 <span>  <span class="dt">type</span> = {Poster},</span>
@@ -75,6 +76,7 @@ page-style: site
   <span class="pub-author">Thomas Hikaru Clark, Jacob Hoover Vigly, Edward Gibson, Roger Levy</span>
   <span class="pub-venue">CogSci 2025</span>
   <div class="pub-extras">
+    <a class="extra link" href="https://escholarship.org/uc/item/9kr1b1gm">eScholarship</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
 <div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@inproceedings</span>{<span class="ot">clark</span>.<span class="ot">t:2025cogsci</span>,</span>
 <span>  <span class="dt">title</span> = {A Model of Approximate and Incremental Noisy-Channel Language Processing},</span>
@@ -93,6 +95,7 @@ page-style: site
   <span class="pub-author">Jacob Hoover Vigly, Peng Qian, Morgan Sonderegger, Timothy J. O&#39;Donnell</span>
   <span class="pub-venue">PsyArXiv</span> <span class="pub-status">preprint</span>
   <div class="pub-extras">
+    <a class="extra link" href="https://osf.io/2498w">OSF</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
 <div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@online</span>{<span class="ot">vigly</span>.<span class="ot">j:2025psyarxiv</span>,</span>
 <span>  <span class="dt">title</span> = {Comprehension Effort as the Cost of Inference},</span>
@@ -109,8 +112,9 @@ page-style: site
 <li class="pub">
   <a class="pub-title" href="https://hsp2025.github.io/abstracts/254.pdf">Implicit Gender Bias in Linguistic Descriptions for Expected Events: The Case of the 2024 United States Presidential Election</a>
   <span class="pub-author">Jacob Hoover Vigly, Veronica Boyce, Michaela Socolof, James Michaelov, Titus von der Malsburg, Roger Levy</span>
-  <span class="pub-venue">HSP 2025</span>
+  <a class="pub-venue" href="https://hsp2025.github.io/">HSP 2025</a>
   <div class="pub-extras">
+    <a class="extra link" href="https://hsp2025.github.io/abstracts/254.pdf">pdf</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
 <div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@unpublished</span>{<span class="ot">vigly</span>.<span class="ot">j:2025HSP</span>,</span>
 <span>  <span class="dt">type</span> = {Poster},</span>
@@ -128,8 +132,9 @@ page-style: site
 <li class="pub">
   <a class="pub-title" href="https://hsp2025.github.io/abstracts/187.pdf">Modeling Human Inferences and Reading Behavior with an Incremental, Resource-Rational Model of Noisy-Channel Language Processing</a>
   <span class="pub-author">Thomas Hikaru Clark, Jacob Hoover Vigly, Edward Gibson, Roger Levy</span>
-  <span class="pub-venue">HSP 2025</span>
+  <a class="pub-venue" href="https://hsp2025.github.io/">HSP 2025</a>
   <div class="pub-extras">
+    <a class="extra link" href="https://hsp2025.github.io/abstracts/187.pdf">pdf</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
 <div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@unpublished</span>{<span class="ot">clark</span>.<span class="ot">t:2025HSP</span>,</span>
 <span>  <span class="dt">type</span> = {Poster},</span>
@@ -149,6 +154,7 @@ page-style: site
   <span class="pub-author">Jacob Louis Hoover</span>
   <span class="pub-venue">McGill University</span> <span class="pub-status">dissertation</span>
   <div class="pub-extras">
+    <a class="extra link" href="https://escholarship.mcgill.ca/concern/theses/r494vr42w">eScholarship</a>
     <a class="extra pdf" href="/assets/pdfs/dissertation.pdf">pdf</a>
     <a class="extra other" href="/assets/pdfs/dissertation_precis.pdf">précis</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
@@ -170,8 +176,9 @@ page-style: site
 <li class="pub">
   <a class="pub-title" href="https://aclanthology.org/2024.findings-eacl.123">Contextualized Topic Coherence Metrics</a>
   <span class="pub-author">Hamed Rahimi, David Mimno, Jacob Hoover, Hubert Naacke, Camelia Constantin, Bernd Amann</span>
-  <span class="pub-venue">Findings of ACL: EACL 2024</span>
+  <a class="pub-venue" href="https://2024.eacl.org/">EACL 2024</a>
   <div class="pub-extras">
+    <a class="extra link" href="https://aclanthology.org/2024.findings-eacl.123">ACL Anthology</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
 <div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@inproceedings</span>{<span class="ot">rahimi</span>.<span class="ot">h:2024</span>,</span>
 <span>  <span class="dt">title</span> = {Contextualized {{Topic Coherence Metrics}}},</span>
@@ -192,9 +199,10 @@ page-style: site
 <li class="pub">
   <a class="pub-title" href="https://doi.org/10.1162/opmi_a_00086">The Plausibility of Sampling as an Algorithmic Theory of Sentence Processing</a>
   <span class="pub-author">Jacob Louis Hoover, Morgan Sonderegger, Steven T. Piantadosi, Timothy J. O’Donnell</span>
-  <span class="pub-venue">Open Mind</span>
+  <a class="pub-venue" href="https://direct.mit.edu/opmi/issue/volume/7">Open Mind, Volume 7 (2023)</a>
   <div class="pub-extras">
-    <a class="extra preprint" href="https://doi.org/10.31234/osf.io/qjnpv">preprint</a>
+    <a class="extra link" href="https://doi.org/10.1162/opmi_a_00086">DOI</a>
+    <a class="extra preprint" href="https://doi.org/10.31234/osf.io/qjnpv">PsyArXiv</a>
     <a class="extra code" href="https://github.com/mcqll/plausibility-sampling-processing/">code</a>
     <a class="extra other" href="https://jahoo.shinyapps.io/surprisal_explorer/">surprisal explorer</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
@@ -218,8 +226,9 @@ page-style: site
 <li class="pub">
   <a class="pub-title" href="https://aclanthology.org/2022.coling-1.5">Measuring Morphological Fusion Using Partial Information Decomposition</a>
   <span class="pub-author">Michaela Socolof, Jacob Louis Hoover, Richard Futrell, Alessandro Sordoni, Timothy J. O&#39;Donnell</span>
-  <span class="pub-venue">COLING 2022</span>
+  <a class="pub-venue" href="https://coling2022.org/">COLING 2022</a>
   <div class="pub-extras">
+    <a class="extra link" href="https://aclanthology.org/2022.coling-1.5">ACL Anthology</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
 <div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@inproceedings</span>{<span class="ot">socolof</span>.<span class="ot">m:2022</span>,</span>
 <span>  <span class="dt">title</span> = {Measuring Morphological Fusion Using Partial Information Decomposition},</span>
@@ -240,8 +249,9 @@ page-style: site
 <li class="pub">
   <a class="pub-title" href="https://virtual.oxfordabstracts.com/#/event/3067/submission/297">With Better Language Models, Processing Time Is Superlinear in Surprisal</a>
   <span class="pub-author">Jacob Louis Hoover, Morgan Sonderegger, Timothy J. O&#39;Donnell</span>
-  <span class="pub-venue">Architectures and Mechanisms for Language Processing (AMLaP 28)</span>
+  <a class="pub-venue" href="https://amlap2022.york.ac.uk/">AMLaP 2022</a>
   <div class="pub-extras">
+    <a class="extra link" href="https://virtual.oxfordabstracts.com/#/event/3067/submission/297">link</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
 <div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@unpublished</span>{<span class="ot">hoover</span>.<span class="ot">j:2022poster</span>,</span>
 <span>  <span class="dt">type</span> = {Poster},</span>
@@ -262,8 +272,9 @@ page-style: site
 <li class="pub">
   <a class="pub-title" href="https://aclanthology.org/2021.emnlp-main.234">Linguistic Dependencies and Statistical Dependence</a>
   <span class="pub-author">Jacob Louis Hoover, Wenyu Du, Alessandro Sordoni, Timothy J. O&#39;Donnell</span>
-  <span class="pub-venue">EMNLP 2021</span>
+  <a class="pub-venue" href="https://aclanthology.org/events/emnlp-2021/">EMNLP 2021</a>
   <div class="pub-extras">
+    <a class="extra link" href="https://aclanthology.org/2021.emnlp-main.234">ACL Anthology</a>
     <a class="extra code" href="https://github.com/mcqll/cpmi-dependencies">code</a>
     <a class="extra slides" href="/assets/pdfs/2021.10.11.EMNLP.talk-slides.pdf">slides</a>
     <a class="extra poster" href="/assets/pdfs/2021.10.11.EMNLP.poster.pdf">poster</a>
@@ -289,13 +300,14 @@ page-style: site
 <li class="pub">
   <a class="pub-title" href="http://www.lingref.com/cpp/wccfl/38/abstract3568.html">Accounting for Variation in Number Agreement in Icelandic Dative-Nominative Constructions</a>
   <span class="pub-author">Jacob Louis Hoover</span>
-  <span class="pub-venue">WCCFL 38</span>
+  <a class="pub-venue" href="https://wccfl2020.linguistics.ubc.ca/">WCCFL 38</a>
   <div class="pub-extras">
+    <a class="extra link" href="http://www.lingref.com/cpp/wccfl/38/abstract3568.html">lingref</a>
     <a class="extra pdf" href="/assets/pdfs/wccfl2020-cascadilla-paper3568-proof.pdf">pdf</a>
     <a class="extra handout" href="/assets/pdfs/wccfl2020-handout.pdf">handout</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
 <div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@inproceedings</span>{<span class="ot">hoover</span>.<span class="ot">j:2021WCCFL</span>,</span>
-<span>  <span class="dt">title</span> = {Accounting for Variation in Number Agreement in Icelandic Dative-Nominative Constructions},</span>
+<span>  <span class="dt">title</span> = {Accounting for Variation in Number Agreement in {{Icelandic}} Dative-Nominative Constructions},</span>
 <span>  <span class="dt">booktitle</span> = {Proceedings of the 38th {{West Coast Conference}} on {{Formal Linguistics}}},</span>
 <span>  <span class="dt">author</span> = {Hoover, Jacob Louis},</span>
 <span>  <span class="dt">editor</span> = {Soo, Rachel and Chow, Una Y. and Nederveen, Sander},</span>

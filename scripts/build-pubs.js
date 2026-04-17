@@ -69,6 +69,40 @@ export function buildDoiUrl(doi) {
   return `https://doi.org/${doi}`;
 }
 
+// Map URL → display label for link buttons. Common publisher / preprint-server
+// domains get a short name; DOI URLs use the DOI prefix to identify the
+// publisher when known; everything else falls back to the caller's default
+// (usually "link" for a primary-URL button, "preprint" for links.preprint).
+const DOI_PREFIX_LABELS = {
+  '10.31234': 'PsyArXiv',
+  '10.48550': 'arXiv',
+};
+
+const URL_LABEL_RULES = [
+  [/^https?:\/\/(www\.)?arxiv\.org\//i, 'arXiv'],
+  [/^https?:\/\/(www\.)?aclanthology\.org\//i, 'ACL Anthology'],
+  [/^https?:\/\/(www\.)?openreview\.net\//i, 'OpenReview'],
+  [/^https?:\/\/(www\.)?psyarxiv\.com\//i, 'PsyArXiv'],
+  [/^https?:\/\/(www\.)?biorxiv\.org\//i, 'bioRxiv'],
+  [/^https?:\/\/(www\.)?osf\.io\//i, 'OSF'],
+  [/^https?:\/\/(www\.)?escholarship(\.org|\.mcgill\.ca)\//i, 'eScholarship'],
+  [/^https?:\/\/(www\.)?underline\.io\//i, 'Underline'],
+  [/^https?:\/\/(www\.)?lingref\.com\//i, 'lingref'],
+];
+
+export function labelForUrl(url, fallback = 'link') {
+  if (!url) return null;
+  const doiMatch = url.match(/^https?:\/\/doi\.org\/(10\.\d+)/i);
+  if (doiMatch) {
+    return DOI_PREFIX_LABELS[doiMatch[1]] ?? 'DOI';
+  }
+  for (const [re, label] of URL_LABEL_RULES) {
+    if (re.test(url)) return label;
+  }
+  if (/\.pdf(?:[?#].*)?$/i.test(url)) return 'pdf';
+  return fallback;
+}
+
 // Fallback order: a paper's DOI (when present) is the canonical published URL
 // and should beat any preprint link. arxiv/openreview/preprint are used only
 // when no DOI is set (typical for preprint-only or review-venue entries).
@@ -148,31 +182,58 @@ export function validateEntry(entry) {
 }
 
 // Order of link buttons in the .pub-extras row.
+// `preprint` uses labelForUrl so a PsyArXiv/bioRxiv DOI gets [PsyArXiv]/
+// [bioRxiv] instead of the generic "preprint".
 const LINK_RENDERERS = [
-  ['arxiv',      (v) => ({ cls: 'arxiv',      label: 'arXiv',      href: buildArxivUrl(v) })],
-  ['preprint',   (v) => ({ cls: 'preprint',   label: 'preprint',   href: v })],
-  ['pdf',        (v) => ({ cls: 'pdf',        label: 'pdf',        href: buildPdfUrl(v) })],
-  ['code',       (v) => ({ cls: 'code',       label: 'code',       href: v })],
-  ['slides',     (v) => ({ cls: 'slides',     label: 'slides',     href: buildPdfUrl(v) })],
-  ['poster',     (v) => ({ cls: 'poster',     label: 'poster',     href: buildPdfUrl(v) })],
-  ['handout',    (v) => ({ cls: 'handout',    label: 'handout',    href: buildPdfUrl(v) })],
-  ['video',      (v) => ({ cls: 'video',      label: 'video',      href: v })],
-  ['openreview', (v) => ({ cls: 'openreview', label: 'OpenReview', href: v })],
-  ['lingbuzz',   (v) => ({ cls: 'lingbuzz',   label: 'lingbuzz',   href: buildLingbuzzUrl(v) })],
+  ['arxiv',      (v) => ({ cls: 'arxiv',      label: 'arXiv',                        href: buildArxivUrl(v) })],
+  ['preprint',   (v) => ({ cls: 'preprint',   label: labelForUrl(v, 'preprint'),     href: v })],
+  ['pdf',        (v) => ({ cls: 'pdf',        label: 'pdf',                          href: buildPdfUrl(v) })],
+  ['code',       (v) => ({ cls: 'code',       label: 'code',                         href: v })],
+  ['slides',     (v) => ({ cls: 'slides',     label: 'slides',                       href: buildPdfUrl(v) })],
+  ['poster',     (v) => ({ cls: 'poster',     label: 'poster',                       href: buildPdfUrl(v) })],
+  ['handout',    (v) => ({ cls: 'handout',    label: 'handout',                      href: buildPdfUrl(v) })],
+  ['video',      (v) => ({ cls: 'video',      label: 'video',                        href: v })],
+  ['openreview', (v) => ({ cls: 'openreview', label: 'OpenReview',                   href: v })],
+  ['lingbuzz',   (v) => ({ cls: 'lingbuzz',   label: 'lingbuzz',                     href: buildLingbuzzUrl(v) })],
 ];
+
+// Normalize URLs for comparison — strips scheme, trailing slash, and fragment.
+// Lets us treat `http://arxiv.org/abs/X` and `https://arxiv.org/abs/X/` as
+// the same URL for dedup purposes.
+function normalizeUrl(url) {
+  return String(url)
+    .replace(/^https?:\/\//i, '')
+    .replace(/\/+$/, '')
+    .replace(/#.*$/, '');
+}
 
 function renderExtras(links, bibHtml) {
   const buttons = [];
   if (links) {
+    const regular = [];
+    const hrefs = new Set();
     for (const [key, fn] of LINK_RENDERERS) {
       if (links[key]) {
         const { cls, label, href } = fn(links[key]);
-        buttons.push(`<a class="extra ${cls}" href="${escapeHtml(href)}">${escapeHtml(label)}</a>`);
+        regular.push(`<a class="extra ${cls}" href="${escapeHtml(href)}">${escapeHtml(label)}</a>`);
+        hrefs.add(normalizeUrl(href));
       }
     }
-    for (const o of links.other ?? []) {
-      buttons.push(`<a class="extra other" href="${escapeHtml(o.url)}">${escapeHtml(o.label)}</a>`);
+    const others = (links.other ?? []).map((o) => {
+      hrefs.add(normalizeUrl(o.url));
+      return `<a class="extra other" href="${escapeHtml(o.url)}">${escapeHtml(o.label)}</a>`;
+    });
+
+    // Primary-URL button, labeled by domain — goes first in the row.
+    // Skipped if another button already shows the same URL (e.g. the arxiv
+    // or openreview button, or a user-specified `other`).
+    const primaryUrl = getPrimaryUrl(links);
+    if (primaryUrl && !hrefs.has(normalizeUrl(primaryUrl))) {
+      buttons.push(
+        `<a class="extra link" href="${escapeHtml(primaryUrl)}">${escapeHtml(labelForUrl(primaryUrl))}</a>`
+      );
     }
+    buttons.push(...regular, ...others);
   }
   if (bibHtml) {
     // <details> is rendered inline (see site.css) so the [bib] summary shares

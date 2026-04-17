@@ -13,6 +13,7 @@ import {
   escapeHtml,
   formatAuthorsHtml,
   buildPdfUrl, buildArxivUrl, buildLingbuzzUrl, buildDoiUrl, getPrimaryUrl,
+  labelForUrl,
   sortEntries,
   validateEntry,
   generateHtmlEntry,
@@ -153,6 +154,50 @@ test('getPrimaryUrl: arxiv preferred over preprint', () => {
 test('getPrimaryUrl: returns null if no known link', () => {
   assert.equal(getPrimaryUrl({ code: 'http://c' }), null);
   assert.equal(getPrimaryUrl({}), null);
+});
+
+test('labelForUrl: ACL Anthology', () => {
+  assert.equal(labelForUrl('https://aclanthology.org/2021.emnlp-main.234'), 'ACL Anthology');
+});
+test('labelForUrl: arXiv', () => {
+  assert.equal(labelForUrl('https://arxiv.org/abs/2501.12345'), 'arXiv');
+  assert.equal(labelForUrl('http://arxiv.org/abs/x'), 'arXiv');
+});
+test('labelForUrl: OpenReview', () => {
+  assert.equal(labelForUrl('https://openreview.net/forum?id=abc'), 'OpenReview');
+});
+test('labelForUrl: PsyArXiv via psyarxiv.com', () => {
+  assert.equal(labelForUrl('https://psyarxiv.com/qjnpv'), 'PsyArXiv');
+});
+test('labelForUrl: PsyArXiv via doi.org/10.31234', () => {
+  assert.equal(labelForUrl('https://doi.org/10.31234/osf.io/qjnpv'), 'PsyArXiv');
+});
+test('labelForUrl: generic doi.org → DOI', () => {
+  assert.equal(labelForUrl('https://doi.org/10.1162/opmi_a_00086'), 'DOI');
+});
+test('labelForUrl: eScholarship (both .org and mcgill.ca)', () => {
+  assert.equal(labelForUrl('https://escholarship.org/uc/item/9kr1b1gm'), 'eScholarship');
+  assert.equal(labelForUrl('https://escholarship.mcgill.ca/concern/theses/r494vr42w'), 'eScholarship');
+});
+test('labelForUrl: OSF, bioRxiv, Underline, lingref', () => {
+  assert.equal(labelForUrl('https://osf.io/2498w'), 'OSF');
+  assert.equal(labelForUrl('https://www.biorxiv.org/content/xyz'), 'bioRxiv');
+  assert.equal(labelForUrl('https://underline.io/events/489/poster'), 'Underline');
+  assert.equal(labelForUrl('http://www.lingref.com/cpp/wccfl/38/abstract3568.html'), 'lingref');
+});
+test('labelForUrl: .pdf extension → pdf', () => {
+  assert.equal(labelForUrl('https://example.com/paper.pdf'), 'pdf');
+  assert.equal(labelForUrl('https://hsp2025.github.io/abstracts/254.pdf'), 'pdf');
+});
+test('labelForUrl: unknown → "link" by default', () => {
+  assert.equal(labelForUrl('https://example.com/'), 'link');
+});
+test('labelForUrl: custom fallback overrides "link"', () => {
+  assert.equal(labelForUrl('https://example.com/', 'preprint'), 'preprint');
+});
+test('labelForUrl: null/undefined → null', () => {
+  assert.equal(labelForUrl(null), null);
+  assert.equal(labelForUrl(undefined), null);
 });
 
 // ------------------------------------------------------------
@@ -331,6 +376,78 @@ test('generateHtmlEntry: escapes HTML-unsafe chars in author names', () => {
   const entry = { ...htmlFixture, authors: ['Alice & Co'] };
   const html = generateHtmlEntry(entry);
   assert.match(html, /Alice &amp; Co/);
+});
+
+test('generateHtmlEntry: primary-URL button goes first, labeled by domain', () => {
+  const e = {
+    ...htmlFixture,
+    links: { url: 'https://aclanthology.org/2021.emnlp-main.234', code: 'https://github.com/x' },
+  };
+  const html = generateHtmlEntry(e);
+  // Primary button present, labeled 'ACL Anthology', appears before code
+  assert.match(
+    html,
+    /<a class="extra link"[^>]*>ACL Anthology<\/a>[\s\S]*<a class="extra code"/
+  );
+});
+
+test('generateHtmlEntry: skips primary button when arxiv already shows same URL (http/https dedup)', () => {
+  const e = {
+    ...htmlFixture,
+    links: { url: 'http://arxiv.org/abs/2603.05432', arxiv: '2603.05432' },
+  };
+  const html = generateHtmlEntry(e);
+  assert.doesNotMatch(html, /class="extra link"/);
+  assert.equal((html.match(/class="extra arxiv"/g) || []).length, 1);
+});
+
+test('generateHtmlEntry: skips primary button when openreview already shows same URL', () => {
+  const e = {
+    ...htmlFixture,
+    links: {
+      url: 'https://openreview.net/forum?id=abc',
+      openreview: 'https://openreview.net/forum?id=abc',
+    },
+  };
+  const html = generateHtmlEntry(e);
+  assert.doesNotMatch(html, /class="extra link"/);
+  assert.equal((html.match(/class="extra openreview"/g) || []).length, 1);
+});
+
+test('generateHtmlEntry: preprint button uses domain-aware label for PsyArXiv', () => {
+  const e = {
+    ...htmlFixture,
+    links: {
+      url: 'https://example.com/published-version',
+      preprint: 'https://doi.org/10.31234/osf.io/qjnpv',
+    },
+  };
+  const html = generateHtmlEntry(e);
+  assert.match(
+    html,
+    /<a class="extra preprint" href="https:\/\/doi\.org\/10\.31234\/[^"]+">PsyArXiv<\/a>/
+  );
+});
+
+test('generateHtmlEntry: preprint button falls back to "preprint" for unknown domain', () => {
+  const e = {
+    ...htmlFixture,
+    links: {
+      url: 'https://example.com/x',
+      preprint: 'https://random-preprint-server.example.com/p',
+    },
+  };
+  const html = generateHtmlEntry(e);
+  assert.match(html, /<a class="extra preprint"[^>]*>preprint<\/a>/);
+});
+
+test('generateHtmlEntry: DOI primary yields [DOI] button when no prefix match', () => {
+  const e = {
+    ...htmlFixture,
+    links: { doi_url: 'https://doi.org/10.1162/opmi_a_00086' },
+  };
+  const html = generateHtmlEntry(e);
+  assert.match(html, /<a class="extra link" href="https:\/\/doi\.org\/[^"]+">DOI<\/a>/);
 });
 
 // ------------------------------------------------------------
