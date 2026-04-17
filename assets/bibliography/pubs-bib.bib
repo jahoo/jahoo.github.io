@@ -1,0 +1,197 @@
+@online{chan.r:2026arxiv,
+  title = {Ensembling {{Language Models}} with {{Sequential Monte Carlo}}},
+  author = {Chan, Robin Shing Moon and Liu, Tianyu and Kiegeland, Samuel and Pasti, Clemente and Vigly, Jacob Hoover and O'Donnell, Timothy J. and Cotterell, Ryan and Vieira, Tim},
+  date = {2026-03-05},
+  eprint = {2603.05432},
+  eprinttype = {arXiv},
+  eprintclass = {cs},
+  doi = {10.48550/arXiv.2603.05432},
+  url = {http://arxiv.org/abs/2603.05432},
+  urldate = {2026-04-14},
+  abstract = {Practitioners have access to an abundance of language models and prompting strategies for solving many language modeling tasks; yet prior work shows that modeling performance is highly sensitive to both choices. Classical machine learning ensembling techniques offer a principled approach: aggregate predictions from multiple sources to achieve better performance than any single one. However, applying ensembling to language models during decoding is challenging: naively aggregating next-token probabilities yields samples from a locally normalized, biased approximation of the generally intractable ensemble distribution over strings. In this work, we introduce a unified framework for composing \$K\$ language models into \$f\$-ensemble distributions for a wide range of functions \$f\textbackslash colon\textbackslash mathbb\{R\}\_\{\textbackslash geq 0\}\textasciicircum\{K\}\textbackslash to\textbackslash mathbb\{R\}\_\{\textbackslash geq 0\}\$. To sample from these distributions, we propose a byte-level sequential Monte Carlo (SMC) algorithm that operates in a shared character space, enabling ensembles of models with mismatching vocabularies and consistent sampling in the limit. We evaluate a family of \$f\$-ensembles across prompt and model combinations for various structured text generation tasks, highlighting the benefits of alternative aggregation strategies over traditional probability averaging, and showing that better posterior approximations can yield better ensemble performance.},
+  pubstate = {prepublished},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Computation and Language,Computer Science - Machine Learning},
+  file = {/Users/v/Zotfiles/Ensembling Language Models with Sequenti.pdf;/Users/v/Zotero/storage/NDL8LTWE/2603.html}
+}
+
+@inproceedings{clark.t:2025cogsci,
+  title = {A Model of Approximate and Incremental Noisy-Channel Language Processing},
+  booktitle = {Proceedings of the 47th Annual Meeting of the {{Cognitive Science Society}}},
+  author = {Clark, Thomas Hikaru and Vigly, Jacob Hoover and Gibson, Edward and Levy, Roger},
+  date = {2025-07},
+  location = {San Francisco, CA},
+  url = {https://escholarship.org/uc/item/9kr1b1gm},
+  langid = {english},
+  file = {~/Zotfiles/clark.t2025cogsci A model of approximate and incremental n.pdf}
+}
+
+@unpublished{clark.t:2025HSP,
+  type = {Poster},
+  title = {Modeling Human Inferences and Reading Behavior with an Incremental, Resource-Rational Model of Noisy-Channel Language Processing},
+  author = {Clark, Thomas Hikaru and Vigly, Jacob Hoover and Gibson, Edward and Levy, Roger},
+  date = {2025-03},
+  url = {https://hsp2025.github.io/abstracts/187.pdf},
+  eventtitle = {The 38th {{Annual Conference}} on {{Human Sentence Processing}}},
+  venue = {University of Maryland, College Park}
+}
+
+@inproceedings{hoover.j:2021EMNLP,
+  title = {Linguistic Dependencies and Statistical Dependence},
+  booktitle = {Proceedings of the 2021 {{Conference}} on {{Empirical Methods}} in {{Natural Language Processing}}},
+  author = {Hoover, Jacob Louis and Du, Wenyu and Sordoni, Alessandro and O'Donnell, Timothy J.},
+  date = {2021-11},
+  pages = {2941--2963},
+  publisher = {Association for Computational Linguistics},
+  location = {Online and Punta Cana, Dominican Republic},
+  doi = {10.18653/v1/2021.emnlp-main.234},
+  url = {https://aclanthology.org/2021.emnlp-main.234},
+  urldate = {2022-05-19},
+  abstract = {Are pairs of words that tend to occur together also likely to stand in a linguistic dependency? This empirical question is motivated by a long history of literature in cognitive science, psycholinguistics, and NLP. In this work we contribute an extensive analysis of the relationship between linguistic dependencies and statistical dependence between words. Improving on previous work, we introduce the use of large pretrained language models to compute contextualized estimates of the pointwise mutual information between words (CPMI). For multiple models and languages, we extract dependency trees which maximize CPMI, and compare to gold standard linguistic dependencies. Overall, we find that CPMI dependencies achieve an unlabelled undirected attachment score of at most \$\textbackslash approx 0.5\$. While far above chance, and consistently above a non-contextualized PMI baseline, this score is generally comparable to a simple baseline formed by connecting adjacent words. We analyze which kinds of linguistic dependencies are best captured in CPMI dependencies, and also find marked differences between the estimates of the large pretrained language models, illustrating how their different training schemes affect the type of dependencies they capture.},
+  eventtitle = {{{EMNLP}} 2021},
+  openaccess = {true},
+  peerreview = {db},
+  keywords = {dependency grammar,linguistic dependencies},
+  file = {~/Zotfiles/hoover.j2021emnlp Linguistic dependencies and statistical.pdf}
+}
+
+@inproceedings{hoover.j:2021WCCFL,
+  title = {Accounting for Variation in Number Agreement in Icelandic Dative-Nominative Constructions},
+  booktitle = {Proceedings of the 38th {{West Coast Conference}} on {{Formal Linguistics}}},
+  author = {Hoover, Jacob Louis},
+  editor = {Soo, Rachel and Chow, Una Y. and Nederveen, Sander},
+  date = {2021-06},
+  pages = {231--241},
+  publisher = {Cascadilla Proceedings Project},
+  location = {Somerville, Mass., USA},
+  url = {http://www.lingref.com/cpp/wccfl/38/abstract3568.html},
+  abstract = {Icelandic dative-nominative constructions exhibit a syntactic hierarchy effect known as the Person Restriction: only third person nominatives may control agreement. In these constructions, there is variation between speakers in the extent to which the verb agrees with the nominative for number. Sigurðsson \& Holmberg (2008) explain this variation as arising due to differences between varieties in the timing of subject raising, using a split phi-probe. This paper revises their approach, using the feature gluttony mechanism for Agree developed in Coon \& Keine (2020), and a split phi-probe in which person probing precedes number probing. Within this framework, the observed variation can be captured by allowing variability two independent parameters: the timing of EPP subject raising, and the visibility of a number feature on dative DPs. The proposed mechanism describes the variation, including predicting the observed optional agreement in certain cases that previous literature had struggled to account for, and makes additional predictions about the differences between varieties in cases of syncretism within the verbal paradigm. An investigation into these predictions should allow this already well-studied area of Icelandic grammar to continue to be a useful test-case for crosslinguistic assumptions about the mechanism of Agree, and the status of dative arguments.},
+  eventtitle = {{{WCCFL38}}, {{March}} 6--8, 2020, {{University}} of {{British Columbia}}, {{Vancouver}}},
+  openaccess = {true},
+  peerreview = {no},
+  annotation = {lingref.com document 3568},
+  file = {~/Zotfiles/hoover.j2021wccfl Accounting for variation in number agree.pdf}
+}
+
+@unpublished{hoover.j:2022poster,
+  type = {Poster},
+  title = {With Better Language Models, Processing Time Is Superlinear in Surprisal},
+  author = {Hoover, Jacob Louis and Sonderegger, Morgan and O'Donnell, Timothy J.},
+  namea = {Piantadosi, Steven T.},
+  nameatype = {collaborator},
+  date = {2022-09-06},
+  url = {https://virtual.oxfordabstracts.com/#/event/3067/submission/297},
+  eventtitle = {Architectures and {{Mechanisms}} for {{Language Processing}} ({{AMLaP}} 28)},
+  peerreview = {no},
+  venue = {York, England}
+}
+
+@article{hoover.j:2023,
+  title = {The Plausibility of Sampling as an Algorithmic Theory of Sentence Processing},
+  author = {Hoover, Jacob Louis and Sonderegger, Morgan and Piantadosi, Steven T. and O’Donnell, Timothy J.},
+  date = {2023-07-21},
+  journaltitle = {Open Mind: Discoveries in Cognitive Science},
+  shortjournal = {Open Mind},
+  volume = {7},
+  pages = {350--391},
+  issn = {2470-2986},
+  doi = {10.1162/opmi_a_00086},
+  url = {https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10449406/},
+  urldate = {2023-07-21},
+  abstract = {Words that are more surprising given context take longer to process. However, no incremental parsing algorithm has been shown to directly predict this phenomenon. In this work, we focus on a class of algorithms whose runtime does naturally scale in surprisal—those that involve repeatedly sampling from the prior. Our first contribution is to show that simple examples of such algorithms predict runtime to increase superlinearly with surprisal, and also predict variance in runtime to increase. These two predictions stand in contrast with literature on surprisal theory (Hale, 2001; Levy, 2008a) which assumes that the expected processing cost increases linearly with surprisal, and makes no prediction about variance. In the second part of this paper, we conduct an empirical study of the relationship between surprisal and reading time, using a collection of modern language models to estimate surprisal. We find that with better language models, reading time increases superlinearly in surprisal, and also that variance increases. These results are consistent with the predictions of sampling-based algorithms.},
+  openaccess = {true},
+  pmcid = {PMC10449406},
+  keywords = {processing algorithms,sentence processing,surprisal theory},
+  file = {~/Zotfiles/hoover.j2023 The plausibility of sampling as an algor.pdf}
+}
+
+@thesis{hoover.j:2024phd,
+  type = {phdthesis},
+  title = {The Cost of Information: Looking beyond Predictability in Language Processing},
+  shorttitle = {The Cost of Information},
+  author = {Hoover, Jacob Louis},
+  date = {2024-08},
+  institution = {McGill University},
+  location = {Montréal, Canada},
+  url = {https://escholarship.mcgill.ca/concern/theses/r494vr42w},
+  langid = {canadian},
+  pagetotal = {xi, 110},
+  file = {/Users/j/MIT Dropbox/Jacob Vigly/Zotfiles/hoover.j2024phd précis.pdf;~/Zotfiles/hoover.j2024phd The cost of information looking beyond.pdf}
+}
+
+@inproceedings{lipkin.b:2025,
+  title = {Fast Controlled Generation from Language Models with Adaptive Weighted Rejection Sampling},
+  author = {Lipkin, Ben and LeBrun, Benjamin and Vigly, Jacob Hoover and Loula, João and MacIver, David R. and Du, Li and Eisner, Jason and Cotterell, Ryan and Mansinghka, Vikash and O'Donnell, Timothy J. and Lew, Alexander K. and Vieira, Tim},
+  date = {2025-10-07},
+  publisher = {OpenReview.net},
+  location = {Montréal, Canada},
+  url = {https://openreview.net/forum?id=3BmPSFAdq3},
+  eventtitle = {Second Conference on Language Modeling ({{COLM}})},
+  file = {/Users/v/Zotfiles/lipkin.b2025 Fast controlled generation from language.pdf}
+}
+
+@inproceedings{rahimi.h:2024,
+  title = {Contextualized {{Topic Coherence Metrics}}},
+  booktitle = {Findings of the {{Association}} for {{Computational Linguistics}}: {{EACL}} 2024},
+  author = {Rahimi, Hamed and Mimno, David and Hoover, Jacob and Naacke, Hubert and Constantin, Camelia and Amann, Bernd},
+  editor = {Graham, Yvette and Purver, Matthew},
+  date = {2024-03},
+  pages = {1760--1773},
+  publisher = {Association for Computational Linguistics},
+  location = {St. Julian's, Malta},
+  url = {https://aclanthology.org/2024.findings-eacl.123},
+  urldate = {2024-04-29},
+  abstract = {This article proposes a new family of LLM-based topic coherence metrics called Contextualized Topic Coherence (CTC) and inspired by standard human topic evaluation methods. CTC metrics simulate human-centered coherence evaluation while maintaining the efficiency of other automated methods. We compare the performance of our CTC metrics and five other baseline metrics on seven topic models and show that CTC metrics better reflect human judgment, particularly for topics extracted from short text collections by avoiding highly scored topics that are meaningless to humans.},
+  eventtitle = {Findings 2024},
+  file = {~/Zotfiles/rahimi.h2024 Contextualized Topic Coherence Metrics.pdf}
+}
+
+@inproceedings{socolof.m:2022,
+  title = {Measuring Morphological Fusion Using Partial Information Decomposition},
+  booktitle = {Proceedings of the 29th {{International Conference}} on {{Computational Linguistics}}},
+  author = {Socolof, Michaela and Hoover, Jacob Louis and Futrell, Richard and Sordoni, Alessandro and O'Donnell, Timothy J.},
+  date = {2022-10-12},
+  pages = {44--54},
+  publisher = {International Committee on Computational Linguistics},
+  location = {Gyeongju, Republic of Korea},
+  url = {https://aclanthology.org/2022.coling-1.5},
+  abstract = {Morphological systems across languages vary when it comes to the relation between form and meaning. In some languages, a single meaning feature corresponds to a single morpheme, whereas in other languages, multiple meaning features are bundled together into one morpheme. The two types of languages have been called agglutinative and fusional, respectively, but this distinction does not capture the graded nature of the phenomenon. We provide a mathematically precise way of characterizing morphological systems using partial information decomposition, a framework for decomposing mutual information into three components: unique, redundant, and synergistic information. We show that highly fusional languages are characterized by high levels of synergy.},
+  eventtitle = {{{COLING}} 2022},
+  openaccess = {true},
+  file = {~/Zotfiles/socolof.m2022coling Measuring morphological fusion using par.pdf}
+}
+
+@unpublished{vigly.j:2025cogsci,
+  type = {Poster},
+  title = {When Unpredictable Does Not Mean Difficult to Process},
+  author = {Vigly, Jacob Hoover and Qian, Peng and Sonderegger, Morgan and O'Donnell, Timothy J.},
+  date = {2025-07-31},
+  doi = {10.48448/jqwa-9g33},
+  url = {https://underline.io/events/489/posters/20440/poster/119457-},
+  eventtitle = {Annual Meeting of the {{Cognitive Science Society}}},
+  venue = {San Francisco, CA}
+}
+
+@unpublished{vigly.j:2025HSP,
+  type = {Poster},
+  title = {Implicit Gender Bias in Linguistic Descriptions for Expected Events: {{The}} Case of the 2024 {{United States}} Presidential Election},
+  author = {Vigly, Jacob Hoover and Boyce, Veronica and Socolof, Michaela and Michaelov, James and family=Malsburg, given=Titus, prefix=von der, useprefix=true and Levy, Roger},
+  date = {2025-03},
+  url = {https://hsp2025.github.io/abstracts/254.pdf},
+  eventtitle = {The 38th {{Annual Conference}} on {{Human Sentence Processing}}},
+  venue = {University of Maryland, College Park},
+  keywords = {comprehension,gender bias,gender stereotypes,implicit bias,poster,production,pronouns}
+}
+
+@online{vigly.j:2025psyarxiv,
+  title = {Comprehension Effort as the Cost of Inference},
+  author = {Vigly, Jacob Hoover and Qian, Peng and Sonderegger, Morgan and O'Donnell, Timothy J.},
+  date = {2025-06-18},
+  number = {2498w},
+  doi = {10.31234/osf.io/2498w_v1},
+  url = {https://osf.io/2498w},
+  urldate = {2025-06-18},
+  abstract = {As you read this text, word by word, you build an understanding of its meaning. What cognitive mechanisms underlie this ability?  An influential approach to answering this question comes from viewing comprehension as probabilistic inference over potential interpretations given linguistic input. Motivated within this perspective, a wealth of previous literature in psycholinguistics has focused on an important empirical relationship made precise by surprisal theory (Hale, 2001; Levy, 2008a), the hypothesis that the effort required to process a word scales in its negative log probability, in context. However, the standard derivation of surprisal within the inference framework relies on a crucial assumption: that there is a deterministic relationship between the latent interpretations targeted by inference and the observable input. In this work we propose relaxing this assumption and formalize inference cost directly as the amount of change in probabilistic beliefs. This proposal forms a nontrivial generalization of standard surprisal theory, which provides a more direct connection to algorithmic theories, and naturally explains phenomena where unpredictable input requires little processing effort. To test this framework against surprisal theory, we conduct a self-paced reading time study targeting words with orthographic errors, a specific setting where our approach predicts substantially different patterns. We find that processing effort follows the predictions of belief-update rather than surprisal, in a noisy-channel model of comprehension as inference about intended words. These results demonstrate a clear case where surface surprisal cannot explain human processing cost, and provide further support for models of language comprehension as rational inference.},
+  langid = {american},
+  pubstate = {prepublished},
+  file = {~/Zotfiles/vigly.j2025psyarxiv Comprehension effort as the cost of infe.pdf}
+}

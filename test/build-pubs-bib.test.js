@@ -402,6 +402,19 @@ test('adaptEntry: no arxivMap → no links.arxiv', () => {
   assert.equal(e.links?.arxiv, undefined);
 });
 
+test('adaptEntry: venue defaults to "arXiv" for arxiv entries with no other venue info', () => {
+  const cslArxiv = {
+    id: 'chan:2026',
+    type: 'webpage',
+    title: 'Paper',
+    author: [{ given: 'A', family: 'B' }],
+    issued: { 'date-parts': [[2026]] },
+  };
+  const arxivMap = new Map([['chan:2026', '2603.05432']]);
+  const e = adaptEntry(cslArxiv, {}, arxivMap);
+  assert.equal(e.venue, 'arXiv');
+});
+
 test('adaptEntry: editor from bib', () => {
   const cslWithEditor = {
     ...cslInproceedings,

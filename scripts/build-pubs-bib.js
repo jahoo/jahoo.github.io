@@ -171,22 +171,24 @@ export function adaptEntry(csl, extras = {}, arxivEprints = new Map()) {
     csl['container-title'] || csl.journal || csl.booktitle || undefined;
   const eventTitle = csl['event-title'] || csl['event'] || undefined;
 
+  // Links: bib-derived fill in first, extras override
+  const bibUrl = csl.URL || undefined;
+  const doiUrl = csl.DOI ? `https://doi.org/${csl.DOI}` : undefined;
+  const arxivId = arxivEprints.get(csl.id) || undefined;
+
   // venue: extras override; else short forms; else event-title;
-  // else container-title; else (for theses) publisher
+  // else container-title; else (for theses) publisher;
+  // else (for arxiv preprints without other venue info) "arXiv"
   const venue =
     extras.venue ??
     csl['container-title-short'] ??
     eventTitle ??
     containerTitle ??
-    (type === 'thesis' ? csl.publisher : undefined);
+    (type === 'thesis' ? csl.publisher : undefined) ??
+    (arxivId ? 'arXiv' : undefined);
 
   // venue_full — for theses, the publisher is the school (our venue_full)
   const venueFull = containerTitle ?? (type === 'thesis' ? csl.publisher : undefined);
-
-  // Links: bib-derived fill in first, extras override
-  const bibUrl = csl.URL || undefined;
-  const doiUrl = csl.DOI ? `https://doi.org/${csl.DOI}` : undefined;
-  const arxivId = arxivEprints.get(csl.id) || undefined;
 
   const links = { ...(extras.links ?? {}) };
   if (!links.url && bibUrl) links.url = bibUrl;
