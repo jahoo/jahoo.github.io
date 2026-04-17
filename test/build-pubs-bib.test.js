@@ -229,3 +229,201 @@ test('cslAuthorsToStrings: undefined/null returns empty array', () => {
   assert.deepEqual(cslAuthorsToStrings(undefined), []);
   assert.deepEqual(cslAuthorsToStrings(null), []);
 });
+
+import { adaptEntry } from '../scripts/build-pubs-bib.js';
+
+// A hand-crafted CSL-JSON entry for an inproceedings paper
+// (shape observed in Task 1's citation-js smoke-test).
+const cslInproceedings = {
+  id: 'foo:2021conf',
+  type: 'paper-conference',
+  title: 'A Paper About Things',
+  author: [
+    { given: 'First', family: 'Last' },
+    { given: 'Another', family: 'Person' },
+  ],
+  'container-title': 'Proceedings of the First Conference on Things',
+  'event-title': 'FCoT',
+  issued: { 'date-parts': [[2021, 11]] },
+  page: '1-10',
+  publisher: 'Some Publisher',
+  'publisher-place': 'Somewhere',
+  DOI: '10.1000/abc',
+  URL: 'https://example.com/abc',
+};
+
+test('adaptEntry: basic inproceedings, no extras', () => {
+  const e = adaptEntry(cslInproceedings, {});
+  assert.equal(e.id, 'foo:2021conf');
+  assert.equal(e.title, 'A Paper About Things');
+  assert.deepEqual(e.authors, ['First Last', 'Another Person']);
+  assert.equal(e.year, 2021);
+  assert.equal(e.month, 11);
+  assert.equal(e.type, 'inproceedings');
+  assert.equal(e.venue_full, 'Proceedings of the First Conference on Things');
+  // venue falls back to event-title when no extras.venue
+  assert.equal(e.venue, 'FCoT');
+  assert.equal(e.pages, '1-10');
+  assert.equal(e.publisher, 'Some Publisher');
+  assert.equal(e.address, 'Somewhere');
+  assert.equal(e.doi, '10.1000/abc');
+  assert.equal(e.links.url, 'https://example.com/abc');
+  assert.equal(e.links.doi_url, 'https://doi.org/10.1000/abc');
+});
+
+test('adaptEntry: venue fallback chain', () => {
+  // extras.venue wins
+  const e1 = adaptEntry(cslInproceedings, { venue: 'Short Label' });
+  assert.equal(e1.venue, 'Short Label');
+  // without event-title, falls back to container-title
+  const { 'event-title': _, ...noEvent } = cslInproceedings;
+  const e2 = adaptEntry(noEvent, {});
+  assert.equal(e2.venue, 'Proceedings of the First Conference on Things');
+});
+
+test('adaptEntry: article → journal as container-title', () => {
+  const cslArticle = {
+    id: 'bar:2023',
+    type: 'article-journal',
+    title: 'Another Thing',
+    author: [{ given: 'Solo', family: 'Author' }],
+    'container-title': 'Journal of Stuff',
+    issued: { 'date-parts': [[2023, 7]] },
+    DOI: '10.1000/def',
+  };
+  const e = adaptEntry(cslArticle, {});
+  assert.equal(e.type, 'article');
+  assert.equal(e.venue_full, 'Journal of Stuff');
+  assert.equal(e.venue, 'Journal of Stuff');
+  assert.equal(e.links.doi_url, 'https://doi.org/10.1000/def');
+});
+
+test('adaptEntry: thesis uses publisher as school (not duplicated)', () => {
+  const cslThesis = {
+    id: 'baz:2024phd',
+    type: 'thesis',
+    title: 'My Dissertation',
+    author: [{ given: 'The', family: 'Graduate' }],
+    publisher: 'Some University',
+    issued: { 'date-parts': [[2024]] },
+    URL: 'https://example.com/thesis',
+  };
+  const e = adaptEntry(cslThesis, {});
+  assert.equal(e.type, 'thesis');
+  assert.equal(e.venue, 'Some University');
+  assert.equal(e.venue_full, 'Some University');
+  // thesis publisher is the school; don't also set entry.publisher
+  assert.equal(e.publisher, undefined);
+  assert.equal(e.links.url, 'https://example.com/thesis');
+});
+
+test('adaptEntry: extras note + status + equal_contribution', () => {
+  const e = adaptEntry(cslInproceedings, {
+    note: 'Best Paper',
+    status: 'preprint',
+    equal_contribution: [0, 1],
+  });
+  assert.equal(e.note, 'Best Paper');
+  assert.equal(e.status, 'preprint');
+  assert.deepEqual(e.equal_contribution, [0, 1]);
+});
+
+test('adaptEntry: links merge — extras add to bib-derived', () => {
+  const e = adaptEntry(cslInproceedings, {
+    links: {
+      code: 'https://github.com/foo',
+      slides: 'talk.pdf',
+    },
+  });
+  // bib-derived
+  assert.equal(e.links.url, 'https://example.com/abc');
+  assert.equal(e.links.doi_url, 'https://doi.org/10.1000/abc');
+  // extras
+  assert.equal(e.links.code, 'https://github.com/foo');
+  assert.equal(e.links.slides, 'talk.pdf');
+});
+
+test('adaptEntry: extras.links.url overrides bib URL', () => {
+  const e = adaptEntry(cslInproceedings, {
+    links: { url: 'https://override.com' },
+  });
+  assert.equal(e.links.url, 'https://override.com');
+});
+
+test('adaptEntry: extras.venue_url only from extras', () => {
+  const e = adaptEntry(cslInproceedings, { venue_url: 'https://fcot.org' });
+  assert.equal(e.venue_url, 'https://fcot.org');
+});
+
+test('adaptEntry: extras.note overrides bib note', () => {
+  const withBibNote = { ...cslInproceedings, note: 'bib note' };
+  const e1 = adaptEntry(withBibNote, {});
+  assert.equal(e1.note, 'bib note');
+  const e2 = adaptEntry(withBibNote, { note: 'extras note' });
+  assert.equal(e2.note, 'extras note');
+});
+
+test('adaptEntry: links.arxiv from arxivEprints map (3rd arg)', () => {
+  // citation-js drops biblatex eprint/eprinttype; we recover via the map
+  const cslWebpage = {
+    id: 'qux:2025arxiv',
+    type: 'webpage',
+    title: 'A Preprint',
+    author: [{ given: 'Preprint', family: 'Writer' }],
+    issued: { 'date-parts': [[2025]] },
+  };
+  const arxivMap = new Map([['qux:2025arxiv', '2501.12345']]);
+  const e = adaptEntry(cslWebpage, {}, arxivMap);
+  assert.equal(e.links.arxiv, '2501.12345');
+});
+
+test('adaptEntry: extras.links.arxiv overrides map', () => {
+  const cslWebpage = {
+    id: 'qux:2025arxiv',
+    type: 'webpage',
+    title: 'A Preprint',
+    author: [{ given: 'P', family: 'W' }],
+    issued: { 'date-parts': [[2025]] },
+  };
+  const arxivMap = new Map([['qux:2025arxiv', '2501.12345']]);
+  const e = adaptEntry(cslWebpage, { links: { arxiv: '2600.99999' } }, arxivMap);
+  assert.equal(e.links.arxiv, '2600.99999');
+});
+
+test('adaptEntry: no arxivMap → no links.arxiv', () => {
+  const cslWebpage = {
+    id: 'xyz',
+    type: 'webpage',
+    title: 'T',
+    author: [{ given: 'A', family: 'B' }],
+    issued: { 'date-parts': [[2025]] },
+  };
+  const e = adaptEntry(cslWebpage, {});
+  assert.equal(e.links?.arxiv, undefined);
+});
+
+test('adaptEntry: editor from bib', () => {
+  const cslWithEditor = {
+    ...cslInproceedings,
+    editor: [
+      { given: 'Ed', family: 'One' },
+      { given: 'Ed', family: 'Two' },
+    ],
+  };
+  const e = adaptEntry(cslWithEditor, {});
+  assert.equal(e.editor, 'Ed One, Ed Two');
+});
+
+test('adaptEntry: misc type (document) passes through', () => {
+  const cslMisc = {
+    id: 'quux:2022poster',
+    type: 'document',
+    title: 'A Poster',
+    author: [{ given: 'P', family: 'P' }],
+    issued: { 'date-parts': [[2022]] },
+    publisher: 'Poster at Some Meeting',
+  };
+  const e = adaptEntry(cslMisc, {});
+  assert.equal(e.type, 'misc');
+  assert.equal(e.publisher, 'Poster at Some Meeting');
+});

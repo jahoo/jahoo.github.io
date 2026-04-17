@@ -127,6 +127,90 @@ export function cslAuthorsToStrings(authors) {
   });
 }
 
+// Extract year/month/day from CSL-JSON's issued field.
+function extractDate(issued) {
+  if (!issued || !issued['date-parts'] || !issued['date-parts'][0]) {
+    return { year: null, month: null, day: null };
+  }
+  const [year, month, day] = issued['date-parts'][0];
+  return {
+    year: year ?? null,
+    month: month ?? null,
+    day: day ?? null,
+  };
+}
+
+// Build our entry shape (what generateHtmlEntry consumes) by pulling
+// bibliographic data from the CSL-JSON entry and overlaying the extras.
+//
+// arxivEprints is a Map<key, eprintId> produced by extractArxivEprints;
+// citation-js drops biblatex's eprint/eprinttype fields, so we pass this
+// in as a third argument and use it to populate links.arxiv.
+export function adaptEntry(csl, extras = {}, arxivEprints = new Map()) {
+  const { year, month, day } = extractDate(csl.issued);
+  const type = mapCslType(csl.type);
+
+  const containerTitle =
+    csl['container-title'] || csl.journal || csl.booktitle || undefined;
+  const eventTitle = csl['event-title'] || csl['event'] || undefined;
+
+  // venue: extras override; else short forms; else event-title;
+  // else container-title; else (for theses) publisher
+  const venue =
+    extras.venue ??
+    csl['container-title-short'] ??
+    eventTitle ??
+    containerTitle ??
+    (type === 'thesis' ? csl.publisher : undefined);
+
+  // venue_full — for theses, the publisher is the school (our venue_full)
+  const venueFull = containerTitle ?? (type === 'thesis' ? csl.publisher : undefined);
+
+  // Links: bib-derived fill in first, extras override
+  const bibUrl = csl.URL || undefined;
+  const doiUrl = csl.DOI ? `https://doi.org/${csl.DOI}` : undefined;
+  const arxivId = arxivEprints.get(csl.id) || undefined;
+
+  const links = { ...(extras.links ?? {}) };
+  if (!links.url && bibUrl) links.url = bibUrl;
+  if (!links.doi_url && doiUrl) links.doi_url = doiUrl;
+  if (!links.arxiv && arxivId) links.arxiv = arxivId;
+
+  const entry = {
+    id: csl.id,
+    title: csl.title,
+    authors: cslAuthorsToStrings(csl.author),
+    year,
+    type,
+    venue,
+  };
+  if (month != null) entry.month = month;
+  if (day != null) entry.day = day;
+  if (venueFull) entry.venue_full = venueFull;
+  if (extras.venue_url) entry.venue_url = extras.venue_url;
+  if (csl.page) entry.pages = csl.page;
+  // For thesis: CSL stores school in publisher; keep it as venue_full only,
+  // don't duplicate as entry.publisher.
+  if (csl.publisher && type !== 'thesis') entry.publisher = csl.publisher;
+  const address = csl['event-place'] || csl['publisher-place'];
+  if (address) entry.address = address;
+  if (csl.DOI) entry.doi = csl.DOI;
+  if (csl.editor) {
+    entry.editor = cslAuthorsToStrings(csl.editor).join(', ');
+  }
+
+  // note: extras wins, else bib note
+  const note = extras.note ?? csl.note;
+  if (note) entry.note = note;
+
+  if (extras.status) entry.status = extras.status;
+  if (extras.equal_contribution) entry.equal_contribution = extras.equal_contribution;
+
+  if (Object.keys(links).length > 0) entry.links = links;
+
+  return entry;
+}
+
 // ------------------------------------------------------------
 // Main
 // ------------------------------------------------------------
