@@ -9,5 +9,7 @@ description: >
 bibliography: assets/bibliography/default.bib
 bib-source: source.bib
 nav:
+  - text: home
+    url: /
   - text: blog
     url: /posts/
