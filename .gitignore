@@ -5,3 +5,4 @@ _site
 .DS_Store
 _explorations/*-notes*
 node_modules
+source.bib

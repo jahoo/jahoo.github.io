@@ -6,6 +6,7 @@ description: >
   Formerly Postdoc at MIT, Department of Brain and Cognitive Sciences.
   PhD in Linguistics from McGill University.
 bibliography: assets/bibliography/default.bib
+bib-source: source.bib
 nav:
   - text: home
     url: /
