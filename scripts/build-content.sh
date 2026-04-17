@@ -54,16 +54,13 @@ for src in content/posts/*.md; do
 done
 
 # ---- Root pages ----
-# index.md → _site/index.html (special case: no subdirectory)
-if [ content/index.md -nt "$OUTDIR/index.html" ] || [ templates/base.html -nt "$OUTDIR/index.html" ]; then
-  build_one content/index.md "$OUTDIR/index.html"
-fi
-
-# Other root pages: content/pubs.md → _site/pubs/index.html
+# Pages with basename starting with `_` are partials consumed by other build
+# steps (e.g. content/_about.md is read by build-pubs.js into the homepage);
+# they aren't built as standalone pages.
 for src in content/*.md; do
   [ -f "$src" ] || continue
-  [ "$src" = "content/index.md" ] && continue
   basename=$(basename "$src" .md)
+  case "$basename" in _*) continue ;; esac
   dest="$OUTDIR/$basename/index.html"
   if [ "$src" -nt "$dest" ] || [ templates/base.html -nt "$dest" ]; then
     build_one "$src" "$dest"
@@ -71,10 +68,16 @@ for src in content/*.md; do
 done
 
 # ---- Generated pages (_generated/*.md) ----
+# Special case: _generated/index.md is the homepage; it goes to _site/index.html
+# directly (no index/ subdirectory). Everything else follows the usual pattern.
 for src in _generated/*.md; do
   [ -f "$src" ] || continue
   basename=$(basename "$src" .md)
-  dest="$OUTDIR/$basename/index.html"
+  if [ "$basename" = "index" ]; then
+    dest="$OUTDIR/index.html"
+  else
+    dest="$OUTDIR/$basename/index.html"
+  fi
   if [ "$src" -nt "$dest" ] || [ templates/base.html -nt "$dest" ]; then
     build_one "$src" "$dest"
   fi

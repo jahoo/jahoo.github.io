@@ -81,6 +81,9 @@ body {
 .site-title:hover {
   color: #424242;
 }
+/* Long form shown by default; short form takes over under 450px. */
+.site-title .site-title-full { display: inline; }
+.site-title .site-title-short { display: none; }
 .site-nav {
   font-family: 'Linux Libertine', 'Computer Modern Concrete', Times, serif;
   font-size: 1.5rem;
@@ -88,8 +91,6 @@ body {
   float: right;
   display: block;
 }
-.site-nav .nav-trigger { display: none; }
-.site-nav .menu-icon { display: none; }
 .site-nav .trigger { white-space: nowrap; padding-top: 8px; }
 .site-nav .page-link {
   color: #999;
@@ -105,52 +106,18 @@ body {
   color: var(--s-accent-warm);
 }
 
-/* Tighten nav padding at narrow widths (matches sidenote-collapse) */
+/* Tighten nav padding at narrow widths (matches sidenote-collapse). */
 @media (max-width: 800px) {
   .site-header .wrapper {
     padding: 0 15px;
   }
 }
 
-/* Hamburger menu */
-@media screen and (max-width: 660px) {
-  .site-nav {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    background: #fff;
-    border: 1px solid #d5d5d5;
-    border-radius: 5px;
-    text-align: right;
-  }
-  .site-nav .menu-icon {
-    display: block;
-    float: right;
-    width: 33px;
-    height: 28px;
-    line-height: 0;
-    padding-top: 5px;
-    text-align: center;
-    cursor: pointer;
-  }
-  .site-nav .menu-icon svg path {
-    fill: #828282;
-  }
-  .site-nav .trigger {
-    clear: both;
-    display: none;
-  }
-  .site-nav .nav-trigger:checked ~ .trigger {
-    display: block;
-    padding-bottom: 5px;
-  }
-  .site-nav .page-link {
-    display: block;
-    padding: 5px 10px;
-    margin-right: 0 !important;
-    font-size: 1.2rem;
-    line-height: 1.5;
-  }
+/* Very narrow viewports: shorten "jacob hoover vigly" → "jacob vigly" so
+   the title and the single nav link still fit on one line. */
+@media (max-width: 450px) {
+  .site-title .site-title-full { display: none; }
+  .site-title .site-title-short { display: inline; }
 }
 
 /* ── Page content wrapper ───────────────────────────── */

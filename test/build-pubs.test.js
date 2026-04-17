@@ -13,11 +13,11 @@ import {
   escapeHtml,
   formatAuthorsHtml,
   buildPdfUrl, buildArxivUrl, buildLingbuzzUrl, buildDoiUrl, getPrimaryUrl,
-  labelForUrl,
+  labelForUrl, labelForPrimary,
   sortEntries,
   validateEntry,
   generateHtmlEntry,
-  generateMarkdown,
+  generateHomepage,
   expandHome, loadBibSource,
   parseBib, indexByKey, extractArxivEprints, extractEntriesByKey,
   mapCslType,
@@ -201,6 +201,39 @@ test('labelForUrl: custom fallback overrides "link"', () => {
 test('labelForUrl: null/undefined → null', () => {
   assert.equal(labelForUrl(null), null);
   assert.equal(labelForUrl(undefined), null);
+});
+
+test('labelForPrimary: DOI prefix wins over osf.io URL (PsyArXiv case)', () => {
+  // Bib has URL=https://osf.io/2498w and DOI=10.31234/...
+  // The primary URL is the osf.io URL, but we want the PsyArXiv label.
+  const links = {
+    url: 'https://osf.io/2498w',
+    doi_url: 'https://doi.org/10.31234/osf.io/2498w_v1',
+  };
+  assert.equal(labelForPrimary(links, links.url), 'PsyArXiv');
+});
+
+test('labelForPrimary: DOI prefix wins for arXiv over a different URL', () => {
+  const links = {
+    url: 'https://example.com/preprint',
+    doi_url: 'https://doi.org/10.48550/arXiv.2603.05432',
+  };
+  assert.equal(labelForPrimary(links, links.url), 'arXiv');
+});
+
+test('labelForPrimary: unrecognized DOI prefix falls through to URL label', () => {
+  // 10.1162 is Open Mind (MIT Press) — not in our map, so the URL wins.
+  const links = {
+    url: 'https://doi.org/10.1162/opmi_a_00086',
+    doi_url: 'https://doi.org/10.1162/opmi_a_00086',
+  };
+  // Primary URL happens to be a DOI URL, labelForUrl falls back to "DOI"
+  assert.equal(labelForPrimary(links, links.url), 'DOI');
+});
+
+test('labelForPrimary: no DOI → URL-based label', () => {
+  const links = { url: 'https://aclanthology.org/2021.emnlp-main.234' };
+  assert.equal(labelForPrimary(links, links.url), 'ACL Anthology');
 });
 
 // ------------------------------------------------------------
@@ -467,6 +500,21 @@ test('generateHtmlEntry: link_label overrides the auto-derived label', () => {
   assert.doesNotMatch(html, />DOI</);
 });
 
+test('generateHtmlEntry: OSF URL labeled PsyArXiv when DOI prefix is 10.31234', () => {
+  const e = {
+    ...htmlFixture,
+    links: {
+      url: 'https://osf.io/2498w',
+      doi_url: 'https://doi.org/10.31234/osf.io/2498w_v1',
+    },
+  };
+  const html = generateHtmlEntry(e);
+  assert.match(
+    html,
+    /<a class="extra link" href="https:\/\/osf\.io\/2498w">PsyArXiv<\/a>/
+  );
+});
+
 test('adaptEntry: copies extras.link_label onto entry', () => {
   const e = adaptEntry(cslInproceedings, { link_label: 'Proceedings' });
   assert.equal(e.link_label, 'Proceedings');
@@ -487,9 +535,14 @@ const docEntries = [
   },
 ];
 
-test('generateMarkdown: has front matter and pub-list', () => {
-  const md = generateMarkdown(docEntries);
-  assert.match(md, /^---\ntitle: research\npage-style: site\n---/);
+const SAMPLE_ABOUT = 'Hi, I am someone. Some [link](https://example.com) content here.';
+
+test('generateHomepage: has front matter, about section, publications section', () => {
+  const md = generateHomepage(SAMPLE_ABOUT, docEntries);
+  assert.match(md, /^---\ntitle: home\npage-style: site\n---/);
+  assert.match(md, /## about/);
+  assert.match(md, /Hi, I am someone/);
+  assert.match(md, /## publications/);
   assert.match(md, /<ul class="pub-list">/);
   assert.match(md, /<li class="pub">/);
   assert.match(md, /scholar\.google\.com/);
@@ -497,10 +550,15 @@ test('generateMarkdown: has front matter and pub-list', () => {
   assert.match(md, /surname is Vigly/);
 });
 
-test('generateMarkdown: equal-contribution footnote only when used', () => {
-  const md = generateMarkdown(docEntries);
+test('generateHomepage: about section precedes publications section', () => {
+  const md = generateHomepage(SAMPLE_ABOUT, docEntries);
+  assert.ok(md.indexOf('## about') < md.indexOf('## publications'));
+});
+
+test('generateHomepage: equal-contribution footnote only when used', () => {
+  const md = generateHomepage(SAMPLE_ABOUT, docEntries);
   assert.match(md, /\* Equal contribution/);
-  const mdNoEq = generateMarkdown([docEntries[0]]);
+  const mdNoEq = generateHomepage(SAMPLE_ABOUT, [docEntries[0]]);
   assert.doesNotMatch(mdNoEq, /\* Equal contribution/);
 });
 

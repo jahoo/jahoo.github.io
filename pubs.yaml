@@ -19,16 +19,18 @@
 
 - key: lipkin.b:2025
   venue: CoLM 2025
-  venue_url: https://colmweb.org/
+  venue_url: https://colmweb.org/2025/
   note: "Outstanding Paper Award"
   links:
     openreview: https://openreview.net/forum?id=3BmPSFAdq3
 
 - key: vigly.j:2025HSP
   venue: HSP 2025
+  venue_url: https://hsp2025.github.io/
 
 - key: clark.t:2025HSP
   venue: HSP 2025
+  venue_url: https://hsp2025.github.io/
 
 - key: hoover.j:2024phd
   venue: McGill University
@@ -40,10 +42,12 @@
         url: /assets/pdfs/dissertation_precis.pdf
 
 - key: rahimi.h:2024
-  venue: "Findings of ACL: EACL 2024"
+  venue: "EACL 2024"
+  venue_url: https://2024.eacl.org/
 
 - key: hoover.j:2023
-  venue: Open Mind
+  venue: Open Mind, Volume 7 (2023)
+  venue_url: https://direct.mit.edu/opmi/issue/volume/7
   links:
     preprint: https://doi.org/10.31234/osf.io/qjnpv
     code: https://github.com/mcqll/plausibility-sampling-processing/
@@ -53,11 +57,15 @@
 
 - key: socolof.m:2022
   venue: COLING 2022
+  venue_url: https://coling2022.org/
 
 - key: hoover.j:2022poster
+  venue: AMLaP 2022
+  venue_url: https://amlap2022.york.ac.uk/
 
 - key: hoover.j:2021EMNLP
   venue: EMNLP 2021
+  venue_url: https://aclanthology.org/events/emnlp-2021/
   links:
     code: https://github.com/mcqll/cpmi-dependencies
     slides: 2021.10.11.EMNLP.talk-slides.pdf
@@ -65,6 +73,7 @@
 
 - key: hoover.j:2021WCCFL
   venue: WCCFL 38
+  venue_url: https://wccfl2020.linguistics.ubc.ca/
   links:
     pdf: wccfl2020-cascadilla-paper3568-proof.pdf
     handout: wccfl2020-handout.pdf

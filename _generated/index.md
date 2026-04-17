@@ -1,7 +1,19 @@
 ---
-title: research
+title: home
 page-style: site
 ---
+
+## about
+
+Hi. [I](/assets/j2024.jpeg)'m Jacob. Some things I'm interested in are human language processing and inference algorithms. My research builds on probabilistic models of cognition, using information theory, algorithmic complexity, and tools from linguistics and machine learning.
+
+In my current position I research and coordinate at [CHI FRO](https://chi-fro.org/), and I am part of the [GenLM](https://genlm.org/) research consortium. Previously, I was a postdoctoral fellow at MIT's [Department of Brain and Cognitive Sciences](https://bcs.mit.edu), working with [Roger Levy](https://www.mit.edu/~rplevy/), in the [Computational Psycholinguistics Laboratory](http://cpl.mit.edu/). I completed my PhD in [Linguistics at McGill](https://mcgill.ca/linguistics/) University, under the supervision of [Tim O'Donnell](https://todonnell.github.io/), where I was a member of the [Montreal Computational & Quantitative Linguistics Lab](https://mcqll.org/) and [Mila](https://mila.quebec/) -- Quebec AI Institute.
+
+I'm also a dancer, formerly with Festival Ballet Providence (now [Ballet RI](https://balletri.org/)) in Rhode Island, The [Vanemuine Theatre](https://www.vanemuine.ee) in Tartu, Estonia, and Jose Mateo Ballet Theatre in Cambridge, Massachusetts.
+
+Here is my [CV](/assets/CV/jlhv-academic_cv.pdf).
+
+## publications
 
 <ul class="social-media-list">
   <li><a href="https://scholar.google.com/citations?user=koLi2TwAAAAJ">Google Scholar</a></li>
@@ -91,11 +103,11 @@ page-style: site
 
 </li>
 <li class="pub">
-  <a class="pub-title" href="https://osf.io/2498w">Comprehension Effort as the Cost of Inference</a>
+  <a class="pub-title" href="https://doi.org/10.31234/osf.io/2498w_v1">Comprehension Effort as the Cost of Inference</a>
   <span class="pub-author">Jacob Hoover Vigly, Peng Qian, Morgan Sonderegger, Timothy J. O&#39;Donnell</span>
   <span class="pub-venue">PsyArXiv</span> <span class="pub-status">preprint</span>
   <div class="pub-extras">
-    <a class="extra link" href="https://osf.io/2498w">OSF</a>
+    <a class="extra link" href="https://doi.org/10.31234/osf.io/2498w_v1">PsyArXiv</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
 <div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@online</span>{<span class="ot">vigly</span>.<span class="ot">j:2025psyarxiv</span>,</span>
 <span>  <span class="dt">title</span> = {Comprehension Effort as the Cost of Inference},</span>
@@ -103,7 +115,6 @@ page-style: site
 <span>  <span class="dt">date</span> = {2025-06-18},</span>
 <span>  <span class="dt">number</span> = {2498w},</span>
 <span>  <span class="dt">doi</span> = {10.31234/osf.io/2498w_v1},</span>
-<span>  <span class="dt">url</span> = {https://osf.io/2498w},</span>
 <span>}</span></code></pre></div>
     </details>
   </div>

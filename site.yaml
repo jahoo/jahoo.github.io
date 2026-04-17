@@ -1,4 +1,5 @@
 site-title: jacob hoover vigly
+site-title-short: jacob vigly
 url: https://jahoo.github.io
 author: Jacob Hoover Vigly
 description: >
@@ -8,9 +9,5 @@ description: >
 bibliography: assets/bibliography/default.bib
 bib-source: source.bib
 nav:
-  - text: home
-    url: /
-  - text: publications
-    url: /pubs/
-  - text: posts
+  - text: blog
     url: /posts/

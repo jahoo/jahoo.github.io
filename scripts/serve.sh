@@ -47,8 +47,8 @@ PIDS+=($!)
     2>/dev/null \
 | while IFS= read -r changed; do
     case "$changed" in
-        *pubs.yaml|*build-pubs.js|*source.bib|*all-biblatex.bib)
-            echo "Pubs changed — regenerating pubs.md + pubs.bib"
+        *pubs.yaml|*build-pubs.js|*source.bib|*all-biblatex.bib|*content/_about.md)
+            echo "Pubs/about changed — regenerating homepage + pubs.bib"
             node scripts/build-pubs.js || true
             bash scripts/build-content.sh 2>&1 || true
             ;;

@@ -87,6 +87,14 @@ const URL_LABEL_RULES = [
   [/^https?:\/\/(www\.)?osf\.io\//i, 'OSF'],
 ];
 
+// Returns the publisher label for a doi.org URL iff the DOI prefix is in our
+// map (arxiv, psyarxiv, …). null otherwise.
+function doiPrefixLabel(doiUrl) {
+  if (!doiUrl) return null;
+  const m = doiUrl.match(/^https?:\/\/doi\.org\/(10\.\d+)/i);
+  return m ? (DOI_PREFIX_LABELS[m[1]] ?? null) : null;
+}
+
 export function labelForUrl(url, fallback = 'link') {
   if (!url) return null;
   const doiMatch = url.match(/^https?:\/\/doi\.org\/(10\.\d+)/i);
@@ -98,6 +106,15 @@ export function labelForUrl(url, fallback = 'link') {
   }
   if (/\.pdf(?:[?#].*)?$/i.test(url)) return 'pdf';
   return fallback;
+}
+
+// Label for the primary-URL button. When the entry has a DOI whose prefix
+// we recognize (e.g. 10.31234 → PsyArXiv, 10.48550 → arXiv), that label
+// takes priority over whatever the primary URL's own domain suggests —
+// because the DOI describes the nature of the work (PsyArXiv preprint)
+// even when the actual title link goes elsewhere (osf.io/2498w).
+export function labelForPrimary(links, primaryUrl) {
+  return doiPrefixLabel(links?.doi_url) ?? labelForUrl(primaryUrl);
 }
 
 // Fallback order: a paper's DOI (when present) is the canonical published URL
@@ -226,7 +243,7 @@ function renderExtras(links, bibHtml, linkLabelOverride) {
     // button already shows the same URL.
     const primaryUrl = getPrimaryUrl(links);
     if (primaryUrl && !hrefs.has(normalizeUrl(primaryUrl))) {
-      const label = linkLabelOverride ?? labelForUrl(primaryUrl);
+      const label = linkLabelOverride ?? labelForPrimary(links, primaryUrl);
       buttons.push(
         `<a class="extra link" href="${escapeHtml(primaryUrl)}">${escapeHtml(label)}</a>`
       );
@@ -285,7 +302,10 @@ const GOOGLE_SCHOLAR_URL =
 
 const NAME_NOTE = `*Note on my name:* My surname is Vigly. Prior to September 2024, my surname was Hoover, which is now a middle name.`;
 
-export function generateMarkdown(entries) {
+// Homepage = "about" section + "publications" section + name-change note.
+// aboutMarkdown is the body of content/_about.md (plain markdown, no front
+// matter); `entries` is the sorted publications list (already bib-highlighted).
+export function generateHomepage(aboutMarkdown, entries) {
   const hasEqual = entries.some(
     (e) => e.equal_contribution && e.equal_contribution.length > 0
   );
@@ -293,9 +313,15 @@ export function generateMarkdown(entries) {
 
   const parts = [
     '---',
-    'title: research',
+    'title: home',
     'page-style: site',
     '---',
+    '',
+    '## about',
+    '',
+    aboutMarkdown.trim(),
+    '',
+    '## publications',
     '',
     '<ul class="social-media-list">',
     `  <li><a href="${GOOGLE_SCHOLAR_URL}">Google Scholar</a></li>`,
@@ -707,10 +733,16 @@ function main() {
     e.bibHtml = highlighted[i];
   });
 
-  // 7. Render the page.
+  // 7. Read the about fragment and render the homepage.
+  const aboutPath = 'content/_about.md';
+  if (!existsSync(aboutPath)) {
+    console.error(`${aboutPath} not found (the about-section source for the homepage)`);
+    process.exit(1);
+  }
+  const aboutMarkdown = readFileSync(aboutPath, 'utf8');
   ensureDir('_generated');
-  writeFileSync('_generated/pubs.md', generateMarkdown(sorted));
-  console.log(`Generated: _generated/pubs.md (${sorted.length} entries)`);
+  writeFileSync('_generated/index.md', generateHomepage(aboutMarkdown, sorted));
+  console.log(`Generated: _generated/index.md (${sorted.length} entries)`);
 
   // 8. Write the filtered bib download.
   const biblatex = stripLeakyFields(
