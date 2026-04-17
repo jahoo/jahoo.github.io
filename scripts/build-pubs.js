@@ -20,6 +20,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { homedir } from 'node:os';
+import { spawnSync } from 'node:child_process';
 import yaml from 'js-yaml';
 import { Cite } from '@citation-js/core';
 import '@citation-js/plugin-bibtex';
@@ -197,12 +198,17 @@ export function generateHtmlEntry(paper) {
     ? ` <span class="pub-status">${escapeHtml(paper.status)}</span>`
     : '';
 
+  const bibDetails = paper.bibHtml
+    ? `  <details class="pub-bibtex"><summary>bib</summary>\n${paper.bibHtml}  </details>\n`
+    : '';
+
   return [
     '<li class="pub">',
     `  ${titleHtml}`,
     `  <span class="pub-author">${authors}</span>`,
     `  ${venueHtml}${statusHtml}${noteHtml}`,
     renderExtras(paper.links),
+    bibDetails,
     '</li>',
   ].join('\n');
 }
@@ -521,6 +527,40 @@ function warnMissingPdfs(entries) {
   }
 }
 
+// Batch-highlight all bib entries in a single Pandoc invocation.
+// Returns an array of HTML strings (one <div class="sourceCode">...</div> each)
+// in the same order as the input. Line-number anchors and numbered ids from
+// Pandoc are stripped to avoid visual clutter and id collisions on the page.
+function highlightBibsBatch(bibStrings) {
+  if (bibStrings.length === 0) return [];
+  const markdown = bibStrings
+    .map((s) => '```bibtex\n' + s + '\n```')
+    .join('\n\n');
+  const result = spawnSync(
+    'pandoc',
+    ['--from', 'markdown', '--to', 'html', '--wrap=none'],
+    { input: markdown, encoding: 'utf8' }
+  );
+  if (result.status !== 0) {
+    throw new Error(
+      'Pandoc highlighting failed:\n' + (result.stderr || '(no stderr)')
+    );
+  }
+  const pieces = result.stdout
+    .split(/(?=<div class="sourceCode")/)
+    .filter((p) => p.trim().startsWith('<div class="sourceCode"'));
+  if (pieces.length !== bibStrings.length) {
+    throw new Error(
+      `highlightBibsBatch: expected ${bibStrings.length} highlighted blocks, got ${pieces.length}`
+    );
+  }
+  return pieces.map((p) =>
+    p
+      .replace(/\sid="cb[^"]*"/g, '')
+      .replace(/<a href="#cb[^"]*"[^>]*><\/a>/g, '')
+  );
+}
+
 function main() {
   // 1. Read site.yaml, resolve bib-source path.
   const siteMeta = yaml.load(readFileSync('site.yaml', 'utf8'));
@@ -585,16 +625,29 @@ function main() {
   }
   warnMissingPdfs(entries);
 
-  // 5. Sort + render markdown.
+  // 5. Sort entries.
   const sorted = sortEntries(entries);
+
+  // 6. Extract each entry's bib verbatim (stripping private/leaky fields),
+  // then syntax-highlight them all in a single Pandoc call. Attach the
+  // resulting HTML to each entry for the <details> block in the page.
+  const perEntryBib = sorted.map((e) =>
+    stripLeakyFields(extractEntriesByKey(bibText, [e.id])).trim()
+  );
+  const highlighted = highlightBibsBatch(perEntryBib);
+  sorted.forEach((e, i) => {
+    e.bibHtml = highlighted[i];
+  });
+
+  // 7. Render the page.
   ensureDir('_generated');
   writeFileSync('_generated/pubs.md', generateMarkdown(sorted));
   console.log(`Generated: _generated/pubs.md (${sorted.length} entries)`);
 
-  // 6. Extract requested entries verbatim from the source bib, then strip
-  // Zotero's local filesystem paths and other private metadata before writing.
-  const selectedKeys = sorted.map(e => e.id);
-  const biblatex = stripLeakyFields(extractEntriesByKey(bibText, selectedKeys));
+  // 8. Write the filtered bib download.
+  const biblatex = stripLeakyFields(
+    extractEntriesByKey(bibText, sorted.map((e) => e.id))
+  );
   ensureDir('assets/bibliography');
   writeFileSync('assets/bibliography/pubs.bib', biblatex);
   console.log(`Generated: assets/bibliography/pubs.bib (${sorted.length} entries)`);

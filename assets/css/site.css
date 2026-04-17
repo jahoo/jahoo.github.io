@@ -257,10 +257,21 @@ body.page-style-site .pub-title {
   font-size: 1.1rem;
   display: block;
   margin-bottom: 0.2rem;
-  color: var(--s-accent-warm, #424242);
 }
-body.page-style-site a.pub-title:hover {
+/* Title links: keep the title's own color (not the generic blue), with a
+   thin gray solid underline instead of the standard link underline. */
+body.page-style-site .pub-list a.pub-title,
+body.page-style-site .pub-list a.pub-title:visited {
+  color: inherit;
   text-decoration: underline;
+  text-decoration-color: #999;
+  text-decoration-style: solid;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+body.page-style-site .pub-list a.pub-title:hover {
+  color: inherit;
+  text-decoration-color: #333;
 }
 body.page-style-site .pub-author {
   display: block;
@@ -271,6 +282,22 @@ body.page-style-site .pub-author {
 body.page-style-site .pub-venue {
   font-style: italic;
   color: #333;
+  font-size: 0.95rem;
+}
+/* Venue links: subtle dashed gray underline; do not adopt the standard
+   link color or the underline from the generic post-content a rule. */
+body.page-style-site .pub-list a.pub-venue,
+body.page-style-site .pub-list a.pub-venue:visited {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: #999;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 0.5px;
+  text-underline-offset: 0.2em;
+}
+body.page-style-site .pub-list a.pub-venue:hover {
+  color: inherit;
+  text-decoration-color: #555;
 }
 body.page-style-site .pub-status {
   display: inline-block;
@@ -305,4 +332,45 @@ body.page-style-site ul.social-media-list {
 body.page-style-site ul.social-media-list li {
   display: inline-block;
   margin-right: 0.75rem;
+}
+
+/* Per-entry expandable bib (<details> with pandoc-highlighted code). */
+body.page-style-site details.pub-bibtex {
+  margin-top: 0.3rem;
+  font-size: 0.875rem;
+  display: inline-block;
+}
+body.page-style-site details.pub-bibtex > summary {
+  cursor: pointer;
+  display: inline-block;
+  color: #2a7ae2;
+  list-style: none;  /* hide Firefox default marker */
+}
+body.page-style-site details.pub-bibtex > summary::-webkit-details-marker {
+  display: none;     /* hide WebKit/Blink default triangle */
+}
+body.page-style-site details.pub-bibtex > summary::before { content: '['; color: #888; }
+body.page-style-site details.pub-bibtex > summary::after  { content: ']'; color: #888; }
+body.page-style-site details.pub-bibtex[open] > summary {
+  color: #555;
+}
+body.page-style-site details.pub-bibtex > div.sourceCode {
+  margin: 0.4rem 0 0.2rem;
+  padding: 0.6rem 0.8rem;
+  background: #f7f7f5;
+  border: 1px solid var(--s-border, #e4e4e1);
+  border-radius: 3px;
+  max-width: 800px;
+  overflow-x: auto;
+}
+body.page-style-site details.pub-bibtex pre.sourceCode {
+  margin: 0;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 0.85rem;
+  white-space: pre;
+}
+body.page-style-site details.pub-bibtex code.sourceCode {
+  font-family: ui-monospace, 'SF Mono', 'Menlo', 'Consolas', monospace;
 }
