@@ -311,8 +311,48 @@ export function generateBibtexFile(entries) {
 // Main
 // ------------------------------------------------------------
 
+function ensureDir(path) {
+  mkdirSync(path, { recursive: true });
+}
+
+function warnMissingPdfs(entries) {
+  for (const e of entries) {
+    const links = e.links ?? {};
+    for (const key of ['pdf', 'slides', 'poster', 'handout']) {
+      const val = links[key];
+      if (!val || /^https?:\/\//.test(val)) continue;
+      const full = resolve('assets/pdfs', val);
+      if (!existsSync(full)) {
+        console.warn(`[${e.id}] warning: ${key} file not found at ${full}`);
+      }
+    }
+  }
+}
+
 function main() {
-  console.log('build-pubs: not yet implemented');
+  const raw = readFileSync('pubs.yaml', 'utf8');
+  const entries = yaml.load(raw);
+  if (!Array.isArray(entries)) {
+    console.error('pubs.yaml must be a list of entries');
+    process.exit(1);
+  }
+  try {
+    entries.forEach(validateEntry);
+  } catch (err) {
+    console.error(err.message);
+    process.exit(1);
+  }
+  warnMissingPdfs(entries);
+
+  const sorted = sortEntries(entries);
+
+  ensureDir('_generated');
+  writeFileSync('_generated/pubs.md', generateMarkdown(sorted));
+  console.log(`Generated: _generated/pubs.md (${sorted.length} entries)`);
+
+  ensureDir('assets/bibliography');
+  writeFileSync('assets/bibliography/pubs.bib', generateBibtexFile(sorted));
+  console.log(`Generated: assets/bibliography/pubs.bib (${sorted.length} entries)`);
 }
 
 // Run if invoked directly
