@@ -43,10 +43,15 @@ PIDS+=($!)
 
 # 3. Content/asset watcher using fswatch
 "$FSWATCH" -r --event Updated \
-    content/ filters/ templates/ assets/css/ assets/fonts/ site.yaml \
+    content/ filters/ templates/ assets/css/ assets/fonts/ site.yaml pubs.yaml scripts/ \
     2>/dev/null \
 | while IFS= read -r changed; do
     case "$changed" in
+        *pubs.yaml|*build-pubs.js)
+            echo "Pubs changed — regenerating pubs.md + pubs.bib"
+            node scripts/build-pubs.js || true
+            bash scripts/build-content.sh 2>&1 || true
+            ;;
         *.md)
             rel="${changed#$(pwd)/}"
             echo "Content changed: $rel"
