@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>An equivalence between generative automata and logical
+constraints — jacob hoover vigly</title>
+
+  <!-- MathJax v4: Pandoc emits \(...\) and \[...\] inside <span class="math"> -->
+  <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['\\(', '\\)'], ['$', '$']],
+      displayMath: [['\\[', '\\]'], ['$$', '$$']]
+    }
+  };
+  </script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/post.css">
+  <link rel="stylesheet" href="/assets/css/site.css">
+</head>
+<body class="page-style-post">
+
+  <header class="site-header">
+    <div class="wrapper">
+      <a class="site-title" href="/">
+        <span class="site-title-full">jacob hoover vigly</span>
+        <span class="site-title-short">jacob vigly</span>
+        <span class="site-title-xs">jv</span>
+      </a>
+      <nav class="site-nav">
+        <div class="trigger">
+          <a class="page-link" href="/">home</a>
+          <a class="page-link" href="/posts/">blog</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="wrapper">
+      <article>
+
+        <header class="post-header">
+          <h1 class="post-title">An equivalence between generative
+automata and logical constraints</h1>
+          <p class="post-meta">
+            <time>2018-11-15</time>
+            · Jacob Louis Hoover
+            · <span class="post-tags">presentation</span>
+          </p>
+        </header>
+
+
+        <div class="post-content">
+<p>I gave a presentation to <a href="https://mcqll.org/">MCQLL</a>, on
+an an example of the duality of generative systems and constraint-based
+systems. The particular example I discussed was a proof of the
+equivalence in expressive power between Finite state automata (FSA) and
+monadic second order logic (with a successor function;
+MSOL[<em>S</em>]). That is, I presented the proof that any language for
+which there exists an FSA can be described equivalently using
+constraints written in MSOL[<em>S</em>].</p>
+<p>My slides are <a
+href="/assets/pdfs/2018.11.15-generative_vs_constraint.pdf">here</a>.</p>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrapper">
+      <span class="last-modified">Last modified: 2026-04-17 00:25</span>
+    </div>
+  </footer>
+
+  <script src="/assets/js/collapse.js"></script>
+  <script src="/assets/js/active-nav.js"></script>
+</body>
+</html>

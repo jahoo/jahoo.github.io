@@ -1,0 +1,17 @@
+{
+  "state": "s",
+  "rstate": "\\widetilde{\\state}",
+  "target": "\\pi",
+  "impwt": "\\rho",
+  "normwt": "w",
+  "np": "N",
+  "cnt": "M",
+  "gen": "{\\mathcal{G}}",
+  "E": "{\\mathbb{E}}",
+  "Var": "\\operatorname{Var}",
+  "cdf": "F",
+  "invcdf": "{F^{-1}}",
+  "probe": "u",
+  "resid": "\\widetilde{\\normwt}",
+  "idx": "i"
+}

@@ -1,0 +1,2198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Interactive Divergence Fitting</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]}); if(typeof renderQFormula==='function') renderQFormula();"></script>
+    <style>
+        .katex {
+            font-size: 0.9rem !important;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        h1 {
+            font-size: 1.5em;
+            margin-bottom: 0.3em;
+        }
+
+        h2 {
+            font-size: 1.1em;
+            margin: 1em 0 0.3em;
+            color: #555;
+        }
+
+        p.subtitle {
+            color: #666;
+            margin-bottom: 1.5em;
+        }
+
+        .panels {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .panel {
+            flex: 1;
+            min-width: 260px;
+        }
+
+        .grid-3x2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 20px;
+        }
+
+        .grid-3x2 .row-label {
+            grid-column: 1 / -1;
+            font-weight: 600;
+            font-size: 0.95em;
+            margin-top: 0.8em;
+            padding-bottom: 2px;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .grid-3x2 .panel {
+            min-width: 0;
+        }
+
+        .panel-label {
+            font-weight: 600;
+            font-size: 0.95em;
+            margin-bottom: 4px;
+            min-height: 1.4em;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .panel-label .kl-val {
+            font-weight: 400;
+            font-size: 0.85em;
+            font-family: monospace;
+        }
+
+        .panel-label .kl-val .kl-num {
+            border-bottom: 3px solid #888;
+            padding-bottom: 1px;
+        }
+
+        canvas.kl-canvas {
+            width: 100%;
+            height: 240px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .control-box {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #fafafa;
+            padding: 8px 12px;
+            margin: 0.8em 0;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: nowrap;
+            overflow: hidden;
+            padding: 3px 0;
+            font-size: 0.85em;
+        }
+
+        .control-row + .control-row {
+            border-top: 1px solid #eee;
+            margin-top: 3px;
+            padding-top: 6px;
+        }
+
+        .control-row button {
+            padding: 4px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #f8f8f8;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .control-row button:hover { background: #eee; }
+
+        .control-row button:disabled {
+            opacity: 0.35;
+            cursor: default;
+        }
+
+        .control-row button:disabled:hover { background: #f8f8f8; }
+
+        .control-row button .key {
+            color: #aaa;
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 0.95em;
+        }
+
+        .toggle-group {
+            display: inline-flex;
+        }
+
+        .toggle-group .method-toggle {
+            border-radius: 0;
+        }
+
+        .toggle-group .method-toggle:first-child {
+            border-radius: 3px 0 0 3px;
+        }
+
+        .toggle-group .method-toggle:last-child {
+            border-radius: 0 3px 3px 0;
+        }
+
+        .toggle-group .method-toggle + .method-toggle {
+            border-left: none;
+        }
+
+        .method-toggle {
+            padding: 2px 10px;
+            font-size: 0.85em;
+            line-height: 1.4;
+            border: 1px solid #aaa;
+            border-radius: 3px;
+            background: #f0f0f0;
+            cursor: pointer;
+        }
+
+        .method-toggle.active {
+            background: #333;
+            color: #fff;
+            border-color: #333;
+        }
+
+        .method-toggle:hover:not(.active) { background: #e0e0e0; }
+
+        body.mode-mc .det-only { display: none; }
+        body.mode-det .mc-only { display: none; }
+        body.div-kl .div-chisq-only { display: none; }
+        body.div-chisq .div-kl-only { display: none; }
+
+        .control-row button.active {
+            background: #333;
+            color: #fff;
+            border-color: #333;
+        }
+
+        .control-row label {
+            font-size: 1em;
+            color: #555;
+            cursor: help;
+        }
+
+        .control-row input[type=range] {
+            width: 80px;
+            vertical-align: middle;
+        }
+
+        .control-row select {
+            padding: 3px 6px;
+            font-size: 1em;
+        }
+
+        .land-tooltip {
+            position: fixed;
+            pointer-events: none;
+            background: rgba(30,30,30,0.88);
+            color: #eee;
+            font-family: monospace;
+            font-size: 0.75em;
+            line-height: 1.5;
+            padding: 4px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            z-index: 100;
+            display: none;
+        }
+
+        .legend {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 6px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: nowrap;
+            white-space: nowrap;
+        }
+
+        .legend .swatch {
+            display: inline-block;
+            width: 14px;
+            height: 3px;
+            vertical-align: middle;
+            margin-right: 3px;
+        }
+    </style>
+</head>
+
+<body class="mode-mc div-kl">
+    <div class="land-tooltip" id="land-tooltip"></div>
+
+    <h1>Interactive Divergence Fitting</h1>
+    <p style="font-size:0.85em; color:#666; margin-bottom:0.3em;">This page built off of <a
+            href="https://timvieira.github.io/blog/interactive-kl-divergence-fitting/" style="color:#44c;">Tim Vieira's
+            interactive KL divergence fitting post</a></p>
+    <p class="subtitle" id="subtitle">Monte Carlo gradient estimation — drag the target modes or the fitted distribution
+    </p>
+
+    <div class="control-box">
+        <div class="control-row">
+            <span class="toggle-group"><button id="btn-deterministic" class="method-toggle"
+                title="Exact gradients via closed-form moments and numerical integration">Deterministic</button><button id="btn-mc" class="method-toggle active" title="Stochastic gradient estimation from K samples">Monte Carlo</button></span>
+            <span class="mc-only"><label title="Number of Monte Carlo particles per gradient step">$K$:
+                    <button id="btn-K-minus" style="padding:0 4px;border:1px solid #ccc;border-radius:3px;background:#f8f8f8;cursor:pointer;line-height:1.3;">&minus;</button>
+                    <span id="val-K" style="display:inline-block;min-width:1.6em;text-align:center;">64</span>
+                    <button id="btn-K-plus" style="padding:0 4px;border:1px solid #ccc;border-radius:3px;background:#f8f8f8;cursor:pointer;line-height:1.3;">+</button>
+                    <input type="range" id="slider-K" min="0" max="1000" value="667" step="1">
+                    </label></span>
+            <span style="flex:1;"></span>
+            <select id="select-divergence" style="padding:2px 6px; border:1px solid #ccc; border-radius:3px;">
+                <option value="kl">KL</option>
+                <option value="chisq">χ²</option>
+            </select>
+        </div>
+        <div class="control-row" style="flex-wrap:wrap;">
+            <span style="display:flex; gap:10px; align-items:center; flex-wrap:nowrap;">
+            <button id="btn-playpause" title="Play/pause optimization (space)">⏸ <span class="key">␣</span></button>
+            <button id="btn-step" title="Advance one gradient step (>)" disabled>⏭ <span class="key">&gt;</span></button>
+            <label title="Optimization speed (gradient steps per second)">Speed: <input type="range" id="slider-speed"
+                    min="0" max="1000" value="446" step="1" list="speed-ticks" style="width:100px;"></label>
+            <datalist id="speed-ticks"><option value="446" label="1/frame"></datalist>
+            <span class="fps-display" id="fps-display" style="color:#aaa; font-family:monospace;">... steps/s</span>
+            </span>
+            <span style="display:flex; gap:10px; align-items:center;">
+            <label title="Learning rate (decays as lr₀ / (1 + 0.001t))">LR: <input type="range" id="slider-lr" min="1" max="30" value="8">
+                <span id="val-lr">0.08</span></label>
+            <label title="Mixture weight: 0 = all left, 1 = all right">$p$ mix: <input type="range"
+                    id="slider-mix" min="0" max="100" value="50" step="1">
+                <span id="val-mix">0.50</span></label>
+            </span>
+        </div>
+        <div class="control-row" style="flex-wrap:wrap;">
+            <span style="display:flex; gap:10px; align-items:center; flex-wrap:nowrap; overflow:hidden;">$\textcolor{#7B2D8E}{q_\phi}$:
+            <button id="btn-reset" title="Randomize q starting position">↻ randomize</button>
+            $\phi\!=$ <select id="select-parameterization"></select>
+            <span id="q-formula" style="cursor:help; border-bottom:1px dotted #aaa;" title=""></span></span>
+            <span style="display:flex; gap:10px; align-items:center;">
+            <label id="label-natgrad" title="Premultiply gradient by F⁻¹ (Fisher information inverse). Makes the update parameterization-invariant: same step in KL-divergence space regardless of φ. Uses SGD with momentum (not Adam — Adam's per-parameter adaptivity interferes with F⁻¹ and breaks invariance)."><input type="checkbox" id="chk-natgrad" checked> natural gradient</label>
+            <label class="div-chisq-only" title="Clip gradient norm to a maximum of 5 before the optimizer step. Mitigates a pathology of reverse χ²: the gradient ∂χ²(q‖p)/∂φ includes weights q/p that scale as ~1/σ, creating a positive feedback loop where small σ → large gradient → even smaller σ. Gradient clipping breaks this runaway."><input type="checkbox" id="chk-gradclip" checked> gradient clipping</label>
+            </span>
+        </div>
+    </div>
+
+    <div class="grid-3x2">
+        <div class="row-label" id="row-label-fwd">Minimize <span class="div-kl-only">$\mathrm{KL}(p \| \textcolor{#7B2D8E}{q_\phi})$</span><span class="div-chisq-only">$\chi^2(p \| \textcolor{#7B2D8E}{q_\phi})$</span> — mean-seeking<span id="fwd-via"></span></div>
+        <div class="panel">
+            <div class="panel-label"><span class="kl-val" id="kl-fwd"><span class="div-kl-only">$\mathrm{KL}(p \| \textcolor{#7B2D8E}{q_\phi})$</span><span class="div-chisq-only">$\chi^2(p \| \textcolor{#7B2D8E}{q_\phi})$</span> =
+                    <span class="kl-num">...</span></span></div>
+            <canvas class="kl-canvas" id="canvas-fwd" height="220"></canvas>
+        </div>
+        <div class="panel">
+            <div class="panel-label"><span id="q-params-fwd" style="font-weight:400; font-size:0.85em; font-family:monospace; color:#7B2D8E;"></span></div>
+            <canvas class="kl-canvas" id="canvas-land-fwd" height="220"></canvas>
+        </div>
+
+        <div class="row-label" id="row-label-rev">Minimize <span class="div-kl-only">$\mathrm{KL}(\textcolor{#7B2D8E}{q_\phi} \| p)$</span><span class="div-chisq-only">$\chi^2(\textcolor{#7B2D8E}{q_\phi} \| p)$</span> — mode-seeking<span id="rev-via"></span><span id="rev-method-btns" class="mc-only div-kl-only toggle-group"><button id="btn-reinforce" class="method-toggle active"
+                    title="Score function estimator: weight each sample's score ∇log q by reward r = log p - log q">REINFORCE</button><button id="btn-reparam" class="method-toggle"
+                    title="Reparameterization trick: backprop through z = μ + σε. Lower variance, requires differentiable q.">reparameterization</button></span></div>
+        <div class="panel">
+            <div class="panel-label"><span class="kl-val" id="kl-rev"><span class="div-kl-only">$\mathrm{KL}(\textcolor{#7B2D8E}{q_\phi} \| p)$</span><span class="div-chisq-only">$\chi^2(\textcolor{#7B2D8E}{q_\phi} \| p)$</span> =
+                    <span class="kl-num">...</span></span></div>
+            <canvas class="kl-canvas" id="canvas-rev" height="220"></canvas>
+        </div>
+        <div class="panel">
+            <div class="panel-label"><span id="q-params-rev" style="font-weight:400; font-size:0.85em; font-family:monospace; color:#7B2D8E;"></span></div>
+            <canvas class="kl-canvas" id="canvas-land-rev" height="220"></canvas>
+        </div>
+
+    </div>
+
+    <div class="legend">
+        <span><span class="swatch" style="background:#000"></span> target $p(z)$</span>
+        <span><span class="swatch" style="background:#7B2D8E"></span> fitted $\textcolor{#7B2D8E}{q_\phi}$</span>
+        <span><span class="swatch"
+                style="background:rgba(123,45,142,0.3);border-top:1px dashed rgba(123,45,142,0.6)"></span> optimal $q^*$
+            (dashed = global, dotted = local)</span>
+    </div>
+    <div class="legend mc-only">
+        <span><span class="swatch" style="border-top:2px dotted rgba(50,100,220,0.4)"></span> <span class="div-kl-only">$w = \tilde{p}/\textcolor{#7B2D8E}{q_\phi}$</span><span class="div-chisq-only">$w^2 = (\tilde{p}/\textcolor{#7B2D8E}{q_\phi})^2$</span> (fwd only)</span>
+        <span>rug: <span style="color:rgba(50,100,220,0.8)">blue</span> = positive gradient contribution; <span style="color:rgba(200,50,50,0.8)">red</span> = negative</span>
+    </div>
+    <details style="font-size:0.85em; color:#555; margin-top:0.8em;">
+        <summary style="cursor:pointer; color:#333; font-weight:600;">Reading the plots</summary>
+        <ul style="margin-top:0.5em; padding-left:1.2em; line-height:1.7;">
+            <li><strong>Black curve</strong> — the target $p(z)$, a mixture of two Gaussians. Drag the <strong>black
+                    dots</strong> at the mode peaks to move them (horizontal = $\mu$, vertical = $\sigma$).</li>
+            <li><strong>Purple curve</strong> — the fitted $q_\phi = \mathcal{N}(\mu, \sigma^2)$. Drag the
+                <strong>purple dot</strong> at its peak to reposition it (also draggable on the loss landscape).
+            </li>
+            <li><strong>Blue dashed/dotted curves</strong> — the exact KL-optimal $q^*$. Dashed = global minimum; dotted
+                = local minima. These recompute when you move the target modes.</li>
+            <li class="mc-only"><strong>Rug plot</strong> (below x-axis) — the $K$ Monte Carlo particles sampled from
+                $q_\phi$ each gradient step. Each tick marks a sample location $z^{(i)}$.
+                <span style="color:rgba(50,100,220,0.8)">Blue</span> = positive gradient contribution (pulls $q$ toward that region);
+                <span style="color:rgba(200,50,50,0.8)">red</span> = negative (pushes $q$ away).
+                Opacity $\propto$ contribution magnitude. Forward ticks are always blue; reverse KL has both; reverse $\chi^2$ is always red.</li>
+            <li class="mc-only"><strong>Dotted purple curve</strong> (forward only) — the theoretical per-particle weight: $w(z) = p(z)/q_\phi(z)$ for KL, $w(z)^2$ for $\chi^2$.</li>
+            <li><strong>Divergence value</strong> (top of each panel) — the current divergence (KL or $\chi^2$), computed by numerical integration. The underline color matches the loss landscape at $q_\phi$'s position.</li>
+        </ul>
+    </details>
+
+    <details style="font-size:0.85em; color:#555; margin-top:0.8em;">
+        <summary style="cursor:pointer; color:#333; font-weight:600;">How the gradients are computed</summary>
+
+        <div class="det-only div-kl-only">
+        <p style="margin-top:0.5em;">
+        <b>Forward KL</b>: $\nabla_\phi \mathrm{KL}(p \| q_\phi) = -\mathbb{E}_p[\nabla_\phi \log q_\phi(x)]$. For a Gaussian $q$ this depends only on $\mathbb{E}_p[x]$ and $\mathbb{E}_p[(x-\mu)^2]$, which are available in closed form for a Gaussian mixture &mdash; no integration or sampling needed. The forward KL is convex; the gradient always points toward the unique moment-matching solution.
+        </p>
+        <p>
+        <b>Reverse KL</b>: $\nabla_\phi \mathrm{KL}(q_\phi \| p) = -\nabla_\phi \mathbb{E}_{q_\phi}[\log p(x)] + \ldots$ requires $\mathbb{E}_q[\nabla_x \log p(x)]$, an expectation of a nonlinear function of $p$ under $q$. This has no closed form, so it is computed by numerical integration (trapezoidal rule, 400 grid points) &mdash; effectively exact in 1D. The reverse KL is nonconvex, so gradient descent finds local minima but cannot escape them.
+        </p>
+        <p>
+        <b>Why this doesn't scale.</b> In higher dimensions, numerical integration requires $N^d$ evaluations ($N$ grid points per dimension), and closed-form mixture moments are unavailable for complex targets like empirical data distributions. In maximum likelihood training, $\mathbb{E}_p[\cdot]$ is replaced with a sample average over training data &mdash; this <i>is</i> Monte Carlo estimation of the forward KL gradient. Switch to <b>Monte Carlo</b> mode to see how stochastic estimation changes the dynamics.
+        </p>
+        </div>
+
+        <div class="det-only div-chisq-only">
+        <p style="margin-top:0.5em;">
+        <b>Forward $\chi^2$</b>: $\nabla_\phi \chi^2(p \| q_\phi) = -\mathbb{E}_p[w(z)\,\nabla_\phi \log q_\phi(z)]$ where $w = p/q_\phi$. Unlike forward KL, no closed-form gradient exists &mdash; the extra $w(z)$ factor prevents reduction to simple moments. Computed by numerical integration (trapezoidal rule, 400 grid points). Minimizing forward $\chi^2$ is equivalent to minimizing IS weight variance.
+        </p>
+        <p>
+        <b>Reverse $\chi^2$</b>: $\nabla_\phi \chi^2(q_\phi \| p) = 2\,\mathbb{E}_{q_\phi}[(q_\phi/p)\,\nabla_\phi \log q_\phi(z)]$. Also computed by numerical integration. Like reverse KL, the landscape is nonconvex and mode-seeking, but the penalty for placing mass where $p \approx 0$ is quadratic rather than logarithmic.
+        </p>
+        <p>
+        <b>Convexity</b>: Like forward KL, forward $\chi^2(p \| q_\phi)$ is convex in the natural parameters &mdash; in fact <em>log</em>-convex, which is stronger. This is because $\chi^2 + 1 = \exp(A(\eta) + f(\eta))$ where both $A$ (log-partition) and $f(\eta) = \log \int p(x)^2 e^{-\eta \cdot T(x)} dx$ are convex. Reverse $\chi^2$ is nonconvex in all parameterizations.
+        </p>
+        </div>
+
+        <div class="mc-only div-kl-only">
+        <p style="margin-top:0.5em;">
+        <b>Forward KL</b>: $\nabla_\phi \mathrm{KL}(p \| q_\phi) = -\mathbb{E}_p[\nabla_\phi \log q_\phi(x)]$. The expectation is under $p$, which we can evaluate but not sample from, so we use <b>importance sampling</b> from $q_\phi$: sample $z^{(i)} \sim q_\phi$, compute self-normalized weights $\bar{w}_i \propto p(z^{(i)})/q_\phi(z^{(i)})$, and estimate the gradient as a weighted average of score functions.
+        </p>
+        <p>
+        <b>Reverse KL</b>: $\nabla_\phi \mathrm{KL}(q_\phi \| p) = -\nabla_\phi \mathbb{E}_{q_\phi}[\log p(x)] + \ldots$. The expectation is under $q_\phi$, which depends on $\phi$, so we need to differentiate through the sampling distribution. <b>REINFORCE</b> uses the log-derivative trick: weight each sample's score function $\nabla_\phi \log q_\phi(z^{(i)})$ by the reward $r_i = \log p(z^{(i)}) - \log q_\phi(z^{(i)})$. <b>Reparameterization</b> writes $z = \mu + \sigma\varepsilon$ with $\varepsilon \sim \mathcal{N}(0,1)$ and differentiates through the sample directly, using $\nabla_x \log p(z)$.
+        </p>
+        <p>
+        <b>Why MC optimization can get stuck.</b> All MC estimators sample from $q_\phi$, so the gradient can only reflect what $q_\phi$ "sees." If $q_\phi$ doesn't overlap a mode of $p$, the gradient has no signal to move toward it. This is most striking for the forward KL, which is convex &mdash; true gradient descent always converges, but MC estimation can get stuck indefinitely. Set $K$ low and drag $q_\phi$ onto one mode to see this. For the reverse KL, mode-locking is a genuine local minimum even with exact gradients, but MC noise can additionally trap the optimizer in places that are not true local minima.
+        </p>
+        </div>
+
+        <div class="mc-only div-chisq-only">
+        <p style="margin-top:0.5em;">
+        <b>Forward $\chi^2$</b>: Like forward KL, uses importance sampling from $q_\phi$, but the per-particle weight is $\propto \bar{w}_i^2$ (squared IS weights) rather than $\bar{w}_i$. This concentrates the gradient on the highest-weight particles &mdash; the effective sample size $\mathrm{ESS} = 1/\sum_i \bar{w}_i^2$ directly quantifies how many particles contribute.
+        </p>
+        <p>
+        <b>Reverse $\chi^2$</b>: Sample $z^{(i)} \sim q_\phi$ and weight each score by $-q_\phi(z^{(i)})/p(z^{(i)}) = -e^{-r_i}$. Unlike REINFORCE, the weights are <b>always negative</b>: the gradient only pushes $q_\phi$ away from regions where it overestimates $p$, never directly pulling toward high-$p$ modes. No REINFORCE or reparameterization trick is needed &mdash; the pathwise and REINFORCE terms are equal, so backpropagation through $q_\phi(z)$ at stopped samples gives the correct gradient.
+        </p>
+        <p>
+        <b>Why MC optimization can get stuck.</b> The same issue as KL: MC gradients are blind to modes $q_\phi$ doesn't overlap. For forward $\chi^2$, the squared weighting makes this worse &mdash; even fewer particles contribute. For reverse $\chi^2$, the "push only" dynamics mean $q_\phi$ can only learn to flee bad regions, never actively seek good ones.
+        </p>
+        </div>
+
+        <p style="margin-top:0.5em;" id="optimizer-note">
+        </p>
+    </details>
+
+    <script>
+        (function () {
+            "use strict";
+
+            // ===== Math =====
+            const sqrt2pi = Math.sqrt(2 * Math.PI);
+            function gaussPdf(x, mu, sigma) {
+                const z = (x - mu) / sigma;
+                return Math.exp(-0.5 * z * z) / (sigma * sqrt2pi);
+            }
+            function gaussLogPdf(x, mu, sigma) {
+                const z = (x - mu) / sigma;
+                return -0.5 * z * z - Math.log(sigma * sqrt2pi);
+            }
+            function mixturePdf(x, comps) {
+                let s = 0;
+                for (const c of comps) s += c.w * gaussPdf(x, c.mu, c.sigma);
+                return s;
+            }
+            function mixtureLogPdf(x, comps) {
+                let maxL = -Infinity;
+                const lts = [];
+                for (const c of comps) {
+                    const lt = Math.log(c.w) + gaussLogPdf(x, c.mu, c.sigma);
+                    lts.push(lt);
+                    if (lt > maxL) maxL = lt;
+                }
+                let s = 0;
+                for (const lt of lts) s += Math.exp(lt - maxL);
+                return maxL + Math.log(s);
+            }
+            // Box-Muller
+            function randn() {
+                const u1 = Math.random(), u2 = Math.random();
+                return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+            }
+            function softmax(arr) {
+                let mx = -Infinity;
+                for (let i = 0; i < arr.length; i++) if (arr[i] > mx) mx = arr[i];
+                const e = new Float64Array(arr.length);
+                let s = 0;
+                for (let i = 0; i < arr.length; i++) { e[i] = Math.exp(arr[i] - mx); s += e[i]; }
+                for (let i = 0; i < arr.length; i++) e[i] /= s;
+                return e;
+            }
+
+            // ===== Formatting =====
+            function fmtNum(v) {
+                if (v === Infinity) return '∞';
+                if (v === -Infinity) return '−∞';
+                if (!isFinite(v)) return 'NaN';
+                const a = Math.abs(v);
+                if (a < 1e-3) return v.toExponential(2);
+                if (a < 100) return v.toFixed(4);
+                if (a < 1e6) return v.toFixed(1);
+                return v.toExponential(2);
+            }
+
+            // ===== Config =====
+            const X_MIN = -8, X_MAX = 8, N_GRID = 400;
+
+            // ===== State =====
+            let pComps = [
+                { mu: -3.0, sigma: 0.9, w: 0.5 },
+                { mu: 2.0, sigma: 0.7, w: 0.5 },
+            ];
+
+            // q objects store (mu, logSigma); use q.sigma getter pattern via helper
+            const _initMu = (Math.random() - 0.5) * 12;
+            const _initLs = Math.log(1 + Math.random() * 2);
+            let qFwd = { mu: _initMu, logSigma: _initLs, get sigma() { return Math.exp(this.logSigma); } };
+            let qRev = { mu: _initMu, logSigma: _initLs, get sigma() { return Math.exp(this.logSigma); } };
+            let reverseMethod = 'reinforce';  // 'reinforce' or 'reparam'
+            let gradientMode = 'mc';  // 'mc' or 'deterministic'
+            let divergenceType = 'kl';  // 'kl' or 'chisq'
+            let landParam = 'mu-sigma';  // key into PARAMS registry
+            let natGrad = true;  // apply Fisher inverse to gradients
+            let gradClip = true;  // clip gradient norm (mitigates reverse χ² blowup)
+
+            // Optimal solutions (recomputed when p changes)
+            let optFwd = null;   // { mu, sigma }
+            let optRev = [];     // [{ mu, sigma, kl }, ...]
+
+            let running = true;
+            let K = 64;
+            let baseLR = 0.08;
+
+            // Adam state
+            let adamFwd = { mMu: 0, vMu: 0, mSig: 0, vSig: 0, t: 0 };
+            let adamRev = { mMu: 0, vMu: 0, mSig: 0, vSig: 0, t: 0 };
+
+            function resetAdam() {
+                adamFwd = { mMu: 0, vMu: 0, mSig: 0, vSig: 0, t: 0 };
+                adamRev = { mMu: 0, vMu: 0, mSig: 0, vSig: 0, t: 0 };
+            }
+
+            // ===== Parameterization registry =====
+            // Each entry is self-contained: add/remove entries to change available options.
+            // The dropdown is generated from this at runtime.
+            const PARAMS = {
+                'natural': {
+                    label: 'η₁, η₂',
+                    formula: '\\textcolor{#7B2D8E}{q_\\phi}(x) \\propto \\exp(\\eta_1 x + \\eta_2 x^2)',
+                    tooltip() {
+                        return divergenceType === 'chisq'
+                            ? 'Natural (exponential family) parameters. Both forward KL and forward χ² are convex in φ (χ² is even log-convex). The only parameterization here where gradient descent is guaranteed to find the global optimum.'
+                            : 'Natural (exponential family) parameters. Forward KL is convex in φ — the only parameterization here where gradient descent is guaranteed to find the global optimum.';
+                    },
+                    axes: ['η₁', 'η₂'],
+                    fromQ(q) {
+                        const s2 = q.sigma * q.sigma;
+                        return [q.mu / s2, -1 / (2 * s2)];
+                    },
+                    toQ(a1, a2, q) {
+                        a2 = Math.min(-0.02, a2);  // σ < ~5
+                        const s2 = -1 / (2 * a2);
+                        q.mu = a1 * s2;
+                        q.logSigma = 0.5 * Math.log(s2);
+                    },
+                    toMuSigma(a1, a2) {
+                        a2 = Math.min(-0.02, a2);
+                        const s2 = -1 / (2 * a2);
+                        return [a1 * s2, Math.sqrt(s2)];
+                    },
+                    fromMuSigma(mu, sigma) {
+                        const s2 = sigma * sigma;
+                        return [mu / s2, -1 / (2 * s2)];
+                    },
+                    transformGrad(gMu, gLs, q) {
+                        const s2 = q.sigma * q.sigma;
+                        return [s2 * gMu, 2 * q.mu * s2 * gMu + s2 * gLs];
+                    },
+                    // F^{-1} for natural params: full 2×2, det(F) = 2σ⁶
+                    fisherInv(g1, g2, q) {
+                        const s2 = q.sigma * q.sigma, s4 = s2 * s2, mu = q.mu;
+                        const det = 2 * s2 * s4;
+                        return [((4*mu*mu*s2 + 2*s4) * g1 - 2*mu*s2 * g2) / det,
+                                (-2*mu*s2 * g1 + s2 * g2) / det];
+                    },
+                    hoverLabel(a1, a2) { return 'η₁ = ' + a1.toFixed(2) + '<br>η₂ = ' + a2.toFixed(3); },
+                    bounds(pComps, optFwd, optRev, qs, divType) {
+                        const pts = [];
+                        for (const c of pComps) {
+                            const s2 = c.sigma * c.sigma;
+                            pts.push([c.mu / s2, -1 / (2 * s2)]);
+                        }
+                        if (optFwd) {
+                            const s2 = optFwd.sigma * optFwd.sigma;
+                            pts.push([optFwd.mu / s2, -1 / (2 * s2)]);
+                        }
+                        for (const o of optRev) {
+                            const s2 = o.sigma * o.sigma;
+                            pts.push([o.mu / s2, -1 / (2 * s2)]);
+                        }
+                        for (const q of qs) {
+                            const s2 = q.sigma * q.sigma;
+                            pts.push([q.mu / s2, -1 / (2 * s2)]);
+                        }
+                        let a1Lo = Infinity, a1Hi = -Infinity, a2Lo = Infinity, a2Hi = -Infinity;
+                        for (const [a1, a2] of pts) {
+                            a1Lo = Math.min(a1Lo, a1); a1Hi = Math.max(a1Hi, a1);
+                            a2Lo = Math.min(a2Lo, a2); a2Hi = Math.max(a2Hi, a2);
+                        }
+                        const tight = divType === 'chisq' ? 0.15 : 0.3;
+                        const a1Pad = Math.max(1, (a1Hi - a1Lo) * tight);
+                        const a2Pad = Math.max(0.1, (a2Hi - a2Lo) * tight);
+                        const eta2Max = divType === 'chisq' ? -0.05 : -0.02;
+                        return [a1Lo - a1Pad, a1Hi + a1Pad, a2Lo - a2Pad, Math.min(eta2Max, a2Hi + a2Pad)];
+                    },
+                },
+                'mu-sigma': {
+                    label: 'μ, σ',
+                    formula: '\\textcolor{#7B2D8E}{q_\\phi}(x) = \\mathcal{N}(x;\\, \\mu,\\, \\sigma^2)',
+                    tooltip() { return 'Direct parameterization. The optimum is moment matching: μ* = 𝔼ₚ[x], σ* = √Varₚ(x). Simple and interpretable, but requires σ > 0 and the landscape is not globally convex.'; },
+                    axes: ['μ', 'σ'],
+                    fromQ(q) { return [q.mu, q.sigma]; },
+                    toQ(a1, a2, q) {
+                        q.mu = a1; q.logSigma = Math.log(Math.max(0.1, a2));
+                    },
+                    toMuSigma(a1, a2) { return [a1, Math.max(0.1, a2)]; },
+                    fromMuSigma(mu, sigma) { return [mu, sigma]; },
+                    transformGrad(gMu, gLs, q) { return [gMu, gLs / q.sigma]; },
+                    // F^{-1} = diag(σ², σ²/2)
+                    fisherInv(g1, g2, q) {
+                        const s2 = q.sigma * q.sigma;
+                        return [s2 * g1, s2 / 2 * g2];
+                    },
+                    hoverLabel(a1, a2) { return 'μ = ' + a1.toFixed(2) + '<br>σ = ' + a2.toFixed(2); },
+                    bounds(pComps, optFwd, optRev, qs, divType) {
+                        const pad = divType === 'chisq' ? 1.15 : 1.5;
+                        let sLo = 0.3, sHi = divType === 'chisq' ? 2 : 3;
+                        if (optFwd) {
+                            sLo = Math.min(sLo, optFwd.sigma * 0.5);
+                            sHi = Math.max(sHi, optFwd.sigma * pad);
+                        }
+                        for (const o of optRev) {
+                            sLo = Math.min(sLo, o.sigma * 0.5);
+                            sHi = Math.max(sHi, o.sigma * pad);
+                        }
+                        for (const c of pComps) sHi = Math.max(sHi, c.sigma * pad);
+                        for (const q of qs) {
+                            sLo = Math.min(sLo, q.sigma * 0.8);
+                            sHi = Math.max(sHi, q.sigma * 1.2);
+                        }
+                        return [X_MIN, X_MAX, Math.max(0.1, sLo), sHi];
+                    },
+                },
+                'mu-logsigma': {
+                    label: 'μ, log σ',
+                    formula: '\\textcolor{#7B2D8E}{q_\\phi}(x) = \\mathcal{N}(x;\\, \\mu,\\, e^{2\\log\\sigma})',
+                    tooltip() { return 'The standard ML parameterization (VAEs, normalizing flows). Unconstrained: φ ∈ ℝ², no positivity constraints needed. Still non-convex, but log σ compresses the large-σ region where non-convexity lives.'; },
+                    axes: ['μ', 'log σ'],
+                    fromQ(q) { return [q.mu, q.logSigma]; },
+                    toQ(a1, a2, q) { q.mu = a1; q.logSigma = a2; },
+                    toMuSigma(a1, a2) { return [a1, Math.exp(a2)]; },
+                    fromMuSigma(mu, sigma) { return [mu, Math.log(sigma)]; },
+                    transformGrad(gMu, gLs, _q) { return [gMu, gLs]; },
+                    // F^{-1} = diag(σ², 1/2)
+                    fisherInv(g1, g2, q) { return [q.sigma * q.sigma * g1, g2 / 2]; },
+                    hoverLabel(a1, a2) { return 'μ = ' + a1.toFixed(2) + '<br>log σ = ' + a2.toFixed(2); },
+                    bounds(pComps, optFwd, optRev, qs, divType) {
+                        const pad = divType === 'chisq' ? 0.3 : 0.5;
+                        let lsLo = -0.5, lsHi = divType === 'chisq' ? 0.8 : 1.5;
+                        if (optFwd) {
+                            lsLo = Math.min(lsLo, Math.log(optFwd.sigma) - pad);
+                            lsHi = Math.max(lsHi, Math.log(optFwd.sigma) + pad);
+                        }
+                        for (const o of optRev) {
+                            lsLo = Math.min(lsLo, Math.log(o.sigma) - pad);
+                            lsHi = Math.max(lsHi, Math.log(o.sigma) + pad);
+                        }
+                        for (const c of pComps) lsHi = Math.max(lsHi, Math.log(c.sigma) + pad);
+                        for (const q of qs) {
+                            lsLo = Math.min(lsLo, q.logSigma - 0.3);
+                            lsHi = Math.max(lsHi, q.logSigma + 0.3);
+                        }
+                        return [X_MIN, X_MAX, lsLo, lsHi];
+                    },
+                },
+                'mu-tau': {
+                    label: 'μ, τ',
+                    formula: '\\textcolor{#7B2D8E}{q_\\phi}(x) \\propto \\sqrt{\\tau}\\,\\exp\\!\\bigl({-}\\tfrac{\\tau}{2}(x{-}\\mu)^2\\bigr)',
+                    tooltip() { return 'Precision parameterization: τ = 1/σ². Since η₂ = −τ/2, τ is linear in one natural parameter. But η₁ = μτ is bilinear in (μ,τ), so the joint map is nonlinear — partial linearity is not enough for convexity.'; },
+                    axes: ['μ', 'τ'],
+                    fromQ(q) { return [q.mu, 1 / (q.sigma * q.sigma)]; },
+                    toQ(a1, a2, q) {
+                        a2 = Math.max(0.04, a2);  // σ < 5
+                        q.mu = a1; q.logSigma = -0.5 * Math.log(a2);
+                    },
+                    toMuSigma(a1, a2) { a2 = Math.max(0.04, a2); return [a1, 1 / Math.sqrt(a2)]; },
+                    fromMuSigma(mu, sigma) { return [mu, 1 / (sigma * sigma)]; },
+                    transformGrad(gMu, gLs, q) {
+                        const s2 = q.sigma * q.sigma;
+                        return [gMu, -gLs * s2 / 2];
+                    },
+                    // F^{-1} = diag(1/τ, 2τ²) = diag(σ², 2/σ⁴)
+                    fisherInv(g1, g2, q) {
+                        const s2 = q.sigma * q.sigma;
+                        return [s2 * g1, 2 * g2 / (s2 * s2)];
+                    },
+                    hoverLabel(a1, a2) { return 'μ = ' + a1.toFixed(2) + '<br>τ = ' + a2.toFixed(2); },
+                    bounds(pComps, optFwd, optRev, qs, divType) {
+                        const pad = divType === 'chisq' ? 1.15 : 1.5;
+                        let tLo = 0.2, tHi = 3;
+                        if (optFwd) {
+                            const t = 1 / (optFwd.sigma * optFwd.sigma);
+                            tLo = Math.min(tLo, t * 0.5); tHi = Math.max(tHi, t * pad);
+                        }
+                        for (const o of optRev) {
+                            const t = 1 / (o.sigma * o.sigma);
+                            tLo = Math.min(tLo, t * 0.5); tHi = Math.max(tHi, t * pad);
+                        }
+                        for (const c of pComps) {
+                            const t = 1 / (c.sigma * c.sigma);
+                            tLo = Math.min(tLo, t * 0.5); tHi = Math.max(tHi, t * pad);
+                        }
+                        for (const q of qs) {
+                            const t = 1 / (q.sigma * q.sigma);
+                            tLo = Math.min(tLo, t * 0.7); tHi = Math.max(tHi, t * 1.3);
+                        }
+                        const tLoFloor = divType === 'chisq' ? 0.1 : 0.04;
+                        return [X_MIN, X_MAX, Math.max(tLoFloor, tLo), tHi];
+                    },
+                },
+            };
+            function curP() { return PARAMS[landParam]; }
+
+            // Thin wrappers — keep call sites unchanged
+            function qToLand(q) { return curP().fromQ(q); }
+            function setQFromLand(a1, a2, q) { curP().toQ(a1, a2, q); }
+            function landToMuSigma(a1, a2) { return curP().toMuSigma(a1, a2); }
+            function muSigmaToLand(mu, sigma) { return curP().fromMuSigma(mu, sigma); }
+            function transformGrad(g1, g2, q) { return curP().transformGrad(g1, g2, q); }
+
+            // ===== Optimal solutions =====
+            function integrate(f, a, b, n) {
+                const h = (b - a) / n;
+                let s = 0.5 * (f(a) + f(b));
+                for (let i = 1; i < n; i++) s += f(a + i * h);
+                return s * h;
+            }
+
+            function intRange() {
+                // Dynamic integration range: cover all modes plus generous tails
+                let lo = Infinity, hi = -Infinity;
+                for (const c of pComps) {
+                    lo = Math.min(lo, c.mu - 6 * c.sigma);
+                    hi = Math.max(hi, c.mu + 6 * c.sigma);
+                }
+                return [Math.min(lo, -10), Math.max(hi, 10)];
+            }
+
+            function computeOptimal() {
+                const [intA, intB] = intRange();
+
+                if (divergenceType === 'chisq') {
+                    optFwd = null;  // set by computeLandscapes via multi-start
+                } else {
+                    // Forward KL: moment matching (analytic)
+                    let Ep = 0, Ep2 = 0;
+                    for (const c of pComps) {
+                        Ep += c.w * c.mu;
+                        Ep2 += c.w * (c.sigma * c.sigma + c.mu * c.mu);
+                    }
+                    const fwdVar = Ep2 - Ep * Ep;
+                    optFwd = { mu: Ep, sigma: Math.sqrt(Math.max(0.01, fwdVar)) };
+                }
+
+                optRev = [];
+            }
+            computeOptimal();
+
+            // ===== Loss landscape grids =====
+            const LAND_RES = 60;      // final render
+            const LAND_RES_LO = 20;  // low-res for live dragging
+            let landCurRes = LAND_RES;
+
+            let landMuMin, landMuMax, landLsMin, landLsMax;
+            let landFwdGrid = null, landRevGrid = null;
+            let landVmin = 0, landVmax = 1;
+
+            function computeLandBounds() {
+                const [a1Lo, a1Hi, a2Lo, a2Hi] = curP().bounds(pComps, optFwd, optRev, [qFwd, qRev], divergenceType);
+                landMuMin = a1Lo; landMuMax = a1Hi;
+                landLsMin = a2Lo; landLsMax = a2Hi;
+            }
+
+            function computeLandscapes(res, _retry) {
+                res = res || LAND_RES;
+                computeLandBounds();
+                const mus = new Float64Array(res);
+                const lss = new Float64Array(res);
+                landCurRes = res;
+                for (let i = 0; i < res; i++) {
+                    mus[i] = landMuMin + (landMuMax - landMuMin) * i / (res - 1);
+                    lss[i] = landLsMin + (landLsMax - landLsMin) * i / (res - 1);
+                }
+
+                landFwdGrid = new Float64Array(res * res);
+                landRevGrid = new Float64Array(res * res);
+
+                const [intA, intB] = intRange();
+                for (let j = 0; j < res; j++) {
+                    for (let i = 0; i < res; i++) {
+                        const [mu, sigma] = landToMuSigma(mus[i], lss[j]);
+                        const idx = j * res + i;
+
+                        // Skip extreme parameter values (prevents slowdown at grid corners)
+                        if (!isFinite(mu) || !isFinite(sigma) || sigma > 30 || Math.abs(mu) > 50) {
+                            landFwdGrid[idx] = 100; landRevGrid[idx] = 100; continue;
+                        }
+
+                        // Integration range covers both q tails and p tails
+                        const lo = Math.min(intA, mu - 5 * sigma);
+                        const hi = Math.max(intB, mu + 5 * sigma);
+
+                        const nInt = res < 30 ? 100 : 300;  // fewer integration points for low-res
+
+                        if (divergenceType === 'chisq') {
+                            landFwdGrid[idx] = integrate(x => {
+                                const px = mixturePdf(x, pComps);
+                                const qx = gaussPdf(x, mu, sigma);
+                                return qx > 1e-15 ? px * px / qx : 0;
+                            }, lo, hi, nInt) - 1;
+
+                            landRevGrid[idx] = integrate(x => {
+                                const px = mixturePdf(x, pComps);
+                                const qx = gaussPdf(x, mu, sigma);
+                                return px > 1e-15 ? qx * qx / px : 0;
+                            }, lo, hi, nInt) - 1;
+                        } else {
+                            landFwdGrid[idx] = integrate(x => {
+                                const px = mixturePdf(x, pComps);
+                                if (px < 1e-15) return 0;
+                                return px * (mixtureLogPdf(x, pComps) - gaussLogPdf(x, mu, sigma));
+                            }, lo, hi, nInt);
+
+                            landRevGrid[idx] = integrate(x => {
+                                const qx = gaussPdf(x, mu, sigma);
+                                if (qx < 1e-15) return 0;
+                                return qx * (gaussLogPdf(x, mu, sigma) - mixtureLogPdf(x, pComps));
+                            }, lo, hi, nInt);
+                        }
+                        // Negative divergence = numerical failure (no overlap); true value is +∞
+                        if (landFwdGrid[idx] < 0) landFwdGrid[idx] = Infinity;
+                        if (landRevGrid[idx] < 0) landRevGrid[idx] = Infinity;
+                    }
+                }
+
+                // Color range: absolute bottom at div≈0 (log10 floor),
+                // top capped at the 85th percentile so basins aren't washed out
+                const allVals = [];
+                for (let i = 0; i < landFwdGrid.length; i++) {
+                    allVals.push(Math.max(landFwdGrid[i], 1e-3));
+                    allVals.push(Math.max(landRevGrid[i], 1e-3));
+                }
+                allVals.sort((a, b) => a - b);
+                landVmin = Math.log10(1e-3);
+                landVmax = Math.log10(allVals[Math.floor(allVals.length * 0.85)]);
+
+                // ===== χ² gradient functions for multi-start optimization =====
+                function chisqFwdEval(mu, sigma) {
+                    const lo = Math.min(intA, mu - 6 * sigma);
+                    const hi = Math.max(intB, mu + 6 * sigma);
+                    return integrate(z => {
+                        const pz = mixturePdf(z, pComps);
+                        const qz = gaussPdf(z, mu, sigma);
+                        return qz > 1e-15 ? pz * pz / qz : 0;
+                    }, lo, hi, 800) - 1;
+                }
+                function gradChisqFwd(mu, sigma) {
+                    const lo = Math.min(intA, mu - 6 * sigma);
+                    const hi = Math.max(intB, mu + 6 * sigma);
+                    const sig2 = sigma * sigma;
+                    const gMu = -integrate(z => {
+                        const pz = mixturePdf(z, pComps);
+                        const qz = gaussPdf(z, mu, sigma);
+                        if (qz < 1e-15) return 0;
+                        return (pz * pz / qz) * (z - mu) / sig2;
+                    }, lo, hi, 800);
+                    const gSigma = -integrate(z => {
+                        const pz = mixturePdf(z, pComps);
+                        const qz = gaussPdf(z, mu, sigma);
+                        if (qz < 1e-15) return 0;
+                        return (pz * pz / qz) * ((z - mu) * (z - mu) / (sig2 * sigma) - 1 / sigma);
+                    }, lo, hi, 800);
+                    return { dmu: gMu, dsigma: gSigma };
+                }
+                function chisqRevEval(mu, sigma) {
+                    const lo = Math.min(intA, mu - 6 * sigma);
+                    const hi = Math.max(intB, mu + 6 * sigma);
+                    return integrate(z => {
+                        const pz = mixturePdf(z, pComps);
+                        const qz = gaussPdf(z, mu, sigma);
+                        return pz > 1e-15 ? qz * qz / pz : 0;
+                    }, lo, hi, 800) - 1;
+                }
+                function gradChisqRev(mu, sigma) {
+                    const lo = Math.min(intA, mu - 6 * sigma);
+                    const hi = Math.max(intB, mu + 6 * sigma);
+                    const sig2 = sigma * sigma;
+                    const gMu = 2 * integrate(z => {
+                        const pz = mixturePdf(z, pComps);
+                        const qz = gaussPdf(z, mu, sigma);
+                        if (pz < 1e-15) return 0;
+                        return (qz * qz / pz) * (z - mu) / sig2;
+                    }, lo, hi, 800);
+                    const gSigma = 2 * integrate(z => {
+                        const pz = mixturePdf(z, pComps);
+                        const qz = gaussPdf(z, mu, sigma);
+                        if (pz < 1e-15) return 0;
+                        return (qz * qz / pz) * ((z - mu) * (z - mu) / (sig2 * sigma) - 1 / sigma);
+                    }, lo, hi, 800);
+                    return { dmu: gMu, dsigma: gSigma };
+                }
+
+                // ===== Find optima via multi-start GD =====
+                function klRevEval(mu, sigma) {
+                    const lo = Math.min(intA, mu - 6 * sigma);
+                    const hi = Math.max(intB, mu + 6 * sigma);
+                    return integrate(x => {
+                        const qx = gaussPdf(x, mu, sigma);
+                        if (qx < 1e-15) return 0;
+                        return qx * (gaussLogPdf(x, mu, sigma) - mixtureLogPdf(x, pComps));
+                    }, lo, hi, 800);
+                }
+                function gradRevRefine(mu, sigma) {
+                    const lo = Math.min(intA, mu - 6 * sigma);
+                    const hi = Math.max(intB, mu + 6 * sigma);
+                    function dLogP(x) {
+                        const px = mixturePdf(x, pComps);
+                        if (px < 1e-15) return 0;
+                        let dp = 0;
+                        for (const c of pComps)
+                            dp += c.w * gaussPdf(x, c.mu, c.sigma) * (-(x - c.mu) / (c.sigma * c.sigma));
+                        return dp / px;
+                    }
+                    const Eq_dlogp = integrate(x => gaussPdf(x, mu, sigma) * dLogP(x), lo, hi, 800);
+                    const Eq_z_dlogp = integrate(x => gaussPdf(x, mu, sigma) * ((x - mu) / sigma) * dLogP(x), lo, hi, 800);
+                    return { dmu: -Eq_dlogp, dsigma: -1 / sigma - Eq_z_dlogp };
+                }
+
+                function optimizeGeneric(evalFn, gradFn, startMu, startSigma) {
+                    let mu = startMu, sigma = startSigma;
+                    for (let i = 0; i < 500; i++) {
+                        const g = gradFn(mu, sigma);
+                        mu -= 0.02 * g.dmu;
+                        sigma -= 0.5 * 0.02 * g.dsigma;
+                        sigma = Math.max(0.1, sigma);
+                    }
+                    return { mu, sigma, kl: evalFn(mu, sigma) };
+                }
+
+                function multiStartOptimize(evalFn, gradFn) {
+                    const results = [];
+                    for (const c of pComps) results.push(optimizeGeneric(evalFn, gradFn, c.mu, c.sigma));
+                    const meanMu = pComps.reduce((s, c) => s + c.w * c.mu, 0);
+                    results.push(optimizeGeneric(evalFn, gradFn, meanMu, 1.5));
+                    for (let i = 0; i < pComps.length; i++)
+                        for (let j = i + 1; j < pComps.length; j++)
+                            results.push(optimizeGeneric(evalFn, gradFn, (pComps[i].mu + pComps[j].mu) / 2, 1.5));
+                    const optima = [];
+                    for (const r of results) {
+                        if (!isFinite(r.kl) || r.kl < -0.01) continue;
+                        const dup = optima.find(o => Math.abs(o.mu - r.mu) < 0.3 && Math.abs(o.sigma - r.sigma) < 0.3);
+                        if (dup) { if (r.kl < dup.kl) { dup.mu = r.mu; dup.sigma = r.sigma; dup.kl = r.kl; } }
+                        else optima.push({ ...r });
+                    }
+                    optima.sort((a, b) => a.kl - b.kl);
+                    return optima;
+                }
+
+                if (divergenceType === 'chisq') {
+                    const fwdOptima = multiStartOptimize(chisqFwdEval, gradChisqFwd);
+                    optFwd = fwdOptima.length > 0 ? fwdOptima[0] : { mu: 0, sigma: 1 };
+                    optRev = multiStartOptimize(chisqRevEval, gradChisqRev);
+                } else {
+                    optRev = multiStartOptimize(klRevEval, gradRevRefine);
+                }
+
+                // Check if any optimum is outside the grid (can happen for χ² where
+                // optima are found after bounds are computed). If so, recompute.
+                function optimumInBounds(o) {
+                    const [a1, a2] = muSigmaToLand(o.mu, o.sigma);
+                    return a1 >= landMuMin && a1 <= landMuMax && a2 >= landLsMin && a2 <= landLsMax;
+                }
+                let needRecompute = false;
+                if (optFwd && !optimumInBounds(optFwd)) needRecompute = true;
+                for (const o of optRev) if (!optimumInBounds(o)) needRecompute = true;
+                if (needRecompute && !_retry) return computeLandscapes(res, true);
+            }
+            computeLandscapes();
+
+            // White (KL=0) → yellow → orange → red (high KL)
+            function heatmap(t) {
+                t = Math.max(0, Math.min(1, t));
+                const stops = [
+                    [0.00, 1.00, 1.00, 1.00],   // white (KL = 0)
+                    [0.40, 1.00, 1.00, 0.55],   // yellow
+                    [0.65, 1.00, 0.65, 0.15],   // orange
+                    [0.85, 0.85, 0.20, 0.05],   // red
+                    [1.00, 0.50, 0.00, 0.00],   // dark red
+                ];
+                let i = 0;
+                while (i < stops.length - 2 && t > stops[i + 1][0]) i++;
+                const [t0, r0, g0, b0] = stops[i];
+                const [t1, r1, g1, b1] = stops[i + 1];
+                const f = (t - t0) / (t1 - t0);
+                const r = Math.round(255 * (r0 + f * (r1 - r0)));
+                const g = Math.round(255 * (g0 + f * (g1 - g0)));
+                const b = Math.round(255 * (b0 + f * (b1 - b0)));
+                return `rgb(${r},${g},${b})`;
+            }
+
+            const canvasLandFwd = document.getElementById('canvas-land-fwd');
+            const canvasLandRev = document.getElementById('canvas-land-rev');
+
+            function drawLandscape(canvas, grid, q, optima) {
+                const ctx = canvas.getContext('2d');
+                const dpr = window.devicePixelRatio || 1;
+
+                // Resize
+                const rect = canvas.getBoundingClientRect();
+                if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+                    canvas.width = rect.width * dpr;
+                    canvas.height = rect.height * dpr;
+                }
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                const margin = 25 * dpr;
+                const plotW = canvas.width - margin;
+                const plotH = canvas.height - margin;
+
+                function muToX(mu) { return margin + (mu - landMuMin) / (landMuMax - landMuMin) * plotW; }
+                function lsToY(ls) { return (1 - (ls - landLsMin) / (landLsMax - landLsMin)) * plotH; }
+
+                // Subtle background fill + contour lines
+                const cellW = plotW / (landCurRes - 1);
+                const cellH = plotH / (landCurRes - 1);
+
+                // Light heatmap wash for orientation
+                ctx.globalAlpha = 0.12;
+                for (let j = 0; j < landCurRes; j++) {
+                    for (let i = 0; i < landCurRes; i++) {
+                        const v = Math.log10(Math.max(grid[j * landCurRes + i], 1e-2));
+                        const t = (v - landVmin) / (landVmax - landVmin + 1e-8);
+                        ctx.fillStyle = heatmap(t);
+                        const cx = margin + i * cellW;
+                        const cy = (landCurRes - 1 - j) * cellH;
+                        ctx.fillRect(cx - cellW / 2, cy - cellH / 2, cellW + 1, cellH + 1);
+                    }
+                }
+                ctx.globalAlpha = 1.0;
+
+                // Contour lines via marching squares
+                const rawLogGrid = new Float64Array(landCurRes * landCurRes);
+                for (let k = 0; k < rawLogGrid.length; k++) {
+                    const v = Math.log10(Math.max(grid[k], 1e-3));
+                    rawLogGrid[k] = isFinite(v) ? v : 100;
+                }
+                // 5×5 median filter: cleans up integration noise in extreme regions,
+                // no-op in the smooth basin where neighbors agree
+                const logGrid = new Float64Array(rawLogGrid.length);
+                const _med = new Float64Array(25);
+                for (let j = 0; j < landCurRes; j++) {
+                    for (let i = 0; i < landCurRes; i++) {
+                        let n = 0;
+                        for (let dj = -2; dj <= 2; dj++)
+                            for (let di = -2; di <= 2; di++) {
+                                const jj = Math.max(0, Math.min(landCurRes - 1, j + dj));
+                                const ii = Math.max(0, Math.min(landCurRes - 1, i + di));
+                                _med[n++] = rawLogGrid[jj * landCurRes + ii];
+                            }
+                        _med.sort();
+                        logGrid[j * landCurRes + i] = _med[12];
+                    }
+                }
+
+                // Per-panel contour range: dense in the basin, sparse in the cliff
+                const sorted = Float64Array.from(logGrid).filter(v => isFinite(v) && v > landVmin).sort();
+                const panelVknee = sorted.length > 0 ? sorted[Math.floor(sorted.length * 0.85)] : landVmax;
+                const panelVtop = sorted.length > 0 ? sorted[sorted.length - 1] : landVmax;
+
+                // Marching squares segment lookup (SW=bit0 SE=bit1 NE=bit2 NW=bit3)
+                // Edges: 0=south 1=east 2=west 3=north
+                const CS = [[],[[0,2]],[[0,1]],[[2,1]],[[3,1]],[[0,2],[3,1]],
+                    [[0,3]],[[2,3]],[[3,2]],[[0,3]],[[0,1],[3,2]],
+                    [[3,1]],[[2,1]],[[0,1]],[[0,2]],[]];
+
+                const nMain = 20, nTail = 5;
+                for (let li = 1; li <= nMain + nTail; li++) {
+                    const level = li <= nMain
+                        ? landVmin + (panelVknee - landVmin) * li / nMain
+                        : panelVknee + (panelVtop - panelVknee) * (li - nMain) / nTail;
+                    ctx.beginPath();
+                    ctx.strokeStyle = 'rgba(80,80,80,0.3)';
+                    ctx.lineWidth = 1.0 * dpr;
+
+                    for (let j = 0; j < landCurRes - 1; j++) {
+                        for (let i = 0; i < landCurRes - 1; i++) {
+                            const sw = logGrid[j * landCurRes + i];
+                            const se = logGrid[j * landCurRes + i + 1];
+                            const ne = logGrid[(j+1) * landCurRes + i + 1];
+                            const nw = logGrid[(j+1) * landCurRes + i];
+
+                            const c = ((sw >= level) ? 1 : 0) | ((se >= level) ? 2 : 0) |
+                                      ((ne >= level) ? 4 : 0) | ((nw >= level) ? 8 : 0);
+                            if (c === 0 || c === 15) continue;
+
+                            const x0 = margin + i * cellW, x1 = x0 + cellW;
+                            const yBot = (landCurRes - 1 - j) * cellH;
+
+                            const lerp = (a, b) => (level - a) / (b - a + 1e-15);
+                            const ep = [
+                                { x: x0 + lerp(sw, se) * cellW, y: yBot },
+                                { x: x1, y: yBot - lerp(se, ne) * cellH },
+                                { x: x0, y: yBot - lerp(sw, nw) * cellH },
+                                { x: x0 + lerp(nw, ne) * cellW, y: yBot - cellH },
+                            ];
+
+                            for (const [e1, e2] of CS[c]) {
+                                ctx.moveTo(ep[e1].x, ep[e1].y);
+                                ctx.lineTo(ep[e2].x, ep[e2].y);
+                            }
+                        }
+                    }
+                    ctx.stroke();
+                }
+
+                // Axes
+                ctx.strokeStyle = '#999'; ctx.lineWidth = 1 * dpr;
+                ctx.beginPath(); ctx.moveTo(margin, 0); ctx.lineTo(margin, plotH);
+                ctx.lineTo(margin + plotW, plotH); ctx.stroke();
+
+                ctx.fillStyle = '#666'; ctx.font = (9 * dpr) + 'px sans-serif';
+                // Smart tick step based on axis range
+                function tickStep(range) {
+                    const rough = range / 6;
+                    const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+                    const norm = rough / mag;
+                    return (norm < 1.5 ? 1 : norm < 3.5 ? 2 : norm < 7.5 ? 5 : 10) * mag;
+                }
+                function fmtTick(v, step) {
+                    return step >= 1 ? v.toFixed(0) : step >= 0.1 ? v.toFixed(1) : v.toFixed(2);
+                }
+                const xStep = tickStep(landMuMax - landMuMin);
+                const yStep = tickStep(landLsMax - landLsMin);
+                ctx.textAlign = 'center';
+                for (let t = Math.ceil(landMuMin / xStep) * xStep; t <= landMuMax; t += xStep) {
+                    const x = muToX(t);
+                    ctx.fillText(fmtTick(t, xStep), x, plotH + 13 * dpr);
+                }
+                ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+                for (let t = Math.ceil(landLsMin / yStep) * yStep; t <= landLsMax; t += yStep) {
+                    const y = lsToY(t);
+                    ctx.fillText(fmtTick(t, yStep), margin - 4 * dpr, y);
+                }
+                const [xLabel, yLabel] = curP().axes;
+                ctx.textAlign = 'center';
+                ctx.fillText(xLabel, margin + plotW / 2, plotH + 22 * dpr);
+                ctx.save(); ctx.translate(8 * dpr, plotH / 2);
+                ctx.rotate(-Math.PI / 2); ctx.fillText(yLabel, 0, 0); ctx.restore();
+
+                // Minima markers
+                if (optima) {
+                    for (let oi = 0; oi < optima.length; oi++) {
+                        const opt = optima[oi];
+                        const isGlobal = (oi === 0);
+                        const [oa1, oa2] = muSigmaToLand(opt.mu, opt.sigma);
+                        const ox = muToX(oa1);
+                        const oy = lsToY(oa2);
+                        const s = isGlobal ? 5 * dpr : 4 * dpr;
+                        ctx.lineWidth = (isGlobal ? 2 : 1.5) * dpr;
+                        ctx.lineCap = 'round';
+                        ctx.strokeStyle = isGlobal ? 'rgba(123,45,142,0.9)' : 'rgba(123,45,142,0.5)';
+                        ctx.beginPath();
+                        // × for all
+                        ctx.moveTo(ox - s, oy - s); ctx.lineTo(ox + s, oy + s);
+                        ctx.moveTo(ox + s, oy - s); ctx.lineTo(ox - s, oy + s);
+                        if (isGlobal) {
+                            // + overlay for global (star)
+                            ctx.moveTo(ox, oy - s); ctx.lineTo(ox, oy + s);
+                            ctx.moveTo(ox - s, oy); ctx.lineTo(ox + s, oy);
+                        }
+                        ctx.stroke();
+                    }
+                }
+
+                // Current q position (thick purple open circle)
+                const [qa1, qa2] = qToLand(q);
+                const qx = muToX(qa1);
+                const qy = lsToY(qa2);
+                ctx.beginPath(); ctx.arc(qx, qy, 7 * dpr, 0, 2 * Math.PI);
+                ctx.strokeStyle = PURPLE; ctx.lineWidth = 3 * dpr; ctx.stroke();
+            }
+
+            // ===== MC Gradient Steps =====
+            // Adam update in the selected parameter space.
+            // Callers pass gradients in (μ, logσ) space; transformGrad converts them.
+            function adamUpdate(q, gradMu, gradLogSigma, state) {
+                let [g1, g2] = transformGrad(gradMu, gradLogSigma, q);
+                if (natGrad) [g1, g2] = curP().fisherInv(g1, g2, q);
+                if (gradClip) {
+                    const gNorm = Math.sqrt(g1 * g1 + g2 * g2);
+                    if (gNorm > 5) { const s = 5 / gNorm; g1 *= s; g2 *= s; }
+                }
+                const [p1, p2] = qToLand(q);
+
+                state.t++;
+                const lr = baseLR / (1 + 0.001 * state.t);
+
+                if (natGrad) {
+                    // SGD with momentum — Adam's per-parameter adaptivity
+                    // interferes with F⁻¹, breaking parameterization invariance
+                    const beta = 0.9;
+                    state.mMu = beta * state.mMu + (1 - beta) * g1;
+                    state.mSig = beta * state.mSig + (1 - beta) * g2;
+                    setQFromLand(p1 - lr * state.mMu, p2 - lr * state.mSig, q);
+                } else {
+                    const beta1 = 0.9, beta2 = 0.999, eps = 1e-8;
+
+                    state.mMu = beta1 * state.mMu + (1 - beta1) * g1;
+                    state.vMu = beta2 * state.vMu + (1 - beta2) * g1 * g1;
+                    const mh = state.mMu / (1 - Math.pow(beta1, state.t));
+                    const vh = state.vMu / (1 - Math.pow(beta2, state.t));
+
+                    state.mSig = beta1 * state.mSig + (1 - beta1) * g2;
+                    state.vSig = beta2 * state.vSig + (1 - beta2) * g2 * g2;
+                    const mhs = state.mSig / (1 - Math.pow(beta1, state.t));
+                    const vhs = state.vSig / (1 - Math.pow(beta2, state.t));
+
+                    setQFromLand(
+                        p1 - lr * mh / (Math.sqrt(vh) + eps),
+                        p2 - lr * mhs / (Math.sqrt(vhs) + eps),
+                        q
+                    );
+                }
+            }
+
+            function stepForwardKL() {
+                // Sample from q, compute IS weights targeting p, weight the score
+                const z = new Float64Array(K);
+                for (let i = 0; i < K; i++) z[i] = qFwd.mu + qFwd.sigma * randn();
+
+                const logw = new Float64Array(K);
+                for (let i = 0; i < K; i++)
+                    logw[i] = mixtureLogPdf(z[i], pComps) - gaussLogPdf(z[i], qFwd.mu, qFwd.sigma);
+                const w = softmax(logw);
+
+                const sig2 = qFwd.sigma * qFwd.sigma;
+                let gMu = 0, gLs = 0;
+                for (let i = 0; i < K; i++) {
+                    const score_mu = (z[i] - qFwd.mu) / sig2;
+                    const score_ls = (z[i] - qFwd.mu) * (z[i] - qFwd.mu) / sig2 - 1;
+                    gMu += w[i] * score_mu;
+                    gLs += w[i] * score_ls;
+                }
+                // These are gradients of E_p[log q] (ascent direction); negate for descent on KL
+                adamUpdate(qFwd, -gMu, -gLs, adamFwd);
+
+                // alpha_i = w̄_i (self-normalized IS weights, all positive)
+                return { z, alpha: w };
+            }
+
+            function stepREINFORCE() {
+                // Sample from q, compute reward = log p_tilde - log q, weight the score
+                const z = new Float64Array(K);
+                for (let i = 0; i < K; i++) z[i] = qRev.mu + qRev.sigma * randn();
+
+                const reward = new Float64Array(K);
+                for (let i = 0; i < K; i++)
+                    reward[i] = mixtureLogPdf(z[i], pComps) - gaussLogPdf(z[i], qRev.mu, qRev.sigma);
+
+                const sig2 = qRev.sigma * qRev.sigma;
+                let gMu = 0, gLs = 0;
+                for (let i = 0; i < K; i++) {
+                    const score_mu = (z[i] - qRev.mu) / sig2;
+                    const score_ls = (z[i] - qRev.mu) * (z[i] - qRev.mu) / sig2 - 1;
+                    gMu += reward[i] * score_mu / K;
+                    gLs += reward[i] * score_ls / K;
+                }
+                // gMu, gLs are d(ELBO)/d(mu), d(ELBO)/d(log_sigma) — ascent on ELBO
+                adamUpdate(qRev, -gMu, -gLs, adamRev);
+
+                // alpha_i = r_i / K (signed)
+                const alpha = new Float64Array(K);
+                for (let i = 0; i < K; i++) alpha[i] = reward[i] / K;
+                return { z, alpha };
+            }
+
+            function stepReverseKL() {
+                // Reparameterized: z = mu + sigma * eps, backprop through z
+                const eps = new Float64Array(K);
+                const z = new Float64Array(K);
+                for (let i = 0; i < K; i++) {
+                    eps[i] = randn();
+                    z[i] = qRev.mu + qRev.sigma * eps[i];
+                }
+
+                // d(ELBO)/d(mu) = E[d/dz log p_tilde(z)]
+                // d(ELBO)/d(log_sigma) = E[d/dz log p_tilde(z) * sigma * eps] + 1
+                // We compute d/dz log p(z) = score of the target
+                let gMu = 0, gLs = 0;
+                for (let i = 0; i < K; i++) {
+                    const px = mixturePdf(z[i], pComps);
+                    if (px < 1e-15) continue;
+                    let dpx = 0;
+                    for (const c of pComps)
+                        dpx += c.w * gaussPdf(z[i], c.mu, c.sigma) * (-(z[i] - c.mu) / (c.sigma * c.sigma));
+                    const score_p = dpx / px;
+                    gMu += score_p / K;
+                    gLs += score_p * qRev.sigma * eps[i] / K;
+                }
+                gLs += 1;  // entropy term
+
+                // gMu, gLs are d(ELBO)/d(mu), d(ELBO)/d(log_sigma) — ascent on ELBO = descent on KL
+                adamUpdate(qRev, -gMu, -gLs, adamRev);
+
+                // alpha_i = r_i / K for visualization (signed)
+                const alpha = new Float64Array(K);
+                for (let i = 0; i < K; i++)
+                    alpha[i] = (mixtureLogPdf(z[i], pComps) - gaussLogPdf(z[i], qRev.mu, qRev.sigma)) / K;
+                return { z, alpha };
+            }
+
+            // ===== Deterministic gradient steps (quadrature / closed-form) =====
+            function stepForwardKL_deterministic() {
+                // Closed-form gradient: dKL/dmu = (mu - E_p[x]) / sigma^2
+                //                       dKL/d(logSigma) = 1 - E_p[(x-mu)^2] / sigma^2
+                const mu = qFwd.mu, sigma = qFwd.sigma, sig2 = sigma * sigma;
+                let Epx = 0, Epxmu2 = 0;
+                for (const c of pComps) {
+                    Epx += c.w * c.mu;
+                    Epxmu2 += c.w * (c.sigma * c.sigma + (c.mu - mu) * (c.mu - mu));
+                }
+                adamUpdate(qFwd, (mu - Epx) / sig2, 1 - Epxmu2 / sig2, adamFwd);
+            }
+
+            function stepReverseKL_deterministic() {
+                // Numerical integration: dKL/dmu = -E_q[d/dx log p(x)]
+                //                        dKL/d(logSigma) = -1 - E_q[(x-mu) * d/dx log p(x)]
+                const mu = qRev.mu, sigma = qRev.sigma;
+                const [iA, iB] = intRange();
+                const lo = Math.min(iA, mu - 6 * sigma);
+                const hi = Math.max(iB, mu + 6 * sigma);
+
+                function dLogP(x) {
+                    const px = mixturePdf(x, pComps);
+                    if (px < 1e-15) return 0;
+                    let dpx = 0;
+                    for (const c of pComps)
+                        dpx += c.w * gaussPdf(x, c.mu, c.sigma) * (-(x - c.mu) / (c.sigma * c.sigma));
+                    return dpx / px;
+                }
+
+                const Eq_dlogp = integrate(x => gaussPdf(x, mu, sigma) * dLogP(x), lo, hi, 400);
+                const Eq_xmu_dlogp = integrate(x => gaussPdf(x, mu, sigma) * (x - mu) * dLogP(x), lo, hi, 400);
+
+                adamUpdate(qRev, -Eq_dlogp, -1 - Eq_xmu_dlogp, adamRev);
+            }
+
+            // ===== χ² MC gradient steps =====
+            function stepForwardChisq() {
+                // Sample from q, compute IS weights, use w̄² weighting
+                const z = new Float64Array(K);
+                for (let i = 0; i < K; i++) z[i] = qFwd.mu + qFwd.sigma * randn();
+
+                const logw = new Float64Array(K);
+                for (let i = 0; i < K; i++)
+                    logw[i] = mixtureLogPdf(z[i], pComps) - gaussLogPdf(z[i], qFwd.mu, qFwd.sigma);
+                const w = softmax(logw);
+
+                const sig2 = qFwd.sigma * qFwd.sigma;
+                let gMu = 0, gLs = 0;
+                for (let i = 0; i < K; i++) {
+                    const w2 = w[i] * w[i];
+                    const score_mu = (z[i] - qFwd.mu) / sig2;
+                    const score_ls = (z[i] - qFwd.mu) * (z[i] - qFwd.mu) / sig2 - 1;
+                    gMu += K * w2 * score_mu;
+                    gLs += K * w2 * score_ls;
+                }
+                adamUpdate(qFwd, -gMu, -gLs, adamFwd);
+
+                const alpha = new Float64Array(K);
+                for (let i = 0; i < K; i++) alpha[i] = w[i] * w[i];
+                return { z, alpha };
+            }
+
+            function stepReverseChisq() {
+                // Sample from q, weight by q/p = e^{-r}
+                const z = new Float64Array(K);
+                for (let i = 0; i < K; i++) z[i] = qRev.mu + qRev.sigma * randn();
+
+                const sig2 = qRev.sigma * qRev.sigma;
+                let gMu = 0, gLs = 0;
+                const alpha = new Float64Array(K);
+                for (let i = 0; i < K; i++) {
+                    const r = mixtureLogPdf(z[i], pComps) - gaussLogPdf(z[i], qRev.mu, qRev.sigma);
+                    const qOverP = Math.exp(-r);
+                    const score_mu = (z[i] - qRev.mu) / sig2;
+                    const score_ls = (z[i] - qRev.mu) * (z[i] - qRev.mu) / sig2 - 1;
+                    gMu += 2 * qOverP * score_mu / K;
+                    gLs += 2 * qOverP * score_ls / K;
+                    alpha[i] = -qOverP;
+                }
+                adamUpdate(qRev, gMu, gLs, adamRev);
+
+                return { z, alpha };
+            }
+
+            // ===== χ² deterministic gradient steps =====
+            function stepForwardChisq_deterministic() {
+                const mu = qFwd.mu, sigma = qFwd.sigma, sig2 = sigma * sigma;
+                const [iA, iB] = intRange();
+                const lo = Math.min(iA, mu - 6 * sigma);
+                const hi = Math.max(iB, mu + 6 * sigma);
+
+                const gMu = -integrate(z => {
+                    const pz = mixturePdf(z, pComps);
+                    const qz = gaussPdf(z, mu, sigma);
+                    if (qz < 1e-15) return 0;
+                    return (pz * pz / qz) * (z - mu) / sig2;
+                }, lo, hi, 400);
+
+                const gLs = -integrate(z => {
+                    const pz = mixturePdf(z, pComps);
+                    const qz = gaussPdf(z, mu, sigma);
+                    if (qz < 1e-15) return 0;
+                    return (pz * pz / qz) * ((z - mu) * (z - mu) / sig2 - 1);
+                }, lo, hi, 400);
+
+                adamUpdate(qFwd, gMu, gLs, adamFwd);
+            }
+
+            function stepReverseChisq_deterministic() {
+                const mu = qRev.mu, sigma = qRev.sigma, sig2 = sigma * sigma;
+                const [iA, iB] = intRange();
+                const lo = Math.min(iA, mu - 6 * sigma);
+                const hi = Math.max(iB, mu + 6 * sigma);
+
+                const gMu = 2 * integrate(z => {
+                    const pz = mixturePdf(z, pComps);
+                    const qz = gaussPdf(z, mu, sigma);
+                    if (pz < 1e-15) return 0;
+                    return (qz * qz / pz) * (z - mu) / sig2;
+                }, lo, hi, 400);
+
+                const gLs = 2 * integrate(z => {
+                    const pz = mixturePdf(z, pComps);
+                    const qz = gaussPdf(z, mu, sigma);
+                    if (pz < 1e-15) return 0;
+                    return (qz * qz / pz) * ((z - mu) * (z - mu) / sig2 - 1);
+                }, lo, hi, 400);
+
+                adamUpdate(qRev, gMu, gLs, adamRev);
+            }
+
+            // ===== χ² evaluation =====
+            function chisqEval(qMu, qSigma, direction) {
+                const [iA, iB] = intRange();
+                const lo = Math.min(iA, qMu - 6 * qSigma);
+                const hi = Math.max(iB, qMu + 6 * qSigma);
+                if (direction === 'forward') {
+                    return integrate(z => {
+                        const pz = mixturePdf(z, pComps);
+                        const qz = gaussPdf(z, qMu, qSigma);
+                        return qz > 1e-15 ? pz * pz / qz : 0;
+                    }, lo, hi, 400) - 1;
+                } else {
+                    return integrate(z => {
+                        const pz = mixturePdf(z, pComps);
+                        const qz = gaussPdf(z, qMu, qSigma);
+                        return pz > 1e-15 ? qz * qz / pz : 0;
+                    }, lo, hi, 400) - 1;
+                }
+            }
+
+            // ===== KL evaluation (for display) =====
+            function klEval(qMu, qSigma, direction) {
+                const [iA, iB] = intRange();
+                const lo = Math.min(iA, qMu - 6 * qSigma);
+                const hi = Math.max(iB, qMu + 6 * qSigma);
+                if (direction === 'forward') {
+                    return integrate(x => {
+                        const px = mixturePdf(x, pComps);
+                        if (px < 1e-15) return 0;
+                        return px * (mixtureLogPdf(x, pComps) - gaussLogPdf(x, qMu, qSigma));
+                    }, lo, hi, 400);
+                } else {
+                    return integrate(x => {
+                        const qx = gaussPdf(x, qMu, qSigma);
+                        if (qx < 1e-15) return 0;
+                        return qx * (gaussLogPdf(x, qMu, qSigma) - mixtureLogPdf(x, pComps));
+                    }, lo, hi, 400);
+                }
+            }
+            function divForward() {
+                return divergenceType === 'chisq'
+                    ? chisqEval(qFwd.mu, qFwd.sigma, 'forward')
+                    : klEval(qFwd.mu, qFwd.sigma, 'forward');
+            }
+            function divReverse() {
+                return divergenceType === 'chisq'
+                    ? chisqEval(qRev.mu, qRev.sigma, 'reverse')
+                    : klEval(qRev.mu, qRev.sigma, 'reverse');
+            }
+
+            // ===== Canvas drawing =====
+            const canvasFwd = document.getElementById('canvas-fwd');
+            const canvasRev = document.getElementById('canvas-rev');
+
+            function resizeCanvas(canvas) {
+                const rect = canvas.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+            }
+            function initCanvases() {
+                resizeCanvas(canvasFwd); resizeCanvas(canvasRev);
+                resizeCanvas(canvasLandFwd); resizeCanvas(canvasLandRev);
+            }
+            window.addEventListener('resize', initCanvases);
+            initCanvases();
+
+            function xToC(x, c) { return (x - X_MIN) / (X_MAX - X_MIN) * c.width; }
+            function cToX(cx, c) { return X_MIN + (cx / c.width) * (X_MAX - X_MIN); }
+            function yToC(y, c, yMax) {
+                const dpr = window.devicePixelRatio || 1;
+                const margin = 20 * dpr;
+                return c.height - margin - (y / yMax) * (c.height - margin);
+            }
+
+            const PURPLE = '#7B2D8E';
+
+            function drawPanel(canvas, q, optima, particles, label) {
+                const ctx = canvas.getContext('2d');
+                const dpr = window.devicePixelRatio || 1;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                const dx = (X_MAX - X_MIN) / N_GRID;
+                const yMax = computeYMax(q, optima);
+
+                // X-axis
+                const margin = 20 * dpr;
+                ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1 * dpr;
+                ctx.beginPath(); ctx.moveTo(0, canvas.height - margin);
+                ctx.lineTo(canvas.width, canvas.height - margin); ctx.stroke();
+                ctx.fillStyle = '#aaa'; ctx.font = (10 * dpr) + 'px sans-serif'; ctx.textAlign = 'center';
+                for (let t = Math.ceil(X_MIN); t <= Math.floor(X_MAX); t++) {
+                    const cx = xToC(t, canvas);
+                    ctx.beginPath(); ctx.moveTo(cx, canvas.height - margin);
+                    ctx.lineTo(cx, canvas.height - margin + 3 * dpr); ctx.stroke();
+                    ctx.fillText(t, cx, canvas.height - 4 * dpr);
+                }
+
+                // Target p (filled)
+                ctx.beginPath();
+                ctx.moveTo(xToC(X_MIN, canvas), yToC(0, canvas, yMax));
+                for (let i = 0; i <= N_GRID; i++) {
+                    const x = X_MIN + i * dx;
+                    ctx.lineTo(xToC(x, canvas), yToC(mixturePdf(x, pComps), canvas, yMax));
+                }
+                ctx.lineTo(xToC(X_MAX, canvas), yToC(0, canvas, yMax));
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(0,0,0,0.06)'; ctx.fill();
+                ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1.5 * dpr; ctx.stroke();
+
+                // Optimal q* curves (dashed = global, dotted = local)
+                if (optima) {
+                    for (let oi = optima.length - 1; oi >= 0; oi--) {
+                        const opt = optima[oi];
+                        const isGlobal = (oi === 0);
+                        ctx.beginPath();
+                        ctx.setLineDash(isGlobal ? [6 * dpr, 4 * dpr] : [3 * dpr, 4 * dpr]);
+                        for (let i = 0; i <= N_GRID; i++) {
+                            const x = X_MIN + i * dx;
+                            const y = gaussPdf(x, opt.mu, opt.sigma);
+                            if (i === 0) ctx.moveTo(xToC(x, canvas), yToC(y, canvas, yMax));
+                            else ctx.lineTo(xToC(x, canvas), yToC(y, canvas, yMax));
+                        }
+                        ctx.strokeStyle = isGlobal ? 'rgba(123,45,142,0.6)' : 'rgba(123,45,142,0.3)';
+                        ctx.lineWidth = (isGlobal ? 1.5 : 1) * dpr;
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+                }
+
+                // Theoretical curve and particle stems — both use the same normalization.
+                // r(z) = log p_tilde(z) - log q(z) is the common quantity.
+                // Forward KL shows exp(r) (importance weights); reverse shows r (reward/ELBO integrand).
+                const stemMax = 0.15 * yMax;
+                const baselineY = yToC(0, canvas, yMax);
+                const isFwd = (label === 'fwd');
+
+                // Forward: dotted purple curve showing theoretical weight (MC mode only)
+                // Shows w = p̃/q for KL, w² = (p̃/q)² for χ²
+                if (isFwd && gradientMode === 'mc') {
+                    const curveW = new Float64Array(N_GRID + 1);
+                    let wMax = 0;
+                    const useWSquared = (divergenceType === 'chisq');
+                    for (let i = 0; i <= N_GRID; i++) {
+                        const x = X_MIN + i * dx;
+                        const r = mixtureLogPdf(x, pComps) - gaussLogPdf(x, q.mu, q.sigma);
+                        const w = Math.exp(r);
+                        curveW[i] = useWSquared ? w * w : w;
+                        if (curveW[i] > wMax) wMax = curveW[i];
+                    }
+                    if (wMax > 0) {
+                        ctx.beginPath();
+                        ctx.setLineDash([2 * dpr, 2 * dpr]);
+                        for (let i = 0; i <= N_GRID; i++) {
+                            const cx = xToC(X_MIN + i * dx, canvas);
+                            const cy = yToC((curveW[i] / wMax) * stemMax, canvas, yMax);
+                            if (i === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+                        }
+                        ctx.strokeStyle = 'rgba(50,100,220,0.4)';
+                        ctx.lineWidth = 1.5 * dpr;
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+                }
+
+                // Particle rug plot below x-axis
+                // Unified: blue = positive α_i (pull), red = negative (push), opacity ∝ |α_i|
+                if (particles && particles.alpha) {
+                    const rugH = 8 * dpr;
+                    const axisY = canvas.height - margin;
+
+                    let maxAbs = 0;
+                    for (let i = 0; i < particles.alpha.length; i++) {
+                        const a = Math.abs(particles.alpha[i]);
+                        if (a > maxAbs) maxAbs = a;
+                    }
+                    if (maxAbs === 0) maxAbs = 1;
+
+                    for (let i = 0; i < particles.alpha.length; i++) {
+                        const px = xToC(particles.z[i], canvas);
+                        const ai = particles.alpha[i];
+                        const opacity = (0.1 + 0.9 * Math.abs(ai) / maxAbs).toFixed(2);
+
+                        ctx.strokeStyle = ai >= 0
+                            ? `rgba(50,100,220,${opacity})`
+                            : `rgba(200,50,50,${opacity})`;
+                        ctx.lineWidth = 1.5 * dpr;
+                        ctx.beginPath();
+                        ctx.moveTo(px, axisY);
+                        ctx.lineTo(px, axisY + rugH);
+                        ctx.stroke();
+                    }
+                }
+
+                // Fitted q (solid purple)
+                ctx.beginPath();
+                for (let i = 0; i <= N_GRID; i++) {
+                    const x = X_MIN + i * dx;
+                    const y = gaussPdf(x, q.mu, q.sigma);
+                    if (i === 0) ctx.moveTo(xToC(x, canvas), yToC(y, canvas, yMax));
+                    else ctx.lineTo(xToC(x, canvas), yToC(y, canvas, yMax));
+                }
+                ctx.strokeStyle = PURPLE; ctx.lineWidth = 2.5 * dpr; ctx.stroke();
+
+                // Handles: target mode peaks
+                for (const c of pComps) {
+                    const cx = xToC(c.mu, canvas);
+                    const cy = yToC(c.w * gaussPdf(c.mu, c.mu, c.sigma), canvas, yMax);
+                    ctx.beginPath(); ctx.arc(cx, cy, 5 * dpr, 0, 2 * Math.PI);
+                    ctx.fillStyle = (hoveredHandle && hoveredHandle.comp === c) ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)';
+                    ctx.fill();
+                }
+
+                // Handle: q peak
+                const qcx = xToC(q.mu, canvas);
+                const qcy = yToC(gaussPdf(q.mu, q.mu, q.sigma), canvas, yMax);
+                ctx.beginPath(); ctx.arc(qcx, qcy, 5 * dpr, 0, 2 * Math.PI);
+                ctx.fillStyle = (hoveredHandle && hoveredHandle.q === q)
+                    ? PURPLE : 'rgba(123,45,142,0.35)';
+                ctx.fill();
+            }
+
+            // ===== Interaction =====
+            let hoveredHandle = null;
+            let dragState = null;
+
+            function computeYMax(q, optima) {
+                const dx = (X_MAX - X_MIN) / N_GRID;
+                let yMax = 0;
+                for (let i = 0; i <= N_GRID; i++) {
+                    const x = X_MIN + i * dx;
+                    yMax = Math.max(yMax, mixturePdf(x, pComps), gaussPdf(x, q.mu, q.sigma));
+                }
+                if (optima) for (const opt of optima)
+                    for (let i = 0; i <= N_GRID; i++)
+                        yMax = Math.max(yMax, gaussPdf(X_MIN + i * dx, opt.mu, opt.sigma));
+                return yMax * 1.15;
+            }
+
+            function getHandles(canvas, q, optima) {
+                const yMax = computeYMax(q, optima);
+                const handles = [];
+                for (const c of pComps) {
+                    handles.push({
+                        target: 'p', comp: c,
+                        cx: xToC(c.mu, canvas), cy: yToC(c.w * gaussPdf(c.mu, c.mu, c.sigma), canvas, yMax)
+                    });
+                }
+                handles.push({
+                    target: 'q', q: q,
+                    cx: xToC(q.mu, canvas), cy: yToC(gaussPdf(q.mu, q.mu, q.sigma), canvas, yMax)
+                });
+                return handles;
+            }
+
+            function hitTest(canvas, q, optima, mx, my) {
+                const dpr = window.devicePixelRatio || 1;
+                const handles = getHandles(canvas, q, optima);
+                let best = null, bestD = 18 * dpr;
+                for (const h of handles) {
+                    const d = Math.hypot(mx - h.cx, my - h.cy);
+                    if (d < bestD) { bestD = d; best = h; }
+                }
+                return best;
+            }
+
+            function getPos(canvas, e) {
+                const rect = canvas.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                const cx = e.touches ? e.touches[0].clientX : e.clientX;
+                const cy = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: (cx - rect.left) * dpr, y: (cy - rect.top) * dpr };
+            }
+
+            function setupCanvas(canvas, q, getOptima) {
+                function onDown(e) {
+                    e.preventDefault();
+                    const pos = getPos(canvas, e);
+                    const h = hitTest(canvas, q, getOptima(), pos.x, pos.y);
+                    if (h) {
+                        const startSigma = h.target === 'p' ? h.comp.sigma : h.q.sigma;
+                        dragState = { handle: h, canvas, startY: pos.y, startSigma };
+                        canvas.style.cursor = 'grabbing';
+                    }
+                }
+                function onMove(e) {
+                    const pos = getPos(canvas, e);
+                    if (dragState && dragState.canvas === canvas) {
+                        e.preventDefault();
+                        const dpr = window.devicePixelRatio || 1;
+                        const newMu = cToX(pos.x, canvas);
+                        const dy = pos.y - dragState.startY;
+                        const newSigma = Math.max(0.1, dragState.startSigma + dy / (150 * dpr));
+                        if (dragState.handle.target === 'p') {
+                            dragState.handle.comp.mu = newMu;
+                            dragState.handle.comp.sigma = newSigma;
+                            computeOptimal();
+                            computeLandscapes(LAND_RES_LO);
+                        } else {
+                            dragState.handle.q.mu = newMu;
+                            dragState.handle.q.logSigma = Math.log(newSigma);
+                        }
+                    } else {
+                        const h = hitTest(canvas, q, getOptima(), pos.x, pos.y);
+                        hoveredHandle = h;
+                        canvas.style.cursor = h ? 'grab' : 'crosshair';
+                    }
+                }
+                function onUp() {
+                    if (dragState) {
+                        dragState.canvas.style.cursor = 'crosshair';
+                        if (dragState.handle.target === 'p') { computeOptimal(); computeLandscapes(); }
+                        resetAdam();
+                        lastFwd = null; lastRev = null;
+                        dragState = null;
+                    }
+                }
+                canvas.addEventListener('mousedown', onDown);
+                canvas.addEventListener('touchstart', onDown, { passive: false });
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('touchmove', onMove, { passive: false });
+                window.addEventListener('mouseup', onUp);
+                window.addEventListener('touchend', onUp);
+            }
+            setupCanvas(canvasFwd, qFwd, () => optFwd ? [optFwd] : null);
+            setupCanvas(canvasRev, qRev, () => optRev);
+
+            // Landscape canvases: drag the purple circle to move q in (mu, logSigma) space
+            let landDragActive = false;
+            const landTip = document.getElementById('land-tooltip');
+            function showTip(html, clientX, clientY) {
+                landTip.innerHTML = html;
+                landTip.style.display = 'block';
+                // Position near cursor, then clamp to viewport
+                let x = clientX + 14, y = clientY - 60;
+                const w = landTip.offsetWidth, h = landTip.offsetHeight;
+                const vw = window.innerWidth, vh = window.innerHeight;
+                if (x + w > vw - 4) x = clientX - w - 10;
+                if (y < 4) y = 4;
+                if (y + h > vh - 4) y = vh - h - 4;
+                landTip.style.left = x + 'px';
+                landTip.style.top = y + 'px';
+            }
+            function hideTip() { landTip.style.display = 'none'; }
+            function setupLandscape(canvas, q, getGrid) {
+                let landDrag = null;
+                function getLandPos(e) {
+                    const rect = canvas.getBoundingClientRect();
+                    const dpr = window.devicePixelRatio || 1;
+                    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+                    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+                    return { x: (cx - rect.left) * dpr, y: (cy - rect.top) * dpr, cx, cy };
+                }
+                function posToParams(pos) {
+                    const dpr = window.devicePixelRatio || 1;
+                    const margin = 25 * dpr;
+                    const plotW = canvas.width - margin;
+                    const plotH = canvas.height - margin;
+                    const a1 = landMuMin + (pos.x - margin) / plotW * (landMuMax - landMuMin);
+                    const a2 = landLsMax - pos.y / plotH * (landLsMax - landLsMin);
+                    return { a1, a2 };
+                }
+                function isNearQ(pos) {
+                    const dpr = window.devicePixelRatio || 1;
+                    const margin = 25 * dpr;
+                    const plotW = canvas.width - margin;
+                    const plotH = canvas.height - margin;
+                    const [qa1, qa2] = qToLand(q);
+                    const qx = margin + (qa1 - landMuMin) / (landMuMax - landMuMin) * plotW;
+                    const qy = (1 - (qa2 - landLsMin) / (landLsMax - landLsMin)) * plotH;
+                    return Math.hypot(pos.x - qx, pos.y - qy) < 15 * dpr;
+                }
+                function onDown(e) {
+                    const pos = getLandPos(e);
+                    if (isNearQ(pos)) {
+                        e.preventDefault();
+                        landDrag = true;
+                        landDragActive = true;
+                        canvas.style.cursor = 'grabbing';
+                    }
+                }
+                function onMove(e) {
+                    const pos = getLandPos(e);
+                    if (landDrag) {
+                        e.preventDefault();
+                        const p = posToParams(pos);
+                        const a1 = Math.max(landMuMin, Math.min(landMuMax, p.a1));
+                        const a2 = Math.max(landLsMin, Math.min(landLsMax, p.a2));
+                        setQFromLand(a1, a2, q);
+                    } else {
+                        canvas.style.cursor = isNearQ(pos) ? 'grab' : 'crosshair';
+                    }
+                }
+                // Tooltip on canvas hover (separate from window-level drag handler)
+                function onHover(e) {
+                    const pos = getLandPos(e);
+                    const p = posToParams(pos);
+                    if (p.a1 >= landMuMin && p.a1 <= landMuMax && p.a2 >= landLsMin && p.a2 <= landLsMax) {
+                        const grid = getGrid();
+                        const fi = (p.a1 - landMuMin) / (landMuMax - landMuMin) * (landCurRes - 1);
+                        const fj = (p.a2 - landLsMin) / (landLsMax - landLsMin) * (landCurRes - 1);
+                        const i = Math.round(Math.max(0, Math.min(landCurRes - 1, fi)));
+                        const j = Math.round(Math.max(0, Math.min(landCurRes - 1, fj)));
+                        const kl = grid[j * landCurRes + i];
+                        const divLabel = divergenceType === 'chisq' ? 'χ²' : 'KL';
+                        const paramLabel = curP().hoverLabel(p.a1, p.a2);
+                        showTip(divLabel + ' = ' + fmtNum(kl) + '<br>' + paramLabel, pos.cx, pos.cy);
+                    }
+                }
+                canvas.addEventListener('mousemove', onHover);
+                canvas.addEventListener('mouseleave', hideTip);
+                function onUp() {
+                    if (landDrag) {
+                        landDrag = false;
+                        landDragActive = false;
+                        canvas.style.cursor = 'default';
+                        resetAdam();
+                        lastFwd = null; lastRev = null;
+                    }
+                }
+                canvas.addEventListener('mousedown', onDown);
+                canvas.addEventListener('touchstart', function(e) {
+                    onDown(e);
+                    if (!landDrag) onMove(e);  // show tooltip on tap
+                }, { passive: false });
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('touchmove', onMove, { passive: false });
+                window.addEventListener('mouseup', onUp);
+                window.addEventListener('touchend', function() { onUp(); hideTip(); });
+            }
+            setupLandscape(canvasLandFwd, qFwd, () => landFwdGrid);
+            setupLandscape(canvasLandRev, qRev, () => landRevGrid);
+
+            // ===== Controls =====
+            const btnPlayPause = document.getElementById('btn-playpause');
+            const btnStep = document.getElementById('btn-step');
+
+            function updatePlayState() {
+                btnPlayPause.innerHTML = running ? '⏸ <span class="key">␣</span>' : '▶ <span class="key">␣</span>';
+                btnPlayPause.classList.toggle('active', !running);  // dark when paused
+                btnStep.disabled = running;
+            }
+
+            btnPlayPause.addEventListener('click', function () {
+                running = !running;
+                updatePlayState();
+            });
+
+            let doOneStep = false;
+            btnStep.addEventListener('click', function () {
+                if (!running) doOneStep = true;
+            });
+
+            document.getElementById('btn-reset').addEventListener('click', function () {
+                const mu0 = (Math.random() - 0.5) * 8;
+                const sig0 = 0.3 + Math.random() * 2;
+                const ls0 = Math.log(sig0);
+                qFwd.mu = mu0; qFwd.logSigma = ls0;
+                qRev.mu = mu0; qRev.logSigma = ls0;
+                resetAdam();
+            });
+            const sliderK = document.getElementById('slider-K');
+            const LOG_K_MAX = Math.log(512);
+            function kToSlider(k) { return Math.round(Math.log(Math.max(1, k)) / LOG_K_MAX * 1000); }
+            function sliderToK(s) { return Math.max(1, Math.round(Math.exp(s / 1000 * LOG_K_MAX))); }
+            function setK(v) {
+                K = Math.max(1, Math.min(512, v));
+                sliderK.value = kToSlider(K);
+                document.getElementById('val-K').textContent = K;
+            }
+            sliderK.addEventListener('input', function () { setK(sliderToK(+this.value)); });
+            document.getElementById('btn-K-minus').addEventListener('click', () => setK(K - 1));
+            document.getElementById('btn-K-plus').addEventListener('click', () => setK(K + 1));
+
+            // Speed slider: log-scale steps/sec. slider 0→~2/s, ~405→~60/s, 1000→~4000/s
+            const LOG_SPEED_MIN = 1, LOG_SPEED_MAX = 12;  // 2^1=2 to 2^12=4096
+            let stepsPerSec = 60;
+            function speedFromSlider(v) { return Math.pow(2, LOG_SPEED_MIN + (v / 1000) * (LOG_SPEED_MAX - LOG_SPEED_MIN)); }
+            document.getElementById('slider-speed').addEventListener('input', function () {
+                stepsPerSec = speedFromSlider(+this.value);
+            });
+
+            document.getElementById('slider-lr').addEventListener('input', function () {
+                baseLR = +this.value / 100;
+                document.getElementById('val-lr').textContent = baseLR.toFixed(2);
+            });
+
+            const sliderMix = document.getElementById('slider-mix');
+            sliderMix.addEventListener('input', function () {
+                const w2 = +this.value / 100;
+                document.getElementById('val-mix').textContent = w2.toFixed(2);
+                pComps[0].w = 1 - w2;
+                pComps[1].w = w2;
+                lastFwd = null; lastRev = null;
+                computeOptimal();
+                computeLandscapes(LAND_RES_LO);  // fast low-res while dragging
+            });
+            sliderMix.addEventListener('change', function () {
+                computeOptimal();
+                computeLandscapes();  // full resolution on release
+                resetAdam();
+            });
+
+            // Divergence type selector
+            const selectDiv = document.getElementById('select-divergence');
+
+            function updateViaLabels() {
+                const fwdVia = document.getElementById('fwd-via');
+                const revVia = document.getElementById('rev-via');
+                if (divergenceType === 'kl') {
+                    fwdVia.textContent = gradientMode === 'mc' ? ', via importance sampling' : ', via closed-form moments of p';
+                    revVia.textContent = gradientMode === 'mc' ? ', via ' : ', via numerical integration';
+                } else {
+                    fwdVia.textContent = gradientMode === 'mc' ? ', via IS (w\u00B2 weights)' : ', via numerical integration';
+                    revVia.textContent = gradientMode === 'mc' ? ', via pathwise estimator' : ', via numerical integration';
+                }
+                if (typeof fitRowLabels === 'function') fitRowLabels();
+            }
+
+            function setDivergence(type) {
+                divergenceType = type;
+                selectDiv.value = type;
+                document.body.classList.toggle('div-kl', type === 'kl');
+                document.body.classList.toggle('div-chisq', type === 'chisq');
+                updateViaLabels();
+                renderQFormula();  // tooltip is divergence-aware
+                updateOptimizerNote();
+                computeOptimal();
+                computeLandscapes();
+                resetAdam();
+                lastFwd = null; lastRev = null;
+            }
+
+            selectDiv.addEventListener('change', function () { setDivergence(this.value); });
+
+            // Parameterization selector — populated from PARAMS registry
+            const selectParam = document.getElementById('select-parameterization');
+            const qFormulaEl = document.getElementById('q-formula');
+            for (const [key, param] of Object.entries(PARAMS)) {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = param.label;
+                selectParam.appendChild(opt);
+            }
+            selectParam.value = landParam;
+            window.renderQFormula = function() {
+                if (typeof katex !== 'undefined' && qFormulaEl) {
+                    katex.render(curP().formula, qFormulaEl, { throwOnError: false });
+                    qFormulaEl.title = curP().tooltip() || '';
+                }
+            };
+            renderQFormula();
+            selectParam.addEventListener('change', function () {
+                landParam = this.value;
+                resetAdam();
+                lastFwd = null; lastRev = null;
+                renderQFormula();
+                computeLandscapes();
+            });
+
+            // Natural gradient toggle
+            function updateOptimizerNote() {
+                const el = document.getElementById('optimizer-note');
+                let s = '<b>Optimizer</b>: With <b>natural gradient</b> on (default), gradients are premultiplied by <b>F⁻¹</b> (Fisher information inverse of <i>q<sub>φ</sub></i>) and fed to <b>SGD with momentum</b> (β = 0.9) — this makes the update parameterization-invariant. With natural gradient off, <b>Adam</b> is used instead (β₁ = 0.9, β₂ = 0.999, ε = 10⁻⁸). Learning rate decays as lr<sub>t</sub> = lr₀ / (1 + 0.001t). Optimization is over the selected φ.';
+                if (divergenceType === 'chisq') {
+                    s += ' Note: F⁻¹ is the Fisher of <i>q</i>, not the Hessian of χ², so natural gradient is not Newton\'s method here (unlike forward KL in natural parameters). The forward χ² landscape is still convex in natural parameters (in fact log-convex), so convergence is guaranteed.';
+                }
+                el.innerHTML = s;
+            }
+            updateOptimizerNote();
+            document.getElementById('chk-natgrad').addEventListener('change', function () {
+                natGrad = this.checked;
+                resetAdam();
+            });
+
+            document.getElementById('chk-gradclip').addEventListener('change', function () {
+                gradClip = this.checked;
+            });
+
+            // Gradient mode toggle
+            const btnDeterministic = document.getElementById('btn-deterministic');
+            const btnMC = document.getElementById('btn-mc');
+
+            function setGradientMode(mode) {
+                gradientMode = mode;
+                btnDeterministic.classList.toggle('active', mode === 'deterministic');
+                btnMC.classList.toggle('active', mode === 'mc');
+                document.body.className = (mode === 'mc' ? 'mode-mc' : 'mode-det') + ' ' + (divergenceType === 'kl' ? 'div-kl' : 'div-chisq');
+                updateViaLabels();
+                document.getElementById('subtitle').textContent = mode === 'mc'
+                    ? 'Monte Carlo gradient estimation \u2014 drag the target modes or the fitted distribution'
+                    : 'Deterministic gradient computation \u2014 drag the target modes or the fitted distribution';
+                resetAdam();
+                lastFwd = null; lastRev = null;
+            }
+
+            btnDeterministic.addEventListener('click', () => setGradientMode('deterministic'));
+            btnMC.addEventListener('click', () => setGradientMode('mc'));
+
+            // Reverse method toggle
+            const btnReinforce = document.getElementById('btn-reinforce');
+            const btnReparam = document.getElementById('btn-reparam');
+            btnReinforce.addEventListener('click', function () {
+                if (reverseMethod === 'reinforce') return;
+                reverseMethod = 'reinforce';
+                this.classList.add('active'); btnReparam.classList.remove('active');
+                resetAdam();
+            });
+            btnReparam.addEventListener('click', function () {
+                if (reverseMethod === 'reparam') return;
+                reverseMethod = 'reparam';
+                this.classList.add('active'); btnReinforce.classList.remove('active');
+                resetAdam();
+            });
+
+            // ===== Keyboard shortcuts =====
+            document.addEventListener('keydown', function (e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    running = !running;
+                    updatePlayState();
+                } else if ((e.key === '>' || e.key === '.') && !running) {
+                    doOneStep = true;
+                }
+            });
+
+            // ===== Animation loop =====
+            let lastFwd = null, lastRev = null;
+            let stepsAccum = 0, lastFrameTime = 0;
+            let fpsFrames = 0, fpsLast = performance.now(), fpsVal = 0;
+
+            function isOffGrid(q) {
+                const [a1, a2] = qToLand(q);
+                return a1 < landMuMin || a1 > landMuMax ||
+                    a2 < landLsMin || a2 > landLsMax;
+            }
+
+            let recomputeTimer = null;
+            function scheduleRecompute() {
+                // Debounce: wait 250ms so that if q bounces back in range, we skip the expensive recompute
+                if (recomputeTimer !== null) return;
+                recomputeTimer = setTimeout(() => {
+                    recomputeTimer = null;
+                    // Check if q is still off-grid — if it came back, skip
+                    if (!isOffGrid(qFwd) && !isOffGrid(qRev)) return;
+                    // Only recompute if bounds would actually change
+                    const prev = [landMuMin, landMuMax, landLsMin, landLsMax];
+                    computeLandBounds();
+                    const delta = Math.abs(landMuMin - prev[0]) + Math.abs(landMuMax - prev[1]) +
+                        Math.abs(landLsMin - prev[2]) + Math.abs(landLsMax - prev[3]);
+                    const range = (prev[1] - prev[0]) + (prev[3] - prev[2]);
+                    if (delta / (range + 1e-8) > 0.08) {
+                        computeLandscapes();
+                    }
+                }, 250);
+            }
+
+            function doStep() {
+                if (divergenceType === 'chisq') {
+                    if (gradientMode === 'deterministic') {
+                        stepForwardChisq_deterministic();
+                        stepReverseChisq_deterministic();
+                        lastFwd = null; lastRev = null;
+                    } else {
+                        lastFwd = stepForwardChisq();
+                        lastRev = stepReverseChisq();
+                    }
+                } else {
+                    if (gradientMode === 'deterministic') {
+                        stepForwardKL_deterministic();
+                        stepReverseKL_deterministic();
+                        lastFwd = null; lastRev = null;
+                    } else {
+                        lastFwd = stepForwardKL();
+                        lastRev = (reverseMethod === 'reinforce') ? stepREINFORCE() : stepReverseKL();
+                    }
+                }
+                fpsFrames++;
+                if (isOffGrid(qFwd) || isOffGrid(qRev)) scheduleRecompute();
+            }
+
+            function frame(now) {
+                // FPS counter (update every second)
+                if (now - fpsLast >= 1000) {
+                    fpsVal = fpsFrames;
+                    fpsFrames = 0;
+                    fpsLast = now;
+                    document.getElementById('fps-display').textContent = fpsVal + ' steps/s';
+                }
+
+                // Accumulator-based stepping: accurate steps/sec regardless of frame rate
+                const dt = lastFrameTime ? (now - lastFrameTime) : 0;
+                lastFrameTime = now;
+                if (!dragState && !landDragActive) {
+                    if (running) {
+                        stepsAccum += stepsPerSec * dt / 1000;
+                        const n = Math.min(Math.floor(stepsAccum), 256);  // cap to avoid death spiral
+                        stepsAccum -= n;
+                        for (let i = 0; i < n; i++) doStep();
+                    } else if (doOneStep) {
+                        doStep();
+                        doOneStep = false;
+                    }
+                } else {
+                    stepsAccum = 0;  // reset accumulator while dragging
+                }
+
+                drawPanel(canvasFwd, qFwd, optFwd ? [optFwd] : null, lastFwd, 'fwd');
+                drawPanel(canvasRev, qRev, optRev, lastRev, reverseMethod === 'reinforce' ? 'rf' : 'rev');
+
+                drawLandscape(canvasLandFwd, landFwdGrid, qFwd, optFwd ? [optFwd] : null);
+                drawLandscape(canvasLandRev, landRevGrid, qRev, optRev);
+
+
+                function updateKLDisplay(id, klVal) {
+                    const el = document.getElementById(id);
+                    const numEl = el.querySelector('.kl-num');
+                    numEl.textContent = fmtNum(klVal);
+                    const t = (Math.log10(Math.max(klVal, 1e-3)) - landVmin) / (landVmax - landVmin);
+                    numEl.style.borderBottomColor = heatmap(t);
+                }
+                function updateQParams(id, q) {
+                    const [a1, a2] = qToLand(q);
+                    const [n1, n2] = curP().axes;
+                    document.getElementById(id).textContent = n1 + '=' + fmtNum(a1) + '  ' + n2 + '=' + fmtNum(a2);
+                }
+                updateKLDisplay('kl-fwd', divForward());
+                updateKLDisplay('kl-rev', divReverse());
+                updateQParams('q-params-fwd', qFwd);
+                updateQParams('q-params-rev', qRev);
+
+                requestAnimationFrame(frame);
+            }
+            requestAnimationFrame(frame);
+            updateViaLabels();
+
+            // Auto-shrink row labels and control rows to fit without wrapping
+            function fitRowLabels() {
+                for (const el of document.querySelectorAll('.row-label, .control-row:not([style*="flex-wrap:wrap"])')) {
+                    el.style.fontSize = '';
+                    let size = parseFloat(getComputedStyle(el).fontSize);
+                    while (el.scrollWidth > el.clientWidth && size > 6) {
+                        size -= 0.5;
+                        el.style.fontSize = size + 'px';
+                    }
+                }
+            }
+            fitRowLabels();
+            window.addEventListener('resize', fitRowLabels);
+
+        })();
+    </script>
+</body>
+
+</html>

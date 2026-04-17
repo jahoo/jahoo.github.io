@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nivre’s parsing examples animated — jacob hoover vigly</title>
+
+  <!-- MathJax v4: Pandoc emits \(...\) and \[...\] inside <span class="math"> -->
+  <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['\\(', '\\)'], ['$', '$']],
+      displayMath: [['\\[', '\\]'], ['$$', '$$']]
+    }
+  };
+  </script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/post.css">
+  <link rel="stylesheet" href="/assets/css/site.css">
+</head>
+<body class="page-style-post">
+
+  <header class="site-header">
+    <div class="wrapper">
+      <a class="site-title" href="/">
+        <span class="site-title-full">jacob hoover vigly</span>
+        <span class="site-title-short">jacob vigly</span>
+        <span class="site-title-xs">jv</span>
+      </a>
+      <nav class="site-nav">
+        <div class="trigger">
+          <a class="page-link" href="/">home</a>
+          <a class="page-link" href="/posts/">blog</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="wrapper">
+      <article>
+
+        <header class="post-header">
+          <h1 class="post-title">Nivre’s parsing examples animated</h1>
+          <p class="post-meta">
+            <time>2021-04-16</time>
+            · Jacob Louis Hoover
+            · <span class="post-tags">note</span>
+          </p>
+        </header>
+
+
+        <div class="post-content">
+<p>I made a simple flipbook animation of deterministic dependency
+parsing algorithms examples from <a
+href="https://doi.org/10.1162/coli.07-056-R1-07-027">Nivre (2008)</a>,
+using <a href="https://ctan.org/pkg/beamer">beamer</a>, because
+apparently I’m living in 2006.</p>
+<div class="center">
+<p><a
+href="/assets/2021-04-16-deterministic-dependency-parsing.pdf"><img
+src="/assets/2021-04-16-deterministic-dependency-parsing-example.png"
+width="600" /></a></p>
+</div>
+<p>The <a
+href="/assets/2021-04-16-deterministic-dependency-parsing.pdf">PDF
+here</a> is meant to be viewed in presentation mode / single-page view.
+The LaTeX code is <a
+href="/assets/2021-04-deterministic-dependency-parsing.zip">in this zip
+file</a>, in case that’s useful to anyone.</p>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrapper">
+      <span class="last-modified">Last modified: 2026-04-17 00:25</span>
+    </div>
+  </footer>
+
+  <script src="/assets/js/collapse.js"></script>
+  <script src="/assets/js/active-nav.js"></script>
+</body>
+</html>

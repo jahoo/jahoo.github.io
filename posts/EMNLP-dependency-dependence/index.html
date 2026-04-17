@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Linguistic Dependencies and Statistical Dependence — jacob
+hoover vigly</title>
+
+  <!-- MathJax v4: Pandoc emits \(...\) and \[...\] inside <span class="math"> -->
+  <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['\\(', '\\)'], ['$', '$']],
+      displayMath: [['\\[', '\\]'], ['$$', '$$']]
+    }
+  };
+  </script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/post.css">
+  <link rel="stylesheet" href="/assets/css/site.css">
+</head>
+<body class="page-style-post">
+
+  <header class="site-header">
+    <div class="wrapper">
+      <a class="site-title" href="/">
+        <span class="site-title-full">jacob hoover vigly</span>
+        <span class="site-title-short">jacob vigly</span>
+        <span class="site-title-xs">jv</span>
+      </a>
+      <nav class="site-nav">
+        <div class="trigger">
+          <a class="page-link" href="/">home</a>
+          <a class="page-link" href="/posts/">blog</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="wrapper">
+      <article>
+
+        <header class="post-header">
+          <h1 class="post-title">Linguistic Dependencies and Statistical
+Dependence</h1>
+          <p class="post-meta">
+            <time>2021-11-07</time>
+            · Jacob Louis Hoover
+            · <span class="post-tags">presentation, paper</span>
+          </p>
+        </header>
+
+
+        <div class="post-content">
+<p>At <a href="https://2021.emnlp.org/">EMNLP</a> (virtually) I
+presented work (with <a
+href="https://aclanthology.org/people/w/wenyu-du/">Wenyu Du</a>, <a
+href="https://scholar.google.it/citations?user=DJon7w4AAAAJ&amp;hl">Alessandro
+Sordoni</a>, and <a
+href="https://scholar.google.com/citations?user=iYjXhYwAAAAJ&amp;hl">Timothy
+J. O’Donnell</a>) titled <em>Linguistic Dependencies and Statistical
+Dependence</em>.</p>
+<div class="center">
+<p><img src="/assets/2021-11-07-EMNLP-dependency-dependence-fig.png"
+width="400" /></p>
+</div>
+<p>In this work, we compared <em>linguistic dependency</em> trees to
+dependency trees representing <em>statistical dependence</em> between
+words, which we extracted from mutual information estimates using
+pretrained language models. Computing accuracy scores we found that the
+accuracy of the extracted trees was only as high as a simple linear
+baseline that connects adjacent words, even with strong controls. We
+also found considerable differences between pretrained LMs.</p>
+<ul>
+<li>Paper is <a
+href="http://dx.doi.org/10.18653/v1/2021.emnlp-main.234">here</a>.<br />
+</li>
+<li>Poster is <a
+href="/assets/pdfs/2021.10.11.EMNLP.poster.pdf">here</a>.</li>
+<li>Talk slides are <a
+href="/assets/pdfs/2021.10.11.EMNLP.talk-slides.pdf">here</a>.</li>
+<li>Code is available <a
+href="https://github.com/mcqll/cpmi-dependencies">here</a>.</li>
+</ul>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrapper">
+      <span class="last-modified">Last modified: 2026-04-17 00:25</span>
+    </div>
+  </footer>
+
+  <script src="/assets/js/collapse.js"></script>
+  <script src="/assets/js/active-nav.js"></script>
+</body>
+</html>

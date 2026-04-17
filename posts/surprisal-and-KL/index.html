@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>surprisal and KL — jacob hoover vigly</title>
+
+  <!-- MathJax v4: Pandoc emits \(...\) and \[...\] inside <span class="math"> -->
+  <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['\\(', '\\)'], ['$', '$']],
+      displayMath: [['\\[', '\\]'], ['$$', '$$']]
+    }
+  };
+  </script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/post.css">
+  <link rel="stylesheet" href="/assets/css/site.css">
+</head>
+<body class="page-style-post">
+
+  <header class="site-header">
+    <div class="wrapper">
+      <a class="site-title" href="/">
+        <span class="site-title-full">jacob hoover vigly</span>
+        <span class="site-title-short">jacob vigly</span>
+        <span class="site-title-xs">jv</span>
+      </a>
+      <nav class="site-nav">
+        <div class="trigger">
+          <a class="page-link" href="/">home</a>
+          <a class="page-link" href="/posts/">blog</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="wrapper">
+      <article>
+
+        <header class="post-header">
+          <h1 class="post-title">surprisal and KL</h1>
+          <p class="post-meta">
+            <time>2023-10-10</time>
+            · Jacob Louis Hoover
+            · <span class="post-tags">note</span>
+          </p>
+        </header>
+
+
+        <div class="post-content">
+<div style="display:none;">
+<p><span class="math display">\[
+\require{color}
+\def\colorKL{\color{#4fa283}}
+\def\colorR{\color{#ec8c62}}
+\def\R{\colorR\mathrm{R}}
+\]</span></p>
+</div>
+<p>Consider any setting where a distribution over some latent variable
+<span class="math inline">\(Z\)</span> changes when conditioning on some
+outcome <span class="math inline">\(\breve u\)</span> of an observable
+random variable. The change can be quantified as <em>KL divergence</em>,
+<span class="math inline">\(\operatorname{\colorKL KL}(p_{Z\mid \breve
+u}\|p_{Z})\)</span>. This divergence can be decomposed into
+<em>surprisal</em> of <span class="math inline">\(\breve u\)</span>
+minus another term, which I’ll call <span
+class="math inline">\(\R\)</span>:</p>
+<p><span class="math display">\[
+\begin{aligned}
+  \operatorname{\colorKL KL}(p_{Z\mid \breve u}\|p_{Z})
+  &amp;&amp; = &amp;&amp; -\log p(\breve u)
+  &amp;&amp; - &amp;&amp; \mathop{\mathbb{E}}_{p_{Z\mid \breve u}}[-\log
+p(\breve u\mid z)]\\
+  \operatorname{\colorKL
+KL}(\operatorname{posterior}\|\operatorname{prior})
+  &amp;&amp; = &amp;&amp; \operatorname{surprisal}
+  &amp;&amp; - &amp;&amp;
+  \underbrace{\mathop{\mathbb{E}}_{\operatorname{posterior}}[-\log
+\operatorname{lik}]}_{\operatorname{\colorR R}}
+\end{aligned}
+\]</span></p>
+<p>Since KL is nonnegative, R can take on values between 0 and the
+surprisal. Put another way, this implies that surprisal upper-bounds the
+amount by which the distribution changes. Note that if surprisal is
+large and R is also large, KL is small—that is, despite the observation
+containing a large amount of information, it does not result in a large
+change in the distribution.</p>
+<section id="interactive-illustration" class="level3">
+<h3>Interactive illustration</h3>
+<p>Manipulate prior and likelihood sliders below to see posterior and
+resulting surprisal partition:</p>
+<iframe width="100%" height="1509" frameborder="0" src="https://observablehq.com/embed/@postylem/kl-and-surprisal?cells=viewof+showOtherKL%2Cplot1_1%2Cplot1_2%2Cviewof+dim%2Cviewof+useLogInput%2Cviewof+allowZeroes%2Cinput1%2Cviewof+scale_prior%2Cviewof+scale_likelihood%2Cviewof+applyScaleLikelihood1%2Cmodification_plots%2Cviewof+whetherPlotLogSpace%2Cviewof+maxUnits%2Cviewof+base">
+</iframe>
+</section>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrapper">
+      <span class="last-modified">Last modified: 2026-04-17 00:25</span>
+    </div>
+  </footer>
+
+  <script src="/assets/js/collapse.js"></script>
+  <script src="/assets/js/active-nav.js"></script>
+</body>
+</html>

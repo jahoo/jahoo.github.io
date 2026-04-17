@@ -1,0 +1,4 @@
+/.quarto/
+# don't save the _files folders which are big
+*_files/
+*_cache/
