@@ -154,7 +154,7 @@ body {
   background: var(--s-code-bg);
   padding: 0.1em 0.3em;
   border-radius: 3px;
-  font-size: 0.95em;
+  font-size: 0.8em;
 }
 .post-content pre {
   background: var(--s-code-bg);
@@ -162,7 +162,6 @@ body {
   border-radius: var(--s-radius);
   overflow-x: auto;
   line-height: 1.45;
-  font-size: 0.85rem;
 }
 .post-content pre code {
   background: none;

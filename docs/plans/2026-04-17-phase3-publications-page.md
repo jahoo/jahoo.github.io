@@ -1083,7 +1083,7 @@ Expected: FAIL.
 Append to `scripts/build-pubs.js`:
 ```js
 const GOOGLE_SCHOLAR_URL =
-  'https://scholar.google.com/citations?user=tfaTOlEAAAAJ';
+  'https://scholar.google.com/citations?user=koLi2TwAAAAJ';
 
 const NAME_NOTE = `*Note on my name:* My surname is Vigly. Prior to September 2024, my surname was Hoover, which is now a middle name.`;
 

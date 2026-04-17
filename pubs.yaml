@@ -9,9 +9,11 @@
 
 - key: vigly.j:2025cogsci
   venue: CogSci 2025
+  venue_url: https://cognitivesciencesociety.org/cogsci-2025/
 
 - key: clark.t:2025cogsci
   venue: CogSci 2025
+  venue_url: https://cognitivesciencesociety.org/cogsci-2025/
 
 - key: vigly.j:2025psyarxiv
   venue: PsyArXiv
@@ -33,7 +35,7 @@
   venue_url: https://hsp2025.github.io/
 
 - key: hoover.j:2024phd
-  venue: McGill University
+  venue: McGill University (PhD)
   status: dissertation
   links:
     pdf: dissertation.pdf

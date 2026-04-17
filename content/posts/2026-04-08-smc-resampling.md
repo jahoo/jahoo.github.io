@@ -8,6 +8,7 @@ js:
 css:
   - smc-resampling.css
 bibliography: assets/smc-resampling/references.bib
+reference-section-title: References
 link-citations: true
 mathjax-macros: assets/smc-resampling/macros.json
 ---
@@ -98,7 +99,7 @@ on the CDF plot at right to place probes, and consider what strategy would you u
 
 ## 3. Multinomial, stratified, and systematic resampling
 
-You may have found that the most natural idea is to use $\np$ independent draws from the uniform distribution.^[That is, inverse transform sampling. A little while ago, I made another [post exploring density transformations](/2022/09/02/transform-pdf.html) in the continuous case. Here we are doing this in a discrete setting: Each uniform-distributed independent probe $\probe_k$ is transformed through the discrete quantile function $\invcdf$ to produce a sample from the particle-weight distribution, just as passing a uniform draw through a continuous inverse CDF yields a draw from the corresponding distribution.]
+You may have found that the most natural idea is to use $\np$ independent draws from the uniform distribution.^[That is, inverse transform sampling. A little while ago, I made another [post exploring density transformations](/posts/transform-pdf/) in the continuous case. Here we are doing this in a discrete setting: Each uniform-distributed independent probe $\probe_k$ is transformed through the discrete quantile function $\invcdf$ to produce a sample from the particle-weight distribution, just as passing a uniform draw through a continuous inverse CDF yields a draw from the corresponding distribution.]
 This works, and leads to the first standard algorithm, **multinomial resampling**.
 We will then look at two other common strategies that reduce variance by spreading probes more evenly for lower variance.
 
@@ -117,7 +118,10 @@ positions = random(N)
 indices = np.searchsorted(cumulative_sum, positions)
 ```
 
-Equivalent to `np.random.choice(N, size=N, replace=True, p=weights)`.
+::: {.fullwidth}
+(Equivalent to `np.random.choice(N, size=N, replace=True, p=weights)`)
+:::
+
 
 <!-- 
 <details markdown="1" style="font-size:0.85em; color:#555; margin:0.3em 0 0.8em;">

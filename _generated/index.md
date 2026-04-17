@@ -70,7 +70,7 @@ I sometimes post about things on the [blog](/posts/).
 <li class="pub">
   <a class="pub-title" href="https://underline.io/events/489/posters/20440/poster/119457-">When Unpredictable Does Not Mean Difficult to Process</a>
   <span class="pub-author">Jacob Hoover Vigly, Peng Qian, Morgan Sonderegger, Timothy J. O&#39;Donnell</span>
-  <span class="pub-venue">CogSci 2025</span>
+  <a class="pub-venue" href="https://cognitivesciencesociety.org/cogsci-2025/">CogSci 2025</a>
   <div class="pub-extras">
     <a class="extra link" href="https://underline.io/events/489/posters/20440/poster/119457-">link</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
@@ -91,7 +91,7 @@ I sometimes post about things on the [blog](/posts/).
 <li class="pub">
   <a class="pub-title" href="https://escholarship.org/uc/item/9kr1b1gm">A Model of Approximate and Incremental Noisy-Channel Language Processing</a>
   <span class="pub-author">Thomas Hikaru Clark, Jacob Hoover Vigly, Edward Gibson, Roger Levy</span>
-  <span class="pub-venue">CogSci 2025</span>
+  <a class="pub-venue" href="https://cognitivesciencesociety.org/cogsci-2025/">CogSci 2025</a>
   <div class="pub-extras">
     <a class="extra link" href="https://escholarship.org/uc/item/9kr1b1gm">link</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
@@ -168,7 +168,7 @@ I sometimes post about things on the [blog](/posts/).
 <li class="pub">
   <a class="pub-title" href="https://escholarship.mcgill.ca/concern/theses/r494vr42w">The Cost of Information: Looking beyond Predictability in Language Processing</a>
   <span class="pub-author">Jacob Louis Hoover</span>
-  <span class="pub-venue">McGill University</span> <span class="pub-status">dissertation</span>
+  <span class="pub-venue">McGill University (PhD)</span> <span class="pub-status">dissertation</span>
   <div class="pub-extras">
     <a class="extra link" href="https://escholarship.mcgill.ca/concern/theses/r494vr42w">link</a>
     <a class="extra pdf" href="/assets/pdfs/dissertation.pdf">pdf</a>
