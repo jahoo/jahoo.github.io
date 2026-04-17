@@ -470,3 +470,89 @@ test('extractEntriesByKey: unknown keys are silently skipped', () => {
   assert.match(result, /foo:2021conf/);
   assert.doesNotMatch(result, /nonexistent/);
 });
+
+import { stripLeakyFields } from '../scripts/build-pubs-bib.js';
+
+test('stripLeakyFields: removes file field with local paths', () => {
+  const input = `@article{x,
+  title = {T},
+  file = {/Users/v/Zotero/file.pdf;/Users/v/other/file2.pdf},
+  author = {A B},
+  year = {2025}
+}`;
+  const result = stripLeakyFields(input);
+  assert.doesNotMatch(result, /\/Users\/v/);
+  assert.doesNotMatch(result, /\bfile\s*=/);
+  assert.match(result, /title = \{T\}/);
+  assert.match(result, /author = \{A B\}/);
+});
+
+test('stripLeakyFields: handles nested braces in abstract', () => {
+  const input = `@article{x,
+  title = {T},
+  abstract = {Some {nested} braces and $math_{sub}$ here.},
+  year = {2025}
+}`;
+  const result = stripLeakyFields(input);
+  assert.doesNotMatch(result, /abstract/);
+  assert.doesNotMatch(result, /nested/);
+  assert.match(result, /title = \{T\}/);
+  assert.match(result, /year = \{2025\}/);
+});
+
+test('stripLeakyFields: handles multiline field values', () => {
+  const input = `@article{x,
+  title = {T},
+  abstract = {First line of abstract.
+    Second line here.
+    Third line concludes.},
+  year = {2025}
+}`;
+  const result = stripLeakyFields(input);
+  assert.doesNotMatch(result, /abstract/);
+  assert.doesNotMatch(result, /Second line/);
+  assert.match(result, /title = \{T\}/);
+});
+
+test('stripLeakyFields: removes all designated leaky fields', () => {
+  const input = `@article{x,
+  title = {T},
+  keywords = {tag1,tag2},
+  urldate = {2024-11-15},
+  langid = {en-US},
+  pubstate = {prepublished},
+  eprintclass = {cs.CL},
+  year = {2025}
+}`;
+  const result = stripLeakyFields(input);
+  for (const field of ['keywords', 'urldate', 'langid', 'pubstate', 'eprintclass']) {
+    assert.doesNotMatch(result, new RegExp(`\\b${field}\\b`), `${field} should be stripped`);
+  }
+  assert.match(result, /title = \{T\}/);
+  assert.match(result, /year = \{2025\}/);
+});
+
+test('stripLeakyFields: leaves non-leaky fields intact', () => {
+  const input = `@article{x,
+  title = {T},
+  author = {A B},
+  doi = {10.1000/xyz},
+  url = {https://example.com},
+  year = {2025}
+}`;
+  const result = stripLeakyFields(input);
+  assert.match(result, /title = \{T\}/);
+  assert.match(result, /author = \{A B\}/);
+  assert.match(result, /doi = \{10\.1000\/xyz\}/);
+  assert.match(result, /url = \{https:\/\/example\.com\}/);
+  assert.match(result, /year = \{2025\}/);
+});
+
+test('stripLeakyFields: does not munge entry header', () => {
+  const input = `@article{x,
+  file = {/path},
+  year = {2025}
+}`;
+  const result = stripLeakyFields(input);
+  assert.match(result, /^@article\{x,/);
+});

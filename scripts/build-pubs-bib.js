@@ -8,8 +8,7 @@
 // Bibliographic fields come from source.bib via citation-js; pubs-bib.yaml
 // overlays short venue labels, custom links, awards, status, equal-contrib marks.
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync, lstatSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import yaml from 'js-yaml';
 import { Cite } from '@citation-js/core';
@@ -18,7 +17,6 @@ import '@citation-js/plugin-bibtex';
 import {
   sortEntries,
   validateEntry,
-  generateHtmlEntry,
   generateMarkdown,
 } from './build-pubs.js';
 
@@ -104,6 +102,53 @@ export function extractEntriesByKey(bibText, keys) {
     }
   }
   return pieces.length === 0 ? '' : pieces.join('\n\n') + '\n';
+}
+
+// Fields stripped from entries before writing the downloadable bib.
+// - `file`: Zotero writes absolute local paths — would leak private filesystem layout.
+// - `abstract`, `keywords`, `urldate`, `langid`, `pubstate`, `eprintclass`: internal
+//   Zotero metadata not useful for readers who want to cite the work.
+const LEAKY_BIB_FIELDS = new Set([
+  'file', 'abstract', 'keywords', 'urldate', 'langid', 'pubstate', 'eprintclass',
+]);
+
+// Remove leaky fields from biblatex text, handling brace-balanced multi-line
+// field values (needed for abstracts with nested braces or long paragraphs).
+//
+// The field-start regex uses [ \t]* (same-line indent only), NOT \s* — otherwise
+// greedy \s* would swallow the preceding newline as "leading whitespace," and
+// stripping would collapse the previous line's terminator against the next
+// surviving field's indent.
+export function stripLeakyFields(bibText) {
+  const out = [];
+  let i = 0;
+  const FIELD_START_RE = /^([ \t]*)(\w+)[ \t]*=[ \t]*\{/;
+  while (i < bibText.length) {
+    const rest = bibText.slice(i);
+    const m = rest.match(FIELD_START_RE);
+    if (m && LEAKY_BIB_FIELDS.has(m[2].toLowerCase())) {
+      // Walk brace-balanced to find the end of this field value.
+      const valStart = i + m[0].length;
+      let depth = 1;
+      let j = valStart;
+      while (j < bibText.length && depth > 0) {
+        const c = bibText[j];
+        if (c === '{') depth++;
+        else if (c === '}') depth--;
+        j++;
+      }
+      // Skip trailing comma and following whitespace through newline.
+      let endPos = j;
+      if (bibText[endPos] === ',') endPos++;
+      while (endPos < bibText.length && /[^\S\n]/.test(bibText[endPos])) endPos++;
+      if (bibText[endPos] === '\n') endPos++;
+      i = endPos;
+    } else {
+      out.push(bibText[i]);
+      i++;
+    }
+  }
+  return out.join('');
 }
 
 // Map CSL-JSON type strings (what citation-js emits) to our entry type enum.
@@ -310,11 +355,10 @@ function main() {
   );
   console.log(`Generated: _generated/pubs-bib.md (${sorted.length} entries)`);
 
-  // 6. Extract requested entries verbatim from the source bib for download.
-  // Preserves original cite keys and field formatting (citation-js's own
-  // serializer rewrites keys, which we don't want here).
+  // 6. Extract requested entries verbatim from the source bib, then strip
+  // Zotero's local filesystem paths and other private metadata before writing.
   const selectedKeys = sorted.map(e => e.id);
-  const biblatex = extractEntriesByKey(bibText, selectedKeys);
+  const biblatex = stripLeakyFields(extractEntriesByKey(bibText, selectedKeys));
   ensureDir('assets/bibliography');
   writeFileSync('assets/bibliography/pubs-bib.bib', biblatex);
   console.log(`Generated: assets/bibliography/pubs-bib.bib (${sorted.length} entries)`);
