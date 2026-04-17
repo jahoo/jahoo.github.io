@@ -1,0 +1,185 @@
+# Publications, newest first.
+# Schema: see docs/specs/2026-04-17-phase3-publications-page.md
+#
+# Required: id, title, authors, year, type, venue
+# Optional: month, day, venue_full, venue_url, pages, publisher, address,
+#           doi, editor, school, note, status, equal_contribution, links
+
+- id: chan.r:2026arxiv
+  title: "Ensembling {Language Models} with Sequential {Monte Carlo}"
+  authors:
+    - Robin Shing Moon Chan
+    - Tianyu Liu
+    - Samuel Kiegeland
+    - Clemente Pasti
+    - Jacob Hoover Vigly
+    - Timothy J. O'Donnell
+    - Ryan Cotterell
+    - Tim Vieira
+  year: 2026
+  month: 3
+  day: 5
+  type: online
+  venue: arXiv
+  venue_full: "arXiv:2603.05432"
+  status: preprint
+  links:
+    arxiv: "2603.05432"
+
+- id: lipkin.b:2025
+  title: "Fast Controlled Generation from Language Models with Adaptive Weighted Rejection Sampling"
+  authors:
+    - Ben Lipkin
+    - Benjamin LeBrun
+    - Jacob Hoover Vigly
+    - João Loula
+    - David R. MacIver
+    - Li Du
+    - Jason Eisner
+    - Ryan Cotterell
+    - Vikash Mansinghka
+    - Timothy J. O'Donnell
+    - Alexander K. Lew
+    - Tim Vieira
+  year: 2025
+  month: 10
+  day: 7
+  type: misc
+  venue: CoLM 2025
+  venue_full: "Second Conference on Language Modeling (CoLM)"
+  address: Montréal
+  note: "Outstanding Paper Award"
+  links:
+    url: https://openreview.net/forum?id=3BmPSFAdq3
+    arxiv: "2504.05410"
+    openreview: https://openreview.net/forum?id=3BmPSFAdq3
+
+- id: vigly.j:2025cogsci
+  title: "When Unpredictable Does Not Mean Difficult to Process"
+  authors:
+    - Jacob Hoover Vigly
+    - Peng Qian
+    - Morgan Sonderegger
+    - Timothy J. O'Donnell
+  year: 2025
+  month: 7
+  day: 31
+  type: misc
+  venue: CogSci 2025
+  venue_full: "Annual Meeting of the Cognitive Science Society"
+  address: "San Francisco, CA"
+  links:
+    poster: https://underline.io/events/489/posters/20440/poster/119457-
+
+- id: vigly.j:2025psyarxiv
+  title: "Comprehension Effort as the Cost of Inference"
+  authors:
+    - Jacob Hoover Vigly
+    - Peng Qian
+    - Morgan Sonderegger
+    - Timothy J. O'Donnell
+  year: 2025
+  month: 6
+  day: 18
+  type: online
+  venue: PsyArXiv
+  status: preprint
+  links:
+    url: https://osf.io/2498w
+    preprint: https://osf.io/2498w
+
+- id: hoover.j:2024phd
+  title: "The Cost of Information: Looking beyond Predictability in Language Processing"
+  authors:
+    - Jacob Louis Hoover
+  year: 2024
+  month: 8
+  type: thesis
+  venue: McGill University
+  venue_full: McGill University
+  links:
+    url: https://escholarship.mcgill.ca/concern/theses/r494vr42w
+    pdf: dissertation.pdf
+    other:
+      - label: précis
+        url: /assets/pdfs/dissertation_precis.pdf
+
+- id: hoover.j:2023
+  title: "The Plausibility of Sampling as an Algorithmic Theory of Sentence Processing"
+  authors:
+    - Jacob Louis Hoover
+    - Morgan Sonderegger
+    - Steven T. Piantadosi
+    - Timothy J. O'Donnell
+  year: 2023
+  month: 7
+  type: article
+  venue: Open Mind
+  venue_full: "Open Mind: Discoveries in Cognitive Science"
+  venue_url: https://doi.org/10.1162/opmi_a_00086
+  doi: 10.1162/opmi_a_00086
+  pages: "350--391"
+  links:
+    preprint: https://doi.org/10.31234/osf.io/qjnpv
+    code: https://github.com/mcqll/plausibility-sampling-processing/
+    other:
+      - label: surprisal explorer
+        url: https://jahoo.shinyapps.io/surprisal_explorer/
+
+- id: socolof.m:2022coling
+  title: "Measuring Morphological Fusion Using Partial Information Decomposition"
+  authors:
+    - Michaela Socolof
+    - Jacob Louis Hoover
+    - Richard Futrell
+    - Alessandro Sordoni
+    - Timothy J. O'Donnell
+  year: 2022
+  month: 10
+  day: 12
+  type: inproceedings
+  venue: COLING 2022
+  venue_full: "Proceedings of the 29th International Conference on Computational Linguistics (COLING)"
+  venue_url: https://aclanthology.org/2022.coling-1.5
+  address: "Gyeongju, Republic of Korea"
+  pages: "44--54"
+  publisher: International Committee on Computational Linguistics
+
+- id: hoover.j:2021emnlp
+  title: "Linguistic Dependencies and Statistical Dependence"
+  authors:
+    - Jacob Louis Hoover
+    - Wenyu Du
+    - Alessandro Sordoni
+    - Timothy J. O'Donnell
+  year: 2021
+  month: 11
+  type: inproceedings
+  venue: EMNLP 2021
+  venue_full: "Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing"
+  venue_url: https://aclanthology.org/2021.emnlp-main.234
+  address: "Online and Punta Cana, Dominican Republic"
+  pages: "2941--2963"
+  publisher: Association for Computational Linguistics
+  links:
+    code: https://github.com/mcqll/cpmi-dependencies
+    slides: 2021.10.11.EMNLP.talk-slides.pdf
+    poster: 2021.10.11.EMNLP.poster.pdf
+
+- id: hoover.j:2021wccfl
+  title: "Accounting for Variation in Number Agreement in Icelandic Dative-Nominative Constructions"
+  authors:
+    - Jacob Louis Hoover
+  year: 2021
+  month: 10
+  type: inproceedings
+  venue: WCCFL 38
+  venue_full: "Proceedings of the 38th West Coast Conference on Formal Linguistics"
+  venue_url: http://www.lingref.com/cpp/wccfl/38/abstract3568.html
+  editor: "Rachel Soo, Una Y. Chow, Sander Nederveen"
+  pages: "231--241"
+  publisher: Cascadilla Proceedings Project
+  address: "Somerville, Mass., USA"
+  links:
+    pdf: wccfl2020-cascadilla-paper3568-proof.pdf
+    handout: wccfl2020-handout.pdf
