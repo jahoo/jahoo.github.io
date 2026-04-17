@@ -8,6 +8,7 @@ import {
 } from '../scripts/build-pubs.js';
 import { sortEntries } from '../scripts/build-pubs.js';
 import { validateEntry } from '../scripts/build-pubs.js';
+import { generateHtmlEntry } from '../scripts/build-pubs.js';
 
 // Imports will be added as functions are implemented.
 
@@ -220,4 +221,80 @@ test('validateEntry: rejects links.other entry missing label or url', () => {
     () => validateEntry({ ...minimalEntry, links: { other: [{ label: 'x' }] } }),
     /links\.other/
   );
+});
+
+const htmlFixture = {
+  id: 'hoover.j:2021emnlp',
+  title: 'Linguistic Dependencies and Statistical Dependence',
+  authors: [
+    'Jacob Louis Hoover',
+    'Wenyu Du',
+    'Alessandro Sordoni',
+    "Timothy J. O'Donnell",
+  ],
+  year: 2021,
+  month: 11,
+  type: 'inproceedings',
+  venue: 'EMNLP 2021',
+  venue_url: 'https://aclanthology.org/2021.emnlp-main.234',
+  links: {
+    code: 'https://github.com/mcqll/cpmi-dependencies',
+    slides: '2021.10.11.EMNLP.talk-slides.pdf',
+  },
+};
+
+test('generateHtmlEntry: contains title, authors, venue, links', () => {
+  const html = generateHtmlEntry(htmlFixture);
+  assert.match(html, /<li class="pub"/);
+  assert.match(html, /Linguistic Dependencies and Statistical Dependence/);
+  assert.match(html, /Jacob Louis Hoover/);
+  assert.match(html, /Wenyu Du/);
+  assert.match(html, /EMNLP 2021/);
+  assert.match(html, /href="https:\/\/aclanthology\.org\/2021\.emnlp-main\.234"/);
+  assert.match(html, /class="extra code"/);
+  assert.match(html, /href="https:\/\/github\.com\/mcqll\/cpmi-dependencies"/);
+  assert.match(html, /class="extra slides"/);
+  assert.match(html, /href="\/assets\/pdfs\/2021\.10\.11\.EMNLP\.talk-slides\.pdf"/);
+});
+
+test('generateHtmlEntry: title unwrapped when no primary URL', () => {
+  const noLinks = { ...htmlFixture, venue_url: undefined, links: undefined };
+  const html = generateHtmlEntry(noLinks);
+  assert.match(html, /Linguistic Dependencies and Statistical Dependence/);
+  assert.doesNotMatch(html, /<a class="pub-title"/);
+});
+
+test('generateHtmlEntry: strips title braces for display', () => {
+  const braced = { ...htmlFixture, title: 'Sequential {Monte Carlo}' };
+  const html = generateHtmlEntry(braced);
+  assert.match(html, /Sequential Monte Carlo/);
+  assert.doesNotMatch(html, /\{Monte Carlo\}/);
+});
+
+test('generateHtmlEntry: renders note in parens', () => {
+  const awarded = { ...htmlFixture, note: 'Outstanding Paper Award' };
+  const html = generateHtmlEntry(awarded);
+  assert.match(html, /\(Outstanding Paper Award\)/);
+});
+
+test('generateHtmlEntry: renders status tag', () => {
+  const preprint = { ...htmlFixture, status: 'preprint' };
+  const html = generateHtmlEntry(preprint);
+  assert.match(html, /<span class="pub-status">preprint<\/span>/);
+});
+
+test('generateHtmlEntry: renders equal contribution asterisks', () => {
+  const eq = { ...htmlFixture, equal_contribution: [0, 1] };
+  const html = generateHtmlEntry(eq);
+  assert.match(html, /Jacob Louis Hoover\*, Wenyu Du\*/);
+});
+
+test('generateHtmlEntry: renders links.other list', () => {
+  const withOther = {
+    ...htmlFixture,
+    links: { ...htmlFixture.links, other: [{ label: 'surprisal explorer', url: 'https://s.io' }] },
+  };
+  const html = generateHtmlEntry(withOther);
+  assert.match(html, /href="https:\/\/s\.io"/);
+  assert.match(html, /surprisal explorer/);
 });

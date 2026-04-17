@@ -153,6 +153,64 @@ export function validateEntry(entry) {
   }
 }
 
+// Order of link buttons in the .pub-extras row.
+const LINK_RENDERERS = [
+  ['arxiv',      (v) => ({ cls: 'arxiv',      label: 'arXiv',      href: buildArxivUrl(v) })],
+  ['preprint',   (v) => ({ cls: 'preprint',   label: 'preprint',   href: v })],
+  ['pdf',        (v) => ({ cls: 'pdf',        label: 'pdf',        href: buildPdfUrl(v) })],
+  ['code',       (v) => ({ cls: 'code',       label: 'code',       href: v })],
+  ['slides',     (v) => ({ cls: 'slides',     label: 'slides',     href: buildPdfUrl(v) })],
+  ['poster',     (v) => ({ cls: 'poster',     label: 'poster',     href: buildPdfUrl(v) })],
+  ['handout',    (v) => ({ cls: 'handout',    label: 'handout',    href: buildPdfUrl(v) })],
+  ['video',      (v) => ({ cls: 'video',      label: 'video',      href: v })],
+  ['openreview', (v) => ({ cls: 'openreview', label: 'OpenReview', href: v })],
+  ['lingbuzz',   (v) => ({ cls: 'lingbuzz',   label: 'lingbuzz',   href: buildLingbuzzUrl(v) })],
+];
+
+function renderExtras(links) {
+  if (!links) return '';
+  const buttons = [];
+  for (const [key, fn] of LINK_RENDERERS) {
+    if (links[key]) {
+      const { cls, label, href } = fn(links[key]);
+      buttons.push(`<a class="extra ${cls}" href="${href}">${label}</a>`);
+    }
+  }
+  for (const o of links.other ?? []) {
+    buttons.push(`<a class="extra other" href="${o.url}">${o.label}</a>`);
+  }
+  if (buttons.length === 0) return '';
+  return `  <div class="pub-extras">\n    ${buttons.join('\n    ')}\n  </div>\n`;
+}
+
+export function generateHtmlEntry(paper) {
+  const title = stripTitleBraces(paper.title);
+  const authors = formatAuthorsHtml(paper.authors, paper.equal_contribution ?? []);
+  const primaryUrl = getPrimaryUrl(paper.links);
+
+  const titleHtml = primaryUrl
+    ? `<a class="pub-title" href="${primaryUrl}">${title}</a>`
+    : `<span class="pub-title">${title}</span>`;
+
+  const venueHtml = paper.venue_url
+    ? `<a class="pub-venue" href="${paper.venue_url}">${paper.venue}</a>`
+    : `<span class="pub-venue">${paper.venue}</span>`;
+
+  const noteHtml = paper.note ? ` (${paper.note})` : '';
+  const statusHtml = paper.status
+    ? ` <span class="pub-status">${paper.status}</span>`
+    : '';
+
+  return [
+    '<li class="pub">',
+    `  ${titleHtml}`,
+    `  <span class="pub-author">${authors}</span>`,
+    `  ${venueHtml}${statusHtml}${noteHtml}`,
+    renderExtras(paper.links),
+    '</li>',
+  ].join('\n');
+}
+
 // ------------------------------------------------------------
 // Main
 // ------------------------------------------------------------
