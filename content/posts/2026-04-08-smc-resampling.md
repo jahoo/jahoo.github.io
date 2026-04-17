@@ -13,10 +13,9 @@ link-citations: true
 mathjax-macros: assets/smc-resampling/macros.json
 ---
 
-*Exploring some standard resampling schemes*
+*Exploring some standard resampling schemes*.^[{-} I drafted this post back in October 2023, with visualizations unfinished. It's structured pedagogically as a standalone introduction aimed at my own understanding. Now (2026) I've had Claude reimplement and vastly improve the visualizations with interactivity, and thought the result was was worth sharing ...with a vibe-coding disclaimer: I have not checked the code for simulations, which is all new. But even with that caveat, the illustrations should serve their purpose better than what I had originally.]
 
-I've been thinking recently about the way in which you do resampling in sequential Monte Carlo (SMC).^[{-} This post was written a few years ago with code for visualizations never finished. It's structured pedagogically as a standalone introduction to these concepts aimed at my own understanding. Now I've had Claude reimplement and vastly improve the visualizations with interactivity, and thought it was worth sharing ...with a vibe-coding disclaimer.]
-Like many other things, while there are many asymptotically identical methods, in practice it matters which one you choose. In this post, I'm making some visualizations to explore some standard resampling schemes, and get intuitions about why they work, and why you might choose one over another.
+I've been thinking recently about the way in which you do resampling in sequential Monte Carlo (SMC). Like many other things, while there are many asymptotically identical methods, in practice it matters which one you choose. In this post, I'm making some visualizations to explore some standard resampling schemes, and get intuitions about why they work, and why you might choose one over another.
 
 ## 1. Why and how to resample
 
