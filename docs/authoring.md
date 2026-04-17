@@ -315,13 +315,45 @@ The build also writes `assets/bibliography/pubs.bib` — readers click the "BibT
 
 It also warns (not errors) if `pdf` / `slides` / `poster` / `handout` reference a file not found under `assets/pdfs/`.
 
+### Bib-ground-truth variant (exploration)
+
+A parallel experiment at `/pubs-bib/` uses a BibLaTeX file as the bibliographic source of truth instead of duplicating bib data in `pubs.yaml`. It's live alongside the YAML variant during a comparison phase; one will be chosen and the other removed.
+
+**Setup.** Create a gitignored symlink at the repo root pointing at your local bib file (which must be in BibLaTeX format — Zotero's "Better BibLaTeX" export works; classic BibTeX largely works modulo a few field-name differences):
+
+```bash
+ln -s ~/all-biblatex.bib source.bib
+```
+
+The path on the right-hand side is wherever your bib actually lives; `source.bib` is what the build reads. If the symlink is missing or broken, `node scripts/build-pubs-bib.js` exits with a clear error pointing at this command.
+
+**Config file (`pubs-bib.yaml`).** Lists entries by bib key, with only website-specific extras:
+
+```yaml
+- key: surname.f:2024key           # required; must exist in source.bib
+  venue: SHORT 2024                # optional: short display label
+  venue_url: https://…             # optional: link for the venue label
+  note: "Outstanding Paper Award"  # optional: shown in parens
+  status: preprint                 # optional: small tag (preprint | forthcoming | …)
+  equal_contribution: [0, 1]       # optional: 0-based author indices
+  links:
+    code: https://…                # link buttons — other types:
+    slides: talk.pdf               #   preprint, openreview, video, lingbuzz,
+    poster: poster.pdf             #   handout, pdf, other: [{label, url}]
+```
+
+Bibliographic fields (title, authors, year, venue_full, DOI, URL, arxiv ID) are pulled from the bib. The `venue` overlay is a short display label; without it, the page falls back to the bib's `container-title-short` / `eventtitle` / `container-title`, in that order (and "arXiv" for arxiv preprints that have no other venue info).
+
+**Differences from the YAML variant.** `/pubs/` (from `pubs.yaml`) duplicates bib data in YAML; `/pubs-bib/` (from `pubs-bib.yaml` + source.bib) keeps bib data canonical in the bib and overlays only extras. Same renderer, different data source. See `docs/specs/2026-04-17-phase3-alt-bib-ground-truth.md`.
+
 ## Build commands
 
 ```bash
-make            # full parallel build (generate listing + pubs + content + JS + assets)
+make            # full parallel build (generate listing + pubs + pubs-bib + content + JS + assets)
 make serve      # dev server with live reload
 make content    # rebuild only markdown → HTML
 make pubs       # regenerate pubs.md + pubs.bib from pubs.yaml
+make pubs-bib   # regenerate pubs-bib.md + pubs-bib.bib from pubs-bib.yaml + source.bib
 make js         # rebundle only JS
 make assets     # sync only static assets (CSS, fonts, images)
 make test       # run JS tests
