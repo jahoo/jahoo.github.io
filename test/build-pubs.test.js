@@ -7,6 +7,7 @@ import {
   buildPdfUrl, buildArxivUrl, buildLingbuzzUrl, buildDoiUrl, getPrimaryUrl
 } from '../scripts/build-pubs.js';
 import { sortEntries } from '../scripts/build-pubs.js';
+import { validateEntry } from '../scripts/build-pubs.js';
 
 // Imports will be added as functions are implemented.
 
@@ -164,4 +165,59 @@ test('sortEntries: does not mutate input', () => {
   const before = JSON.stringify(entries);
   sortEntries(entries);
   assert.equal(JSON.stringify(entries), before);
+});
+
+const minimalEntry = {
+  id: 'x:2025',
+  title: 'T',
+  authors: ['A B'],
+  year: 2025,
+  type: 'article',
+  venue: 'Venue',
+};
+
+test('validateEntry: minimal entry is valid', () => {
+  assert.doesNotThrow(() => validateEntry(minimalEntry));
+});
+
+test('validateEntry: missing required field throws', () => {
+  for (const key of ['id', 'title', 'authors', 'year', 'type', 'venue']) {
+    const bad = { ...minimalEntry };
+    delete bad[key];
+    assert.throws(() => validateEntry(bad), new RegExp(key));
+  }
+});
+
+test('validateEntry: rejects unknown type', () => {
+  assert.throws(
+    () => validateEntry({ ...minimalEntry, type: 'unknown' }),
+    /type/
+  );
+});
+
+test('validateEntry: rejects non-array authors', () => {
+  assert.throws(
+    () => validateEntry({ ...minimalEntry, authors: 'A B' }),
+    /authors/
+  );
+});
+
+test('validateEntry: rejects out-of-range equal_contribution index', () => {
+  assert.throws(
+    () => validateEntry({ ...minimalEntry, authors: ['A B'], equal_contribution: [5] }),
+    /equal_contribution/
+  );
+});
+
+test('validateEntry: accepts valid equal_contribution', () => {
+  assert.doesNotThrow(() =>
+    validateEntry({ ...minimalEntry, authors: ['A B', 'C D'], equal_contribution: [0, 1] })
+  );
+});
+
+test('validateEntry: rejects links.other entry missing label or url', () => {
+  assert.throws(
+    () => validateEntry({ ...minimalEntry, links: { other: [{ label: 'x' }] } }),
+    /links\.other/
+  );
 });

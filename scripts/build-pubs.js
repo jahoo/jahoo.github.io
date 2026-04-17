@@ -111,6 +111,48 @@ export function sortEntries(entries) {
   });
 }
 
+const ALLOWED_TYPES = new Set(['article', 'inproceedings', 'thesis', 'misc', 'online']);
+const REQUIRED_FIELDS = ['id', 'title', 'authors', 'year', 'type', 'venue'];
+
+export function validateEntry(entry) {
+  const id = entry?.id ?? '<unknown>';
+  for (const key of REQUIRED_FIELDS) {
+    if (entry[key] == null || entry[key] === '') {
+      throw new Error(`[${id}] missing required field: ${key}`);
+    }
+  }
+  if (!Array.isArray(entry.authors)) {
+    throw new Error(`[${id}] authors must be a list, got ${typeof entry.authors}`);
+  }
+  if (!ALLOWED_TYPES.has(entry.type)) {
+    throw new Error(
+      `[${id}] type "${entry.type}" not in ${[...ALLOWED_TYPES].join(', ')}`
+    );
+  }
+  if (entry.equal_contribution) {
+    if (!Array.isArray(entry.equal_contribution)) {
+      throw new Error(`[${id}] equal_contribution must be a list of indices`);
+    }
+    for (const idx of entry.equal_contribution) {
+      if (!Number.isInteger(idx) || idx < 0 || idx >= entry.authors.length) {
+        throw new Error(
+          `[${id}] equal_contribution index ${idx} out of range (authors.length=${entry.authors.length})`
+        );
+      }
+    }
+  }
+  if (entry.links?.other) {
+    if (!Array.isArray(entry.links.other)) {
+      throw new Error(`[${id}] links.other must be a list`);
+    }
+    for (const o of entry.links.other) {
+      if (!o || !o.label || !o.url) {
+        throw new Error(`[${id}] links.other entry missing label or url`);
+      }
+    }
+  }
+}
+
 // ------------------------------------------------------------
 // Main
 // ------------------------------------------------------------
