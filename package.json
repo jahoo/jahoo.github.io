@@ -2,10 +2,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test test/**/*.test.js"
+    "test": "node --test 'test/**/*.test.js'"
   },
   "devDependencies": {
+    "browser-sync": "^3.0.0",
     "esbuild": "^0.25.0",
-    "browser-sync": "^3.0.0"
+    "js-yaml": "^4.1.1"
   }
 }
