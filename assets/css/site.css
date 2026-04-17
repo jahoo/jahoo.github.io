@@ -165,11 +165,20 @@ body.page-style-site .post-content h6 {
   line-height: 1.2;
 }
 
+/* Top-level content h1 takes over the post-title look (warm accent, Libertine
+   Concrete, weight 400, letter-spaced) — the homepage has no post-title, so
+   the first h1 is the visual page header. */
 body.page-style-site .post-content h1 {
-  font-size: 2rem;
-  font-weight: bold;
+  font-family: 'Linux Libertine', 'Computer Modern Concrete', Times, serif;
+  font-size: 2.25rem;
+  font-weight: 400;
+  color: var(--s-accent-warm);
+  letter-spacing: -0.1rem;
   margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.2rem;
+}
+body.page-style-site .post-content section:first-of-type > h1 {
+  margin-top: 0;  /* tighter top margin for the first section's h1 */
 }
 body.page-style-site .post-content h2 {
   font-size: 1.75rem;
@@ -253,7 +262,6 @@ body.page-style-site .pub-list li.pub:last-child {
 }
 body.page-style-site .pub-title {
   font-family: 'Linux Libertine', 'Computer Modern Serif', Times, serif;
-  font-weight: 600;
   font-size: 1.1rem;
   display: block;
   margin-bottom: 0.2rem;
@@ -264,14 +272,14 @@ body.page-style-site .pub-list a.pub-title,
 body.page-style-site .pub-list a.pub-title:visited {
   color: inherit;
   text-decoration: underline;
-  text-decoration-color: #999;
+  text-decoration-color: #BBB;
   text-decoration-style: solid;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.15em;
 }
 body.page-style-site .pub-list a.pub-title:hover {
-  color: inherit;
-  text-decoration-color: #333;
+  color: var(--s-accent-warm);
+    /* text-decoration-color: #333; */
 }
 body.page-style-site .pub-author {
   display: block;

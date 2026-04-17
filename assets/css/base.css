@@ -81,9 +81,11 @@ body {
 .site-title:hover {
   color: #424242;
 }
-/* Long form shown by default; short form takes over under 450px. */
+/* Three forms of the title, cycled through via media queries below.
+   ≥500px: full, <500px: short, <350px: xs. */
 .site-title .site-title-full { display: inline; }
 .site-title .site-title-short { display: none; }
+.site-title .site-title-xs { display: none; }
 .site-nav {
   font-family: 'Linux Libertine', 'Computer Modern Concrete', Times, serif;
   font-size: 1.5rem;
@@ -113,11 +115,15 @@ body {
   }
 }
 
-/* Very narrow viewports: shorten "jacob hoover vigly" → "jacob vigly" so
-   the title and the single nav link still fit on one line. */
-@media (max-width: 450px) {
+/* Shorten the title as the viewport narrows so the name + nav links keep
+   fitting on one line. */
+@media (max-width: 500px) {
   .site-title .site-title-full { display: none; }
   .site-title .site-title-short { display: inline; }
+}
+@media (max-width: 350px) {
+  .site-title .site-title-short { display: none; }
+  .site-title .site-title-xs { display: inline; }
 }
 
 /* ── Page content wrapper ───────────────────────────── */

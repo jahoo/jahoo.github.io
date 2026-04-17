@@ -34,6 +34,7 @@ $endfor$
       <a class="site-title" href="/">
         <span class="site-title-full">$site-title$</span>
         <span class="site-title-short">$if(site-title-short)$$site-title-short$$else$$site-title$$endif$</span>
+        <span class="site-title-xs">$if(site-title-xs)$$site-title-xs$$else$$if(site-title-short)$$site-title-short$$else$$site-title$$endif$$endif$</span>
       </a>
       <nav class="site-nav">
         <div class="trigger">
@@ -48,7 +49,7 @@ $endfor$
   <main class="page-content$if(no-sidenotes)$ no-sidenotes$endif$">
     <div class="wrapper">
       <article>
-$if(title)$
+$if(title)$$if(hide-post-title)$$else$
         <header class="post-header">
           <h1 class="post-title">$title$</h1>
 $if(date)$
@@ -63,7 +64,7 @@ $endif$
           </p>
 $endif$
         </header>
-$endif$
+$endif$$endif$
 
         <div class="post-content">
 $body$

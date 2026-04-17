@@ -539,7 +539,10 @@ const SAMPLE_ABOUT = 'Hi, I am someone. Some [link](https://example.com) content
 
 test('generateHomepage: has front matter, about section, publications section', () => {
   const md = generateHomepage(SAMPLE_ABOUT, docEntries);
-  assert.match(md, /^---\ntitle: home\npage-style: site\n---/);
+  assert.match(md, /^---$/m);
+  assert.match(md, /^title: home$/m);
+  assert.match(md, /^page-style: site$/m);
+  assert.match(md, /^hide-post-title: true$/m);
   assert.match(md, /^# about$/m);
   assert.match(md, /Hi, I am someone/);
   assert.match(md, /^# publications$/m);

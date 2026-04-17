@@ -315,6 +315,7 @@ export function generateHomepage(aboutMarkdown, entries) {
     '---',
     'title: home',
     'page-style: site',
+    'hide-post-title: true',
     '---',
     '',
     '# about',
