@@ -334,23 +334,25 @@ body.page-style-site ul.social-media-list li {
   margin-right: 0.75rem;
 }
 
-/* Per-entry expandable bib (<details> with pandoc-highlighted code). */
+/* Per-entry expandable bib: the <details> element sits inside .pub-extras so
+   the [bib] summary shares a line with the other link buttons. `display:
+   inline` on <details> means the block-level sourceCode child (when open)
+   breaks into its own anonymous block below, while the summary itself stays
+   in place on the extras line. The summary uses the .extra class so it
+   inherits bracket-style decoration automatically. */
 body.page-style-site details.pub-bibtex {
-  margin-top: 0.3rem;
-  font-size: 0.875rem;
-  display: inline-block;
+  display: inline;
 }
 body.page-style-site details.pub-bibtex > summary {
+  /* The default `display: list-item` creates a marker AND forces the summary
+     onto its own line. Override to inline so it sits with other link buttons. */
+  display: inline;
   cursor: pointer;
-  display: inline-block;
-  color: #2a7ae2;
   list-style: none;  /* hide Firefox default marker */
 }
 body.page-style-site details.pub-bibtex > summary::-webkit-details-marker {
   display: none;     /* hide WebKit/Blink default triangle */
 }
-body.page-style-site details.pub-bibtex > summary::before { content: '['; color: #888; }
-body.page-style-site details.pub-bibtex > summary::after  { content: ']'; color: #888; }
 body.page-style-site details.pub-bibtex[open] > summary {
   color: #555;
 }

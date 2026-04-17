@@ -161,17 +161,28 @@ const LINK_RENDERERS = [
   ['lingbuzz',   (v) => ({ cls: 'lingbuzz',   label: 'lingbuzz',   href: buildLingbuzzUrl(v) })],
 ];
 
-function renderExtras(links) {
-  if (!links) return '';
+function renderExtras(links, bibHtml) {
   const buttons = [];
-  for (const [key, fn] of LINK_RENDERERS) {
-    if (links[key]) {
-      const { cls, label, href } = fn(links[key]);
-      buttons.push(`<a class="extra ${cls}" href="${escapeHtml(href)}">${escapeHtml(label)}</a>`);
+  if (links) {
+    for (const [key, fn] of LINK_RENDERERS) {
+      if (links[key]) {
+        const { cls, label, href } = fn(links[key]);
+        buttons.push(`<a class="extra ${cls}" href="${escapeHtml(href)}">${escapeHtml(label)}</a>`);
+      }
+    }
+    for (const o of links.other ?? []) {
+      buttons.push(`<a class="extra other" href="${escapeHtml(o.url)}">${escapeHtml(o.label)}</a>`);
     }
   }
-  for (const o of links.other ?? []) {
-    buttons.push(`<a class="extra other" href="${escapeHtml(o.url)}">${escapeHtml(o.label)}</a>`);
+  if (bibHtml) {
+    // <details> is rendered inline (see site.css) so the [bib] summary shares
+    // the extras line with the other link buttons. When the user clicks it,
+    // the sourceCode block inside breaks to a new line below while the
+    // summary itself stays in place.
+    buttons.push(
+      `<details class="pub-bibtex"><summary class="extra bib">bib</summary>\n` +
+      `${bibHtml}    </details>`
+    );
   }
   if (buttons.length === 0) return '';
   return `  <div class="pub-extras">\n    ${buttons.join('\n    ')}\n  </div>\n`;
@@ -198,17 +209,12 @@ export function generateHtmlEntry(paper) {
     ? ` <span class="pub-status">${escapeHtml(paper.status)}</span>`
     : '';
 
-  const bibDetails = paper.bibHtml
-    ? `  <details class="pub-bibtex"><summary>bib</summary>\n${paper.bibHtml}  </details>\n`
-    : '';
-
   return [
     '<li class="pub">',
     `  ${titleHtml}`,
     `  <span class="pub-author">${authors}</span>`,
     `  ${venueHtml}${statusHtml}${noteHtml}`,
-    renderExtras(paper.links),
-    bibDetails,
+    renderExtras(paper.links, paper.bibHtml),
     '</li>',
   ].join('\n');
 }
