@@ -59,3 +59,71 @@ test('loadBibSource: broken symlink throws with actionable message', () => {
   );
   rmSync(dir, { recursive: true, force: true });
 });
+
+import { parseBib, indexByKey, extractArxivEprints } from '../scripts/build-pubs-bib.js';
+
+test('parseBib: returns CSL-JSON array for sample bib', () => {
+  const data = parseBib(SAMPLE_BIB);
+  assert.ok(Array.isArray(data));
+  assert.equal(data.length, 5);
+  const ids = data.map(e => e.id);
+  assert.deepEqual(ids.sort(), [
+    'bar:2023journal', 'baz:2024phd', 'foo:2021conf', 'quux:2022poster', 'qux:2025arxiv',
+  ]);
+});
+
+test('parseBib: preserves type, title, issued', () => {
+  const data = parseBib(SAMPLE_BIB);
+  const foo = data.find(e => e.id === 'foo:2021conf');
+  assert.ok(foo);
+  assert.equal(foo.type, 'paper-conference');
+  assert.equal(foo.title, 'A Paper About Things');
+  assert.ok(foo.issued);
+  assert.equal(foo.issued['date-parts'][0][0], 2021);
+});
+
+test('indexByKey: maps id → entry', () => {
+  const data = parseBib(SAMPLE_BIB);
+  const index = indexByKey(data);
+  assert.ok(index instanceof Map);
+  assert.equal(index.size, 5);
+  assert.equal(index.get('foo:2021conf').title, 'A Paper About Things');
+  assert.equal(index.get('nonexistent'), undefined);
+});
+
+// citation-js silently drops biblatex's eprint/eprinttype fields when parsing
+// to CSL-JSON. We recover arxiv IDs by scanning the raw bib text ourselves.
+test('extractArxivEprints: captures eprint + eprinttype=arxiv', () => {
+  const text = '@online{foo:2024,\n  eprint = {2401.12345},\n  eprinttype = {arxiv}\n}';
+  const map = extractArxivEprints(text);
+  assert.equal(map.get('foo:2024'), '2401.12345');
+});
+
+test('extractArxivEprints: captures archiveprefix=arXiv variant', () => {
+  const text = '@article{bar:2023,\n  archiveprefix = {arXiv},\n  eprint = {2303.01234}\n}';
+  const map = extractArxivEprints(text);
+  assert.equal(map.get('bar:2023'), '2303.01234');
+});
+
+test('extractArxivEprints: case-insensitive arxiv matching', () => {
+  const text = '@online{x,\n  eprint = {1234.5678},\n  eprinttype = {ArXiv}\n}';
+  const map = extractArxivEprints(text);
+  assert.equal(map.get('x'), '1234.5678');
+});
+
+test('extractArxivEprints: ignores non-arxiv eprints', () => {
+  const text = '@misc{baz,\n  eprint = {12345},\n  eprinttype = {pubmed}\n}';
+  const map = extractArxivEprints(text);
+  assert.equal(map.size, 0);
+});
+
+test('extractArxivEprints: ignores entries without eprint', () => {
+  const text = '@article{qux,\n  title = {T},\n  year = {2023}\n}';
+  const map = extractArxivEprints(text);
+  assert.equal(map.size, 0);
+});
+
+test('extractArxivEprints: on sample fixture, captures qux:2025arxiv', () => {
+  const map = extractArxivEprints(SAMPLE_BIB);
+  assert.equal(map.get('qux:2025arxiv'), '2501.12345');
+});

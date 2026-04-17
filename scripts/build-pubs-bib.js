@@ -46,6 +46,49 @@ export function loadBibSource(path) {
   return readFileSync(resolved, 'utf8');
 }
 
+export function parseBib(text) {
+  return new Cite(text).data;
+}
+
+export function indexByKey(entries) {
+  return new Map(entries.map((e) => [e.id, e]));
+}
+
+// citation-js silently drops biblatex's eprint/eprinttype/archiveprefix fields
+// when mapping to CSL-JSON. For arxiv preprints we recover the ID by scanning
+// the raw bib text. Returns Map<citeKey, eprintId>.
+const ENTRY_RE = /@(\w+)\s*\{\s*([^,\s]+)\s*,([\s\S]*?)\n\s*\}/g;
+
+function getBibField(body, fieldName) {
+  const re = new RegExp(
+    `\\b${fieldName}\\s*=\\s*(?:\\{([^{}]*)\\}|"([^"]*)")`,
+    'i'
+  );
+  const m = body.match(re);
+  return m ? (m[1] ?? m[2]) : null;
+}
+
+export function extractArxivEprints(bibText) {
+  const map = new Map();
+  const re = new RegExp(ENTRY_RE.source, 'g');
+  let m;
+  while ((m = re.exec(bibText)) !== null) {
+    const key = m[2];
+    const body = m[3];
+    const eprint = getBibField(body, 'eprint');
+    if (!eprint) continue;
+    const eprinttype = getBibField(body, 'eprinttype');
+    const archiveprefix = getBibField(body, 'archiveprefix');
+    const isArxiv =
+      (eprinttype && /arxiv/i.test(eprinttype)) ||
+      (archiveprefix && /arxiv/i.test(archiveprefix));
+    if (isArxiv) {
+      map.set(key, eprint);
+    }
+  }
+  return map;
+}
+
 // ------------------------------------------------------------
 // Main
 // ------------------------------------------------------------
