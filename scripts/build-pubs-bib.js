@@ -89,6 +89,27 @@ export function extractArxivEprints(bibText) {
   return map;
 }
 
+// Map CSL-JSON type strings (what citation-js emits) to our entry type enum.
+// Observed in Task 1 smoke-test against a biblatex fixture:
+//   @inproceedings → paper-conference
+//   @article       → article-journal
+//   @thesis        → thesis
+//   @online        → webpage     (biblatex preprints come through here)
+//   @misc          → document
+const CSL_TYPE_MAP = {
+  'article-journal': 'article',
+  'paper-conference': 'inproceedings',
+  'thesis': 'thesis',
+  'webpage': 'online',
+  'post': 'online',
+  'post-weblog': 'online',
+  'manuscript': 'online',
+};
+
+export function mapCslType(cslType) {
+  return CSL_TYPE_MAP[cslType] ?? 'misc';
+}
+
 // ------------------------------------------------------------
 // Main
 // ------------------------------------------------------------

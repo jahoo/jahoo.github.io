@@ -127,3 +127,40 @@ test('extractArxivEprints: on sample fixture, captures qux:2025arxiv', () => {
   const map = extractArxivEprints(SAMPLE_BIB);
   assert.equal(map.get('qux:2025arxiv'), '2501.12345');
 });
+
+import { mapCslType } from '../scripts/build-pubs-bib.js';
+
+test('mapCslType: article-journal → article', () => {
+  assert.equal(mapCslType('article-journal'), 'article');
+});
+
+test('mapCslType: paper-conference → inproceedings', () => {
+  assert.equal(mapCslType('paper-conference'), 'inproceedings');
+});
+
+test('mapCslType: thesis → thesis', () => {
+  assert.equal(mapCslType('thesis'), 'thesis');
+});
+
+test('mapCslType: webpage → online (biblatex @online maps here)', () => {
+  assert.equal(mapCslType('webpage'), 'online');
+});
+
+test('mapCslType: post/post-weblog/manuscript → online', () => {
+  assert.equal(mapCslType('post'), 'online');
+  assert.equal(mapCslType('post-weblog'), 'online');
+  assert.equal(mapCslType('manuscript'), 'online');
+});
+
+test('mapCslType: document → misc (biblatex @misc maps here)', () => {
+  assert.equal(mapCslType('document'), 'misc');
+});
+
+test('mapCslType: anything else → misc', () => {
+  assert.equal(mapCslType('book'), 'misc');
+  assert.equal(mapCslType('chapter'), 'misc');
+  assert.equal(mapCslType('report'), 'misc');
+  assert.equal(mapCslType('article-magazine'), 'misc');
+  assert.equal(mapCslType('unknown'), 'misc');
+  assert.equal(mapCslType(undefined), 'misc');
+});
