@@ -62,7 +62,7 @@ serve:
 	@bash scripts/serve.sh
 
 test:
-	@node --test test/**/*.test.js
+	@node --test 'test/**/*.test.js'
 
 clean:
 	@if [ -d "$(OUTDIR)" ]; then trash "$(OUTDIR)"; fi

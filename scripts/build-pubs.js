@@ -19,6 +19,15 @@ export function stripTitleBraces(title) {
   return title.replace(/[{}]/g, '');
 }
 
+// Escape the five HTML-unsafe characters for safe insertion into element
+// content and attribute values. Leaves nullish values unchanged so callers
+// can use it on optional fields without guards.
+const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+export function escapeHtml(s) {
+  if (s == null) return s;
+  return String(s).replace(/[&<>"']/g, (c) => HTML_ESCAPES[c]);
+}
+
 const LATEX_ESCAPES = {
   'ü': '{\\"u}', 'ö': '{\\"o}', 'ä': '{\\"a}', 'Ü': '{\\"U}', 'Ö': '{\\"O}', 'Ä': '{\\"A}',
   'é': "{\\'e}", 'É': "{\\'E}", 'á': "{\\'a}", 'Á': "{\\'A}", 'í': "{\\'i}", 'ó': "{\\'o}", 'ú': "{\\'u}",
@@ -173,32 +182,35 @@ function renderExtras(links) {
   for (const [key, fn] of LINK_RENDERERS) {
     if (links[key]) {
       const { cls, label, href } = fn(links[key]);
-      buttons.push(`<a class="extra ${cls}" href="${href}">${label}</a>`);
+      buttons.push(`<a class="extra ${cls}" href="${escapeHtml(href)}">${escapeHtml(label)}</a>`);
     }
   }
   for (const o of links.other ?? []) {
-    buttons.push(`<a class="extra other" href="${o.url}">${o.label}</a>`);
+    buttons.push(`<a class="extra other" href="${escapeHtml(o.url)}">${escapeHtml(o.label)}</a>`);
   }
   if (buttons.length === 0) return '';
   return `  <div class="pub-extras">\n    ${buttons.join('\n    ')}\n  </div>\n`;
 }
 
 export function generateHtmlEntry(paper) {
-  const title = stripTitleBraces(paper.title);
-  const authors = formatAuthorsHtml(paper.authors, paper.equal_contribution ?? []);
+  const title = escapeHtml(stripTitleBraces(paper.title));
+  const authors = escapeHtml(
+    formatAuthorsHtml(paper.authors, paper.equal_contribution ?? [])
+  );
   const primaryUrl = getPrimaryUrl(paper.links);
 
   const titleHtml = primaryUrl
-    ? `<a class="pub-title" href="${primaryUrl}">${title}</a>`
+    ? `<a class="pub-title" href="${escapeHtml(primaryUrl)}">${title}</a>`
     : `<span class="pub-title">${title}</span>`;
 
+  const venue = escapeHtml(paper.venue);
   const venueHtml = paper.venue_url
-    ? `<a class="pub-venue" href="${paper.venue_url}">${paper.venue}</a>`
-    : `<span class="pub-venue">${paper.venue}</span>`;
+    ? `<a class="pub-venue" href="${escapeHtml(paper.venue_url)}">${venue}</a>`
+    : `<span class="pub-venue">${venue}</span>`;
 
-  const noteHtml = paper.note ? ` (${paper.note})` : '';
+  const noteHtml = paper.note ? ` (${escapeHtml(paper.note)})` : '';
   const statusHtml = paper.status
-    ? ` <span class="pub-status">${paper.status}</span>`
+    ? ` <span class="pub-status">${escapeHtml(paper.status)}</span>`
     : '';
 
   return [

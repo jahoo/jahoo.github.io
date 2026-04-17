@@ -11,6 +11,7 @@ import { validateEntry } from '../scripts/build-pubs.js';
 import { generateHtmlEntry } from '../scripts/build-pubs.js';
 import { generateBibtexEntry } from '../scripts/build-pubs.js';
 import { generateMarkdown, generateBibtexFile } from '../scripts/build-pubs.js';
+import { escapeHtml } from '../scripts/build-pubs.js';
 
 // Imports will be added as functions are implemented.
 
@@ -429,4 +430,37 @@ test('generateBibtexFile: concatenates entries separated by blank lines', () => 
   assert.match(bib, /@misc\{b,/);
   const chunks = bib.trim().split(/\n\n/);
   assert.equal(chunks.length, 2);
+});
+
+test('escapeHtml: escapes <, >, &, ", \'', () => {
+  assert.equal(escapeHtml('a & b'), 'a &amp; b');
+  assert.equal(escapeHtml('<script>'), '&lt;script&gt;');
+  assert.equal(escapeHtml('"quoted"'), '&quot;quoted&quot;');
+  assert.equal(escapeHtml("it's"), 'it&#39;s');
+  assert.equal(escapeHtml('plain text'), 'plain text');
+  assert.equal(escapeHtml(''), '');
+});
+
+test('escapeHtml: null/undefined passes through', () => {
+  assert.equal(escapeHtml(null), null);
+  assert.equal(escapeHtml(undefined), undefined);
+});
+
+test('generateHtmlEntry: escapes HTML-unsafe chars in title', () => {
+  const entry = { ...htmlFixture, title: 'p < 0.05 & q > 0' };
+  const html = generateHtmlEntry(entry);
+  assert.match(html, /p &lt; 0\.05 &amp; q &gt; 0/);
+  assert.doesNotMatch(html, /p < 0\.05/);
+});
+
+test('generateHtmlEntry: escapes HTML-unsafe chars in venue', () => {
+  const entry = { ...htmlFixture, venue: 'A & B Conference', venue_url: undefined };
+  const html = generateHtmlEntry(entry);
+  assert.match(html, /A &amp; B Conference/);
+});
+
+test('generateHtmlEntry: escapes HTML-unsafe chars in author names', () => {
+  const entry = { ...htmlFixture, authors: ['Alice & Co'] };
+  const html = generateHtmlEntry(entry);
+  assert.match(html, /Alice &amp; Co/);
 });
