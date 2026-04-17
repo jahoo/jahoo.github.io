@@ -2,6 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { stripTitleBraces, latexEscape } from '../scripts/build-pubs.js';
+import { formatAuthorsHtml, formatAuthorsBibtex } from '../scripts/build-pubs.js';
 
 // Imports will be added as functions are implemented.
 
@@ -37,4 +38,51 @@ test('latexEscape: ASCII unchanged', () => {
 
 test('latexEscape: empty string', () => {
   assert.equal(latexEscape(''), '');
+});
+
+test('formatAuthorsHtml: single author', () => {
+  assert.equal(formatAuthorsHtml(['Jacob Louis Hoover']), 'Jacob Louis Hoover');
+});
+
+test('formatAuthorsHtml: two authors', () => {
+  assert.equal(
+    formatAuthorsHtml(['Jacob Louis Hoover', "Timothy J. O'Donnell"]),
+    "Jacob Louis Hoover, Timothy J. O'Donnell"
+  );
+});
+
+test('formatAuthorsHtml: equal contribution markers', () => {
+  assert.equal(
+    formatAuthorsHtml(['Alice Smith', 'Bob Jones', 'Carol Lee'], [0, 1]),
+    'Alice Smith*, Bob Jones*, Carol Lee'
+  );
+});
+
+test('formatAuthorsBibtex: single author', () => {
+  assert.equal(formatAuthorsBibtex(['Jacob Louis Hoover']), 'Hoover, Jacob Louis');
+});
+
+test('formatAuthorsBibtex: two authors joined with "and"', () => {
+  assert.equal(
+    formatAuthorsBibtex(['Alice Smith', 'Bob Jones']),
+    'Smith, Alice and Jones, Bob'
+  );
+});
+
+test('formatAuthorsBibtex: surname prefix (Van Durme)', () => {
+  assert.equal(
+    formatAuthorsBibtex(['Benjamin Van Durme']),
+    'Van Durme, Benjamin'
+  );
+});
+
+test('formatAuthorsBibtex: single-name author', () => {
+  assert.equal(formatAuthorsBibtex(['Plato']), 'Plato');
+});
+
+test('formatAuthorsBibtex: apostrophe in surname', () => {
+  assert.equal(
+    formatAuthorsBibtex(["Timothy J. O'Donnell"]),
+    "O'Donnell, Timothy J."
+  );
 });

@@ -33,6 +33,31 @@ export function latexEscape(s) {
   return s.replace(/./g, (c) => LATEX_ESCAPES[c] ?? c);
 }
 
+export function formatAuthorsHtml(authors, equalContribution = []) {
+  const marked = authors.map((a, i) =>
+    equalContribution.includes(i) ? `${a}*` : a
+  );
+  return marked.join(', ');
+}
+
+const SURNAME_PREFIXES = new Set(['Van', 'Von', 'De', 'Di', 'Le', 'La', 'El', 'Al', 'Mc', "O'"]);
+
+export function formatAuthorsBibtex(authors) {
+  const parts = authors.map((a) => {
+    const tokens = a.split(/\s+/);
+    if (tokens.length === 1) return tokens[0];
+    // Find where the surname starts, scanning backward across prefix words.
+    let split = tokens.length - 1;
+    while (split > 1 && SURNAME_PREFIXES.has(tokens[split - 1])) {
+      split -= 1;
+    }
+    const last = tokens.slice(split).join(' ');
+    const first = tokens.slice(0, split).join(' ');
+    return `${last}, ${first}`;
+  });
+  return parts.join(' and ');
+}
+
 // ------------------------------------------------------------
 // Main
 // ------------------------------------------------------------
