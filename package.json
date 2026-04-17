@@ -5,6 +5,8 @@
     "test": "node --test 'test/**/*.test.js'"
   },
   "devDependencies": {
+    "@citation-js/core": "^0.7.21",
+    "@citation-js/plugin-bibtex": "^0.7.21",
     "browser-sync": "^3.0.0",
     "esbuild": "^0.25.0",
     "js-yaml": "^4.1.1"
