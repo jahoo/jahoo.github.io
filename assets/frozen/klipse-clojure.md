@@ -10,7 +10,7 @@ vega: true
 <!-- The following preamble (in /_includes/) is needed for the Vega stuff -->
 {% include clojure-preamble.html %}
 
-The Clojure code for rendering the visualizations (with [Vega](https://vega.github.io/vega/)) in this post is [here](https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html).
+The Clojure code for rendering the visualizations (with [Vega](https://vega.github.io/vega/)) in this post is [here](https://github.com/jahoo/jahoo.github.io/blob/43383b28b555223e5a553dbb2986524d3cb33455/_includes/clojure-preamble.html).
 
 ## Using Klipse for code blocks
 
@@ -63,7 +63,7 @@ For visualizations, rather than `eval-clojure`, specify the language `reagent` f
 
 # Visualizations:
 
-There's some code in the preamble, which I have set to load, hidden, when this page is rendered (see the [clojure-preamble.html](https://github.com/jahoo/jahoo.github.io/blob/master/_includes/clojure-preamble.html) file used to render this page) that gets Vega to work with Klipse. It is copied from Oz (thanks for the help on that, Alex!), and defines the useful function `vega`, which will take in a vega spec vector, and output a diagram.  
+There's some code in the preamble, which I have set to load, hidden, when this page is rendered (see the [clojure-preamble.html](https://github.com/jahoo/jahoo.github.io/blob/43383b28b555223e5a553dbb2986524d3cb33455/_includes/clojure-preamble.html) file used to render this page) that gets Vega to work with Klipse. It is copied from Oz (thanks for the help on that, Alex!), and defines the useful function `vega`, which will take in a vega spec vector, and output a diagram.  
 
 ## Vega for plotting
 

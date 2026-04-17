@@ -5,13 +5,16 @@ author: Jacob Louis Hoover
 tags: [note]
 ---
 
+<div style="display:none;">
 $$
-\global\def\colorKL{\color{4fa283}}
-\global\def\colorR{\color{ec8c62}}
-\global\def\R{\colorR\mathrm{R}}
+\require{color}
+\def\colorKL{\color{#4fa283}}
+\def\colorR{\color{#ec8c62}}
+\def\R{\colorR\mathrm{R}}
 $$
+</div>
 
-Consider any setting where a distribution over some latent variable $$Z$$ changes when conditioning on some outcome $$\breve u$$ of an observable random variable.  The change can be quantified as _KL divergence_, $$\operatorname{\colorKL KL}(p_{Z\mid \breve u}\|p_{Z})$$. This divergence can be decomposed into _surprisal_ of $$\breve u$$ minus another term, which I'll call $$\R$$:
+Consider any setting where a distribution over some latent variable $Z$ changes when conditioning on some outcome $\breve u$ of an observable random variable.  The change can be quantified as _KL divergence_, $\operatorname{\colorKL KL}(p_{Z\mid \breve u}\|p_{Z})$. This divergence can be decomposed into _surprisal_ of $\breve u$ minus another term, which I'll call $\R$:
 
 $$
 \begin{aligned}

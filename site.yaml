@@ -11,7 +11,5 @@ nav:
     url: /
   - text: publications
     url: /pubs/
-  - text: blog
-    url: /blog/
-  - text: cv
-    url: /assets/CV/jlhv-academic_cv.pdf
+  - text: posts
+    url: /posts/

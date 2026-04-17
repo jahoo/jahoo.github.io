@@ -91,9 +91,13 @@ end
 -- Collect posts from a content directory
 ------------------------------------------------------------
 
+-- Strip leading YYYY-MM-DD- date prefix from a slug
+local function strip_date(slug)
+  return slug:gsub("^%d%d%d%d%-%d%d%-%d%d%-", "")
+end
+
 -- Scan a directory for .md files and extract front matter.
--- url_prefix: e.g. "/posts" or "/explorations"
-local function collect_entries(dir, url_prefix)
+local function collect_entries(dir)
   local entries = {}
   local ok, files = pcall(system.list_directory, dir)
   if not ok then return entries end
@@ -105,19 +109,18 @@ local function collect_entries(dir, url_prefix)
       if text then
         local meta = parse_front_matter(text)
         if meta and meta.published ~= false then
-          local slug = name:gsub("%.md$", "")
+          local raw_slug = name:gsub("%.md$", "")
+          local clean_slug = strip_date(raw_slug)
           local entry = {
-            title = meta.title or slug,
+            title = meta.title or clean_slug,
             date  = meta.date or "0000-00-00",
             tags  = meta.tags or {},
             highlighted = meta.highlighted or false,
-            external = meta.external or nil,
-            url   = url_prefix .. "/" .. slug .. "/",
+            external = meta.external or nil,  -- source file path, not URL
+            raw_slug = raw_slug,              -- with date prefix
+            slug = clean_slug,                -- without date prefix
+            url  = "/posts/" .. clean_slug .. "/",
           }
-          -- If external, link to external URL instead
-          if entry.external then
-            entry.url = entry.external
-          end
           entries[#entries+1] = entry
         end
       end
@@ -132,8 +135,8 @@ end
 
 local entries = {}
 
--- Collect from content/blog/
-local blog = collect_entries("content/blog", "/blog")
+-- Collect from content/posts/
+local blog = collect_entries("content/posts")
 for _, e in ipairs(blog) do entries[#entries+1] = e end
 
 -- Sort by date descending
@@ -142,7 +145,7 @@ table.sort(entries, function(a, b) return a.date > b.date end)
 -- Build output as raw HTML for richer formatting
 local lines = {}
 lines[#lines+1] = "---"
-lines[#lines+1] = "title: blog"
+lines[#lines+1] = "title: posts"
 lines[#lines+1] = "---"
 lines[#lines+1] = ""
 lines[#lines+1] = "```{=html}"
@@ -177,7 +180,7 @@ local output = table.concat(lines, "\n")
 pcall(system.make_directory, "_generated", true)
 
 -- Write output
-local outpath = "_generated/blog.md"
+local outpath = "_generated/posts.md"
 system.write_file(outpath, output)
 
 io.write("Generated: " .. outpath .. " (" .. #entries .. " entries)\n")

@@ -66,40 +66,15 @@ body.page-style-site {
   color: #111;
 }
 
-/* ── Nav overrides for site style ──────────────────── */
-
-body.page-style-site .site-header {
-  border-top: 5px solid #424242;
-}
-body.page-style-site .site-title {
-  font-family: 'Linux Biolinum Outline';
-  font-size: 2.75rem;
-  letter-spacing: -3px;
-  color: #828282;
-  line-height: 1.5;
-}
-body.page-style-site .site-title:hover {
-  color: #424242;
-}
-body.page-style-site .site-nav {
-  font-family: 'Linux Libertine', 'Computer Modern Concrete', Times, serif;
-  font-size: 1.5rem;
-  line-height: 1.5;
-}
-body.page-style-site .site-nav .page-link {
-  font-family: inherit;
-  font-size: inherit;
-  color: #424242;
-  text-transform: none;
-}
-body.page-style-site .site-nav .page-link:hover {
-  color: #000;
-}
-
 /* ── Content width: 800px max ──────────────────────── */
 
 body.page-style-site .page-content {
   padding: 2rem 2rem 4rem 2rem;
+}
+@media (max-width: 800px) {
+  body.page-style-site .page-content {
+    padding: 2rem 20px 4rem 20px;
+  }
 }
 
 body.page-style-site .post-content > p,
@@ -164,7 +139,7 @@ body.page-style-site .post-title {
   font-family: 'Linux Libertine', 'Computer Modern Concrete', Times, serif;
   font-size: 2.25rem;
   font-weight: 400;
-  color: #424242;
+  color: var(--s-accent-warm);
   letter-spacing: -0.1rem;
   margin: 0 0 0.2rem;
 }

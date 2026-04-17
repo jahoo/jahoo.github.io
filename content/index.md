@@ -9,6 +9,8 @@ In my current position I research and coordinate at [CHI FRO](https://chi-fro.or
 
 I'm also a dancer, formerly with Festival Ballet Providence (now [Ballet RI](https://balletri.org/)) in Rhode Island, The [Vanemuine Theatre](https://www.vanemuine.ee) in Tartu, Estonia, and Jose Mateo Ballet Theatre in Cambridge, Massachusetts.
 
+Here is my [CV](/assets/CV/jlhv-academic_cv.pdf).
+
 ----
 <span class="post-meta">
 _Note on my name:_  

@@ -19,7 +19,7 @@ trap cleanup INT TERM
 
 # Initial full build
 echo "Building site..."
-make -j4 2>&1 | grep -v '^make\[' || true
+make 2>&1 | grep -v '^make\[' || true
 echo "Build complete."
 
 # 1. browser-sync: serve _site/ with live reload
@@ -43,29 +43,23 @@ PIDS+=($!)
 
 # 3. Content/asset watcher using fswatch
 "$FSWATCH" -r --event Updated \
-    content/ filters/ templates/ assets/css/ assets/fonts/ \
+    content/ filters/ templates/ assets/css/ assets/fonts/ site.yaml \
     2>/dev/null \
 | while IFS= read -r changed; do
     case "$changed" in
         *.md)
-            # Derive the make target from the file path
             rel="${changed#$(pwd)/}"
-            target="_site/$(echo "$rel" | sed 's|^content/||; s|\.md$|.html|')"
-            echo "Content changed: $rel -> building $target"
-            make "$target" 2>&1 | grep -v '^make\[' || true
-            # Posts/explorations also affect the blog index listing
-            case "$rel" in
-                content/posts/*|content/explorations/*)
-                    make _site/posts.html 2>&1 | grep -v '^make\[' || true
-                    ;;
-            esac
+            echo "Content changed: $rel"
+            # Rebuild listing + all content (build-content.sh is incremental)
+            pandoc lua scripts/build-index.lua 2>/dev/null || true
+            bash scripts/build-content.sh 2>&1 || true
             ;;
-        *.lua|*.html)
-            echo "Template/filter changed: $changed -> rebuilding all content"
-            make content 2>&1 | grep -v '^make\[' || true
+        *.lua|*.html|*site.yaml)
+            echo "Template/filter/config changed — rebuilding all content"
+            bash scripts/build-content.sh 2>&1 || true
             ;;
         *.css|*.woff|*.woff2|*.ttf|*.otf|*.eot)
-            echo "Asset changed: $changed -> syncing assets"
+            echo "Asset changed — syncing"
             make assets 2>&1 | grep -v '^make\[' || true
             ;;
     esac
@@ -74,7 +68,7 @@ PIDS+=($!)
 
 echo ""
 echo "Dev server running at http://localhost:4000"
-echo "Watching: content/, filters/, templates/, assets/css/, assets/fonts/"
+echo "Watching: content/, filters/, templates/, assets/css/, assets/fonts/, site.yaml"
 echo "Press Ctrl+C to stop."
 echo ""
 

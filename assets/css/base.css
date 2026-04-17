@@ -31,6 +31,7 @@
   --s-text: #111;
   --s-text-dim: #777;
   --s-accent: #467;
+  --s-accent-warm: #611;
   --s-accent-dim: rgba(68, 102, 119, 0.12);
   --s-border: #ddd;
   --s-header-open: #f5f3eb;
@@ -51,42 +52,105 @@ body {
 /* ── Site header / navigation ───────────────────────── */
 
 .site-header {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 1rem 2rem;
-  border-bottom: 1px solid var(--s-border);
+  border-top: 5px solid #424242;
+  border-bottom: none;
+  padding: 0;
+  position: relative;
+  overflow: visible;
 }
 .site-header .wrapper {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  max-width: none;
+  padding: 0 30px;
+  display: block;
+  overflow: visible;
+  min-height: 35.1px;
+  line-height: 35.1px;
+  border-bottom: 0.5px solid #d5d5d5;
 }
 .site-title {
-  font-family: var(--s-body);
-  font-size: 1.3rem;
-  font-weight: 400;
-  color: var(--s-text);
+  font-family: 'Linux Biolinum Outline';
+  font-size: 49.5px;
+  letter-spacing: -3px;
+  color: #828282;
+  line-height: 35.1px;
+  margin-bottom: 0;
+  white-space: nowrap;
+  float: left;
   text-decoration: none;
 }
 .site-title:hover {
-  color: var(--s-accent);
+  color: #424242;
 }
 .site-nav {
-  display: flex;
-  align-items: baseline;
-  gap: 1.2rem;
+  font-family: 'Linux Libertine', 'Computer Modern Concrete', Times, serif;
+  font-size: 1.5rem;
+  line-height: 35.1px;
+  float: right;
+  display: block;
 }
+.site-nav .nav-trigger { display: none; }
+.site-nav .menu-icon { display: none; }
+.site-nav .trigger { white-space: nowrap; padding-top: 8px; }
 .site-nav .page-link {
-  font-family: var(--s-sans);
-  font-size: 0.85rem;
-  color: var(--s-text-dim);
+  color: #999;
   text-decoration: none;
-  text-transform: lowercase;
+}
+.site-nav .page-link:not(:last-child) {
+  margin-right: 20px;
 }
 .site-nav .page-link:hover {
-  color: var(--s-accent);
+  color: #424242;
+}
+.site-nav .page-link.active {
+  color: var(--s-accent-warm);
+}
+
+/* Tighten nav padding at narrow widths (matches sidenote-collapse) */
+@media (max-width: 800px) {
+  .site-header .wrapper {
+    padding: 0 15px;
+  }
+}
+
+/* Hamburger menu */
+@media screen and (max-width: 660px) {
+  .site-nav {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #fff;
+    border: 1px solid #d5d5d5;
+    border-radius: 5px;
+    text-align: right;
+  }
+  .site-nav .menu-icon {
+    display: block;
+    float: right;
+    width: 33px;
+    height: 28px;
+    line-height: 0;
+    padding-top: 5px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .site-nav .menu-icon svg path {
+    fill: #828282;
+  }
+  .site-nav .trigger {
+    clear: both;
+    display: none;
+  }
+  .site-nav .nav-trigger:checked ~ .trigger {
+    display: block;
+    padding-bottom: 5px;
+  }
+  .site-nav .page-link {
+    display: block;
+    padding: 5px 10px;
+    margin-right: 0 !important;
+    font-size: 1.2rem;
+    line-height: 1.5;
+  }
 }
 
 /* ── Page content wrapper ───────────────────────────── */
@@ -101,6 +165,8 @@ body {
 }
 
 /* ── Document typography (shared) ──────────────────── */
+
+.post-title { color: var(--s-accent-warm); }
 
 .post-content p { margin: 1rem 0; }
 
@@ -328,15 +394,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
   align-items: center;
   justify-content: space-between;
 }
+.site-footer .last-modified {
+  color: #ccc;
+  font-size: 0.8rem;
+}
 
 /* ── Responsive: nav and footer ───────────────────── */
 
 @media (max-width: 800px) {
   .site-header {
-    padding: 0.8rem 1rem;
+    padding: 0;
   }
   .page-content {
-    padding: 2rem 25px 4rem 25px;
+    padding: 2rem 20px 4rem 20px;
   }
   .site-footer {
     padding: 1rem;
