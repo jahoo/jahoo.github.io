@@ -88,6 +88,29 @@ export function getPrimaryUrl(links) {
   return null;
 }
 
+// Coerce month value to integer for sorting.
+// Month may be a number (11) or a string ("November" / "Nov" / "11").
+const MONTH_NAMES = {
+  jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6,
+  jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12,
+};
+function monthNum(m) {
+  if (m == null) return 0;
+  if (typeof m === 'number') return m;
+  const lower = String(m).trim().toLowerCase().slice(0, 3);
+  return MONTH_NAMES[lower] ?? (Number.parseInt(m, 10) || 0);
+}
+
+export function sortEntries(entries) {
+  return [...entries].sort((a, b) => {
+    if (a.year !== b.year) return b.year - a.year;
+    const am = monthNum(a.month), bm = monthNum(b.month);
+    if (am !== bm) return bm - am;
+    const ad = a.day ?? 0, bd = b.day ?? 0;
+    return bd - ad;
+  });
+}
+
 // ------------------------------------------------------------
 // Main
 // ------------------------------------------------------------

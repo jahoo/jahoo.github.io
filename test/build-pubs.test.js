@@ -6,6 +6,7 @@ import { formatAuthorsHtml, formatAuthorsBibtex } from '../scripts/build-pubs.js
 import {
   buildPdfUrl, buildArxivUrl, buildLingbuzzUrl, buildDoiUrl, getPrimaryUrl
 } from '../scripts/build-pubs.js';
+import { sortEntries } from '../scripts/build-pubs.js';
 
 // Imports will be added as functions are implemented.
 
@@ -143,4 +144,24 @@ test('getPrimaryUrl: falls back through preprint, doi_url, openreview', () => {
 test('getPrimaryUrl: returns null if no known link', () => {
   assert.equal(getPrimaryUrl({ code: 'http://c' }), null);
   assert.equal(getPrimaryUrl({}), null);
+});
+
+test('sortEntries: reverse chronological by year, month, day', () => {
+  const entries = [
+    { id: 'a', year: 2021, month: 3 },
+    { id: 'b', year: 2023, month: 7 },
+    { id: 'c', year: 2021, month: 11 },
+    { id: 'd', year: 2022 },
+    { id: 'e', year: 2022, month: 5, day: 2 },
+    { id: 'f', year: 2022, month: 5, day: 1 },
+  ];
+  const sorted = sortEntries(entries).map(e => e.id);
+  assert.deepEqual(sorted, ['b', 'e', 'f', 'd', 'c', 'a']);
+});
+
+test('sortEntries: does not mutate input', () => {
+  const entries = [{ id: 'a', year: 2021 }, { id: 'b', year: 2023 }];
+  const before = JSON.stringify(entries);
+  sortEntries(entries);
+  assert.equal(JSON.stringify(entries), before);
 });
