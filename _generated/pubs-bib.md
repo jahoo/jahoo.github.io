@@ -61,7 +61,7 @@ page-style: site
 <li class="pub">
   <a class="pub-title" href="https://escholarship.mcgill.ca/concern/theses/r494vr42w">The Cost of Information: Looking beyond Predictability in Language Processing</a>
   <span class="pub-author">Jacob Louis Hoover</span>
-  <span class="pub-venue">McGill University (PhD)</span>
+  <span class="pub-venue">McGill University</span> <span class="pub-status">dissertation</span>
   <div class="pub-extras">
     <a class="extra pdf" href="/assets/pdfs/dissertation.pdf">pdf</a>
     <a class="extra other" href="/assets/pdfs/dissertation_precis.pdf">précis</a>
@@ -71,14 +71,15 @@ page-style: site
 <li class="pub">
   <a class="pub-title" href="https://aclanthology.org/2024.findings-eacl.123">Contextualized Topic Coherence Metrics</a>
   <span class="pub-author">Hamed Rahimi, David Mimno, Jacob Hoover, Hubert Naacke, Camelia Constantin, Bernd Amann</span>
-  <span class="pub-venue">Findings 2024</span>
+  <span class="pub-venue">Findings of ACL: EACL 2024</span>
 
 </li>
 <li class="pub">
-  <a class="pub-title" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10449406/">The Plausibility of Sampling as an Algorithmic Theory of Sentence Processing</a>
+  <a class="pub-title" href="https://doi.org/10.1162/opmi_a_00086">The Plausibility of Sampling as an Algorithmic Theory of Sentence Processing</a>
   <span class="pub-author">Jacob Louis Hoover, Morgan Sonderegger, Steven T. Piantadosi, Timothy J. O’Donnell</span>
   <span class="pub-venue">Open Mind</span>
   <div class="pub-extras">
+    <a class="extra preprint" href="https://doi.org/10.31234/osf.io/qjnpv">preprint</a>
     <a class="extra code" href="https://github.com/mcqll/plausibility-sampling-processing/">code</a>
     <a class="extra other" href="https://jahoo.shinyapps.io/surprisal_explorer/">surprisal explorer</a>
   </div>

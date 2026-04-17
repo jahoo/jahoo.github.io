@@ -87,13 +87,16 @@ export function buildDoiUrl(doi) {
   return `https://doi.org/${doi}`;
 }
 
+// Fallback order: a paper's DOI (when present) is the canonical published URL
+// and should beat any preprint link. arxiv/openreview/preprint are used only
+// when no DOI is set (typical for preprint-only or review-venue entries).
 export function getPrimaryUrl(links) {
   if (!links) return null;
   if (links.url) return links.url;
-  if (links.arxiv) return buildArxivUrl(links.arxiv);
-  if (links.preprint) return links.preprint;
   if (links.doi_url) return links.doi_url;
+  if (links.arxiv) return buildArxivUrl(links.arxiv);
   if (links.openreview) return links.openreview;
+  if (links.preprint) return links.preprint;
   return null;
 }
 
@@ -280,7 +283,7 @@ export function generateBibtexEntry(paper) {
 }
 
 const GOOGLE_SCHOLAR_URL =
-  'https://scholar.google.com/citations?user=tfaTOlEAAAAJ';
+  'https://scholar.google.com/citations?user=koLi2TwAAAAJ';
 
 const NAME_NOTE = `*Note on my name:* My surname is Vigly. Prior to September 2024, my surname was Hoover, which is now a middle name.`;
 

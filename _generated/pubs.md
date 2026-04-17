@@ -4,7 +4,7 @@ page-style: site
 ---
 
 <ul class="social-media-list">
-  <li><a href="https://scholar.google.com/citations?user=tfaTOlEAAAAJ">Google Scholar</a></li>
+  <li><a href="https://scholar.google.com/citations?user=koLi2TwAAAAJ">Google Scholar</a></li>
   <li><a href="/assets/bibliography/pubs.bib">BibTeX</a></li>
 </ul>
 

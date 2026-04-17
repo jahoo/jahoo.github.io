@@ -146,6 +146,20 @@ test('getPrimaryUrl: falls back through preprint, doi_url, openreview', () => {
   assert.equal(getPrimaryUrl({ openreview: 'http://o' }), 'http://o');
 });
 
+test('getPrimaryUrl: doi_url preferred over preprint (published paper w/ preprint link)', () => {
+  assert.equal(
+    getPrimaryUrl({ doi_url: 'http://doi', preprint: 'http://psyarxiv' }),
+    'http://doi'
+  );
+});
+
+test('getPrimaryUrl: arxiv preferred over preprint', () => {
+  assert.equal(
+    getPrimaryUrl({ arxiv: '1234.5678', preprint: 'http://p' }),
+    'https://arxiv.org/abs/1234.5678'
+  );
+});
+
 test('getPrimaryUrl: returns null if no known link', () => {
   assert.equal(getPrimaryUrl({ code: 'http://c' }), null);
   assert.equal(getPrimaryUrl({}), null);

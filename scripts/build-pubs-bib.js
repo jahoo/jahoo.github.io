@@ -9,6 +9,7 @@
 // overlays short venue labels, custom links, awards, status, equal-contrib marks.
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { homedir } from 'node:os';
 import yaml from 'js-yaml';
 import { Cite } from '@citation-js/core';
@@ -283,6 +284,20 @@ function ensureDir(path) {
   mkdirSync(path, { recursive: true });
 }
 
+function warnMissingPdfs(entries) {
+  for (const e of entries) {
+    const links = e.links ?? {};
+    for (const key of ['pdf', 'slides', 'poster', 'handout']) {
+      const val = links[key];
+      if (!val || /^https?:\/\//.test(val)) continue;
+      const full = resolve('assets/pdfs', val);
+      if (!existsSync(full)) {
+        console.warn(`[${e.id}] warning: ${key} file not found at ${full}`);
+      }
+    }
+  }
+}
+
 function main() {
   // 1. Read site.yaml, resolve bib-source path.
   const siteMeta = yaml.load(readFileSync('site.yaml', 'utf8'));
@@ -345,6 +360,7 @@ function main() {
     console.error(err.message);
     process.exit(1);
   }
+  warnMissingPdfs(entries);
 
   // 5. Sort + render markdown.
   const sorted = sortEntries(entries);

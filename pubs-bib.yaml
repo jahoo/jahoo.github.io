@@ -31,7 +31,8 @@
   venue: HSP 2025
 
 - key: hoover.j:2024phd
-  venue: McGill University (PhD)
+  venue: McGill University
+  status: dissertation
   links:
     pdf: dissertation.pdf
     other:
@@ -39,10 +40,12 @@
         url: /assets/pdfs/dissertation_precis.pdf
 
 - key: rahimi.h:2024
+  venue: "Findings of ACL: EACL 2024"
 
 - key: hoover.j:2023
   venue: Open Mind
   links:
+    preprint: https://doi.org/10.31234/osf.io/qjnpv
     code: https://github.com/mcqll/plausibility-sampling-processing/
     other:
       - label: surprisal explorer
