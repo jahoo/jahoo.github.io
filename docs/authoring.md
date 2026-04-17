@@ -57,14 +57,14 @@ tags: [note, paper]
 
 ### External content
 
-Not all content is rendered by Pandoc. Some pages are standalone HTML, pre-rendered notebooks, or frozen output from another tool. Every piece of listable content has a `.md` stub in `content/` — even if the actual content lives elsewhere. The `external` field tells the listing generator where to link:
+Not all content is rendered by Pandoc. Some pages are standalone HTML, pre-rendered notebooks, or frozen output from another tool. Every piece of listable content has a `.md` stub in `content/` — even if the actual content lives elsewhere. The `external` field (a repo-relative path) tells `build-content.sh` where to copy the standalone file from:
 
 ```yaml
-# Standalone HTML exploration
-external: /explorations/interactive-divergence-fitting.html
+# Standalone HTML exploration, now living under assets/frozen/
+external: assets/frozen/interactive-divergence-fitting.html
 
-# Frozen Klipse post (rendered by Jekyll, served as static HTML)
-external: /assets/frozen/klipse-clojure.html
+# Frozen Klipse post (originally rendered by Jekyll, kept as static HTML)
+external: assets/frozen/klipse-clojure.html
 ```
 
 The Pandoc-rendered stub serves as a landing page (brief description + link). Source files for frozen content are kept in `assets/frozen/` for future re-rendering.
