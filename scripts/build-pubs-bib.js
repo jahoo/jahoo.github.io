@@ -26,7 +26,25 @@ import {
 // Pure helpers (exported for testing)
 // ------------------------------------------------------------
 
-// stubs — filled in by later tasks
+export function expandHome(path) {
+  if (path.startsWith('~/') || path === '~') {
+    return homedir() + path.slice(1);
+  }
+  return path;
+}
+
+export function loadBibSource(path) {
+  const resolved = expandHome(path);
+  // existsSync follows symlinks, so broken symlinks return false.
+  if (!existsSync(resolved)) {
+    throw new Error(
+      `source.bib not found at ${resolved}\n` +
+      `Create a symlink to your bib file, e.g.:\n` +
+      `  ln -s ~/all-biblatex.bib source.bib`
+    );
+  }
+  return readFileSync(resolved, 'utf8');
+}
 
 // ------------------------------------------------------------
 // Main
