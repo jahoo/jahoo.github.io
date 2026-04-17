@@ -15,3 +15,6 @@ source.bib
 *.out
 *.run.xml
 *.synctex.gz
+
+# Transient git worktree used by `make deploy`
+_deploy
