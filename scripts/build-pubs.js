@@ -284,7 +284,8 @@ const GOOGLE_SCHOLAR_URL =
 
 const NAME_NOTE = `*Note on my name:* My surname is Vigly. Prior to September 2024, my surname was Hoover, which is now a middle name.`;
 
-export function generateMarkdown(entries) {
+export function generateMarkdown(entries, options = {}) {
+  const bibHref = options.bibHref ?? '/assets/bibliography/pubs.bib';
   const hasEqual = entries.some(
     (e) => e.equal_contribution && e.equal_contribution.length > 0
   );
@@ -298,7 +299,7 @@ export function generateMarkdown(entries) {
     '',
     '<ul class="social-media-list">',
     `  <li><a href="${GOOGLE_SCHOLAR_URL}">Google Scholar</a></li>`,
-    '  <li><a href="/assets/bibliography/pubs.bib">BibTeX</a></li>',
+    `  <li><a href="${bibHref}">BibTeX</a></li>`,
     '</ul>',
     '',
     '```{=html}',

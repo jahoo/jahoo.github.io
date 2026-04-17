@@ -432,6 +432,17 @@ test('generateBibtexFile: concatenates entries separated by blank lines', () => 
   assert.equal(chunks.length, 2);
 });
 
+test('generateMarkdown: respects bibHref option', () => {
+  const md = generateMarkdown(docEntries, { bibHref: '/assets/bibliography/alt.bib' });
+  assert.match(md, /href="\/assets\/bibliography\/alt\.bib"/);
+  assert.doesNotMatch(md, /href="\/assets\/bibliography\/pubs\.bib"/);
+});
+
+test('generateMarkdown: default bibHref unchanged', () => {
+  const md = generateMarkdown(docEntries);
+  assert.match(md, /href="\/assets\/bibliography\/pubs\.bib"/);
+});
+
 test('escapeHtml: escapes <, >, &, ", \'', () => {
   assert.equal(escapeHtml('a & b'), 'a &amp; b');
   assert.equal(escapeHtml('<script>'), '&lt;script&gt;');
