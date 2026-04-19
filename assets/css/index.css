@@ -15,10 +15,16 @@ ul.social-media-list li {
 
 /* ── Publications list ─────────────────────────────── */
 
-.pub-list {
+ul.pub-list {
   list-style: none;
   padding: 0;
+  /* Override Jez's `ul:not(.task-list) { margin-left: var(--ul-indent-size) }`
+     — no bullets means no indent needed. Selector uses ul.pub-list instead
+     of .pub-list alone to match Jez's specificity. */
   margin: 1.5rem 0;
+}
+ul.social-media-list {
+  margin-left: 0;
 }
 .pub-list li.pub {
   margin-bottom: 1.5rem;
