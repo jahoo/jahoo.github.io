@@ -106,15 +106,23 @@ a.site-title:hover {
 
 /* ── Post header: full-width title + post-meta ─────── */
 
-/* Let the post header span the full viewport (with small padding) instead
-   of Jez's main-width constraint. Titles won't wrap into awkward 2-line
-   breaks when there's plenty of right-side room. */
+/* Let the post header extend rightward beyond main-width (into the
+   sidenote column), but keep its left edge aligned with main. At narrow
+   and medium breakpoints, Jez's inherited `margin-left: var(--line-height)`
+   already matches main. At very-wide breakpoints where main is centered,
+   manually compute the left margin so header still starts at main's left. */
 header:not(.site-header) {
   max-width: none;
-  margin-left: 0;
   margin-right: 0;
-  padding-left: var(--line-height);
   padding-right: var(--line-height);
+}
+@media screen and (min-width: calc(745px + 2 * (52px + 206px + 52px))) {
+  header:not(.site-header) {
+    /* 100% (not 100vw) so scrollbar width is already excluded — match
+       main's `margin-left: auto` centering exactly. */
+    margin-left: calc((100% - var(--main-width)) / 2);
+    padding-right: 0;
+  }
 }
 
 /* ── Post meta (date · author · tags) under the title ─ */
