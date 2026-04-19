@@ -653,6 +653,10 @@ function highlightBibsBatch(bibStrings) {
     p
       .replace(/\sid="cb[^"]*"/g, '')
       .replace(/<a href="#cb[^"]*"[^>]*><\/a>/g, '')
+      // Opt into Jez's .wide (no-wrap) + .tight-code (tight padding/leading)
+      // utility classes so the bib dropdown stays compact.
+      .replace(/<div class="sourceCode"/, '<div class="sourceCode wide"')
+      .replace(/<pre class="sourceCode/, '<pre class="sourceCode tight-code')
   );
 }
 
