@@ -28,12 +28,15 @@
   font-display: swap;
 }
 
-/* ── Full-width main on the index (no sidenotes here) ─ */
+/* ── Main on the index uses main + sidenote width ────── */
 
+/* No sidenotes on the index, so main can extend into the sidenote column.
+   Cap at main + sidenote + a line-height gutter, centered — avoids
+   edge-to-edge text on very wide monitors. */
 main {
-  max-width: none;
-  margin-left: 0;
-  margin-right: 0;
+  max-width: calc(var(--main-width) + var(--side-note-max-width) + var(--line-height));
+  margin-left: auto;
+  margin-right: auto;
   padding-left: var(--line-height);
   padding-right: var(--line-height);
 }
