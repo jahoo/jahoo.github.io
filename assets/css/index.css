@@ -1,0 +1,141 @@
+/* Index-page styling — publications list + Scholar/BibTeX links.
+   Ported from the old site.css; variable names mapped to Jez's palette. */
+
+/* ── Scholar / BibTeX links (above the pub list) ────── */
+
+ul.social-media-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+ul.social-media-list li {
+  display: inline-block;
+  margin-right: 0.75rem;
+}
+
+/* ── Publications list ─────────────────────────────── */
+
+.pub-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+}
+.pub-list li.pub {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.pub-list li.pub:last-child {
+  border-bottom: none;
+}
+
+.pub-title {
+  font-family: 'Linux Libertine', 'Computer Modern Serif', Times, serif;
+  font-size: 1.1rem;
+  display: block;
+  margin-bottom: 0.2rem;
+}
+.pub-list a.pub-title,
+.pub-list a.pub-title:visited {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: #bbb;
+  text-decoration-style: solid;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+.pub-list a.pub-title:hover {
+  color: var(--color-accent-warm);
+}
+
+.pub-author {
+  display: block;
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 0.2rem;
+}
+
+.pub-venue {
+  font-style: italic;
+  color: #333;
+  font-size: 0.95rem;
+}
+.pub-list a.pub-venue,
+.pub-list a.pub-venue:visited {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: #999;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 0.5px;
+  text-underline-offset: 0.2em;
+}
+.pub-list a.pub-venue:hover {
+  color: inherit;
+  text-decoration-color: #555;
+}
+
+.pub-status {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0 0.4rem;
+  background: #eee;
+  color: #555;
+  font-size: 0.75rem;
+  border-radius: 2px;
+  text-transform: lowercase;
+}
+
+.pub-extras {
+  margin-top: 0.3rem;
+  font-size: 0.875rem;
+}
+.pub-extras .extra {
+  margin-right: 0.25rem;
+  color: var(--color-link);
+}
+.pub-extras .extra::before { content: '['; color: #888; }
+.pub-extras .extra::after  { content: ']'; color: #888; }
+
+/* Per-entry expandable bib: <details> sits inside .pub-extras, sharing
+   the inline link-button row. */
+details.pub-bibtex {
+  display: inline;
+}
+details.pub-bibtex > summary {
+  display: inline;
+  cursor: pointer;
+  list-style: none;
+}
+details.pub-bibtex > summary::-webkit-details-marker {
+  display: none;
+}
+details.pub-bibtex[open] > summary {
+  color: #555;
+}
+details.pub-bibtex > div.sourceCode {
+  margin: 0.4rem 0 0.2rem;
+  padding: 0.6rem 0.8rem;
+  background: #f7f7f5;
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  max-width: 800px;
+  overflow-x: auto;
+}
+details.pub-bibtex pre.sourceCode {
+  margin: 0;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 0.85rem;
+  white-space: pre;
+}
+details.pub-bibtex code.sourceCode {
+  font-family: ui-monospace, 'SF Mono', 'Menlo', 'Consolas', monospace;
+}
+
+/* Footnote-ish small-text paragraphs below the pub list. */
+.pub-footnote {
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 0.5rem;
+}
