@@ -49,8 +49,8 @@
   --background-color: #fffffc;
   --color-accent-warm: #611;
 
-  /* Old-theme teal for links (Jez default is #0070e0). */
-  --color-link: #467;
+  /* Link color (Jez default is #0070e0). */
+  --color-link: #0075b0;
 
   /* Near-black body text — reads heavier than Jez's softer blue-gray default. */
   --color-text: #111;
