@@ -1,7 +1,7 @@
 ---
 title: 'Kitchen Sink `code`'
 subtitle: '"Everything but the kitchen sink."'
-author: '@jez'
+author: 'jez'
 author-url: 'https://github.com/jez'
 date: '2021-06-25'
 return-url: '..'
