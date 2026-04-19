@@ -40,9 +40,10 @@
 }
 
 /* Restore browser-default font smoothing (subpixel AA on macOS) so strokes
-   fill in more heavily. Jez forces grayscale AA which reads thinner with
-   et-book. */
-body {
+   fill in more heavily. Jez forces grayscale AA via the universal selector
+   (*, *:after, *:before), so we have to match that specificity to override
+   — otherwise paragraphs, spans, and MathJax containers all keep grayscale AA. */
+*, *::after, *::before {
   -webkit-font-smoothing: auto;
   -moz-osx-font-smoothing: auto;
 }
