@@ -36,6 +36,14 @@ Wrap the `<h1 class="title">` emission in `$if(hide-post-title)$$else$...$endif$
 so a page can opt out of rendering its own title (e.g., the homepage where
 "home" reads redundantly).
 
+### `template.html5` — `<hr class="post-divider">` at the top of `<main>`
+
+When `$date$` is set in front-matter, the template inserts an `<hr
+class="post-divider">` as the first child of `<main>`. Styled via
+`.post-divider` in `assets/css/site-chrome.css` as a subtle 1px line
+between the post header and the body content. Placing it inside
+`<main>` gives it the right width and alignment automatically.
+
 ### `template.html5` — replace `<blockquote class="metadata">` with old-theme post-meta
 
 Drop Jez's stacked metadata paragraphs in favor of a single inline
