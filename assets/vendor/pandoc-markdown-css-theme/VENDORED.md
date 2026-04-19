@@ -25,6 +25,25 @@ Link `skylighting-solarized-theme.css` in addition to `theme.css`, between the t
   <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/skylighting-solarized-theme.css" />
 ```
 
+### `template.html5` — site chrome CSS link
+
+Link `/assets/css/site-chrome.css` on every page. Carries navbar,
+post-meta, and footer styling — not theme-specific, shared chrome.
+
+### `template.html5` — replace `<blockquote class="metadata">` with old-theme post-meta
+
+Drop Jez's stacked metadata paragraphs in favor of a single inline
+`<p class="post-meta">` that shows `date · author · tags` under the
+title. Markup matches the project's prior theme so existing site-chrome
+CSS rules apply cleanly.
+
+### `template.html5` — always-on site-footer with last-modified
+
+Jez's template only renders a footer when `return-url` is set. We
+replace that with an unconditional `<footer class="site-footer">`
+containing a `last-modified` span (populated by `build-content.sh`
+via `--metadata last-modified=...`). Footer renders on every page.
+
 ### `template.html5` — hard-coded site overrides link
 
 Immediately after the hardcoded `theme.css` link, we add a second hardcoded link for our site-wide overrides file (`assets/css/overrides.css`), which redefines CSS variables like `--font-family-prose` to customize the theme without editing `theme.css`. Load order: vendored theme → site overrides → per-page `$for(css)$`.
