@@ -37,6 +37,21 @@
 
   /* Near-black body text — reads heavier than Jez's softer blue-gray default. */
   --color-text: #111;
+
+  /* More generous heading margins (Tufte-style breathing room). */
+  --h1-margin-bottom: 18px;
+  --h2-margin-bottom: 12px;
+}
+
+/* Jez has no --h3/h4 margin variables (universal * reset zeros all margins).
+   Give them explicit spacing. */
+main h3 {
+  margin-top: 18px;
+  margin-bottom: 8px;
+}
+main h4 {
+  margin-top: 12px;
+  margin-bottom: 6px;
 }
 
 /* Restore browser-default font smoothing (subpixel AA on macOS) so strokes
