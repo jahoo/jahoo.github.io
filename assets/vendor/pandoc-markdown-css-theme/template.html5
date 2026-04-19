@@ -20,9 +20,18 @@ $endif$
 $for(css)$
   <link rel="stylesheet" href="$css$" />
 $endfor$
-$if(math)$
-  $math$
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)'], ['$', '$']],
+    displayMath: [['\\[', '\\]'], ['$$', '$$']]
+$if(mathjax-macros-json)$
+    , macros: $mathjax-macros-json$
 $endif$
+  }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
 $for(header-includes)$
   $header-includes$
 $endfor$
