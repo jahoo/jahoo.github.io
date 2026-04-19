@@ -797,7 +797,7 @@ footnote, rather than a single point. This is longer text to give the paragraph
 some heft to it, so that the side note doesn't feel overpowering.
 
 [^inline-image]:
-  {-} ![Only alt text here, not caption](../img/sugarloaf-hill-forest-green.jpg)
+  {-} ![Only alt text here, not caption](/assets/vendor/pandoc-markdown-css-theme/img/sugarloaf-hill-forest-green.jpg)
 
 Markdown footnotes become side notes. After the note. It would be neat to
 associate a range of text with a footnote, rather than a single point. This is
@@ -810,7 +810,7 @@ longer text to give the paragraph some heft to it, so that the side note doesn't
 feel overpowering. **This paragraph ends with a block image.**[^block-image]
 
 [^block-image]:
-  {^-} ![Only alt text here, not caption](../img/sugarloaf-hill-forest-green.jpg)
+  {^-} ![Only alt text here, not caption](/assets/vendor/pandoc-markdown-css-theme/img/sugarloaf-hill-forest-green.jpg)
 
 The image that comes before it pushes this image down. It still has no caption,
 but that's a limitation of Pandoc markdown. There's an extra big gap, but that's
@@ -834,7 +834,7 @@ the block image to hoist to the top of the associated
 paragraph.[^block-image-start]
 
 [^block-image-start]:
-    {^-} ![Only alt text here, not caption](../img/sugarloaf-hill-forest-green.jpg)
+    {^-} ![Only alt text here, not caption](/assets/vendor/pandoc-markdown-css-theme/img/sugarloaf-hill-forest-green.jpg)
 
     _Faking a caption with italics._
 
@@ -861,7 +861,7 @@ images in footnotes into figures automatically, so if you want this behavior
 you have to write the `figure` HTML directly.[^figure-note]
 
 [^figure-note]:
-  {^-} <figure><img src="../img/sugarloaf-hill-forest-green.jpg" alt="Alt text is not caption"><figcaption aria-hidden="true">Proper caption now</figcaption></figure>
+  {^-} <figure><img src="/assets/vendor/pandoc-markdown-css-theme/img/sugarloaf-hill-forest-green.jpg" alt="Alt text is not caption"><figcaption aria-hidden="true">Proper caption now</figcaption></figure>
 
 This time, there's enough room for the block image to hoist to the top of the
 associated paragraph. This time, there's enough room for the block image to
@@ -874,15 +874,15 @@ paragraph.
 
 We can also handle images:
 
-![Sugarloaf Hill, San Mateo, CA, April 2021](../img/sugarloaf-hill-forest-green.jpg)
+![Sugarloaf Hill, San Mateo, CA, April 2021](/assets/vendor/pandoc-markdown-css-theme/img/sugarloaf-hill-forest-green.jpg)
 
 This is some text after the image. The interesting thing is that the presence of
 a caption pushes the following paragraph down. For example, here's an image
 without a caption:
 
-![](../img/el-capitan-from-four-mile-trail.jpg)
+![](/assets/vendor/pandoc-markdown-css-theme/img/el-capitan-from-four-mile-trail.jpg)
 
-![](../img/el-capitan-from-four-mile-trail.jpg)
+![](/assets/vendor/pandoc-markdown-css-theme/img/el-capitan-from-four-mile-trail.jpg)
 
 Notice how the text after the image resumes further away, instead of being
 close to the image.
@@ -890,7 +890,7 @@ close to the image.
 We can also do extra wide and full width images:
 
 :::{.wide .extra-wide}
-![](../img/sugarloaf-hill-trail-april-june.jpg)
+![](/assets/vendor/pandoc-markdown-css-theme/img/sugarloaf-hill-trail-april-june.jpg)
 :::
 
 This project provides CSS files and a template for using Pandoc to generate
@@ -899,7 +899,7 @@ and some extras. The default look can be tweaked via CSS variables, and it does
 not need JavaScript, even for side notes.
 
 :::{.wide .extra-wide}
-![Sugarloaf Hill, San Mateo, CA. Left: April 2021, right: June 2021](../img/sugarloaf-hill-trail-april-june.jpg)
+![Sugarloaf Hill, San Mateo, CA. Left: April 2021, right: June 2021](/assets/vendor/pandoc-markdown-css-theme/img/sugarloaf-hill-trail-april-june.jpg)
 :::
 
 This project provides CSS files and a template for using Pandoc to generate
@@ -909,7 +909,7 @@ not need JavaScript, even for side notes.
 
 :::{.wide .full-width .left-align-caption}
 
-![Upper Crystal Springs Reservoir, near Belmont, CA](../img/upper-crystal-springs-reservoir-facing-northwest.jpg)
+![Upper Crystal Springs Reservoir, near Belmont, CA](/assets/vendor/pandoc-markdown-css-theme/img/upper-crystal-springs-reservoir-facing-northwest.jpg)
 
 :::
 
