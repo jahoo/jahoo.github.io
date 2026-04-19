@@ -16,6 +16,17 @@
 
 ## Local edits
 
+### `theme.css` — align TOC-sidebar breakpoint with main-centering
+
+Upstream has an off-by-one between two breakpoints:
+- TOC sidebar (float-left): `min-width: calc(... - 1px)` = 1364px+
+- Main centering: `min-width: calc(...)` = 1365px+
+
+At exactly 1364px the TOC floats left but main hasn't yet gained its
+centered layout, so there's no left margin for the TOC to occupy — main
+text wraps around the TOC instead. Drop the `- 1px` offset on the TOC
+rule (line ~1020) so both breakpoints fire together at 1365px+.
+
 ### `template.html5` — hard-coded syntax highlighting CSS link
 
 Link `skylighting-solarized-theme.css` in addition to `theme.css`, between the theme link and the overrides link. Jez's `build.sh` does this via `--css` flags; we bake it into the template to keep `--css` available for front-matter per-page CSS.

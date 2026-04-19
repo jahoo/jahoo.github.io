@@ -1017,7 +1017,7 @@ nav#TOC > input:checked + ul {
  * 52px = 2 * --line-height
  * 206px = side note min width
  */
-@media screen and (min-width: calc(745px + 2 * (52px + 206px + 52px) - 1px)) {
+@media screen and (min-width: calc(745px + 2 * (52px + 206px + 52px))) {
   header {
     margin-bottom: var(--line-height);
   }
