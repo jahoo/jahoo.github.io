@@ -2,6 +2,17 @@
 
 How to write content for this site using the Pandoc + Make pipeline.
 
+> **Theme source.** The visual theme, markdown conventions, and
+> Pandoc template are all based on Jake Zimmerman's
+> [pandoc-markdown-css-theme](https://jez.io/pandoc-markdown-css-theme)
+> (vendored under `assets/vendor/pandoc-markdown-css-theme/`). For the
+> canonical reference on what markdown features are supported — sidenotes,
+> margin notes, figure captions, code block options, TOC, tables, etc. —
+> see his [kitchen-sink page](https://jez.io/pandoc-markdown-css-theme/kitchen-sink/)
+> (also rendered locally at `/kitchen-sink/`). This guide focuses on
+> project-specific bits: front-matter fields, per-page assets, and
+> site-specific conventions.
+
 ## Quick start
 
 1. Create a markdown file in `content/` (e.g., `content/explorations/my-topic.md`)
