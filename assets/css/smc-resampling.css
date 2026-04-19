@@ -151,6 +151,10 @@ canvas.panel-short { height: 200px; }
     padding: 3px 0;
     font-size: 0.85em;
 }
+.control-row > p {
+    margin-top: 0;
+    margin-bottom: 0;
+}
 .control-row + .control-row {
     border-top: 1px solid #eee;
     margin-top: 3px;

@@ -157,7 +157,12 @@ nav#TOC a:visited {
 nav#TOC a:hover {
   text-decoration: underline;
 }
-nav#TOC ul {
-  list-style: none;
-  font-size: 16px;
+/* Inline-TOC only (narrow): no list bullets, slightly smaller font.
+   In wide sidebar mode (Jez's @media min-width 1260px+), Jez already
+   sets list-style: none and font-size: 12px — leave those alone. */
+@media not screen and (min-width: calc(745px + 2 * (52px + 206px + 52px) - 1px)) {
+  nav#TOC ul {
+    list-style: none;
+    font-size: 16px;
+  }
 }
