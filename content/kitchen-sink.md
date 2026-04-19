@@ -6,6 +6,8 @@ author-url: 'https://github.com/jez'
 date: '2021-06-25'
 return-url: '..'
 return-text: '← Return home'
+toc: true
+toc-depth: 3
 ---
 
 This project provides CSS files and a template for using Pandoc to generate
