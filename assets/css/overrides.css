@@ -59,6 +59,22 @@ main h4 {
   margin-top: 12px;
   margin-bottom: 6px;
 }
+main h5 {
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+/* Paragraphs after h4/h5 otherwise inherit Jez's default `p { margin-top:
+   var(--line-height) }` from theme.css:389, which is way too much gap.
+   Match the pattern Jez uses for h3 (theme.css:378-384). */
+main h4 + :is(*:not(.sidenote-wrapper), p),
+main h4 + .sidenote-wrapper + :is(*:not(.sidenote-wrapper), p),
+main h4 + .sidenote-wrapper + .sidenote-wrapper + :is(*:not(.sidenote-wrapper), p),
+main h5 + :is(*:not(.sidenote-wrapper), p),
+main h5 + .sidenote-wrapper + :is(*:not(.sidenote-wrapper), p),
+main h5 + .sidenote-wrapper + .sidenote-wrapper + :is(*:not(.sidenote-wrapper), p) {
+  margin-top: 0;
+}
 
 /* Restore browser-default font smoothing (subpixel AA on macOS) so strokes
    fill in more heavily. Jez forces grayscale AA via the universal selector
