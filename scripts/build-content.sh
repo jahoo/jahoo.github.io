@@ -9,6 +9,7 @@ set -e
 OUTDIR="_site"
 PANDOC_COMMON="--standalone \
   --metadata-file site.yaml \
+  --from markdown+tex_math_single_backslash \
   --template assets/vendor/pandoc-markdown-css-theme/template.html5 \
   --include-before-body templates/navbar.html \
   --section-divs --mathjax --citeproc \
