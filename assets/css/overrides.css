@@ -34,6 +34,17 @@
   /* Warm off-white background + burgundy warm accent. */
   --background-color: #fffffc;
   --color-accent-warm: #611;
+
+  /* Near-black body text — reads heavier than Jez's softer blue-gray default. */
+  --color-text: #111;
+}
+
+/* Restore browser-default font smoothing (subpixel AA on macOS) so strokes
+   fill in more heavily. Jez forces grayscale AA which reads thinner with
+   et-book. */
+body {
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
 }
 
 h1.title {
