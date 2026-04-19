@@ -6,7 +6,7 @@ tags: [exploration]
 js:
   - smc-resampling
 css:
-  - smc-resampling.css
+  - /assets/css/smc-resampling.css
 bibliography: assets/smc-resampling/references.bib
 reference-section-title: References
 link-citations: true
