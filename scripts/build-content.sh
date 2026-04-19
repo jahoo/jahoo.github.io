@@ -30,8 +30,10 @@ build_one() {
   mkdir -p "$(dirname "$dest")"
   local lastmod
   lastmod=$(stat -f '%Sm' -t '%Y-%m-%d %H:%M' "$src" 2>/dev/null || date -r "$src" '+%Y-%m-%d %H:%M' 2>/dev/null || echo "")
+  local extra_flags=""
+  head -30 "$src" | grep -q '^toc: *true' && extra_flags="--toc"
   echo "Build: $src"
-  pandoc "$src" $PANDOC_COMMON $FILTER_FLAGS --metadata last-modified="$lastmod" -o "$dest"
+  pandoc "$src" $PANDOC_COMMON $FILTER_FLAGS $extra_flags --metadata last-modified="$lastmod" -o "$dest"
 }
 
 # ---- Blog posts (content/posts/*.md) ----

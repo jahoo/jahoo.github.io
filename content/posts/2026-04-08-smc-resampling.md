@@ -9,6 +9,8 @@ css:
   - /assets/css/smc-resampling.css
 bibliography: assets/smc-resampling/references.bib
 reference-section-title: References
+toc: true
+toc-depth: 2
 link-citations: true
 mathjax-macros: assets/smc-resampling/macros.json
 ---
