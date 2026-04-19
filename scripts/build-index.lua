@@ -156,14 +156,9 @@ for _, e in ipairs(entries) do
   local cls = e.highlighted and "post-link highlighted" or "post-link"
   lines[#lines+1] = "  <li>"
   lines[#lines+1] = string.format('    <h3><a class="%s" href="%s">%s</a></h3>', cls, e.url, e.title)
-  -- Format date nicely: YYYY-MM-DD → "D Mon YYYY"
-  local y, m, d = e.date:match("(%d+)-(%d+)-(%d+)")
-  local months = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"}
-  local datestr = e.date
-  if y and m and d then
-    datestr = tonumber(d) .. " " .. (months[tonumber(m)] or m) .. " " .. y
-  end
-  local meta_parts = { datestr }
+  -- Dates stay in the front-matter YYYY-MM-DD format so the listing
+  -- matches the post-meta block on individual posts.
+  local meta_parts = { e.date }
   if e.tags and #e.tags > 0 then
     meta_parts[#meta_parts+1] = '<span class="post-tags">' .. table.concat(e.tags, ", ") .. '</span>'
   end
