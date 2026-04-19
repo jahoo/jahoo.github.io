@@ -2,6 +2,7 @@
 title: home
 page-style: site
 hide-post-title: true
+css: [/assets/css/index.css]
 ---
 
 # about
@@ -22,7 +23,6 @@ I sometimes post about things on the [blog](/posts/).
 
 <ul class="social-media-list">
   <li><a href="https://scholar.google.com/citations?user=koLi2TwAAAAJ">Google Scholar</a></li>
-  <li><a href="/assets/bibliography/pubs.bib">BibTeX</a></li>
 </ul>
 
 ```{=html}
@@ -34,7 +34,7 @@ I sometimes post about things on the [blog](/posts/).
   <div class="pub-extras">
     <a class="extra arxiv" href="https://arxiv.org/abs/2603.05432">arXiv</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
-<div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@online</span>{<span class="ot">chan</span>.<span class="ot">r:2026arxiv</span>,</span>
+<div class="sourceCode wide"><pre class="sourceCode tight-code bibtex"><code class="sourceCode bibtex"><span><span class="va">@online</span>{<span class="ot">chan</span>.<span class="ot">r:2026arxiv</span>,</span>
 <span>  <span class="dt">title</span> = {Ensembling Language Models with Sequential {{Monte Carlo}}},</span>
 <span>  <span class="dt">author</span> = {Chan, Robin Shing Moon and Liu, Tianyu and Kiegeland, Samuel and Pasti, Clemente and Vigly, Jacob Hoover and O&#39;Donnell, Timothy J. and Cotterell, Ryan and Vieira, Tim},</span>
 <span>  <span class="dt">date</span> = {2026-03-05},</span>
@@ -54,7 +54,7 @@ I sometimes post about things on the [blog](/posts/).
   <div class="pub-extras">
     <a class="extra openreview" href="https://openreview.net/forum?id=3BmPSFAdq3">OpenReview</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
-<div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@inproceedings</span>{<span class="ot">lipkin</span>.<span class="ot">b:2025</span>,</span>
+<div class="sourceCode wide"><pre class="sourceCode tight-code bibtex"><code class="sourceCode bibtex"><span><span class="va">@inproceedings</span>{<span class="ot">lipkin</span>.<span class="ot">b:2025</span>,</span>
 <span>  <span class="dt">title</span> = {Fast Controlled Generation from Language Models with Adaptive Weighted Rejection Sampling},</span>
 <span>  <span class="dt">author</span> = {Lipkin, Ben and LeBrun, Benjamin and Vigly, Jacob Hoover and Loula, João and MacIver, David R. and Du, Li and Eisner, Jason and Cotterell, Ryan and Mansinghka, Vikash and O&#39;Donnell, Timothy J. and Lew, Alexander K. and Vieira, Tim},</span>
 <span>  <span class="dt">date</span> = {2025-10-07},</span>
@@ -74,7 +74,7 @@ I sometimes post about things on the [blog](/posts/).
   <div class="pub-extras">
     <a class="extra link" href="https://underline.io/events/489/posters/20440/poster/119457-">link</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
-<div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@unpublished</span>{<span class="ot">vigly</span>.<span class="ot">j:2025cogsci</span>,</span>
+<div class="sourceCode wide"><pre class="sourceCode tight-code bibtex"><code class="sourceCode bibtex"><span><span class="va">@unpublished</span>{<span class="ot">vigly</span>.<span class="ot">j:2025cogsci</span>,</span>
 <span>  <span class="dt">type</span> = {Poster},</span>
 <span>  <span class="dt">title</span> = {When Unpredictable Does Not Mean Difficult to Process},</span>
 <span>  <span class="dt">author</span> = {Vigly, Jacob Hoover and Qian, Peng and Sonderegger, Morgan and O&#39;Donnell, Timothy J.},</span>
@@ -95,7 +95,7 @@ I sometimes post about things on the [blog](/posts/).
   <div class="pub-extras">
     <a class="extra link" href="https://escholarship.org/uc/item/9kr1b1gm">link</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
-<div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@inproceedings</span>{<span class="ot">clark</span>.<span class="ot">t:2025cogsci</span>,</span>
+<div class="sourceCode wide"><pre class="sourceCode tight-code bibtex"><code class="sourceCode bibtex"><span><span class="va">@inproceedings</span>{<span class="ot">clark</span>.<span class="ot">t:2025cogsci</span>,</span>
 <span>  <span class="dt">title</span> = {A Model of Approximate and Incremental Noisy-Channel Language Processing},</span>
 <span>  <span class="dt">booktitle</span> = {Proceedings of the 47th Annual Meeting of the {{Cognitive Science Society}}},</span>
 <span>  <span class="dt">author</span> = {Clark, Thomas Hikaru and Vigly, Jacob Hoover and Gibson, Edward and Levy, Roger},</span>
@@ -114,7 +114,7 @@ I sometimes post about things on the [blog](/posts/).
   <div class="pub-extras">
     <a class="extra link" href="https://doi.org/10.31234/osf.io/2498w_v1">PsyArXiv</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
-<div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@online</span>{<span class="ot">vigly</span>.<span class="ot">j:2025psyarxiv</span>,</span>
+<div class="sourceCode wide"><pre class="sourceCode tight-code bibtex"><code class="sourceCode bibtex"><span><span class="va">@online</span>{<span class="ot">vigly</span>.<span class="ot">j:2025psyarxiv</span>,</span>
 <span>  <span class="dt">title</span> = {Comprehension Effort as the Cost of Inference},</span>
 <span>  <span class="dt">author</span> = {Vigly, Jacob Hoover and Qian, Peng and Sonderegger, Morgan and O&#39;Donnell, Timothy J.},</span>
 <span>  <span class="dt">date</span> = {2025-06-18},</span>
@@ -132,7 +132,7 @@ I sometimes post about things on the [blog](/posts/).
   <div class="pub-extras">
     <a class="extra link" href="https://hsp2025.github.io/abstracts/254.pdf">pdf</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
-<div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@unpublished</span>{<span class="ot">vigly</span>.<span class="ot">j:2025HSP</span>,</span>
+<div class="sourceCode wide"><pre class="sourceCode tight-code bibtex"><code class="sourceCode bibtex"><span><span class="va">@unpublished</span>{<span class="ot">vigly</span>.<span class="ot">j:2025HSP</span>,</span>
 <span>  <span class="dt">type</span> = {Poster},</span>
 <span>  <span class="dt">title</span> = {Implicit Gender Bias in Linguistic Descriptions for Expected Events: {{The}} Case of the 2024 {{United States}} Presidential Election},</span>
 <span>  <span class="dt">author</span> = {Vigly, Jacob Hoover and Boyce, Veronica and Socolof, Michaela and Michaelov, James and family=Malsburg, given=Titus, prefix=von der, useprefix=true and Levy, Roger},</span>
@@ -152,7 +152,7 @@ I sometimes post about things on the [blog](/posts/).
   <div class="pub-extras">
     <a class="extra link" href="https://hsp2025.github.io/abstracts/187.pdf">pdf</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
-<div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@unpublished</span>{<span class="ot">clark</span>.<span class="ot">t:2025HSP</span>,</span>
+<div class="sourceCode wide"><pre class="sourceCode tight-code bibtex"><code class="sourceCode bibtex"><span><span class="va">@unpublished</span>{<span class="ot">clark</span>.<span class="ot">t:2025HSP</span>,</span>
 <span>  <span class="dt">type</span> = {Poster},</span>
 <span>  <span class="dt">title</span> = {Modeling Human Inferences and Reading Behavior with an Incremental, Resource-Rational Model of Noisy-Channel Language Processing},</span>
 <span>  <span class="dt">author</span> = {Clark, Thomas Hikaru and Vigly, Jacob Hoover and Gibson, Edward and Levy, Roger},</span>
@@ -174,7 +174,7 @@ I sometimes post about things on the [blog](/posts/).
     <a class="extra pdf" href="/assets/pdfs/dissertation.pdf">pdf</a>
     <a class="extra other" href="/assets/pdfs/dissertation_precis.pdf">précis</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
-<div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@thesis</span>{<span class="ot">hoover</span>.<span class="ot">j:2024phd</span>,</span>
+<div class="sourceCode wide"><pre class="sourceCode tight-code bibtex"><code class="sourceCode bibtex"><span><span class="va">@thesis</span>{<span class="ot">hoover</span>.<span class="ot">j:2024phd</span>,</span>
 <span>  <span class="dt">type</span> = {phdthesis},</span>
 <span>  <span class="dt">title</span> = {The Cost of Information: Looking beyond Predictability in Language Processing},</span>
 <span>  <span class="dt">shorttitle</span> = {The Cost of Information},</span>
@@ -196,7 +196,7 @@ I sometimes post about things on the [blog](/posts/).
   <div class="pub-extras">
     <a class="extra link" href="https://aclanthology.org/2024.findings-eacl.123">ACL Anthology</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
-<div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@inproceedings</span>{<span class="ot">rahimi</span>.<span class="ot">h:2024</span>,</span>
+<div class="sourceCode wide"><pre class="sourceCode tight-code bibtex"><code class="sourceCode bibtex"><span><span class="va">@inproceedings</span>{<span class="ot">rahimi</span>.<span class="ot">h:2024</span>,</span>
 <span>  <span class="dt">title</span> = {Contextualized {{Topic Coherence Metrics}}},</span>
 <span>  <span class="dt">booktitle</span> = {Findings of the {{Association}} for {{Computational Linguistics}}: {{EACL}} 2024},</span>
 <span>  <span class="dt">author</span> = {Rahimi, Hamed and Mimno, David and Hoover, Jacob and Naacke, Hubert and Constantin, Camelia and Amann, Bernd},</span>
@@ -222,7 +222,7 @@ I sometimes post about things on the [blog](/posts/).
     <a class="extra code" href="https://github.com/mcqll/plausibility-sampling-processing/">code</a>
     <a class="extra other" href="https://jahoo.shinyapps.io/surprisal_explorer/">surprisal explorer</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
-<div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@article</span>{<span class="ot">hoover</span>.<span class="ot">j:2023</span>,</span>
+<div class="sourceCode wide"><pre class="sourceCode tight-code bibtex"><code class="sourceCode bibtex"><span><span class="va">@article</span>{<span class="ot">hoover</span>.<span class="ot">j:2023</span>,</span>
 <span>  <span class="dt">title</span> = {The Plausibility of Sampling as an Algorithmic Theory of Sentence Processing},</span>
 <span>  <span class="dt">author</span> = {Hoover, Jacob Louis and Sonderegger, Morgan and Piantadosi, Steven T. and O’Donnell, Timothy J.},</span>
 <span>  <span class="dt">date</span> = {2023-07-21},</span>
@@ -246,7 +246,7 @@ I sometimes post about things on the [blog](/posts/).
   <div class="pub-extras">
     <a class="extra link" href="https://aclanthology.org/2022.coling-1.5">ACL Anthology</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
-<div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@inproceedings</span>{<span class="ot">socolof</span>.<span class="ot">m:2022</span>,</span>
+<div class="sourceCode wide"><pre class="sourceCode tight-code bibtex"><code class="sourceCode bibtex"><span><span class="va">@inproceedings</span>{<span class="ot">socolof</span>.<span class="ot">m:2022</span>,</span>
 <span>  <span class="dt">title</span> = {Measuring Morphological Fusion Using Partial Information Decomposition},</span>
 <span>  <span class="dt">booktitle</span> = {Proceedings of the 29th {{International Conference}} on {{Computational Linguistics}}},</span>
 <span>  <span class="dt">author</span> = {Socolof, Michaela and Hoover, Jacob Louis and Futrell, Richard and Sordoni, Alessandro and O&#39;Donnell, Timothy J.},</span>
@@ -269,7 +269,7 @@ I sometimes post about things on the [blog](/posts/).
   <div class="pub-extras">
     <a class="extra link" href="https://virtual.oxfordabstracts.com/#/event/3067/submission/297">link</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
-<div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@unpublished</span>{<span class="ot">hoover</span>.<span class="ot">j:2022poster</span>,</span>
+<div class="sourceCode wide"><pre class="sourceCode tight-code bibtex"><code class="sourceCode bibtex"><span><span class="va">@unpublished</span>{<span class="ot">hoover</span>.<span class="ot">j:2022poster</span>,</span>
 <span>  <span class="dt">type</span> = {Poster},</span>
 <span>  <span class="dt">title</span> = {With Better Language Models, Processing Time Is Superlinear in Surprisal},</span>
 <span>  <span class="dt">author</span> = {Hoover, Jacob Louis and Sonderegger, Morgan and O&#39;Donnell, Timothy J.},</span>
@@ -295,7 +295,7 @@ I sometimes post about things on the [blog](/posts/).
     <a class="extra slides" href="/assets/pdfs/2021.10.11.EMNLP.talk-slides.pdf">slides</a>
     <a class="extra poster" href="/assets/pdfs/2021.10.11.EMNLP.poster.pdf">poster</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
-<div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@inproceedings</span>{<span class="ot">hoover</span>.<span class="ot">j:2021EMNLP</span>,</span>
+<div class="sourceCode wide"><pre class="sourceCode tight-code bibtex"><code class="sourceCode bibtex"><span><span class="va">@inproceedings</span>{<span class="ot">hoover</span>.<span class="ot">j:2021EMNLP</span>,</span>
 <span>  <span class="dt">title</span> = {Linguistic Dependencies and Statistical Dependence},</span>
 <span>  <span class="dt">booktitle</span> = {Proceedings of the 2021 {{Conference}} on {{Empirical Methods}} in {{Natural Language Processing}}},</span>
 <span>  <span class="dt">author</span> = {Hoover, Jacob Louis and Du, Wenyu and Sordoni, Alessandro and O&#39;Donnell, Timothy J.},</span>
@@ -322,7 +322,7 @@ I sometimes post about things on the [blog](/posts/).
     <a class="extra pdf" href="/assets/pdfs/wccfl2020-cascadilla-paper3568-proof.pdf">pdf</a>
     <a class="extra handout" href="/assets/pdfs/wccfl2020-handout.pdf">handout</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
-<div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@inproceedings</span>{<span class="ot">hoover</span>.<span class="ot">j:2021WCCFL</span>,</span>
+<div class="sourceCode wide"><pre class="sourceCode tight-code bibtex"><code class="sourceCode bibtex"><span><span class="va">@inproceedings</span>{<span class="ot">hoover</span>.<span class="ot">j:2021WCCFL</span>,</span>
 <span>  <span class="dt">title</span> = {Accounting for Variation in Number Agreement in {{Icelandic}} Dative-Nominative Constructions},</span>
 <span>  <span class="dt">booktitle</span> = {Proceedings of the 38th {{West Coast Conference}} on {{Formal Linguistics}}},</span>
 <span>  <span class="dt">author</span> = {Hoover, Jacob Louis},</span>
