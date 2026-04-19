@@ -91,7 +91,7 @@ deploy:
 	@git push origin source
 	@git worktree add _deploy static 2>/dev/null || \
 	  { echo "error: _deploy worktree already exists; run 'git worktree remove _deploy' first"; exit 1; }
-	@rsync -a --delete --exclude='.git' _site/ _deploy/
+	@rsync -a --delete --exclude='.git' --exclude='kitchen-sink' _site/ _deploy/
 	@cd _deploy && git add -A && \
 	  ( git diff --cached --quiet && echo "static: no changes to deploy" || \
 	    ( git commit -m "Deploy $$(cd .. && git rev-parse --short HEAD)" && \
