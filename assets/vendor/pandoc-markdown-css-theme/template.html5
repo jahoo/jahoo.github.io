@@ -18,6 +18,7 @@ $if(description-meta)$
 $endif$
   <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
   <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/theme.css" />
+  <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/skylighting-solarized-theme.css" />
   <link rel="stylesheet" href="/assets/css/overrides.css" />
 $for(css)$
   <link rel="stylesheet" href="$css$" />

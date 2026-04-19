@@ -8,11 +8,22 @@
 
 ## Files vendored
 
-- `template.html5` — Pandoc HTML template. **Contains one local edit** (see below).
+- `template.html5` — Pandoc HTML template. **Contains local edits** (see below).
 - `theme.css` — CSS. Unmodified from upstream.
+- `skylighting-solarized-theme.css` — Syntax highlighting colors (solarized). Unmodified from upstream. Jez's `theme.css` only handles code-block layout — the colors for keyword/string/comment/etc spans live in this separate file.
+- `skylighting-paper-theme.css` — Alternative highlighting palette (paper). Unmodified from upstream. Not linked by default; available if you want to swap palettes.
 - `pandoc-sidenote.lua` — Lua filter. Unmodified from upstream.
 
 ## Local edits
+
+### `template.html5` — hard-coded syntax highlighting CSS link
+
+Link `skylighting-solarized-theme.css` in addition to `theme.css`, between the theme link and the overrides link. Jez's `build.sh` does this via `--css` flags; we bake it into the template to keep `--css` available for front-matter per-page CSS.
+
+```
+  <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/theme.css" />
+  <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/skylighting-solarized-theme.css" />
+```
 
 ### `template.html5` — hard-coded site overrides link
 
