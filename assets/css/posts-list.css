@@ -24,25 +24,23 @@ main .post-list h3 {
   line-height: 1.3;
 }
 
-/* All post-links share the same thick underline-behind-text treatment;
-   only the decoration color varies: light gray for ordinary entries,
-   soft yellow for highlighted ones. */
+/* Post-links: clean at rest, thick underline-behind-text on hover, with
+   warm-accent color on hover overriding the default link color. Highlighted
+   entries get a soft-yellow underline color; plain ones use light gray. */
 .post-list a.post-link,
 .post-list a.post-link:link,
 .post-list a.post-link:visited {
   color: var(--color-text);
+  text-decoration: none;
+}
+.post-list a.post-link:hover {
+  color: var(--color-accent-warm);
   text-decoration: underline 0.66rem #f0f0f0;
   text-underline-offset: -0.33rem;
   text-decoration-skip-ink: none;
 }
-.post-list a.post-link.highlighted,
-.post-list a.post-link.highlighted:link,
-.post-list a.post-link.highlighted:visited {
+.post-list a.post-link.highlighted:hover {
   text-decoration-color: lightgoldenrodyellow;
-}
-
-.post-list a.post-link:hover {
-  color: var(--color-link);
 }
 
 .post-list .post-meta {

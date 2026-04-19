@@ -119,10 +119,11 @@ main h4 {
   font-style: italic;
 }
 
-/* ── Link hover: gray underline instead of link-colored ─ */
+/* ── Link hover: gray underline, slightly offset from baseline ─ */
 
 a:hover {
   text-decoration-color: #bbb;
+  text-underline-offset: 3px;
 }
 
 /* ── Section marks on headings (h1-h4) ─────────────── */
