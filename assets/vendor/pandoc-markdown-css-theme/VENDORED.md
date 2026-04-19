@@ -14,6 +14,18 @@
 
 ## Local edits
 
+### `template.html5` — hard-coded site overrides link
+
+Immediately after the hardcoded `theme.css` link, we add a second hardcoded link for our site-wide overrides file (`assets/css/overrides.css`), which redefines CSS variables like `--font-family-prose` to customize the theme without editing `theme.css`. Load order: vendored theme → site overrides → per-page `$for(css)$`.
+
+```
+  <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/theme.css" />
+  <link rel="stylesheet" href="/assets/css/overrides.css" />
+$for(css)$
+  <link rel="stylesheet" href="$css$" />
+$endfor$
+```
+
 ### `template.html5` — hard-coded theme.css link above the `$for(css)$` loop
 
 Pandoc's metadata merge for the `css` key does not compose site-wide defaults with per-page front-matter — a post with a front-matter `css:` list fully replaces any site-level or CLI-provided `css` value. To guarantee `theme.css` is always linked regardless of per-page front-matter, we add a hard-coded `<link>` to it just before the `$for(css)$` loop:
