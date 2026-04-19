@@ -1,0 +1,69 @@
+/* Posts-listing page styling: no bullets, upright titles, body-color
+   with underline-on-hover, yellow highlight for featured posts, post-meta
+   floating into the right margin on wide screens. */
+
+/* No bullets + kill default indent. Use ul.post-list specificity to beat
+   Jez's `ul:not(.task-list) { margin-left: var(--ul-indent-size) }`. */
+ul.post-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.post-list li {
+  margin-bottom: 1.5rem;
+}
+
+/* Titles — upright (overrides our h3 italic rule via higher specificity),
+   a tad larger than body, normal weight. */
+main .post-list h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.3;
+}
+
+/* Post-links: clean at rest, thick underline-behind-text on hover, with
+   warm-accent color on hover overriding the default link color. Highlighted
+   entries get a soft-yellow underline color; plain ones use light gray. */
+.post-list a.post-link,
+.post-list a.post-link:link,
+.post-list a.post-link:visited {
+  color: var(--color-text);
+  text-decoration: none;
+}
+.post-list a.post-link:hover {
+  color: var(--color-accent-warm);
+  text-decoration: underline 0.66rem #f0f0f0;
+  text-underline-offset: -0.33rem;
+  text-decoration-skip-ink: none;
+}
+.post-list a.post-link.highlighted:hover {
+  text-decoration-color: lightgoldenrodyellow;
+}
+
+.post-list .post-meta {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+.post-list .post-meta .post-tags {
+  font-style: italic;
+}
+
+/* Margin mode: float post-meta into the right margin column. Use the same
+   breakpoint Jez uses for sidenote appearance (26+550+26+169+26 = 797px);
+   below that sidenotes are inline, so the post-list meta falls inline too. */
+@media (min-width: calc(26px + 550px + 26px + 169px + 26px)) {
+  .post-list li {
+    position: relative;
+  }
+  .post-list .post-meta {
+    position: absolute;
+    top: 0.25rem;
+    left: 100%;
+    margin-left: 2rem;
+    width: 40%;
+    line-height: 1.4;
+  }
+}

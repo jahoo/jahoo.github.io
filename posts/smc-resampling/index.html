@@ -1,63 +1,115 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Resampling in Sequential Monte Carlo — jacob hoover
-vigly</title>
-
-  <!-- MathJax v4: Pandoc emits \(...\) and \[...\] inside <span class="math"> -->
-  <script>
-  MathJax = {
-    tex: {
-      inlineMath: [['\\(', '\\)'], ['$', '$']],
-      displayMath: [['\\[', '\\]'], ['$$', '$$']]
-      , macros: { "state": "s", "rstate": "\\widetilde{\\state}", "target": "\\pi", "impwt": "\\rho", "normwt": "w", "np": "N", "cnt": "M", "gen": "{\\mathcal{G}}", "E": "{\\mathbb{E}}", "Var": "\\operatorname{Var}", "cdf": "F", "invcdf": "{F^{-1}}", "probe": "u", "resid": "\\widetilde{\\normwt}", "idx": "i" }
-    }
-  };
-  </script>
-  <script id="MathJax-script" async
-    src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
-
-  <link rel="stylesheet" href="/assets/css/base.css">
-  <link rel="stylesheet" href="/assets/css/post.css">
-  <link rel="stylesheet" href="/assets/css/site.css">
-  <link rel="stylesheet" href="/assets/css/smc-resampling.css">
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc-markdown-css-theme" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Jacob Hoover Vigly" />
+  <meta name="dcterms.date" content="2026-04-08" />
+  <meta name="description" content="Scientific Program Coordinator at CHI FRO, LLC. Formerly Postdoc at MIT, Department of Brain and Cognitive Sciences. PhD in Linguistics from McGill University." />
+  <title>Resampling in Sequential Monte Carlo</title>
+  <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/theme.css" />
+  <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/skylighting-solarized-theme.css" />
+  <link rel="stylesheet" href="/assets/css/overrides.css" />
+  <link rel="stylesheet" href="/assets/css/site-chrome.css" />
+  <link rel="stylesheet" href="/assets/css/smc-resampling.css" />
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)'], ['$', '$']],
+    displayMath: [['\\[', '\\]'], ['$$', '$$']]
+    , macros: { "state": "s", "rstate": "\\widetilde{\\state}", "target": "\\pi", "impwt": "\\rho", "normwt": "w", "np": "N", "cnt": "M", "gen": "{\\mathcal{G}}", "E": "{\\mathbb{E}}", "Var": "\\operatorname{Var}", "cdf": "F", "invcdf": "{F^{-1}}", "probe": "u", "resid": "\\widetilde{\\normwt}", "idx": "i" }
+  }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
 </head>
-<body class="page-style-post">
+<body>
+<header class="site-header">
+  <div class="wrapper">
+    <a class="site-title" href="/">
+      <span class="site-title-full">jacob hoover vigly</span>
+      <span class="site-title-short">jacob vigly</span>
+      <span class="site-title-xs">jv</span>
+    </a>
+    <nav class="site-nav">
+      <div class="trigger">
+        <a class="page-link" href="/">home</a>
+        <a class="page-link" href="/posts/">blog</a>
+      </div>
+    </nav>
+  </div>
+</header>
+<script src="/assets/js/section-marks.js" defer></script>
+<script src="/assets/js/active-nav.js" defer></script>
 
-  <header class="site-header">
-    <div class="wrapper">
-      <a class="site-title" href="/">
-        <span class="site-title-full">jacob hoover vigly</span>
-        <span class="site-title-short">jacob vigly</span>
-        <span class="site-title-xs">jv</span>
-      </a>
-      <nav class="site-nav">
-        <div class="trigger">
-          <a class="page-link" href="/">home</a>
-          <a class="page-link" href="/posts/">blog</a>
-        </div>
-      </nav>
-    </div>
-  </header>
+<header>
 
-  <main class="page-content">
-    <div class="wrapper">
-      <article>
+<h1 class="title">Resampling in Sequential Monte Carlo</h1>
 
-        <header class="post-header">
-          <h1 class="post-title">Resampling in Sequential Monte
-Carlo</h1>
-          <p class="post-meta">
-            <time>2026-04-08</time>
-            · Jacob Hoover Vigly
-            · <span class="post-tags">exploration</span>
-          </p>
-        </header>
+<p class="post-meta">
+  <time datetime="2026-04-08">2026-04-08</time>
+  · Jacob Hoover Vigly
+  · <span class="post-tags">exploration</span>
+</p>
+</header>
 
 
-        <div class="post-content">
+<hr class="post-divider" />
+
+
+<nav id="TOC" role="doc-toc">
+    <strong>Contents</strong><label for="contents">⊕</label>
+  <input type="checkbox" id="contents">
+  <ul>
+  <li><a href="#why-and-how-to-resample"
+  id="toc-why-and-how-to-resample">1. Why and how to resample</a>
+  <ul>
+  <li><a href="#the-first-moment-unbiasedness-condition"
+  id="toc-the-first-moment-unbiasedness-condition">The first-moment
+  (unbiasedness) condition</a></li>
+  </ul></li>
+  <li><a href="#inverse-transform-sampling"
+  id="toc-inverse-transform-sampling">2. Inverse transform
+  sampling</a></li>
+  <li><a href="#multinomial-stratified-and-systematic-resampling"
+  id="toc-multinomial-stratified-and-systematic-resampling">3.
+  Multinomial, stratified, and systematic resampling</a>
+  <ul>
+  <li><a href="#multinomial-resampling"
+  id="toc-multinomial-resampling">Multinomial resampling</a></li>
+  <li><a href="#stratified-resampling"
+  id="toc-stratified-resampling">Stratified resampling</a></li>
+  <li><a href="#systematic-resampling"
+  id="toc-systematic-resampling">Systematic resampling</a></li>
+  <li><a href="#systematic-can-be-higher-variance-than-multinomial"
+  id="toc-systematic-can-be-higher-variance-than-multinomial">⚠︎
+  Systematic can be higher variance than multinomial</a></li>
+  </ul></li>
+  <li><a href="#residual-resampling" id="toc-residual-resampling">4.
+  Residual resampling</a></li>
+  <li><a href="#comparison" id="toc-comparison">5. Comparison</a></li>
+  <li><a href="#other-resampling-schemes"
+  id="toc-other-resampling-schemes">6. Other resampling schemes</a>
+  <ul>
+  <li><a href="#branch-kill-resampling"
+  id="toc-branch-kill-resampling">Branch-kill resampling</a></li>
+  <li><a href="#other-extensions" id="toc-other-extensions">Other
+  extensions</a></li>
+  </ul></li>
+  <li><a href="#resampling-methods-in-action"
+  id="toc-resampling-methods-in-action">7. Resampling methods in
+  action</a>
+  <ul>
+  <li><a href="#comparing-methods-over-many-runs"
+  id="toc-comparing-methods-over-many-runs">Comparing methods over many
+  runs</a></li>
+  </ul></li>
+  <li><a href="#bibliography" id="toc-bibliography">References</a></li>
+  </ul>
+</nav>
+
+<main>
 <p><em>Exploring some standard resampling schemes</em>.<span
 class="sidenote-wrapper"><label for="sn-0" class="margin-toggle">&#8853;</label><input type="checkbox" id="sn-0" class="margin-toggle"/><span
 class="marginnote">I drafted this post back in October 2023, with
@@ -67,7 +119,9 @@ reimplement and vastly improve the visualizations with interactivity,
 and thought the result was was worth sharing …with a vibe-coding
 disclaimer: I have not checked the code for simulations, which is all
 new. But even with that caveat, the illustrations should serve their
-purpose better than what I had originally.</span></span></p>
+purpose better than what I had originally.<br />
+<br />
+</span></span></p>
 <p>I’ve been thinking recently about the way in which you do resampling
 in sequential Monte Carlo (SMC). Like many other things, while there are
 many asymptotically identical methods, in practice it matters which one
@@ -93,10 +147,12 @@ class="math inline">\(\target(\cdot)\)</span>:</p>
 class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle"/><span
 class="sidenote">Throughout the rest of this post, “weights” and
 <code>weights</code> in code refer to the normalized weights <span
-class="math inline">\(\normwt^\idx\)</span>. </span></span> For any test
-function <span class="math inline">\(f\)</span>, taking a weighted
-average of the function applied over the particles gives an estimator of
-its expectation under the target: <span
+class="math inline">\(\normwt^\idx\)</span>. <br />
+<br />
+</span></span> For any test function <span
+class="math inline">\(f\)</span>, taking a weighted average of the
+function applied over the particles gives an estimator of its
+expectation under the target: <span
 class="math inline">\(\widehat{\E_{\target}[f]}\triangleq\E_{\widehat{\target}}[f]=\sum_\idx
 \normwt^\idx f(\state^\idx)\)</span>.</p>
 <p>In sequential importance sampling (SIS), we apply importance sampling
@@ -107,9 +163,27 @@ suffer from <strong>weight degeneracy</strong>: When the weights become
 concentrated and the budget of <span class="math inline">\(\np\)</span>
 particles effectively behaves as if it were just one sample, defeating
 the purpose of having multiple particles.</p>
-<label for="mn-degen" class="margin-toggle">&#8853;</label><input type="checkbox" id="mn-degen" class="margin-toggle"/><div class="marginnote"><canvas id="cv-degeneracy" style="width:100%; height:200px; border:1px solid #ddd; border-radius:3px;">
+<canvas id="cv-degeneracy" style="width:100%; height:200px; border:1px solid #ddd; border-radius:3px;">
 </canvas>
-<p><br><span class="degen-toggle"><span id="degen-label-sis" class="degen-toggle-label">SIS</span><label class="degen-switch"><input type="checkbox" id="chk-degen-resample"><span class="degen-slider"></span></label><span id="degen-label-smc" class="degen-toggle-label">SMC</span></span> <button id="btn-degen-rerun" style="font-size:0.8em;">Re-run</button> <span id="degen-info" style="font-size:0.8em; margin-left:4px;"></span><br><strong>Particle weight evolution.</strong><br>Bars show normalized weights <span class="math inline">\(\normwt_t^\idx\)</span> at each step <span class="math inline">\(t\)</span> in a bootstrap particle filter on a Gaussian random walk model (<span class="math inline">\(\state_t \sim \mathcal{N}(\state_{t-1}, 1)\)</span>; <span class="math inline">\(y_t \sim \mathcal{N}(\state_t, 0.25)\)</span>; <span class="math inline">\(y_t{=}2\)</span>). <br><em>Click a particle to trace its lineage, or click a timestep label to see all ancestors.</em><br><span id="degen-caption"></span></p></div>
+<p><span class="degen-toggle"><span id="degen-label-sis"
+class="degen-toggle-label">SIS</span><label class="degen-switch"><input type="checkbox" id="chk-degen-resample"><span
+class="degen-slider"></span></label><span id="degen-label-smc"
+class="degen-toggle-label">SMC</span></span>
+<button id="btn-degen-rerun" style="font-size:0.8em;">Re-run</button>
+<span id="degen-info"
+style="font-size:0.8em; margin-left:4px;"></span><br><strong>Particle
+weight evolution.</strong><br>Bars show normalized weights <span
+class="math inline">\(\normwt_t^\idx\)</span> at each step <span
+class="math inline">\(t\)</span> in a bootstrap particle filter.<span
+class="sidenote-wrapper"><label for="sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-2" class="margin-toggle"/><span
+class="sidenote">Illustrated for a Gaussian random walk model: <span
+class="math inline">\(\state_t \sim \mathcal{N}(\state_{t-1},
+1)\)</span>; <span class="math inline">\(y_t \sim \mathcal{N}(\state_t,
+0.25)\)</span>; <span class="math inline">\(y_t{=}2\)</span>.<br />
+<br />
+</span></span> Click a particle to trace its lineage, or click a
+timestep label to see all ancestors. <em><span
+id="degen-caption"></span></em></p>
 <p>This weight degeneracy issue is one key motivation for SMC, which
 generalizes from SIS by the addition of <strong>resampling</strong>
 steps. Resampling replaces a current set of particles (potentially with
@@ -117,7 +191,7 @@ degenerate weights) with a new set of samples with weights all set to be
 equal, duplicating high-weight particles and dropping low-weight ones.
 This addresses weight degeneracy, but introduces a different problem:
 <strong>path degeneracy</strong>.<span
-class="sidenote-wrapper"><label for="sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-2" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-3" class="margin-toggle"/><span
 class="sidenote">I’m getting this terminology for the two kinds of
 degeneracy from the excellent <span class="citation"
 data-cites="naesseth.c:2019">Naesseth et al. (<a
@@ -132,10 +206,11 @@ class="math inline">\(\np/2\)</span>), rather than at every step. In
 this post I want to focus just on what happens when we <em>do</em>
 resample, rather than on when to resample, but the ESS values in the
 illustration can give a sense of when resampling would be triggered in
-an adaptive resampling method.</span></span> After enough steps, all
-current particles may trace back to a single ancestor at earlier
-timesteps [<em>click on a timestep label in the illustration to see
-ancestry</em>].</p>
+an adaptive resampling method.<br />
+<br />
+</span></span> After enough steps, all current particles may trace back
+to a single ancestor at earlier timesteps [<em>click on a timestep label
+in the illustration to see ancestry</em>].</p>
 <p>Adding resampling can keep our particle approximation useful (fixing
 SIS’s weight degeneracy problem), but the method we use to resample can
 affect both the variance of our estimates and how quickly path diversity
@@ -162,10 +237,12 @@ f(\state^\idx)\)</span>.</p>
 <strong>multinomial</strong>, <strong>stratified</strong>,
 <strong>systematic</strong>, and <strong>residual</strong>
 resampling.<span
-class="sidenote-wrapper"><label for="sn-3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-3" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-4" class="margin-toggle"/><span
 class="sidenote">These methods all satisfy this ‘first-moment
 condition.’ However, higher moments can differ greatly between schemes
-(as we’ll see, looking at variance).</span></span></p>
+(as we’ll see, looking at variance).<br />
+<br />
+</span></span></p>
 </section>
 </section>
 <section id="inverse-transform-sampling" class="level2">
@@ -235,7 +312,7 @@ class="level2">
 <p>You may have found that the most natural idea is to use <span
 class="math inline">\(\np\)</span> independent draws from the uniform
 distribution.<span
-class="sidenote-wrapper"><label for="sn-4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-4" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-5" class="margin-toggle"/><span
 class="sidenote">That is, inverse transform sampling. A little while
 ago, I made another <a href="/posts/transform-pdf/">post exploring
 density transformations</a> in the continuous case. Here we are doing
@@ -244,11 +321,12 @@ this in a discrete setting: Each uniform-distributed independent probe
 discrete quantile function <span class="math inline">\(\invcdf\)</span>
 to produce a sample from the particle-weight distribution, just as
 passing a uniform draw through a continuous inverse CDF yields a draw
-from the corresponding distribution.</span></span> This works, and leads
-to the first standard algorithm, <strong>multinomial
-resampling</strong>. We will then look at two other common strategies
-that reduce variance by spreading probes more evenly for lower
-variance.</p>
+from the corresponding distribution.<br />
+<br />
+</span></span> This works, and leads to the first standard algorithm,
+<strong>multinomial resampling</strong>. We will then look at two other
+common strategies that reduce variance by spreading probes more evenly
+for lower variance.</p>
 <section id="multinomial-resampling" class="level3">
 <h3>Multinomial resampling</h3>
 <p>Draw <span class="math inline">\(\np\)</span> independent uniforms
@@ -324,7 +402,7 @@ class="math inline">\(f(\state^\idx)=\)</span></span>
 <canvas id="cv-est-multi" class="panel panel-short">
 </canvas>
 </div>
-<div class="proof">
+<div class="callout proof">
 <p><span class="proof-label">Unbiasedness.</span> Each probe <span
 class="math inline">\(\probe_k\)</span> is independently <span
 class="math inline">\(\mathrm{Uniform}(0,1)\)</span>, so it lands in
@@ -348,17 +426,19 @@ class="math inline">\(\np\)</span> equal <strong>strata</strong> <span
 class="math inline">\(\bigl(\frac{k-1}{\np},\,
 \frac{k}{\np}\bigr)_{k=1}^{\np}\)</span> and draw one independent
 uniform within each, resulting in lower variance.<span
-class="sidenote-wrapper"><label for="sn-5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-5" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-6" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-6" class="margin-toggle"/><span
 class="sidenote">See <span class="citation"
 data-cites="douc.r:2005">Douc et al. (<a href="#ref-douc.r:2005"
 role="doc-biblioref">2005</a>)</span> for proof that <span
 class="math inline">\(\Var_{\text{strat}} \leq
-\Var_{\text{mult}}\)</span>.</span></span></p>
+\Var_{\text{mult}}\)</span>.<br />
+<br />
+</span></span></p>
 <div class="sourceCode" id="cb2"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Steps 1 &amp; 3 as above; only step 2 changes:</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># one uniform draw per stratum instead of N independent</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>positions <span class="op">=</span> (random(N) <span class="op">+</span> <span class="bu">range</span>(N)) <span class="op">/</span> N</span></code></pre></div>
-<div class="insight">
+<div class="callout insight">
 <p>Each stratum gets exactly one probe, so we can bound the counts <span
 class="math inline">\(\lfloor \np\normwt^\idx \rfloor \leq \cnt^\idx
 \leq \lceil \np\normwt^\idx \rceil\)</span>.</p>
@@ -394,7 +474,7 @@ class="math inline">\(f(\state^\idx) =\)</span></span>
 <canvas id="cv-est-strat" class="panel panel-short">
 </canvas>
 </div>
-<div class="proof">
+<div class="callout proof">
 <p><span class="proof-label">Unbiasedness.</span> Write <span
 class="math inline">\(\mathbf{1}_k^\idx\)</span> for the indicator that
 stratum <span class="math inline">\(k\)</span>’s probe lands in particle
@@ -460,7 +540,7 @@ class="math inline">\(f(\state^\idx) =\)</span></span>
 <canvas id="cv-est-sys" class="panel panel-short">
 </canvas>
 </div>
-<div class="proof">
+<div class="callout proof">
 <p><span class="proof-label">Unbiasedness.</span> The offset <span
 class="math inline">\(U\)</span> is <span
 class="math inline">\(\mathrm{Uniform}(0, 1/\np)\)</span>, so each probe
@@ -508,7 +588,7 @@ class="math inline">\(f\)</span> is not aligned with the weight
 periodicity.</p>
 <p><strong>Note.</strong> This counterexample depends on the particle
 ordering.<span
-class="sidenote-wrapper"><label for="sn-6" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-6" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-7" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-7" class="margin-toggle"/><span
 class="sidenote"><span class="citation" data-cites="douc.r:2005">Douc et
 al. (<a href="#ref-douc.r:2005" role="doc-biblioref">2005, Section
 3.4</a>)</span> observe that both stratified and systematic resampling
@@ -518,7 +598,9 @@ permutation, systematic resampling becomes empirically similar to
 residual/stratified. They conclude that the counterexample is likely a
 “rare” situation, but that it shows systematic resampling is not as
 robust a variance-reduction method as stratified or residual, and that
-its theoretical analysis is considerably harder.</span></span></p>
+its theoretical analysis is considerably harder.<br />
+<br />
+</span></span></p>
 </section>
 </section>
 <section id="residual-resampling" class="level2">
@@ -535,7 +617,7 @@ class="math inline">\(\resid^\idx = (\np\normwt^\idx - \lfloor
 \np\normwt^\idx \rfloor)/R\)</span>. This nondeterministic part of the
 algorithm could be done using any of the three CDF methods (select
 below).<span
-class="sidenote-wrapper"><label for="sn-7" class="margin-toggle">&#8853;</label><input type="checkbox" id="sn-7" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-8" class="margin-toggle">&#8853;</label><input type="checkbox" id="sn-8" class="margin-toggle"/><span
 class="marginnote"><span class="math inline">\(\Var_{\text{resid}} \leq
 \Var_{\text{mult}}\)</span> when phase 2 uses multinomial or stratified
 resampling <span class="citation" data-cites="douc.r:2005">(<a
@@ -544,10 +626,12 @@ href="#ref-douc.r:2005" role="doc-biblioref">Douc et al.,
 integer parts; the phase-2 choice affects only the residual variance.
 Note that residual-systematic does not have this guarantee, since
 systematic resampling can hit the same counterexample on the residual
-weights.</span></span> The right plot shows the residual CDF (solid)
-overlaid on the original weights CDF (dotted). For highly skewed
-weights, you can see that first allocating the deterministic weights
-makes the residual CDF much more even than the original was.</p>
+weights.<br />
+<br />
+</span></span> The right plot shows the residual CDF (solid) overlaid on
+the original weights CDF (dotted). For highly skewed weights, you can
+see that first allocating the deterministic weights makes the residual
+CDF much more even than the original was.</p>
 <div id="resid-code" class="highlighter-rouge code-sidenote">
 <div class="highlight">
 <pre class="highlight"><code><span class="c1"># Phase 1 (deterministic): guaranteed copies from the integer part</span>
@@ -596,7 +680,7 @@ class="math inline">\(f(\state^\idx) =\)</span></span>
 <canvas id="cv-est-resid" class="panel panel-short">
 </canvas>
 </div>
-<div class="proof">
+<div class="callout proof">
 <p><span class="proof-label">Unbiasedness.</span> Phase 1 gives particle
 <span class="math inline">\(\idx\)</span> exactly <span
 class="math inline">\(\lfloor \np\normwt^\idx \rfloor\)</span> copies.
@@ -720,7 +804,7 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a hr
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>u <span class="op">=</span> np.random.rand(N)    <span class="co"># one uniform draw per particle</span></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>bonus <span class="op">=</span> (u <span class="op">&gt;=</span> <span class="dv">1</span> <span class="op">-</span> p_bonus)    <span class="co"># inverse CDF: right of step → bonus</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>num_copies <span class="op">+=</span> bonus <span class="co"># total may differ from N</span></span></code></pre></div>
-<div class="proof">
+<div class="callout proof">
 <p><span class="proof-label">Unbiasedness.</span> Particle <span
 class="math inline">\(i\)</span> receives <span
 class="math inline">\(\lfloor \np\normwt^\idx \rfloor\)</span>
@@ -879,19 +963,70 @@ href="https://doi.org/10.1561/2200000074">https://doi.org/10.1561/2200000074</a>
 </div>
 </div>
 </section>
-        </div>
-      </article>
-    </div>
-  </main>
+</main>
 
-  <footer class="site-footer">
-    <div class="wrapper">
-      <span class="last-modified">Last modified: 2026-04-17 15:18</span>
-    </div>
-  </footer>
+<script>
+;(function() {
+  // Non-essential if user has JavaScript off. Just makes checkboxes look nicer.
+  var selector = '.task-list > li > input[type="checkbox"]';
+  var checkboxes = document.querySelectorAll(selector);
+  Array.from(checkboxes).forEach((checkbox) => {
+    var wasChecked = checkbox.checked;
+    checkbox.disabled = false;
+    checkbox.addEventListener('click', (ev) => {ev.target.checked = wasChecked});
+  });
 
-  <script src="/assets/js/collapse.js"></script>
-  <script src="/assets/js/active-nav.js"></script>
-  <script src="/assets/js/smc-resampling.bundle.js"></script>
+  function hoistAbove() {
+    const toHoist = document.querySelectorAll('main > .sidenote-wrapper + :not(.sidenote-wrapper)');
+    for (let i = toHoist.length - 1; i >= 0; i--) {
+      const source = toHoist[i];
+      let target = source.previousElementSibling;
+      while (target.previousElementSibling?.classList.contains('sidenote-wrapper')) {
+        target = target.previousElementSibling;
+      }
+      source.parentNode.insertBefore(source, target);
+    }
+  }
+
+  function sinkBelow() {
+    const toHoist = document.querySelectorAll('main > :not(.sidenote-wrapper) + .sidenote-wrapper');
+    for (let i = 0; i < toHoist.length; i++) {
+      const source = toHoist[i].previousElementSibling;
+      let target = source.nextElementSibling;
+      while (target.classList.contains('sidenote-wrapper')) {
+        target = target.nextElementSibling;
+      }
+      source.parentNode.insertBefore(source, target);
+    }
+  }
+
+  if (window.matchMedia('screen')) {
+    if (window.innerWidth <= 796) {
+      hoistAbove();
+    }
+    let prevSize = window.innerWidth;
+    // Needs to mirror breakpoints in :root settings in CSS variables
+    // 745px = --main-width-narrow
+    // 26px = --line-height
+    // 169px = side note min width narrow
+    const breakpoint = 26 + 550 + 26 + 169 + 26 - 1;
+    window.addEventListener('resize', function() {
+      const newSize = window.innerWidth;
+      if (prevSize >= breakpoint && newSize < breakpoint) {
+        hoistAbove();
+      } else if (prevSize < breakpoint && newSize >= breakpoint) {
+        sinkBelow();
+      }
+      prevSize = newSize;
+    });
+  }
+})();
+</script>
+<script src="/assets/js/smc-resampling.bundle.js"></script>
+<footer class="site-footer">
+  <div class="wrapper">
+    <span class="last-modified">Last modified: 2026-04-19 17:02</span>
+  </div>
+</footer>
 </body>
 </html>

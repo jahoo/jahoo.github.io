@@ -1,61 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Banach-Tarski: A basic magic of group theory — jacob hoover
-vigly</title>
-
-  <!-- MathJax v4: Pandoc emits \(...\) and \[...\] inside <span class="math"> -->
-  <script>
-  MathJax = {
-    tex: {
-      inlineMath: [['\\(', '\\)'], ['$', '$']],
-      displayMath: [['\\[', '\\]'], ['$$', '$$']]
-    }
-  };
-  </script>
-  <script id="MathJax-script" async
-    src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
-
-  <link rel="stylesheet" href="/assets/css/base.css">
-  <link rel="stylesheet" href="/assets/css/post.css">
-  <link rel="stylesheet" href="/assets/css/site.css">
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc-markdown-css-theme" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Jacob Louis Hoover" />
+  <meta name="dcterms.date" content="2013-05-02" />
+  <meta name="description" content="Scientific Program Coordinator at CHI FRO, LLC. Formerly Postdoc at MIT, Department of Brain and Cognitive Sciences. PhD in Linguistics from McGill University." />
+  <title>Banach-Tarski: A basic magic of group theory</title>
+  <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/theme.css" />
+  <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/skylighting-solarized-theme.css" />
+  <link rel="stylesheet" href="/assets/css/overrides.css" />
+  <link rel="stylesheet" href="/assets/css/site-chrome.css" />
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)'], ['$', '$']],
+    displayMath: [['\\[', '\\]'], ['$$', '$$']]
+  }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
 </head>
-<body class="page-style-post">
+<body>
+<header class="site-header">
+  <div class="wrapper">
+    <a class="site-title" href="/">
+      <span class="site-title-full">jacob hoover vigly</span>
+      <span class="site-title-short">jacob vigly</span>
+      <span class="site-title-xs">jv</span>
+    </a>
+    <nav class="site-nav">
+      <div class="trigger">
+        <a class="page-link" href="/">home</a>
+        <a class="page-link" href="/posts/">blog</a>
+      </div>
+    </nav>
+  </div>
+</header>
+<script src="/assets/js/section-marks.js" defer></script>
+<script src="/assets/js/active-nav.js" defer></script>
 
-  <header class="site-header">
-    <div class="wrapper">
-      <a class="site-title" href="/">
-        <span class="site-title-full">jacob hoover vigly</span>
-        <span class="site-title-short">jacob vigly</span>
-        <span class="site-title-xs">jv</span>
-      </a>
-      <nav class="site-nav">
-        <div class="trigger">
-          <a class="page-link" href="/">home</a>
-          <a class="page-link" href="/posts/">blog</a>
-        </div>
-      </nav>
-    </div>
-  </header>
+<header>
 
-  <main class="page-content">
-    <div class="wrapper">
-      <article>
+<h1 class="title">Banach-Tarski: A basic magic of group theory</h1>
 
-        <header class="post-header">
-          <h1 class="post-title">Banach-Tarski: A basic magic of group
-theory</h1>
-          <p class="post-meta">
-            <time>2013-05-02</time>
-            · Jacob Louis Hoover
-            · <span class="post-tags">note</span>
-          </p>
-        </header>
+<p class="post-meta">
+  <time datetime="2013-05-02">2013-05-02</time>
+  · Jacob Louis Hoover
+  · <span class="post-tags">note</span>
+</p>
+</header>
 
 
-        <div class="post-content">
+<hr class="post-divider" />
+
+
+
+<main>
 <p>The Banach-Tarski ‘paradox’ is a curious theorem from group
 theory.</p>
 <p>It shows <em>how to conjure things out of thin air</em> …but not with
@@ -65,24 +67,77 @@ choice</a>.<span
 class="sidenote-wrapper"><label for="sn-0" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-0" class="margin-toggle"/><span
 class="sidenote">You also need an infinitely divisible object, but only
 on short loan, because after you cut it up and reassemble it, you’ll
-have two!</span></span> Basically, it gives a method for taking a ball,
-cutting it up into many tiny pieces, and then putting the pieces back
-together to make two balls identical to the one you started with.</p>
+have two!<br />
+<br />
+</span></span> Basically, it gives a method for taking a ball, cutting
+it up into many tiny pieces, and then putting the pieces back together
+to make two balls identical to the one you started with.</p>
 <p>I was quite taken by it when I first learned of it, and wrote up <a
 href="/assets/pdfs/2013.05.02-banach-tarski.pdf">these self-contained
 notes (PDF)</a>.</p>
-        </div>
-      </article>
-    </div>
-  </main>
+</main>
 
-  <footer class="site-footer">
-    <div class="wrapper">
-      <span class="last-modified">Last modified: 2026-04-17 00:25</span>
-    </div>
-  </footer>
+<script>
+;(function() {
+  // Non-essential if user has JavaScript off. Just makes checkboxes look nicer.
+  var selector = '.task-list > li > input[type="checkbox"]';
+  var checkboxes = document.querySelectorAll(selector);
+  Array.from(checkboxes).forEach((checkbox) => {
+    var wasChecked = checkbox.checked;
+    checkbox.disabled = false;
+    checkbox.addEventListener('click', (ev) => {ev.target.checked = wasChecked});
+  });
 
-  <script src="/assets/js/collapse.js"></script>
-  <script src="/assets/js/active-nav.js"></script>
+  function hoistAbove() {
+    const toHoist = document.querySelectorAll('main > .sidenote-wrapper + :not(.sidenote-wrapper)');
+    for (let i = toHoist.length - 1; i >= 0; i--) {
+      const source = toHoist[i];
+      let target = source.previousElementSibling;
+      while (target.previousElementSibling?.classList.contains('sidenote-wrapper')) {
+        target = target.previousElementSibling;
+      }
+      source.parentNode.insertBefore(source, target);
+    }
+  }
+
+  function sinkBelow() {
+    const toHoist = document.querySelectorAll('main > :not(.sidenote-wrapper) + .sidenote-wrapper');
+    for (let i = 0; i < toHoist.length; i++) {
+      const source = toHoist[i].previousElementSibling;
+      let target = source.nextElementSibling;
+      while (target.classList.contains('sidenote-wrapper')) {
+        target = target.nextElementSibling;
+      }
+      source.parentNode.insertBefore(source, target);
+    }
+  }
+
+  if (window.matchMedia('screen')) {
+    if (window.innerWidth <= 796) {
+      hoistAbove();
+    }
+    let prevSize = window.innerWidth;
+    // Needs to mirror breakpoints in :root settings in CSS variables
+    // 745px = --main-width-narrow
+    // 26px = --line-height
+    // 169px = side note min width narrow
+    const breakpoint = 26 + 550 + 26 + 169 + 26 - 1;
+    window.addEventListener('resize', function() {
+      const newSize = window.innerWidth;
+      if (prevSize >= breakpoint && newSize < breakpoint) {
+        hoistAbove();
+      } else if (prevSize < breakpoint && newSize >= breakpoint) {
+        sinkBelow();
+      }
+      prevSize = newSize;
+    });
+  }
+})();
+</script>
+<footer class="site-footer">
+  <div class="wrapper">
+    <span class="last-modified">Last modified: 2026-04-17 00:25</span>
+  </div>
+</footer>
 </body>
 </html>

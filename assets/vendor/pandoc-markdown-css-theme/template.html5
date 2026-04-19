@@ -1,69 +1,96 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="$lang$" xml:lang="$lang$"$if(dir)$ dir="$dir$"$endif$>
 <head>
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc-markdown-css-theme" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="author" content="Jacob Louis Hoover" />
-  <meta name="dcterms.date" content="2021-01-11" />
-  <meta name="description" content="Scientific Program Coordinator at CHI FRO, LLC. Formerly Postdoc at MIT, Department of Brain and Cognitive Sciences. PhD in Linguistics from McGill University." />
-  <title>Simplest least-squares in Julia</title>
+$for(author-meta)$
+  <meta name="author" content="$author-meta$" />
+$endfor$
+$if(date-meta)$
+  <meta name="dcterms.date" content="$date-meta$" />
+$endif$
+$if(keywords)$
+  <meta name="keywords" content="$for(keywords)$$keywords$$sep$, $endfor$" />
+$endif$
+$if(description-meta)$
+  <meta name="description" content="$description-meta$" />
+$endif$
+  <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
   <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/theme.css" />
   <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/skylighting-solarized-theme.css" />
   <link rel="stylesheet" href="/assets/css/overrides.css" />
   <link rel="stylesheet" href="/assets/css/site-chrome.css" />
+$for(css)$
+  <link rel="stylesheet" href="$css$" />
+$endfor$
 <script>
 MathJax = {
   tex: {
-    inlineMath: [['\\(', '\\)'], ['$', '$']],
-    displayMath: [['\\[', '\\]'], ['$$', '$$']]
+    inlineMath: [['\\(', '\\)'], ['$$', '$$']],
+    displayMath: [['\\[', '\\]'], ['$$$$', '$$$$']]
+$if(mathjax-macros-json)$
+    , macros: $mathjax-macros-json$
+$endif$
   }
 };
 </script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+$for(header-includes)$
+  $header-includes$
+$endfor$
 </head>
 <body>
-<header class="site-header">
-  <div class="wrapper">
-    <a class="site-title" href="/">
-      <span class="site-title-full">jacob hoover vigly</span>
-      <span class="site-title-short">jacob vigly</span>
-      <span class="site-title-xs">jv</span>
-    </a>
-    <nav class="site-nav">
-      <div class="trigger">
-        <a class="page-link" href="/">home</a>
-        <a class="page-link" href="/posts/">blog</a>
-      </div>
-    </nav>
-  </div>
-</header>
-<script src="/assets/js/section-marks.js" defer></script>
-<script src="/assets/js/active-nav.js" defer></script>
+$for(include-before)$
+$include-before$
+$endfor$
 
 <header>
-
-<h1 class="title">Simplest least-squares in Julia</h1>
-
+$if(hide-post-title)$$else$
+<h1 class="title">$title$</h1>
+$endif$
+$if(subtitle)$
+<p class="subtitle">$subtitle$</p>
+$endif$
+$if(date)$
 <p class="post-meta">
-  <time datetime="2021-01-11">2021-01-11</time>
-  · Jacob Louis Hoover
-  · <span class="post-tags">note</span>
+  <time datetime="$date$">$date$</time>
+$if(author)$
+  · $if(author-url)$<a href="$author-url$">$author$</a>$else$$author$$endif$
+$endif$
+$if(tags)$
+  · <span class="post-tags">$for(tags)$$tags$$sep$, $endfor$</span>
+$endif$
 </p>
+$endif$
 </header>
 
-
+$if(hide-post-title)$$else$
 <hr class="post-divider" />
+$endif$
 
-
+$if(toc)$
+<nav id="$idprefix$TOC" role="doc-toc">
+  $if(return-url)$
+  <a href="$return-url$">$if(return-text)$$return-text$$else$← Return$endif$</a><br>
+  $endif$
+  <strong>Contents</strong><label for="contents">⊕</label>
+  <input type="checkbox" id="contents">
+  $table-of-contents$
+</nav>
+$endif$
 
 <main>
-<div class="wide full-width">
-<iframe src="/assets/simplest_linear_regression_example.html" width="100%" height="1800" frameborder="none">
-</iframe>
-</div>
+$body$
 </main>
 
+$if(return-url)$
+<footer>
+<p class="signoff">
+  <a href="$return-url$">$if(return-text)$$return-text$$else$← Return$endif$</a>
+</p>
+</footer>
+$endif$
 <script>
 ;(function() {
   // Non-essential if user has JavaScript off. Just makes checkboxes look nicer.
@@ -121,9 +148,17 @@ MathJax = {
   }
 })();
 </script>
+$for(include-after)$
+$include-after$
+$endfor$
+$for(js)$
+<script src="/assets/js/$js$.bundle.js"></script>
+$endfor$
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-04-19 12:03</span>
+$if(last-modified)$
+    <span class="last-modified">Last modified: $last-modified$</span>
+$endif$
   </div>
 </footer>
 </body>

@@ -1,0 +1,172 @@
+/* Site chrome: navbar, post-meta, footer.
+   Loaded on every page regardless of theme. Ports the old-theme look
+   for these elements verbatim; variable names mapped to Jez's palette. */
+
+/* ── Fonts used by the navbar ───────────────────────── */
+
+@font-face {
+  font-family: 'Linux Biolinum Outline';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Linux Biolinum Outline Regular'),
+       url('/assets/fonts/LinBiolinum/LinBiolinum_aU.woff') format('woff');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Linux Libertine';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Linux Libertine'),
+       url('/assets/fonts/LinLibertine/LinLibertine_Re-4.1_.8_.woff') format('woff');
+  font-display: swap;
+}
+
+/* ── Navbar ─────────────────────────────────────────── */
+
+/* Pull navbar flush to the top of the body — Jezs theme sets
+   padding-top: var(--title-margin-top) on body; we override so the
+   navbar sits at y=0. */
+body {
+  padding-top: 0;
+}
+
+.site-header {
+  /* Override Jezs `header { margin-left/right: var(--line-height) }` rules
+     in the narrow- and medium-width media queries so the navbar spans the
+     full viewport. */
+  margin: 0;
+  max-width: none;
+  border-top: 5px solid #424242;
+  border-bottom: none;
+  padding: 0;
+  position: relative;
+  overflow: visible;
+}
+.site-header .wrapper {
+  max-width: none;
+  padding: 0 30px;
+  display: block;
+  overflow: visible;
+  min-height: 35.1px;
+  line-height: 35.1px;
+  border-bottom: 0.5px solid #d5d5d5;
+}
+
+/* Site title uses <a>, so we have to override Jez's generic
+   a { color: var(--color-link) } + a:hover { text-decoration: underline }. */
+a.site-title,
+a.site-title:link,
+a.site-title:visited {
+  font-family: 'Linux Biolinum Outline';
+  font-size: 49.5px;
+  letter-spacing: -3px;
+  color: #828282;
+  line-height: 35.1px;
+  margin-bottom: 0;
+  white-space: nowrap;
+  float: left;
+  text-decoration: none;
+}
+a.site-title:hover {
+  color: #000;
+  text-decoration: none;
+}
+
+/* Three forms of the site title, cycled via media queries below.
+   ≥500px: full, <500px: short, <350px: xs. */
+.site-title .site-title-full { display: inline; }
+.site-title .site-title-short { display: none; }
+.site-title .site-title-xs { display: none; }
+
+.site-nav {
+  font-family: 'Linux Libertine', 'Computer Modern Concrete', Times, serif;
+  font-size: 1.5rem;
+  line-height: 35.1px;
+  float: right;
+  display: block;
+}
+.site-nav .trigger { white-space: nowrap; padding-top: 8px; }
+.site-nav .page-link { color: #999; text-decoration: none; }
+.site-nav .page-link:not(:last-child) { margin-right: 20px; }
+.site-nav .page-link:hover { color: #424242; }
+.site-nav .page-link.active { color: var(--color-accent-warm); }
+
+@media (max-width: 800px) {
+  .site-header .wrapper { padding: 0 15px; }
+}
+@media (max-width: 500px) {
+  .site-title .site-title-full { display: none; }
+  .site-title .site-title-short { display: inline; }
+  .site-nav .page-link:not(:last-child) { margin-right: 10px; }
+}
+@media (max-width: 350px) {
+  .site-title .site-title-short { display: none; }
+  .site-title .site-title-xs { display: inline; }
+}
+
+/* ── Post header: full-width title + post-meta ─────── */
+
+/* Let the post header extend rightward beyond main-width (into the
+   sidenote column), but keep its left edge aligned with main. At narrow
+   and medium breakpoints, Jez's inherited `margin-left: var(--line-height)`
+   already matches main. At very-wide breakpoints where main is centered,
+   manually compute the left margin so header still starts at main's left. */
+header:not(.site-header) {
+  max-width: none;
+  margin-right: 0;
+  padding-right: var(--line-height);
+  /* Jez only applies this at >= 1365px; we want it at all widths so the
+     post-divider and content below don't butt up against post-meta. */
+  margin-bottom: var(--line-height);
+}
+@media screen and (min-width: calc(745px + 2 * (52px + 206px + 52px))) {
+  header:not(.site-header) {
+    /* 100% (not 100vw) so scrollbar width is already excluded — match
+       main's `margin-left: auto` centering exactly. */
+    margin-left: calc((100% - var(--main-width)) / 2);
+    padding-right: 0;
+  }
+}
+
+/* ── Post meta (date · author · tags) under the title ─ */
+
+.post-meta {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin: 0.15rem 0;
+}
+.post-meta .post-tags { font-style: italic; }
+
+/* Subtle divider between post header and content, at body-text width.
+   Inserted by the vendored template as <hr class="post-divider"> at the
+   top of <main> when $date$ is set, so main's layout constraints give
+   it the right width/alignment automatically. */
+hr.post-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin-top: 0;
+  margin-bottom: var(--line-height);
+}
+
+/* ── Site footer (last-modified on every page) ──────── */
+
+.site-footer {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+.site-footer .wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.site-footer .last-modified {
+  color: #ccc;
+  font-size: 0.8rem;
+}
+@media (max-width: 500px) {
+  .site-footer { padding: 1rem; }
+}

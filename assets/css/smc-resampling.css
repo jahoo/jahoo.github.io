@@ -151,6 +151,10 @@ canvas.panel-short { height: 200px; }
     padding: 3px 0;
     font-size: 0.85em;
 }
+.control-row > p {
+    margin-top: 0;
+    margin-bottom: 0;
+}
 .control-row + .control-row {
     border-top: 1px solid #eee;
     margin-top: 3px;
@@ -171,24 +175,25 @@ canvas.panel-short { height: 200px; }
 .est-section { display: none; }
 .est-section.visible { display: block; }
 
-/* --- Insight callout --- */
-.insight {
-    border-left: 3px solid var(--s-accent, #467);
-    background: #f0f7fc;
+/* --- Callouts (.callout shared base; .insight / .proof variants) --- */
+.callout {
     padding: 0.6em 1em;
     margin: 1em 0;
     font-size: 0.92em;
     border-radius: 0 4px 4px 0;
+    border-left: 3px solid;
 }
+/* No wasted vertical space at top/bottom of callout. */
+.callout > p:first-child { margin-top: 0; }
+.callout > p:last-child { margin-bottom: 0; }
 
-/* --- Proof box --- */
-.proof {
-    border-left: 3px solid var(--s-border, #ddd);
+.callout.insight {
+    border-left-color: var(--s-accent, #467);
+    background: #f0f7fc;
+}
+.callout.proof {
+    border-left-color: var(--s-border, #ddd);
     background: var(--s-surface, #f6f8fa);
-    padding: 0.6em 1em;
-    margin: 1em 0;
-    font-size: 0.92em;
-    border-radius: 0 4px 4px 0;
 }
 .proof-label {
     font-weight: bold;
