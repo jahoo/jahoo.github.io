@@ -52,7 +52,11 @@ body {
   border-bottom: 0.5px solid #d5d5d5;
 }
 
-.site-title {
+/* Site title uses <a>, so we have to override Jez's generic
+   a { color: var(--color-link) } + a:hover { text-decoration: underline }. */
+a.site-title,
+a.site-title:link,
+a.site-title:visited {
   font-family: 'Linux Biolinum Outline';
   font-size: 49.5px;
   letter-spacing: -3px;
@@ -63,7 +67,10 @@ body {
   float: left;
   text-decoration: none;
 }
-.site-title:hover { color: #424242; }
+a.site-title:hover {
+  color: #000;
+  text-decoration: none;
+}
 
 /* Three forms of the site title, cycled via media queries below.
    ≥500px: full, <500px: short, <350px: xs. */
