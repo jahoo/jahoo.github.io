@@ -25,6 +25,16 @@ $for(css)$
 $endfor$
 ```
 
+### `template.html5` — add `$for(js)$` slot for per-page JS bundles
+
+Jez's template ships no slot for per-page JavaScript (only `$for(include-after)$`, which inserts raw files, not URLs). Our front-matter uses `js: - <name>` to reference bundles built into `/assets/js/<name>.bundle.js`. We add a `$for(js)$` loop just before `</body>`:
+
+```
+$for(js)$
+<script src="/assets/js/$js$.bundle.js"></script>
+$endfor$
+```
+
 ### `template.html5` — MathJax v4 replaces the `$math$` slot
 
 Upstream ships a `$math$` slot that Pandoc populates based on the `--katex` / `--mathjax` flag. This site uses MathJax v4 with per-page macros loaded from JSON via our `filters/mathjax-macros.lua` filter, which sets the `$mathjax-macros-json$` template variable. We replace the `$math$` slot with an explicit MathJax v4 configuration block so the per-page macros are picked up.

@@ -145,5 +145,8 @@ $endif$
 $for(include-after)$
 $include-after$
 $endfor$
+$for(js)$
+<script src="/assets/js/$js$.bundle.js"></script>
+$endfor$
 </body>
 </html>
