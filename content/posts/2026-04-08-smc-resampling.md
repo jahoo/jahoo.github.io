@@ -10,7 +10,7 @@ css:
 bibliography: assets/smc-resampling/references.bib
 reference-section-title: References
 toc: true
-toc-depth: 2
+toc-depth: 3
 link-citations: true
 mathjax-macros: assets/smc-resampling/macros.json
 ---
@@ -35,9 +35,7 @@ $\widehat{\E_{\target}[f]}\triangleq\E_{\widehat{\target}}[f]=\sum_\idx \normwt^
 
 In sequential importance sampling (SIS), we apply importance sampling sequentially, to approximate a _sequence_ of target distributions by maintaining an evolving population of particles, iteratively propagating and reweighting. One main issue with SIS is that it can suffer from **weight degeneracy**: When the weights become concentrated and the budget of $\np$ particles effectively behaves as if it were just one sample, defeating the purpose of having multiple particles.
 
-::: {.marginnote #mn-degen}
-<canvas id="cv-degeneracy" style="width:100%; height:200px; border:1px solid #ddd; border-radius:3px;"></canvas><br><span class="degen-toggle"><span class="degen-toggle-label" id="degen-label-sis">SIS</span><label class="degen-switch"><input type="checkbox" id="chk-degen-resample"><span class="degen-slider"></span></label><span class="degen-toggle-label" id="degen-label-smc">SMC</span></span> <button id="btn-degen-rerun" style="font-size:0.8em;">Re-run</button> <span id="degen-info" style="font-size:0.8em; margin-left:4px;"></span><br>**Particle weight evolution.**<br>Bars show normalized weights $\normwt_t^\idx$ at each step $t$ in a bootstrap particle filter on a Gaussian random walk model ($\state_t \sim \mathcal{N}(\state_{t-1}, 1)$; $y_t \sim \mathcal{N}(\state_t, 0.25)$; $y_t{=}2$). <br>*Click a particle to trace its lineage, or click a timestep label to see all ancestors.*<br><span id="degen-caption"></span>
-:::
+<canvas id="cv-degeneracy" style="width:100%; height:200px; border:1px solid #ddd; border-radius:3px;"></canvas><span class="degen-toggle"><span class="degen-toggle-label" id="degen-label-sis">SIS</span><label class="degen-switch"><input type="checkbox" id="chk-degen-resample"><span class="degen-slider"></span></label><span class="degen-toggle-label" id="degen-label-smc">SMC</span></span> <button id="btn-degen-rerun" style="font-size:0.8em;">Re-run</button> <span id="degen-info" style="font-size:0.8em; margin-left:4px;"></span><br>**Particle weight evolution.**<br>Bars show normalized weights $\normwt_t^\idx$ at each step $t$ in a bootstrap particle filter.^[Illustrated for a Gaussian random walk model: $\state_t \sim \mathcal{N}(\state_{t-1}, 1)$; $y_t \sim \mathcal{N}(\state_t, 0.25)$; $y_t{=}2$.] Click a particle to trace its lineage, or click a timestep label to see all ancestors. *<span id="degen-caption"></span>*
 
 This weight degeneracy issue is one key motivation for SMC, which generalizes from SIS by the addition of **resampling** steps. Resampling replaces a current set of particles (potentially with degenerate weights) with a new set of samples with weights all set to be equal, duplicating high-weight particles and dropping low-weight ones. This addresses weight degeneracy, but introduces a different problem: **path degeneracy**.^[I'm getting this terminology for the two kinds of degeneracy from the excellent @naesseth.c:2019 [Chapter 2]. They note that *adaptive resampling* can be a partial mitigation for path degeneracy. Only resample when the effective sample size $\text{ESS} = 1/\sum_\idx (\normwt^\idx)^2$ (which ranges from 1 when one particle has all the weight to $\np$ when weights are uniform) drops below a threshold (e.g., $\np/2$), rather than at every step. In this post I want to focus just on what happens when we _do_ resample, rather than on when to resample, but the ESS values in the illustration can give a sense of when resampling would be triggered in an adaptive resampling method.]
 After enough steps, all current particles may trace back to a single ancestor at earlier timesteps [*click on a timestep label in the illustration to see ancestry*].
