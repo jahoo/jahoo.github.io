@@ -108,7 +108,7 @@ h1.title {
   /* Doubled top margin (breathing room above title); tight bottom so
      post-meta hugs the title. Jez default for both is var(--line-height). */
   margin-top: calc(var(--line-height) * 2);
-  margin-bottom: 0.3rem;
+  margin-bottom: 1.3rem;
 }
 
 /* ── Tufte-style italic headings ───────────────────── */
