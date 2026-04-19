@@ -103,3 +103,19 @@ main h3,
 main h4 {
   font-style: italic;
 }
+
+/* ── Margin-ticks on headings (h1-h4) ──────────────── */
+/* A short vertical line hanging in the left margin beside each heading,
+   so section starts are easy to spot. Burgundy for h1, gray for h2-h4. */
+
+main h1:not(.title),
+main h2,
+main h3,
+main h4 {
+  margin-left: -0.8rem;
+  padding-left: calc(0.8rem - 3px);
+  border-left: 3px solid var(--color-border-heavy);
+}
+main h1:not(.title) {
+  border-left-color: var(--color-accent-warm);
+}
