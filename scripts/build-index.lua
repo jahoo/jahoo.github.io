@@ -146,6 +146,7 @@ table.sort(entries, function(a, b) return a.date > b.date end)
 local lines = {}
 lines[#lines+1] = "---"
 lines[#lines+1] = "title: posts"
+lines[#lines+1] = "css: [/assets/css/posts-list.css]"
 lines[#lines+1] = "---"
 lines[#lines+1] = ""
 lines[#lines+1] = "```{=html}"

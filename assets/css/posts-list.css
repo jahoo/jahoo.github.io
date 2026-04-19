@@ -1,0 +1,75 @@
+/* Posts-listing page styling: no bullets, upright titles, body-color
+   with underline-on-hover, yellow highlight for featured posts, post-meta
+   floating into the right margin on wide screens. */
+
+/* No bullets + kill default indent. Use ul.post-list specificity to beat
+   Jez's `ul:not(.task-list) { margin-left: var(--ul-indent-size) }`. */
+ul.post-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.post-list li {
+  margin-bottom: 1.5rem;
+}
+
+/* Titles — upright (overrides our h3 italic rule via higher specificity),
+   slightly larger than body, normal weight. */
+main .post-list h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.3;
+}
+
+/* Standard post link: body color, no underline. Underline + link color on hover. */
+.post-list a.post-link,
+.post-list a.post-link:link,
+.post-list a.post-link:visited {
+  color: var(--color-text);
+  text-decoration: none;
+}
+.post-list a.post-link:hover {
+  color: var(--color-link);
+  text-decoration: underline;
+}
+
+/* Highlighted (front-matter `highlighted: true`): thick soft-yellow
+   underline behind the text (negative offset pulls the underline up). */
+.post-list a.post-link-highlighted,
+.post-list a.post-link-highlighted:link,
+.post-list a.post-link-highlighted:visited {
+  color: var(--color-text);
+  text-decoration: underline 0.66rem lightgoldenrodyellow;
+  text-underline-offset: -0.33rem;
+  text-decoration-skip-ink: none;
+}
+.post-list a.post-link-highlighted:hover {
+  color: var(--color-link);
+}
+
+.post-list .post-meta {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+.post-list .post-meta .post-tags {
+  font-style: italic;
+}
+
+/* Wide mode: float post-meta into the right margin column so titles have
+   a clean vertical rhythm. Narrower: meta falls inline below the title. */
+@media (min-width: 1100px) {
+  .post-list li {
+    position: relative;
+  }
+  .post-list .post-meta {
+    position: absolute;
+    top: 0.25rem;
+    left: 100%;
+    margin-left: 2rem;
+    width: 40%;
+    line-height: 1.4;
+  }
+}
