@@ -113,7 +113,9 @@ main h4 {
 }
 
 /* ── Section marks on headings (h1-h4) ─────────────── */
-/* A light-gray § hangs in the left margin beside each section heading. */
+/* A light-gray § hangs in the left margin beside each section heading;
+   visible on hover, clickable as a self-link. Injected by
+   filters/heading-anchors.lua as <a class="section-mark" href="#id">§</a>. */
 
 main h1:not(.title),
 main h2,
@@ -121,22 +123,22 @@ main h3,
 main h4 {
   position: relative;
 }
-main h1:not(.title)::before,
-main h2::before,
-main h3::before,
-main h4::before {
-  content: "§";
+.section-mark {
   position: absolute;
   left: -0.75em;
   color: #bbb;
+  text-decoration: none;
   font-style: normal;
   font-weight: normal;
   opacity: 0;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, color 0.15s;
 }
-main h1:not(.title):hover::before,
-main h2:hover::before,
-main h3:hover::before,
-main h4:hover::before {
+main h1:not(.title):hover .section-mark,
+main h2:hover .section-mark,
+main h3:hover .section-mark,
+main h4:hover .section-mark {
   opacity: 1;
+}
+.section-mark:hover {
+  color: #888;
 }
