@@ -35,7 +35,7 @@ I sometimes post about things on the [blog](/posts/).
     <a class="extra arxiv" href="https://arxiv.org/abs/2603.05432">arXiv</a>
     <details class="pub-bibtex"><summary class="extra bib">bib</summary>
 <div class="sourceCode"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span><span class="va">@online</span>{<span class="ot">chan</span>.<span class="ot">r:2026arxiv</span>,</span>
-<span>  <span class="dt">title</span> = {Ensembling {{Language Models}} with {{Sequential Monte Carlo}}},</span>
+<span>  <span class="dt">title</span> = {Ensembling Language Models with Sequential {{Monte Carlo}}},</span>
 <span>  <span class="dt">author</span> = {Chan, Robin Shing Moon and Liu, Tianyu and Kiegeland, Samuel and Pasti, Clemente and Vigly, Jacob Hoover and O&#39;Donnell, Timothy J. and Cotterell, Ryan and Vieira, Tim},</span>
 <span>  <span class="dt">date</span> = {2026-03-05},</span>
 <span>  <span class="dt">eprint</span> = {2603.05432},</span>
