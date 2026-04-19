@@ -58,9 +58,10 @@ main .post-list h3 {
   font-style: italic;
 }
 
-/* Wide mode: float post-meta into the right margin column so titles have
-   a clean vertical rhythm. Narrower: meta falls inline below the title. */
-@media (min-width: 1100px) {
+/* Margin mode: float post-meta into the right margin column. Use the same
+   breakpoint Jez uses for sidenote appearance (26+550+26+169+26 = 797px);
+   below that sidenotes are inline, so the post-list meta falls inline too. */
+@media (min-width: calc(26px + 550px + 26px + 169px + 26px)) {
   .post-list li {
     position: relative;
   }
