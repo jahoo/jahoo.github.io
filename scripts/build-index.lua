@@ -153,7 +153,7 @@ lines[#lines+1] = "```{=html}"
 lines[#lines+1] = '<ul class="post-list">'
 
 for _, e in ipairs(entries) do
-  local cls = e.highlighted and "post-link-highlighted" or "post-link"
+  local cls = e.highlighted and "post-link highlighted" or "post-link"
   lines[#lines+1] = "  <li>"
   lines[#lines+1] = string.format('    <h3><a class="%s" href="%s">%s</a></h3>', cls, e.url, e.title)
   -- Format date nicely: YYYY-MM-DD → "D Mon YYYY"

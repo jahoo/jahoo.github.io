@@ -15,38 +15,33 @@ ul.post-list {
 }
 
 /* Titles — upright (overrides our h3 italic rule via higher specificity),
-   slightly larger than body, normal weight. */
+   a tad larger than body, normal weight. */
 main .post-list h3 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 400;
   font-style: normal;
   line-height: 1.3;
 }
 
-/* Standard post link: body color, no underline. Underline + link color on hover. */
+/* All post-links share the same thick underline-behind-text treatment;
+   only the decoration color varies: light gray for ordinary entries,
+   soft yellow for highlighted ones. */
 .post-list a.post-link,
 .post-list a.post-link:link,
 .post-list a.post-link:visited {
   color: var(--color-text);
-  text-decoration: none;
-}
-.post-list a.post-link:hover {
-  color: var(--color-link);
-  text-decoration: none;
-}
-
-/* Highlighted (front-matter `highlighted: true`): thick soft-yellow
-   underline behind the text (negative offset pulls the underline up). */
-.post-list a.post-link-highlighted,
-.post-list a.post-link-highlighted:link,
-.post-list a.post-link-highlighted:visited {
-  color: var(--color-text);
-  text-decoration: underline 0.66rem lightgoldenrodyellow;
+  text-decoration: underline 0.66rem #f0f0f0;
   text-underline-offset: -0.33rem;
   text-decoration-skip-ink: none;
 }
-.post-list a.post-link-highlighted:hover {
+.post-list a.post-link.highlighted,
+.post-list a.post-link.highlighted:link,
+.post-list a.post-link.highlighted:visited {
+  text-decoration-color: lightgoldenrodyellow;
+}
+
+.post-list a.post-link:hover {
   color: var(--color-link);
 }
 
