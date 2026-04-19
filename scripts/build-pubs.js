@@ -327,7 +327,6 @@ export function generateHomepage(aboutMarkdown, entries) {
     '',
     '<ul class="social-media-list">',
     `  <li><a href="${GOOGLE_SCHOLAR_URL}">Google Scholar</a></li>`,
-    '  <li><a href="/assets/bibliography/pubs.bib">BibTeX</a></li>',
     '</ul>',
     '',
     '```{=html}',

@@ -49,11 +49,12 @@ so a page can opt out of rendering its own title (e.g., the homepage where
 
 ### `template.html5` — `<hr class="post-divider">` between header and TOC
 
-When `$date$` is set in front-matter, the template inserts an `<hr
-class="post-divider">` as a sibling between `</header>` and the TOC
-(`<nav id="TOC">`). Styled via `.post-divider` in
-`assets/css/site-chrome.css` as a subtle 1px line below the post
-header and above the content (including the TOC contents).
+The template inserts an `<hr class="post-divider">` as a sibling
+between `</header>` and the TOC (`<nav id="TOC">`) on every page that
+doesn't set `hide-post-title: true` in front-matter. Styled via
+`.post-divider` in `assets/css/site-chrome.css` as a subtle 1px line
+below the post header and above the content. The homepage sets
+`hide-post-title: true` and so skips the divider.
 
 ### `theme.css` — include `hr.post-divider` in header/main/footer layout
 

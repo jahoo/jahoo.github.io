@@ -65,7 +65,7 @@ $endif$
 $endif$
 </header>
 
-$if(date)$
+$if(hide-post-title)$$else$
 <hr class="post-divider" />
 $endif$
 

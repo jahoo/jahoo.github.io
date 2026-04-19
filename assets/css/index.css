@@ -110,6 +110,11 @@ ul.pub-list {
   color: #333;
   font-size: 0.95rem;
 }
+/* Same visual as pub-venue but upright (not italic). */
+.pub-note {
+  color: #333;
+  font-size: 0.95rem;
+}
 .pub-list a.pub-venue,
 .pub-list a.pub-venue:visited {
   color: inherit;

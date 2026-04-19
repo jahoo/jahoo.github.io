@@ -33,7 +33,7 @@ main .post-list h3 {
 }
 .post-list a.post-link:hover {
   color: var(--color-link);
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 /* Highlighted (front-matter `highlighted: true`): thick soft-yellow

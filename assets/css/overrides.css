@@ -119,6 +119,12 @@ main h4 {
   font-style: italic;
 }
 
+/* ── Link hover: gray underline instead of link-colored ─ */
+
+a:hover {
+  text-decoration-color: #bbb;
+}
+
 /* ── Section marks on headings (h1-h4) ─────────────── */
 /* A light-gray § hangs in the left margin beside each section heading;
    visible on hover, clickable as a self-link. Injected by
