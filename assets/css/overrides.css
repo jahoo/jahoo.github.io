@@ -41,6 +41,10 @@
   --title-font-size: 40px;
   --title-code-font-size: 32px;
 
+  /* Inline code inside h1/h2 — smaller than Jez defaults (29/20). */
+  --h1-code-font-size: 26px;
+  --h2-code-font-size: 17px;
+
   /* Warm off-white background + burgundy warm accent. */
   --background-color: #fffffc;
   --color-accent-warm: #611;
