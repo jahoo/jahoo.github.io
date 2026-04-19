@@ -127,8 +127,16 @@ main h3::before,
 main h4::before {
   content: "§";
   position: absolute;
-  left: -1.2em;
+  left: -0.75em;
   color: #bbb;
   font-style: normal;
   font-weight: normal;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+main h1:not(.title):hover::before,
+main h2:hover::before,
+main h3:hover::before,
+main h4:hover::before {
+  opacity: 1;
 }
