@@ -30,6 +30,8 @@
 
   /* et-book has a smaller x-height than system-ui, so bump to compensate. */
   --font-size: 18px;
+  /* Match old-theme body leading (ratio ~1.67 vs Jez's 1.44). */
+  --line-height: 30px;
 
   /* Warm off-white background + burgundy warm accent. */
   --background-color: #fffffc;
