@@ -90,6 +90,7 @@ body {
 @media (max-width: 500px) {
   .site-title .site-title-full { display: none; }
   .site-title .site-title-short { display: inline; }
+  .site-nav .page-link:not(:last-child) { margin-right: 10px; }
 }
 @media (max-width: 350px) {
   .site-title .site-title-short { display: none; }
