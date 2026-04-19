@@ -10,7 +10,8 @@ JS_BUNDLES := $(patsubst src/%/index.js,$(OUTDIR)/assets/js/%.bundle.js,$(JS_ENT
 STATIC_DIRS := assets/css assets/js assets/fonts assets/images assets/bibliography \
                assets/CV assets/frozen assets/pdfs assets/rejection-sampling-expo \
                assets/simplest_linear_regression_example assets/smc-resampling \
-               assets/transform-pdf assets/2022-01-25-MCQLL-talk
+               assets/transform-pdf assets/2022-01-25-MCQLL-talk \
+               assets/vendor
 
 ROOT_HTML   := interactive-divergence-fitting.html interactive-kl-fitting.html
 PRESENTATION_DIRS := $(wildcard 20[0-9][0-9]-*/)

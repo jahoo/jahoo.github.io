@@ -7,11 +7,18 @@
 set -e
 
 OUTDIR="_site"
-PANDOC_COMMON="--standalone --metadata-file site.yaml --template templates/base.html --section-divs --mathjax --citeproc --csl assets/bibliography/apa.csl"
+PANDOC_COMMON="--standalone \
+  --metadata-file site.yaml \
+  --template assets/vendor/pandoc-markdown-css-theme/template.html5 \
+  --include-before-body templates/navbar.html \
+  --css /assets/vendor/pandoc-markdown-css-theme/theme.css \
+  --section-divs --mathjax --citeproc \
+  --csl assets/bibliography/apa.csl"
 FILTER_FLAGS=""
 for f in filters/*.lua; do
   [ -f "$f" ] && FILTER_FLAGS="$FILTER_FLAGS --lua-filter $f"
 done
+FILTER_FLAGS="$FILTER_FLAGS --lua-filter assets/vendor/pandoc-markdown-css-theme/pandoc-sidenote.lua"
 
 # Strip YYYY-MM-DD- prefix from a filename
 strip_date() {
@@ -36,7 +43,7 @@ for src in content/posts/*.md; do
   dest="$OUTDIR/posts/$slug/index.html"
 
   # Check if source is newer than destination
-  if [ "$src" -nt "$dest" ] || [ templates/base.html -nt "$dest" ] || [ site.yaml -nt "$dest" ]; then
+  if [ "$src" -nt "$dest" ] || [ assets/vendor/pandoc-markdown-css-theme/template.html5 -nt "$dest" ] || [ templates/navbar.html -nt "$dest" ] || [ site.yaml -nt "$dest" ]; then
     build_one "$src" "$dest"
   fi
 
@@ -62,7 +69,7 @@ for src in content/*.md; do
   basename=$(basename "$src" .md)
   case "$basename" in _*) continue ;; esac
   dest="$OUTDIR/$basename/index.html"
-  if [ "$src" -nt "$dest" ] || [ templates/base.html -nt "$dest" ]; then
+  if [ "$src" -nt "$dest" ] || [ assets/vendor/pandoc-markdown-css-theme/template.html5 -nt "$dest" ] || [ templates/navbar.html -nt "$dest" ]; then
     build_one "$src" "$dest"
   fi
 done
@@ -78,7 +85,7 @@ for src in _generated/*.md; do
   else
     dest="$OUTDIR/$basename/index.html"
   fi
-  if [ "$src" -nt "$dest" ] || [ templates/base.html -nt "$dest" ]; then
+  if [ "$src" -nt "$dest" ] || [ assets/vendor/pandoc-markdown-css-theme/template.html5 -nt "$dest" ] || [ templates/navbar.html -nt "$dest" ]; then
     build_one "$src" "$dest"
   fi
 done
