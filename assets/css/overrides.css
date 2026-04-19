@@ -142,3 +142,22 @@ main h4:hover .section-mark {
 .section-mark:hover {
   color: #888;
 }
+
+/* ── TOC inline styling ────────────────────────────── */
+/* Plain body text color (no link blue); underline on hover.
+   No list bullets — nested indentation carries the hierarchy. Slightly
+   smaller than body. */
+
+nav#TOC a,
+nav#TOC a:link,
+nav#TOC a:visited {
+  color: var(--color-text);
+  text-decoration: none;
+}
+nav#TOC a:hover {
+  text-decoration: underline;
+}
+nav#TOC ul {
+  list-style: none;
+  font-size: 16px;
+}

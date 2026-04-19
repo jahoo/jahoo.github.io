@@ -173,7 +173,7 @@ $K$ trials** to see means settle toward the weights.
 <canvas id="cv-est-multi" class="panel panel-short"></canvas>
 </div>
 
-<div class="proof">
+<div class="callout proof">
 <span class="proof-label">Unbiasedness.</span>
 Each probe $\probe_k$ is independently $\mathrm{Uniform}(0,1)$, so it
 lands in particle $\idx$'s CDF segment (of width $\normwt^\idx$) with
@@ -196,7 +196,7 @@ and draw one independent uniform within each, resulting in lower variance.^[See 
 positions = (random(N) + range(N)) / N
 ```
 
-::: {.insight}
+::: {.callout .insight}
 Each stratum gets exactly one probe, so we can bound the counts
 $\lfloor \np\normwt^\idx \rfloor \leq \cnt^\idx \leq \lceil \np\normwt^\idx \rceil$.
 :::
@@ -225,7 +225,7 @@ $\lfloor \np\normwt^\idx \rfloor \leq \cnt^\idx \leq \lceil \np\normwt^\idx \rce
 <canvas id="cv-est-strat" class="panel panel-short"></canvas>
 </div>
 
-<div class="proof">
+<div class="callout proof">
 <span class="proof-label">Unbiasedness.</span>
 Write $\mathbf{1}_k^\idx$ for the indicator that stratum $k$'s
 probe lands in particle $\idx$'s segment. Within stratum $k$, the
@@ -276,7 +276,7 @@ positions = (random() + np.arange(N)) / N
 <canvas id="cv-est-sys" class="panel panel-short"></canvas>
 </div>
 
-<div class="proof">
+<div class="callout proof">
 <span class="proof-label">Unbiasedness.</span>
 The offset $U$ is $\mathrm{Uniform}(0, 1/\np)$, so each probe
 $\probe_k = U + (k{-}1)/\np$ is marginally
@@ -362,7 +362,7 @@ indexes[k:N] = np.searchsorted(cumsum(residual), positions)</code></pre></div></
 <canvas id="cv-est-resid" class="panel panel-short"></canvas>
 </div>
 
-<div class="proof">
+<div class="callout proof">
 <span class="proof-label">Unbiasedness.</span>
 Phase 1 gives particle $\idx$ exactly $\lfloor \np\normwt^\idx \rfloor$
 copies. Phase 2 resamples $R = \np - \sum_j \lfloor \np\normwt^j
@@ -447,7 +447,7 @@ num_copies += bonus # total may differ from N
 
 
 
-<div class="proof">
+<div class="callout proof">
 <span class="proof-label">Unbiasedness.</span>
 Particle $i$ receives $\lfloor \np\normwt^\idx \rfloor$ deterministic
 copies plus one bonus copy with probability $\np\normwt^\idx - \lfloor
