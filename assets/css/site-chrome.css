@@ -23,7 +23,19 @@
 
 /* ── Navbar ─────────────────────────────────────────── */
 
+/* Pull navbar flush to the top of the body — Jezs theme sets
+   padding-top: var(--title-margin-top) on body; we override so the
+   navbar sits at y=0. */
+body {
+  padding-top: 0;
+}
+
 .site-header {
+  /* Override Jezs `header { margin-left/right: var(--line-height) }` rules
+     in the narrow- and medium-width media queries so the navbar spans the
+     full viewport. */
+  margin: 0;
+  max-width: none;
   border-top: 5px solid #424242;
   border-bottom: none;
   padding: 0;

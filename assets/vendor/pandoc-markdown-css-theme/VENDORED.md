@@ -30,6 +30,12 @@ Link `skylighting-solarized-theme.css` in addition to `theme.css`, between the t
 Link `/assets/css/site-chrome.css` on every page. Carries navbar,
 post-meta, and footer styling — not theme-specific, shared chrome.
 
+### `template.html5` — `hide-post-title` front-matter flag
+
+Wrap the `<h1 class="title">` emission in `$if(hide-post-title)$$else$...$endif$`
+so a page can opt out of rendering its own title (e.g., the homepage where
+"home" reads redundantly).
+
 ### `template.html5` — replace `<blockquote class="metadata">` with old-theme post-meta
 
 Drop Jez's stacked metadata paragraphs in favor of a single inline

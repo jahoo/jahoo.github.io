@@ -46,7 +46,9 @@ $include-before$
 $endfor$
 
 <header>
+$if(hide-post-title)$$else$
 <h1 class="title">$title$</h1>
+$endif$
 $if(subtitle)$
 <p class="subtitle">$subtitle$</p>
 $endif$
