@@ -105,6 +105,10 @@ mjx-container {
 
 h1.title {
   color: var(--color-accent-warm);
+  /* Doubled top margin (breathing room above title); tight bottom so
+     post-meta hugs the title. Jez default for both is var(--line-height). */
+  margin-top: calc(var(--line-height) * 2);
+  margin-bottom: 0.3rem;
 }
 
 /* ── Tufte-style italic headings ───────────────────── */

@@ -1108,13 +1108,15 @@ nav#TOC > input:checked + ul {
 @media screen and (min-width: calc(745px + 2 * (52px + 206px + 52px))) {
   header,
   main,
-  footer {
+  footer,
+  hr.post-divider {
     max-width: var(--main-width);
   }
 
   header,
   main,
-  footer {
+  footer,
+  hr.post-divider {
     margin-left: auto;
     margin-right: auto;
   }
@@ -1168,7 +1170,8 @@ nav#TOC > input:checked + ul {
   header,
   nav#TOC,
   main,
-  footer {
+  footer,
+  hr.post-divider {
     margin-left: calc(2 * var(--line-height));
     max-width: var(--main-width);
     margin-right: auto;
@@ -1234,7 +1237,8 @@ nav#TOC > input:checked + ul {
   header,
   nav#TOC,
   main,
-  footer {
+  footer,
+  hr.post-divider {
     margin-left: var(--line-height);
     max-width: calc(max(var(--main-width-narrow), 100vw - (3 * var(--line-height)) - var(--side-note-max-width)));
     margin-right: auto;
@@ -1285,7 +1289,8 @@ nav#TOC > input:checked + ul {
   header,
   nav#TOC,
   main,
-  footer {
+  footer,
+  hr.post-divider {
     margin-left: var(--line-height);
     margin-right: var(--line-height);
   }
@@ -1409,7 +1414,8 @@ nav#TOC > input:checked + ul {
   header,
   nav#TOC,
   main,
-  footer {
+  footer,
+  hr.post-divider {
     width: 5.25in;
     margin-right: auto;
   }

@@ -65,6 +65,10 @@ $endif$
 $endif$
 </header>
 
+$if(date)$
+<hr class="post-divider" />
+$endif$
+
 $if(toc)$
 <nav id="$idprefix$TOC" role="doc-toc">
   $if(return-url)$
@@ -77,9 +81,6 @@ $if(toc)$
 $endif$
 
 <main>
-$if(date)$
-<hr class="post-divider" />
-$endif$
 $body$
 </main>
 

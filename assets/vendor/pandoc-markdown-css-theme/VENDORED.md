@@ -47,13 +47,21 @@ Wrap the `<h1 class="title">` emission in `$if(hide-post-title)$$else$...$endif$
 so a page can opt out of rendering its own title (e.g., the homepage where
 "home" reads redundantly).
 
-### `template.html5` — `<hr class="post-divider">` at the top of `<main>`
+### `template.html5` — `<hr class="post-divider">` between header and TOC
 
 When `$date$` is set in front-matter, the template inserts an `<hr
-class="post-divider">` as the first child of `<main>`. Styled via
-`.post-divider` in `assets/css/site-chrome.css` as a subtle 1px line
-between the post header and the body content. Placing it inside
-`<main>` gives it the right width and alignment automatically.
+class="post-divider">` as a sibling between `</header>` and the TOC
+(`<nav id="TOC">`). Styled via `.post-divider` in
+`assets/css/site-chrome.css` as a subtle 1px line below the post
+header and above the content (including the TOC contents).
+
+### `theme.css` — include `hr.post-divider` in header/main/footer layout
+
+Extended six `header, [nav#TOC,] main, footer { ... }` selector lists
+to also include `hr.post-divider`. This gives the hr the same width
+and alignment as `main` at every media breakpoint (otherwise, as a
+sibling of `main` at `body` level, the hr would span the full body
+width instead of body-text width).
 
 ### `template.html5` — replace `<blockquote class="metadata">` with old-theme post-meta
 
