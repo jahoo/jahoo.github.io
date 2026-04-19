@@ -34,5 +34,7 @@ Since KL is nonnegative, R can take on values between 0 and the surprisal. Put a
 
 Manipulate prior and likelihood sliders below to see posterior and resulting surprisal partition:
 
+<div class="wide full-width">
 <iframe width="100%" height="1509" frameborder="0"
   src="https://observablehq.com/embed/@postylem/kl-and-surprisal?cells=viewof+showOtherKL%2Cplot1_1%2Cplot1_2%2Cviewof+dim%2Cviewof+useLogInput%2Cviewof+allowZeroes%2Cinput1%2Cviewof+scale_prior%2Cviewof+scale_likelihood%2Cviewof+applyScaleLikelihood1%2Cmodification_plots%2Cviewof+whetherPlotLogSpace%2Cviewof+maxUnits%2Cviewof+base"></iframe>
+</div>

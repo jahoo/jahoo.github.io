@@ -5,7 +5,7 @@ author: Jacob Louis Hoover
 tags: [note]
 ---
 
-<div>
+<div class="wide full-width">
 <iframe src="/assets/transform-pdf/q/notebooks/transform-pdf.html" width="100%" height="10150" frameborder=none>
 </iframe>
 </div>

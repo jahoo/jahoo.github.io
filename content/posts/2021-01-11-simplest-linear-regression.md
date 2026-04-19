@@ -5,7 +5,7 @@ author: Jacob Louis Hoover
 tags: [note]
 ---
 
-<div>
+<div class="wide full-width">
 <iframe src="/assets/simplest_linear_regression_example.html" width="100%" height="1800" frameborder=none>
 </iframe>
 </div>
