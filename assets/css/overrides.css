@@ -48,6 +48,13 @@
   -moz-osx-font-smoothing: auto;
 }
 
+/* Safari-only bug: hanging-punctuation: first on body (Jez's theme) makes
+   MathJax's opening (, [, { hang into the left margin inside <mjx-container>.
+   Reset just for math — prose still benefits from the hanging effect. */
+mjx-container {
+  hanging-punctuation: none;
+}
+
 h1.title {
   color: var(--color-accent-warm);
 }
