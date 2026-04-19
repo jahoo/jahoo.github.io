@@ -112,18 +112,23 @@ main h4 {
   font-style: italic;
 }
 
-/* ── Margin-ticks on headings (h1-h4) ──────────────── */
-/* A short vertical line hanging in the left margin beside each heading,
-   so section starts are easy to spot. Burgundy for h1, gray for h2-h4. */
+/* ── Section marks on headings (h1-h4) ─────────────── */
+/* A light-gray § hangs in the left margin beside each section heading. */
 
 main h1:not(.title),
 main h2,
 main h3,
 main h4 {
-  margin-left: -0.8rem;
-  padding-left: calc(0.8rem - 3px);
-  border-left: 3px solid var(--color-border-heavy);
+  position: relative;
 }
-main h1:not(.title) {
-  border-left-color: var(--color-accent-warm);
+main h1:not(.title)::before,
+main h2::before,
+main h3::before,
+main h4::before {
+  content: "§";
+  position: absolute;
+  left: -1.2em;
+  color: #bbb;
+  font-style: normal;
+  font-weight: normal;
 }
