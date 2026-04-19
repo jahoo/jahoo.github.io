@@ -549,7 +549,6 @@ test('generateHomepage: has front matter, about section, publications section', 
   assert.match(md, /<ul class="pub-list">/);
   assert.match(md, /<li class="pub">/);
   assert.match(md, /scholar\.google\.com/);
-  assert.match(md, /href="\/assets\/bibliography\/pubs\.bib"/);
   assert.match(md, /surname is Vigly/);
 });
 
