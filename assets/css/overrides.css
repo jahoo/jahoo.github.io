@@ -30,6 +30,14 @@
 
   /* et-book has a smaller x-height than system-ui, so bump to compensate. */
   --font-size: 18px;
+
+  /* Warm off-white background + burgundy warm accent. */
+  --background-color: #fffffc;
+  --color-accent-warm: #611;
+}
+
+h1.title {
+  color: var(--color-accent-warm);
 }
 
 /* ── Tufte-style italic headings ───────────────────── */
