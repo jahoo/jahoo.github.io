@@ -23,12 +23,15 @@ ul.pub-list {
      of .pub-list alone to match Jez's specificity. */
   margin: 1.5rem 0;
 }
+
+/* Tight vertical rhythm within entries (pub-author sets the base
+   line-height at 20px; surrounding parts hug it). */
 ul.social-media-list {
   margin-left: 0;
 }
 .pub-list li.pub {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.6rem;
   border-bottom: 1px solid var(--color-border);
 }
 .pub-list li.pub:last-child {
@@ -38,8 +41,9 @@ ul.social-media-list {
 .pub-title {
   font-family: 'Linux Libertine', 'Computer Modern Serif', Times, serif;
   font-size: 1.1rem;
+  line-height: 1.25;
   display: block;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.1rem;
 }
 .pub-list a.pub-title,
 .pub-list a.pub-title:visited {
@@ -57,14 +61,16 @@ ul.social-media-list {
 .pub-author {
   display: block;
   font-size: 0.95rem;
+  line-height: 20px;
   color: #555;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.1rem;
 }
 
 .pub-venue {
   font-style: italic;
   color: #333;
   font-size: 0.95rem;
+  line-height: 20px;
 }
 .pub-list a.pub-venue,
 .pub-list a.pub-venue:visited {
@@ -92,8 +98,9 @@ ul.social-media-list {
 }
 
 .pub-extras {
-  margin-top: 0.3rem;
+  margin-top: 0.15rem;
   font-size: 0.875rem;
+  line-height: 20px;
 }
 .pub-extras .extra {
   margin-right: 0.25rem;
