@@ -11,7 +11,6 @@ PANDOC_COMMON="--standalone \
   --metadata-file site.yaml \
   --template assets/vendor/pandoc-markdown-css-theme/template.html5 \
   --include-before-body templates/navbar.html \
-  --css /assets/vendor/pandoc-markdown-css-theme/theme.css \
   --section-divs --mathjax --citeproc \
   --csl assets/bibliography/apa.csl"
 FILTER_FLAGS=""

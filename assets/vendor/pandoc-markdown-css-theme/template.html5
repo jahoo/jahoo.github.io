@@ -17,14 +17,15 @@ $if(description-meta)$
   <meta name="description" content="$description-meta$" />
 $endif$
   <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+  <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/theme.css" />
 $for(css)$
   <link rel="stylesheet" href="$css$" />
 $endfor$
 <script>
 MathJax = {
   tex: {
-    inlineMath: [['\\(', '\\)'], ['$', '$']],
-    displayMath: [['\\[', '\\]'], ['$$', '$$']]
+    inlineMath: [['\\(', '\\)'], ['$$', '$$']],
+    displayMath: [['\\[', '\\]'], ['$$$$', '$$$$']]
 $if(mathjax-macros-json)$
     , macros: $mathjax-macros-json$
 $endif$
