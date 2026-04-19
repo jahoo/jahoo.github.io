@@ -33,6 +33,10 @@
   /* Slightly tighter than Jez default (1.44) and old theme (1.7) — ratio 1.56. */
   --line-height: 28px;
 
+  /* Smaller code than Jez defaults (15/14). */
+  --inline-code-font-size: 13px;
+  --code-block-font-size: 13px;
+
   /* Warm off-white background + burgundy warm accent. */
   --background-color: #fffffc;
   --color-accent-warm: #611;
