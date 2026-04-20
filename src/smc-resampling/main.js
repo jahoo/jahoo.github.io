@@ -357,15 +357,7 @@ function redrawAll() {
     drawBranchKillSection(cvBK, secBK, weights);
     // Section 7
     drawComparisonPanel(weights, compData);
-    // Estimator distributions for sections 3-6
-    drawEstDist('cv-est-multi', sec3, METHOD_COLORS.multinomial, 'Multinomial', weights);
-    drawEstDist('cv-est-strat', sec4, METHOD_COLORS.stratified, 'Stratified', weights);
-    drawEstDist('cv-est-sys',   sec5, METHOD_COLORS.systematic, 'Systematic', weights);
-    var p2 = getResidualPhase2() || 'multinomial';
-    var p2Short = { multinomial: 'Multi', stratified: 'Strat', systematic: 'Syst' };
-    drawEstDist('cv-est-resid', sec6, METHOD_COLORS.residual, 'Resid-' + (p2Short[p2] || p2), weights);
-    drawEstDist('cv-est-bk',   secBK, METHOD_COLORS.branchkill, 'Branch-kill', weights);
-    // Section 7 overlaid distributions
+    // Estimator distributions live only in the comparison section now.
     drawCompEstDist(compData, weights);
     // Toolbar is updated by toolbar.js
 }
@@ -438,9 +430,6 @@ function wireMethodButtons(prefix, sec, method) {
     });
     document.getElementById('btn-clear-' + prefix).addEventListener('click', function () {
         sec.probes = []; sec.counts = null; sec.hist = null; sec.mode = 'none';
-        document.getElementById('var-' + prefix).textContent = '';
-        var estEl = document.getElementById('est-' + prefix);
-        if (estEl) estEl.classList.remove('visible');
         redrawAll();
     });
     var slider = document.getElementById('slider-K-' + prefix);
@@ -451,12 +440,6 @@ function wireMethodButtons(prefix, sec, method) {
         sec.hist = runTrials(method, K, weights);
         sec.mode = 'ktrials';
         sec.probes = [];
-        var ev = evalEstimators(sec.hist, weights);
-        var estStd = ev ? Math.sqrt(ev.estVar) : 0;
-        setMathHTML('var-' + prefix,
-            'std of estimator ' + getTestFnLabel() + ' = ' + estStd.toFixed(4) + '  (' + K + ' trials)');
-        var estEl = document.getElementById('est-' + prefix);
-        if (estEl) estEl.classList.add('visible');
         redrawAll();
     });
 }
@@ -479,9 +462,6 @@ document.getElementById('btn-resample-sys').addEventListener('click', function (
 });
 document.getElementById('btn-clear-sys').addEventListener('click', function () {
     sec5.counts = null; sec5.hist = null; sec5.mode = 'none';
-    document.getElementById('var-sys').textContent = '';
-    var estEl = document.getElementById('est-sys');
-    if (estEl) estEl.classList.remove('visible');
     redrawAll();
 });
 (function () {
@@ -493,12 +473,6 @@ document.getElementById('btn-clear-sys').addEventListener('click', function () {
         sec5.hist = runTrials(resample.systematic, K, weights);
         sec5.mode = 'ktrials';
         sec5.probes = [];
-        var ev = evalEstimators(sec5.hist, weights);
-        var estStd = ev ? Math.sqrt(ev.estVar) : 0;
-        setMathHTML('var-sys',
-            'std of estimator ' + getTestFnLabel() + ' = ' + estStd.toFixed(4) + '  (' + K + ' trials)');
-        var estEl = document.getElementById('est-sys');
-        if (estEl) estEl.classList.add('visible');
         redrawAll();
     });
 })();
@@ -586,18 +560,12 @@ document.getElementById('select-resid-phase2').addEventListener('change', functi
     }
     sec6.detCounts = null; sec6.stoCounts = null; sec6.totalCounts = null;
     sec6.residualProbes = []; sec6.hist = null; sec6.mode = 'none';
-    document.getElementById('var-resid').textContent = '';
-    var estEl = document.getElementById('est-resid');
-    if (estEl) estEl.classList.remove('visible');
     redrawAll();
 });
 
 document.getElementById('btn-clear-resid').addEventListener('click', function () {
     sec6.detCounts = null; sec6.stoCounts = null; sec6.totalCounts = null;
     sec6.residualProbes = []; sec6.hist = null; sec6.mode = 'none';
-    document.getElementById('var-resid').textContent = '';
-    var estEl = document.getElementById('est-resid');
-    if (estEl) estEl.classList.remove('visible');
     redrawAll();
 });
 (function () {
@@ -608,12 +576,6 @@ document.getElementById('btn-clear-resid').addEventListener('click', function ()
         var K = parseInt(slider.value, 10);
         sec6.hist = runTrials(function (w) { return resample.residual(w, getResidualPhase2()); }, K, weights);
         sec6.mode = 'ktrials';
-        var ev = evalEstimators(sec6.hist, weights);
-        var estStd = ev ? Math.sqrt(ev.estVar) : 0;
-        setMathHTML('var-resid',
-            'std of estimator ' + getTestFnLabel() + ' = ' + estStd.toFixed(4) + '  (' + K + ' trials)');
-        var estEl = document.getElementById('est-resid');
-        if (estEl) estEl.classList.add('visible');
         redrawAll();
     });
 })();
@@ -637,9 +599,6 @@ document.getElementById('btn-resample-bk').addEventListener('click', function ()
 document.getElementById('btn-clear-bk').addEventListener('click', function () {
     secBK.detCounts = null; secBK.bonusProbes = null; secBK.totalCounts = null;
     secBK.hist = null; secBK.mode = 'none';
-    document.getElementById('var-bk').textContent = '';
-    var estEl = document.getElementById('est-bk');
-    if (estEl) estEl.classList.remove('visible');
     redrawAll();
 });
 (function () {
@@ -650,12 +609,6 @@ document.getElementById('btn-clear-bk').addEventListener('click', function () {
         var K = parseInt(slider.value, 10);
         secBK.hist = runTrials(resample.branchkill, K, weights);
         secBK.mode = 'ktrials';
-        var ev = evalEstimators(secBK.hist, weights);
-        var estStd = ev ? Math.sqrt(ev.estVar) : 0;
-        setMathHTML('var-bk',
-            'std of estimator ' + getTestFnLabel() + ' = ' + estStd.toFixed(4) + '  (' + K + ' trials)');
-        var estEl = document.getElementById('est-bk');
-        if (estEl) estEl.classList.add('visible');
         redrawAll();
     });
 })();
@@ -706,16 +659,7 @@ allTestFnSelects.forEach(function (sel) {
     sel.addEventListener('change', function (e) {
         setTestFnKey(e.target.value);
         allTestFnSelects.forEach(function (s) { s.value = getTestFnKey(); });
-        [['multi', sec3], ['strat', sec4], ['sys', sec5], ['resid', sec6]].forEach(function (pair) {
-            var prefix = pair[0], sec = pair[1];
-            if (sec.hist && sec.hist.allCounts) {
-                var ev = evalEstimators(sec.hist, weights);
-                if (ev) {
-                    setMathHTML('var-' + prefix,
-                        'std of estimator ' + getTestFnLabel() + ' = ' + Math.sqrt(ev.estVar).toFixed(4) + '  (' + sec.hist.K + ' trials)');
-                }
-            }
-        });
+        // Estimator stats only live in the comparison section now.
         if (compData) {
             ['multi', 'strat', 'sys', 'resid'].forEach(function (key) {
                 var ev = evalEstimators(compData[key], weights);
@@ -726,11 +670,6 @@ allTestFnSelects.forEach(function (sel) {
                     document.getElementById('comp-std-' + key).textContent = std;
                 }
             });
-        }
-        if (secBK.hist) {
-            var evBK = evalEstimators(secBK.hist, weights);
-            if (evBK) setMathHTML('var-bk',
-                'std of estimator ' + getTestFnLabel() + ' = ' + Math.sqrt(evBK.estVar).toFixed(4) + '  (' + secBK.hist.K + ' trials)');
         }
         setTimeout(redrawAll, 0);
     });

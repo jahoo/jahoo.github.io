@@ -166,25 +166,14 @@ $K$ trials** to see means settle toward the weights.
 </div>
 </div>
 
-<div class="var-display" id="var-multi"></div>
-
-<div class="est-section" id="est-multi">
-<div class="testfn-row">
-<span>Estimator distribution for $f(\state^\idx)=$</span>
-<select class="testfn-select"></select>
-</div>
-<canvas id="cv-est-multi" class="panel panel-short"></canvas>
-</div>
-
-<div class="callout proof">
-<span class="proof-label">Unbiasedness.</span>
+::: {.callout .proof}
+[Unbiasedness.]{.proof-label}
 Each probe $\probe_k$ is independently $\mathrm{Uniform}(0,1)$, so it
 lands in particle $\idx$'s CDF segment (of width $\normwt^\idx$) with
 probability $\normwt^\idx$. With $\np$ independent probes,
 $\cnt^\idx \sim \mathrm{Binomial}(\np, \normwt^\idx)$ and
 $\E[\cnt^\idx] = \np\,\normwt^\idx$. ∎
-</div>
-
+:::
 
 ### Stratified resampling
 
@@ -218,18 +207,8 @@ $\lfloor \np\normwt^\idx \rfloor \leq \cnt^\idx \leq \lceil \np\normwt^\idx \rce
 </div>
 </div>
 
-<div class="var-display" id="var-strat"></div>
-
-<div class="est-section" id="est-strat">
-<div class="testfn-row">
-<span>Estimator distribution for $f(\state^\idx) =$</span>
-<select class="testfn-select"></select>
-</div>
-<canvas id="cv-est-strat" class="panel panel-short"></canvas>
-</div>
-
-<div class="callout proof">
-<span class="proof-label">Unbiasedness.</span>
+::: {.callout .proof}
+[Unbiasedness.]{.proof-label}
 Write $\mathbf{1}_k^\idx$ for the indicator that stratum $k$'s
 probe lands in particle $\idx$'s segment. Within stratum $k$, the
 probe is $\mathrm{Uniform}\bigl(\frac{k-1}{\np},\,
@@ -239,8 +218,7 @@ scaled by $\np$. Summing over all strata:
 $\E[\cnt^\idx] = \sum_{k=1}^{\np} \E[\mathbf{1}_k^\idx]
 = \np\,\normwt^\idx$, since the strata tile $[0,1]$ and particle $\idx$'s
 segment has total length $\normwt^\idx$. ∎
-</div>
-
+:::
 
 ### Systematic resampling
 
@@ -269,60 +247,28 @@ positions = (random() + np.arange(N)) / N
 </div>
 </div>
 
-<div class="var-display" id="var-sys"></div>
-
-<div class="est-section" id="est-sys">
-<div class="testfn-row">
-<span>Estimator distribution for $f(\state^\idx) =$</span>
-<select class="testfn-select"></select>
-</div>
-<canvas id="cv-est-sys" class="panel panel-short"></canvas>
-</div>
-
-<div class="callout proof">
-<span class="proof-label">Unbiasedness.</span>
+::: {.callout .proof}
+[Unbiasedness.]{.proof-label}
 The offset $U$ is $\mathrm{Uniform}(0, 1/\np)$, so each probe
 $\probe_k = U + (k{-}1)/\np$ is marginally
 $\mathrm{Uniform}\bigl(\frac{k-1}{\np},\, \frac{k}{\np}\bigr)$, the
 same distribution as the stratified probe in stratum $k$. The
 same tiling argument gives $\E[\cnt^\idx] = \np\,\normwt^\idx$.∎
-</div>
+:::
 
-Note that the probes are no longer independent. A single $U$
-determines all of them. The marginal distributions are identical
-to stratified, so unbiasedness holds, but the joint distribution
-differs (and so also the variance).
+Note that the probes are no longer independent. A single $U$ determines all of them. The marginal distributions are identical to stratified, so unbiasedness holds, but the joint distribution differs (and so also the variance).
 
 ### ⚠︎ Systematic can be higher variance than multinomial
 
-@douc.r:2005 [Section 3.4] give the following counterexample to the 
-"frequently encountered conjecture that systematic resampling 
-dominates multinomial resampling in terms of conditional variance."
-It's an example showing that the correlation becomes pathological when 
-$f$ aligns with a periodic weight pattern matching the comb spacing.
+It might seem like systematic resampling will always be at least as good as multinomial in terms of variance. And indeed @douc.r:2005 [Section 3.4] describe the "frequently encountered conjecture that systematic resampling dominates multinomial resampling in terms of conditional variance." But, **the conjecture is false**, and they give the following counterexample.
 
-
-With alternating weights (high, low, high, low, ...) and
-$f(\state^\idx) = \mathbf{1}[\idx \text{ even}]$, the comb teeth
-land either all on even or split evenly---producing a
-**bimodal** estimator. The systematic variance is
-$(\normwt_{\mathrm{even}}-\tfrac{1}{2})(1-\normwt_{\mathrm{even}})$,
-**constant in $\np$**, while multinomial's decreases as
-$\normwt_{\mathrm{even}}(1 - \normwt_{\mathrm{even}})/\np$.
-
-To see this in action, set $f$ to $\mathbf{1}[\idx \text{ even}]$ and weights to "Alternating" in the head-to-head comparison (Section 5), and observe that the systematic estimator variance is larger than multinomial's. Try switching to other test functions (e.g., mean position) to see the effect vanish when $f$ is not aligned with the weight periodicity.
+Consider a case where weights are a 'comb' alternating large, small, large, small, and the test function $f(\state^\idx) = \mathbf{1}[\idx \text{ even}]$.^[{-} To see this in action, set weights to the "Alternating" preset, and $f$ to $\mathbf{1}[\idx \text{ even}]$, and look at the variance in the head to head comparison in section @sec:comparison. Try switching to other test functions (e.g., mean position) to see the effect vanish when $f$ is not aligned with the weight periodicity.] In this case, systematic resampling leads to samples that are all on the 'large' weights, or split uniformly, producing a **bimodal** estimator. The systematic variance is $(\normwt_{\mathrm{even}}-\tfrac{1}{2})(1-\normwt_{\mathrm{even}})$, **constant in $\np$**, while multinomial's decreases as $\normwt_{\mathrm{even}}(1 - \normwt_{\mathrm{even}})/\np$.
 
 **Note.** This counterexample depends on the particle ordering.^[@douc.r:2005 [Section 3.4] observe that both stratified and systematic resampling are sensitive to particle ordering: permuting the indices before resampling changes the distribution of the resampled set. After random permutation, systematic resampling becomes empirically similar to residual/stratified. They conclude that the counterexample is likely a "rare" situation, but that it shows systematic resampling is not as robust a variance-reduction method as stratified or residual, and that its theoretical analysis is considerably harder.]
 
 ## 4. Residual resampling
 
-We could also consider a deterministic-stochastic hybrid, 
-where some particles are deterministically set, and others are allocated randomly. 
-In *residual resampling*, we give particle $\idx$ exactly
-$\lfloor \np\normwt^\idx \rfloor$ copies, then fill the remaining
-$R = \np - \sum_\idx \lfloor \np\normwt^\idx \rfloor$ slots by resampling
-on the **residual weights**
-$\resid^\idx = (\np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor)/R$. This nondeterministic part of the algorithm could be done using any of the three CDF methods (select below).^[{-} $\Var_{\text{resid}} \leq \Var_{\text{mult}}$ when phase 2 uses multinomial or stratified resampling [@douc.r:2005]. The deterministic phase removes variance for the integer parts; the phase-2 choice affects only the residual variance. Note that residual-systematic does not have this guarantee, since systematic resampling can hit the same counterexample on the residual weights.] The right plot shows the residual CDF (solid) overlaid on the original weights CDF (dotted). For highly skewed weights, you can see that first allocating the deterministic weights makes the residual CDF much more even than the original was.
+We could also consider a deterministic-stochastic hybrid, where some particles are deterministically set, and others are allocated randomly. In *residual resampling*, we give particle $\idx$ exactly $\lfloor \np\normwt^\idx \rfloor$ copies, then fill the remaining $R = \np - \sum_\idx \lfloor \np\normwt^\idx \rfloor$ slots by resampling on the **residual weights** $\resid^\idx = (\np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor)/R$. This nondeterministic part of the algorithm could be done using any of the three CDF methods (select below).^[{-} $\Var_{\text{resid}} \leq \Var_{\text{mult}}$ when phase 2 uses multinomial or stratified resampling [@douc.r:2005]. The deterministic phase removes variance for the integer parts; the phase-2 choice affects only the residual variance. Note that residual-systematic does not have this guarantee, since systematic resampling can hit the same counterexample on the residual weights.] The right plot shows the residual CDF (solid) overlaid on the original weights CDF (dotted). For highly skewed weights, you can see that first allocating the deterministic weights makes the residual CDF much more even than the original was.
 
 
 <div class="highlighter-rouge code-sidenote" id="resid-code"><div class="highlight"><pre class="highlight"><code><span class="c1"># Phase 1 (deterministic): guaranteed copies from the integer part</span>
@@ -355,18 +301,8 @@ indexes[k:N] = np.searchsorted(cumsum(residual), positions)</code></pre></div></
 </div>
 </div>
 
-<div class="var-display" id="var-resid"></div>
-
-<div class="est-section" id="est-resid">
-<div class="testfn-row">
-<span>Estimator distribution for $f(\state^\idx) =$</span>
-<select class="testfn-select"></select>
-</div>
-<canvas id="cv-est-resid" class="panel panel-short"></canvas>
-</div>
-
-<div class="callout proof">
-<span class="proof-label">Unbiasedness.</span>
+::: {.callout .proof}
+[Unbiasedness.]{.proof-label}
 Phase 1 gives particle $\idx$ exactly $\lfloor \np\normwt^\idx \rfloor$
 copies. Phase 2 resamples $R = \np - \sum_j \lfloor \np\normwt^j
 \rfloor$ particles using normalized residual weights $\resid^\idx =
@@ -376,14 +312,12 @@ number of phase-2 copies of particle $\idx$ is $R \cdot \resid^\idx =
 \np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor$. Adding the two phases:
 $\E[\cnt^\idx] = \lfloor \np\normwt^\idx \rfloor + (\np\normwt^\idx - \lfloor
 \np\normwt^\idx \rfloor) = \np\,\normwt^\idx$. ∎
-</div>
+:::
 
 
+## 5. Comparison {#sec:comparison}
 
-## 5. Comparison
-
-Comparing all four methods on the same weights: Colored error bars show
-mean count $\pm$ 1 std over $K$ trials.
+Comparing all four methods on the same weights: Colored error bars show mean count $\pm$ 1 std over $K$ trials.
 
 <div class="control-box">
 <div class="control-row">
@@ -392,7 +326,7 @@ mean count $\pm$ 1 std over $K$ trials.
 <span id="val-K-all">1000</span></label>
 <button id="btn-run-all" style="font-weight:600;">Run all four</button>
 <span style="flex:1;"></span>
-<button id="btn-set-counterexample" style="font-size:0.85em;">Douc et al. counterexample</button>
+<button id="btn-set-counterexample" style="font-size:0.85em;">Set Douc et al. counterexample</button>
 <button id="btn-reset-counterexample" style="font-size:0.85em; display:none;">Reset</button>
 </div>
 </div>
@@ -426,18 +360,11 @@ Residual <span class="c-residual" id="comp-std-resid"></span>
 
 ## 6. Other resampling schemes
 
-The four methods above are the most widely used, but they are
-not the only options.
+The four methods above are the most widely used, but they are not the only options.
 
 ### Branch-kill resampling
 
-The methods above all produce exactly $\np$ resampled particles.
-Branch-kill relaxes this: Each particle $\idx$ independently gets
-$\lfloor \np\normwt^\idx \rfloor$ deterministic copies plus one bonus
-copy with probability $\np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor$.
-No shared CDF or residual phase needed.
-The total $\sum_\idx \cnt^\idx$ fluctuates around $\np$ rather than
-equalling it exactly.
+The methods above all produce exactly $\np$ resampled particles. "Branch-kill" resampling relaxes that requirement: Each particle $\idx$ independently gets $\lfloor \np\normwt^\idx \rfloor$ deterministic copies plus one bonus copy with probability $\np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor$. No shared CDF or residual phase needed. The total $\sum_\idx \cnt^\idx$ fluctuates around $\np$ rather than equalling it exactly.
 
 ```python
 # For each particle independently:
@@ -448,15 +375,10 @@ bonus = (u >= 1 - p_bonus)    # inverse CDF: right of step → bonus
 num_copies += bonus # total may differ from N
 ```
 
+::: {.callout .proof}
+[Unbiasedness.]{.proof-label}
 
-
-<div class="callout proof">
-<span class="proof-label">Unbiasedness.</span>
-Particle $i$ receives $\lfloor \np\normwt^\idx \rfloor$ deterministic
-copies plus one bonus copy with probability $\np\normwt^\idx - \lfloor
-\np\normwt^\idx \rfloor$. So $\E[\cnt^\idx] = \lfloor \np\normwt^\idx \rfloor +
-(\np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor) = \np\,\normwt^\idx$. ∎
-</div>
+:::
 
 <canvas id="cv-bk" class="panel"></canvas>
 
@@ -472,15 +394,6 @@ copies plus one bonus copy with probability $\np\normwt^\idx - \lfloor
 </div>
 </div>
 
-<div class="var-display" id="var-bk"></div>
-
-<div class="est-section" id="est-bk">
-<div class="testfn-row">
-<span>Estimator distribution for $f(\state^\idx) =$</span>
-<select class="testfn-select"></select>
-</div>
-<canvas id="cv-est-bk" class="panel panel-short"></canvas>
-</div>
 
 ### Other extensions
 
@@ -488,14 +401,9 @@ copies plus one bonus copy with probability $\np\normwt^\idx - \lfloor
   deterministic: each particle gets $\mathrm{round}(\np\normwt^\idx)$
   copies. This uses zero random draws, but sacrifices the strict
   unbiasedness condition (the bias per particle is at most
-  $0.5/\np$, vanishing as $\np$ grows). See @li.t:2015.
+  $0.5/\np$, vanishing as $\np$ grows). 
 
-- **Optimal transport resampling.** Rather than mapping through a
-  CDF, one can frame resampling as a discrete optimal transport
-  problem, minimizing the expected distance between the original
-  and resampled particle positions. This preserves spatial
-  structure better than CDF-based methods but is more expensive.
-
+- See @li.t:2015 for this and a few more.
 
 ## 7. Resampling methods in action
 
