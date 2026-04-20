@@ -41,6 +41,9 @@
   --title-font-size: 40px;
   --title-code-font-size: 32px;
 
+  /* h1 smaller than Jez default (32px). */
+  --h1-font-size: 26px;
+
   /* Inline code inside h1/h2 — smaller than Jez defaults (29/20). */
   --h1-code-font-size: 26px;
   --h2-code-font-size: 17px;
@@ -58,6 +61,14 @@
   /* More generous heading margins (Tufte-style breathing room). */
   --h1-margin-bottom: 18px;
   --h2-margin-bottom: 12px;
+}
+
+/* Print: scale h1 down like Jez's print block (which sets 22px).
+   26 * (22/32) ≈ 18. */
+@media print {
+  :root {
+    --h1-font-size: 18px;
+  }
 }
 
 /* Jez has no --h3/h4 margin variables (universal * reset zeros all margins).
