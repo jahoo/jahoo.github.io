@@ -74,7 +74,7 @@ segments of width $\normwt^\idx$, and mapping from 'probe' locations on the unit
 
 <!-- Note, this smc-toolbar div is sticky, but that is bounded by the containing element's parent. The solution is in `initToolbar` in `src/smc-resampling/toolbar.js`. What it does: On page load it will find the top-level <section> (i.e. a direct child of <main>) that contains the toolbar, then reparent the toolbar to be a direct child of <main>, positioned immediately after that section  -->
 
-<div id="smc-toolbar" class="smc-toolbar">
+<div id="smc-toolbar" class="smc-toolbar wide extra-wide">
 <div class="smc-toolbar-item" id="smc-toolbar-weights">
 <span class="smc-toolbar-label">Weights:</span>
 <div class="smc-toolbar-dropdown" id="smc-toolbar-dropdown">
@@ -325,10 +325,10 @@ Comparing all four methods on the same weights: Colored error bars show mean cou
 <label style="font-size:0.85em; color:#555;">$K$:
 <input type="range" id="slider-K-all" min="100" max="10000" value="1000" step="100" style="width:120px; vertical-align:middle;">
 <span id="val-K-all">1000</span></label>
-<button id="btn-run-all" style="font-size:0.85em;">Compare variance</button>
+<button id="btn-run-all" style="font-size:0.85em;">Run $K$ trials</button>
 <span style="flex:1;"></span>
-<button id="btn-set-counterexample" style="font-size:0.85em;">Set to counterexample</button>
-<button id="btn-reset-counterexample" style="font-size:0.85em; display:none;">Reset</button>
+<button id="btn-set-counterexample" style="font-size:0.65em;">Set to counterexample</button>
+<button id="btn-reset-counterexample" style="font-size:0.65em; display:none;">Reset</button>
 </div>
 </div>
 
