@@ -73,7 +73,7 @@ segments of width $\normwt^\idx$, and mapping from 'probe' locations on the unit
 
 <!-- Note, this smc-toolbar div is sticky, but that is bounded by the containing element's parent. The solution is in `initToolbar` in `src/smc-resampling/toolbar.js`. What it does: On page load it will find the top-level <section> (i.e. a direct child of <main>) that contains the toolbar, then reparent the toolbar to be a direct child of <main>, positioned immediately after that section  -->
 
-<div id="smc-toolbar" class="smc-toolbar">
+<div id="smc-toolbar" class="smc-toolbar wide extra-wide">
 <div class="smc-toolbar-item" id="smc-toolbar-weights">
 <span class="smc-toolbar-label">Weights:</span>
 <div class="smc-toolbar-dropdown" id="smc-toolbar-dropdown">
@@ -188,10 +188,10 @@ $\E[\cnt^\idx] = \np\,\normwt^\idx$. ∎
 
 ### Stratified resampling
 
-You may have noticed that because the probes are all independently sampled in multinomial resampling, they can cluster and leave gaps. This leads to undesirable extra variance. 
+You may have noticed that because the probes are all independently sampled in multinomial resampling, they can cluster and leave gaps. This leads to undesirable extra variance (consider in particulr the case where the weights are roughly uniform).
+
 *Stratified resampling* introduces a technique to spread them more evenly: Partition $[0,1]$ into $\np$ equal
 **strata** $\bigl(\frac{k-1}{\np},\, \frac{k}{\np}\bigr)_{k=1}^{\np}$
-and draw one independent uniform within each, resulting in lower variance.^[See @douc.r:2005 for proof that $\Var_{\text{strat}} \leq \Var_{\text{mult}}$.]
 
 ```python
 # Steps 1 & 3 as above; only step 2 changes:

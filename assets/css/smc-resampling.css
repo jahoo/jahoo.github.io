@@ -14,7 +14,8 @@
     align-items: center;
     gap: 16px;
     font-size: 0.85em;
-    width: 100% !important;
+    /* Width is controlled by the `wide` class on the element (see
+       Jez's theme.css — .wide switches to main-width + sidenote span). */
     box-sizing: border-box;
 }
 .smc-toolbar-item {
