@@ -147,11 +147,11 @@ export function initToolbar(opts) {
         });
     }
 
-    // ---- Progressive reveal + sparkline update (rAF loop) ----
-    function tick() {
-        updateSparkline();
-        // Show/hide toolbar sections based on scroll position
-        var testfnTrigger = document.getElementById('btn-run-multi');
+    // ---- Progressive reveal: toggle testfn + phase2 items on scroll ----
+    // Test-function selector is only relevant from the Comparison section on
+    // (where the choice of f first matters). Phase-2 selector from §6 on.
+    function updateReveal() {
+        var testfnTrigger = document.getElementById('sec:comparison');
         var phase2Trigger = document.getElementById('cv-sec6');
         if (testfnItem && testfnTrigger) {
             testfnItem.style.display = testfnTrigger.getBoundingClientRect().top < 50 ? 'flex' : 'none';
@@ -159,10 +159,17 @@ export function initToolbar(opts) {
         if (phase2Item && phase2Trigger) {
             phase2Item.style.display = phase2Trigger.getBoundingClientRect().top < 50 ? 'flex' : 'none';
         }
-        requestAnimationFrame(tick);
     }
-    // Start tick loop + force initial draw
+    window.addEventListener('scroll', updateReveal, { passive: true });
+    window.addEventListener('resize', updateReveal);
+    updateReveal();
+
+    // ---- Sparkline + reveal poll (10Hz fallback in case scroll events
+    //      don't fire for programmatic scrolls / backgrounded tabs). ----
     lastJSON = '';
     updateSparkline();
-    requestAnimationFrame(tick);
+    setInterval(function () {
+        updateSparkline();
+        updateReveal();
+    }, 100);
 }

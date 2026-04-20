@@ -17,10 +17,10 @@
     /* Width is controlled by the `wide` class on the element (see
        Jez's theme.css — .wide switches to main-width + sidenote span). */
     box-sizing: border-box;
-    /* .wide sets overflow-x: auto, which would clip the dropdown menu
-       (absolutely-positioned and extending below the toolbar). Restore
-       visible overflow so the menu can spill out. */
-    overflow: visible;
+    /* Content stays on one line; horizontal scroll when it overflows. */
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: visible;
 }
 .smc-toolbar-item {
     display: flex;
@@ -176,6 +176,13 @@ canvas.panel-short { height: 200px; }
     font-size: 0.85em;
 }
 .control-row > p {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+/* Pandoc sometimes wraps inline toolbar content in <p>; its default
+   margin-top/-bottom would push the toolbar items to their own tall
+   rows. Zero it out inside toolbar items so everything stays on one line. */
+.smc-toolbar-item > p {
     margin-top: 0;
     margin-bottom: 0;
 }
