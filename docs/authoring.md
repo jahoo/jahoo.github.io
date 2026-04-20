@@ -191,6 +191,44 @@ Multiple: [@douc.r:2005; @li.t:2015]        → (Douc et al., 2005; Li et al., 2
 
 Pandoc auto-generates the bibliography at the end of the page. Add `link-citations: true` to front matter for clickable links from in-text citations to the bibliography.
 
+## Cross-references
+
+The build runs [pandoc-crossref](https://lierdakil.github.io/pandoc-crossref/)
+before citeproc, so `@sec:foo` / `@fig:foo` / `@tbl:foo` / `@eq:foo` syntax
+creates numbered, clickable references to labeled sections, figures, tables,
+and equations.
+
+```markdown
+Label a section:     ## Comparison {#sec:comparison}
+Reference it:        see @sec:comparison              → see §2.4
+Parenthetical:       (see [@sec:comparison])          → (see §2.4)
+```
+
+**Prefix defaults** (set site-wide in `site.yaml`):
+
+| Kind     | Prefix (singular / plural) |
+|----------|----------------------------|
+| Section  | `§` / `§§`                 |
+| Figure   | `Figure` / `Figures`       |
+| Table    | `Table` / `Tables`         |
+| Equation | `Eq.` / `Eqs.`             |
+
+No per-post setup is needed to use the defaults. To override for a single
+post, put the key in its front matter:
+
+```yaml
+---
+title: ...
+secPrefix: ["section", "sections"]   # "see section 2.4" instead of "see §2.4"
+---
+```
+
+(Same pattern for `figPrefix`, `tblPrefix`, `eqnPrefix`.)
+
+Section numbering reflects the heading hierarchy (h1.h2.h3), so how many
+top-level `#` headings you use affects the numbers. If you want flat numbering
+like "§5", keep the post at a single h1 or none; use h2+ for content sections.
+
 ## Callouts
 
 ```markdown

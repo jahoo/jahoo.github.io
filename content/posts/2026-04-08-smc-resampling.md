@@ -10,7 +10,6 @@ css:
 bibliography: assets/smc-resampling/references.bib
 reference-section-title: References
 toc: true
-toc-depth: 3
 link-citations: true
 mathjax-macros: assets/smc-resampling/macros.json
 ---
@@ -260,7 +259,7 @@ same tiling argument gives $\E[\cnt^\idx] = \np\,\normwt^\idx.$
 
 Note that the probes are no longer independent. A single $U$ determines all of them. The marginal distributions are identical to stratified, so unbiasedness holds, but the joint distribution differs (and so also the variance).
 
-### ⚠︎ Systematic can be higher variance than multinomial
+### ⚠︎ Systematic can be higher variance than multinomial {#sec:counterexample}
 
 It might seem like systematic resampling will always be at least as good as multinomial in terms of variance. And indeed @douc.r:2005 [Section 3.4] describe the "frequently encountered conjecture that systematic resampling dominates multinomial resampling in terms of conditional variance." But, **the conjecture is false**, and they give the following counterexample.
 
@@ -319,7 +318,7 @@ $\E[\cnt^\idx] = \lfloor \np\normwt^\idx \rfloor + (\np\normwt^\idx - \lfloor
 
 ## Comparison {#sec:comparison}
 
-Comparing all four methods on the same weights: Colored error bars show mean count $\pm$ 1 std over $K$ trials.
+Comparing all four methods on the same weights: Colored error bars show mean count $\pm$ 1 std over $K$ trials.^[Click the "set to counterexample" button to set weights and test function $f$ to the pathological values in order to show the counterexample described in @sec:counterexample above, where variance of systematic resampling is larger than multinomial.]
 
 <div class="control-box">
 <div class="control-row">
@@ -328,7 +327,7 @@ Comparing all four methods on the same weights: Colored error bars show mean cou
 <span id="val-K-all">1000</span></label>
 <button id="btn-run-all" style="font-size:0.85em;">Compare variance</button>
 <span style="flex:1;"></span>
-<button id="btn-set-counterexample" style="font-size:0.85em;">Set Douc et al. counterexample</button>
+<button id="btn-set-counterexample" style="font-size:0.85em;">Set to counterexample</button>
 <button id="btn-reset-counterexample" style="font-size:0.85em; display:none;">Reset</button>
 </div>
 </div>

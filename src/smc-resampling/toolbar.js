@@ -24,10 +24,11 @@ export function initToolbar(opts) {
     // section it came from) so it visually appears in roughly the same
     // place but sticks across the rest of the post.
     var toolbar = document.getElementById('smc-toolbar');
-    var main = document.querySelector('main');
-    if (toolbar && main && toolbar.parentElement !== main) {
-        var section = toolbar.closest('main > section');
-        if (section) section.after(toolbar);
+    if (toolbar) {
+        var section = toolbar.closest('section');
+        if (section && toolbar.parentElement !== section.parentElement) {
+            section.after(toolbar);
+        }
     }
 
     // ---- Element references ----
