@@ -219,6 +219,25 @@ canvas.panel-short { height: 200px; }
     border-left-color: var(--s-border, #ddd);
     background: var(--s-surface, #f6f8fa);
 }
+/* Proof header — italic "Proof:" by default, or italic "Proof" + non-italic
+   "(label):" when an optional inline .proof-label is present. */
+.callout.proof > :first-child::before {
+    content: "Proof:";
+    font-style: italic;
+    margin-right: 0.5em;
+}
+.callout.proof:has(.proof-label) > :first-child::before {
+    content: "Proof";
+    margin-right: 0;
+}
+.proof-label {
+    font-style: normal;
+    font-weight: normal;
+    margin-right: 0.5em;
+}
+.proof-label::before { content: " ("; }
+.proof-label::after  { content: "):"; }
+
 /* Auto-append a Q.E.D. tombstone at the end of the last line of a .proof.
    Floating right lets the text flow around it on that line and pushes the
    mark to the right edge. */
@@ -226,11 +245,6 @@ canvas.panel-short { height: 200px; }
     content: "□";
     float: right;
     margin-left: 0.5em;
-}
-.proof-label {
-    font-weight: bold;
-    font-style: italic;
-    margin-right: 0.3em;
 }
 
 /* --- Code callout (legacy pre.code-callout blocks) --- */

@@ -19,7 +19,7 @@ mathjax-macros: assets/smc-resampling/macros.json
 
 I've been thinking recently about the way in which you do resampling in sequential Monte Carlo (SMC). Like many other things, while there are many asymptotically identical methods, in practice it matters which one you choose. In this post, I'm making some visualizations to explore some standard resampling schemes, and get intuitions about why they work, and why you might choose one over another.
 
-## 1. Why and how to resample
+# Why to resample
 
 SMC relies on importance sampling. So let's start quickly recapping that, and defining some notation. We approximate a target distribution $\target(\cdot)$ with a set of samples from some surrogate proposal distribution, by assigning each sample an importance weight
 $\impwt^\idx$ (proportional to the density ratio of target to proposal). Then the set of weighted particles 
@@ -42,7 +42,7 @@ After enough steps, all current particles may trace back to a single ancestor at
 
 Adding resampling can keep our particle approximation useful (fixing SIS's weight degeneracy problem), but the method we use to resample can affect both the variance of our estimates and how quickly path diversity is lost. The rest of this post explores several resampling methods, visualizes their differences, to help build intuition for why some would perform better than others.
 
-### The first-moment (unbiasedness) condition
+## The first-moment (unbiasedness) condition
 
 For any resampling method to be unbiased, the expected number of copies made of each particle must be proportional to its weight. That is, $\cnt^\idx\sim r$ be the number of copies of particle $\idx$ after
 resampling (writing $r$ for the resampling method, some distribution over nonnegative integers, conditioned on the current set of weighted particles)
@@ -53,9 +53,11 @@ This ensures that the equally-weighted resampled particles
 $\sum_{\idx=1}^{\np} \frac{1}{\np} f(\rstate^\idx)$ form an unbiased estimator of the original weighted sum
 $\sum_\idx \normwt^\idx f(\state^\idx)$.
 
+# Some standard methods
+
 We'll focus on visualizing and understanding four canonical methods: **multinomial**, **stratified**, **systematic**, and **residual** resampling. These methods all satisfy this 'first-moment condition.' However, higher moments can differ greatly between schemes (as we'll see, looking at variance).
 
-## 2. Inverse transform sampling
+## Inverse transform sampling
 
 The first methods we'll look at share the same core idea of [inverse transform sampling](https://en.wikipedia.org/wiki/Inverse_transform_sampling).^[A little while ago, I made another [post exploring density transformations](/posts/transform-pdf/) in the continuous case. Here we are doing this in a discrete setting.]
 
@@ -99,7 +101,7 @@ segments of width $\normwt^\idx$, and mapping from 'probe' locations on the unit
 </div>
 </div>
 
-## 3. Multinomial, stratified, and systematic resampling
+## Multinomial, stratified, and systematic resampling
 
 You may have found that the most natural idea is to use $\np$ independent draws from the uniform distribution.
 This works, and leads to the first standard algorithm, **multinomial resampling**.
@@ -167,7 +169,7 @@ $K$ trials** to see means settle toward the weights.
 </div>
 
 ::: {.callout .proof}
-[Unbiasedness.]{.proof-label}
+[Unbiasedness]{.proof-label}
 Each probe $\probe_k$ is independently $\mathrm{Uniform}(0,1)$, so it
 lands in particle $\idx$'s CDF segment (of width $\normwt^\idx$) with
 probability $\normwt^\idx$. With $\np$ independent probes,
@@ -208,7 +210,7 @@ $\lfloor \np\normwt^\idx \rfloor \leq \cnt^\idx \leq \lceil \np\normwt^\idx \rce
 </div>
 
 ::: {.callout .proof}
-[Unbiasedness.]{.proof-label}
+[Unbiasedness]{.proof-label}
 Write $\mathbf{1}_k^\idx$ for the indicator that stratum $k$'s
 probe lands in particle $\idx$'s segment. Within stratum $k$, the
 probe is $\mathrm{Uniform}\bigl(\frac{k-1}{\np},\,
@@ -248,7 +250,7 @@ positions = (random() + np.arange(N)) / N
 </div>
 
 ::: {.callout .proof}
-[Unbiasedness.]{.proof-label}
+[Unbiasedness]{.proof-label}
 The offset $U$ is $\mathrm{Uniform}(0, 1/\np)$, so each probe
 $\probe_k = U + (k{-}1)/\np$ is marginally
 $\mathrm{Uniform}\bigl(\frac{k-1}{\np},\, \frac{k}{\np}\bigr)$, the
@@ -262,11 +264,11 @@ Note that the probes are no longer independent. A single $U$ determines all of t
 
 It might seem like systematic resampling will always be at least as good as multinomial in terms of variance. And indeed @douc.r:2005 [Section 3.4] describe the "frequently encountered conjecture that systematic resampling dominates multinomial resampling in terms of conditional variance." But, **the conjecture is false**, and they give the following counterexample.
 
-Consider a case where weights are a 'comb' alternating large, small, large, small, and the test function $f(\state^\idx) = \mathbf{1}[\idx \text{ even}]$.^[{-} To see this in action, set weights to the "Alternating" preset, and $f$ to $\mathbf{1}[\idx \text{ even}]$, and look at the variance in the head to head comparison in section @sec:comparison. Try switching to other test functions (e.g., mean position) to see the effect vanish when $f$ is not aligned with the weight periodicity.] In this case, systematic resampling leads to samples that are all on the 'large' weights, or split uniformly, producing a **bimodal** estimator. The systematic variance is $(\normwt_{\mathrm{even}}-\tfrac{1}{2})(1-\normwt_{\mathrm{even}})$, **constant in $\np$**, while multinomial's decreases as $\normwt_{\mathrm{even}}(1 - \normwt_{\mathrm{even}})/\np$.
+Consider a case where weights are a 'comb' alternating large, small, large, small, and the test function $f(\state^\idx) = \mathbf{1}[\idx \text{ even}]$.^[{-} To see this in action, set weights to the "Alternating" preset, and $f$ to $\mathbf{1}[\idx \text{ even}]$, and look at the variance in the head to head comparison in @sec:comparison. Try switching to other test functions (e.g., mean position) to see the effect vanish when $f$ is not aligned with the weight periodicity.] In this case, systematic resampling leads to samples that are all on the 'large' weights, or split uniformly, producing a **bimodal** estimator. The systematic variance is $(\normwt_{\mathrm{even}}-\tfrac{1}{2})(1-\normwt_{\mathrm{even}})$, **constant in $\np$**, while multinomial's decreases as $\normwt_{\mathrm{even}}(1 - \normwt_{\mathrm{even}})/\np$.
 
 **Note.** This counterexample depends on the particle ordering.^[@douc.r:2005 [Section 3.4] observe that both stratified and systematic resampling are sensitive to particle ordering: permuting the indices before resampling changes the distribution of the resampled set. After random permutation, systematic resampling becomes empirically similar to residual/stratified. They conclude that the counterexample is likely a "rare" situation, but that it shows systematic resampling is not as robust a variance-reduction method as stratified or residual, and that its theoretical analysis is considerably harder.]
 
-## 4. Residual resampling
+## Residual resampling
 
 We could also consider a deterministic-stochastic hybrid, where some particles are deterministically set, and others are allocated randomly. In *residual resampling*, we give particle $\idx$ exactly $\lfloor \np\normwt^\idx \rfloor$ copies, then fill the remaining $R = \np - \sum_\idx \lfloor \np\normwt^\idx \rfloor$ slots by resampling on the **residual weights** $\resid^\idx = (\np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor)/R$. This nondeterministic part of the algorithm could be done using any of the three CDF methods (select below).^[{-} $\Var_{\text{resid}} \leq \Var_{\text{mult}}$ when phase 2 uses multinomial or stratified resampling [@douc.r:2005]. The deterministic phase removes variance for the integer parts; the phase-2 choice affects only the residual variance. Note that residual-systematic does not have this guarantee, since systematic resampling can hit the same counterexample on the residual weights.] The right plot shows the residual CDF (solid) overlaid on the original weights CDF (dotted). For highly skewed weights, you can see that first allocating the deterministic weights makes the residual CDF much more even than the original was.
 
@@ -302,7 +304,7 @@ indexes[k:N] = np.searchsorted(cumsum(residual), positions)</code></pre></div></
 </div>
 
 ::: {.callout .proof}
-[Unbiasedness.]{.proof-label}
+[Unbiasedness]{.proof-label}
 Phase 1 gives particle $\idx$ exactly $\lfloor \np\normwt^\idx \rfloor$
 copies. Phase 2 resamples $R = \np - \sum_j \lfloor \np\normwt^j
 \rfloor$ particles using normalized residual weights $\resid^\idx =
@@ -315,7 +317,7 @@ $\E[\cnt^\idx] = \lfloor \np\normwt^\idx \rfloor + (\np\normwt^\idx - \lfloor
 :::
 
 
-## 5. Comparison {#sec:comparison}
+## Comparison {#sec:comparison}
 
 Comparing all four methods on the same weights: Colored error bars show mean count $\pm$ 1 std over $K$ trials.
 
@@ -324,7 +326,7 @@ Comparing all four methods on the same weights: Colored error bars show mean cou
 <label style="font-size:0.85em; color:#555;">$K$:
 <input type="range" id="slider-K-all" min="100" max="10000" value="1000" step="100" style="width:120px; vertical-align:middle;">
 <span id="val-K-all">1000</span></label>
-<button id="btn-run-all" style="font-size:0.85em;">Compare methods variance</button>
+<button id="btn-run-all" style="font-size:0.85em;">Compare variance</button>
 <span style="flex:1;"></span>
 <button id="btn-set-counterexample" style="font-size:0.85em;">Set Douc et al. counterexample</button>
 <button id="btn-reset-counterexample" style="font-size:0.85em; display:none;">Reset</button>
@@ -358,7 +360,7 @@ Residual <span class="c-residual" id="comp-std-resid"></span>
 | Random draws | $\np$ | $\np$ | 1 | $R \leq \np$ |
 
 
-## 6. Other resampling schemes
+## Other resampling schemes
 
 The four methods above are the most widely used, but they are not the only options.
 
@@ -376,7 +378,7 @@ num_copies += bonus # total may differ from N
 ```
 
 ::: {.callout .proof}
-[Unbiasedness.]{.proof-label}
+[Unbiasedness]{.proof-label}
 Particle $i$ receives $\lfloor \np\normwt^\idx \rfloor$ deterministic
 copies plus one bonus copy with probability $\np\normwt^\idx - \lfloor
 \np\normwt^\idx \rfloor$. So $\E[\cnt^\idx] = \lfloor \np\normwt^\idx \rfloor +
@@ -398,7 +400,7 @@ copies plus one bonus copy with probability $\np\normwt^\idx - \lfloor
 </div>
 
 
-### Other extensions
+### Even more methods...
 
 - **Rounding-copy resampling.** Like branch-kill, but fully
   deterministic: each particle gets $\mathrm{round}(\np\normwt^\idx)$
@@ -408,7 +410,7 @@ copies plus one bonus copy with probability $\np\normwt^\idx - \lfloor
 
 - See @li.t:2015 for this and a few more.
 
-## 7. Resampling methods in action
+# Resampling methods in action
 
 To see how the choice of resampling method affects particle diversity in practice, here is the same random walk model from the introduction, now with a method selector.
 
@@ -447,7 +449,7 @@ Weight update $\normwt_t^\idx \propto p(y_t \mid \state_t^\idx)$ (after resampli
 
 <canvas id="cv-pf-diagnostics" style="width:100%; height:80px; border:1px solid #eee; border-radius:3px;"></canvas>
 
-### Comparing methods over many runs
+## Comparing methods over many runs
 
 To see the typical behavior rather than a single random run, we can see what happens over many runs of the same method. The plot below shows path degeneracy (unique ancestors at t=1) over $K$ runs for all four methods. You can also the number of particles $\np$ (which we've fixed at $8$ for everything above).
 
