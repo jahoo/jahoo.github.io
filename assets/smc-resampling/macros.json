@@ -11,7 +11,7 @@
   "Var": "\\operatorname{Var}",
   "cdf": "F",
   "invcdf": "{F^{-1}}",
-  "probe": "u",
+  "probe": "x",
   "resid": "\\widetilde{\\normwt}",
   "idx": "i"
 }

@@ -53,22 +53,25 @@ This ensures that the equally-weighted resampled particles
 $\sum_{\idx=1}^{\np} \frac{1}{\np} f(\rstate^\idx)$ form an unbiased estimator of the original weighted sum
 $\sum_\idx \normwt^\idx f(\state^\idx)$.
 
-We'll focus on visualizing and understanding four canonical methods: **multinomial**, **stratified**, **systematic**, and **residual** resampling.^[These methods all satisfy this 'first-moment condition.' However, higher moments can differ greatly between schemes (as we'll see, looking at variance).]
-
+We'll focus on visualizing and understanding four canonical methods: **multinomial**, **stratified**, **systematic**, and **residual** resampling. These methods all satisfy this 'first-moment condition.' However, higher moments can differ greatly between schemes (as we'll see, looking at variance).
 
 ## 2. Inverse transform sampling
 
-The first methods we'll look at share the same core idea of [inverse transform sampling](https://en.wikipedia.org/wiki/Inverse_transform_sampling). We can think of partitioning the unit interval into
-segments of width $\normwt^\idx$, and mapping from 'probe' locations on the unit interval to determine the resampled particles.
-More precisely, the cumulative distribution function (CDF) of the discrete distribution defined by the weights, $\cdf(\idx) = \sum_{j=1}^{\idx} \normwt^j$, defines this partition, and its inverse (the quantile function) it will map a value $\probe\in(0,1]$ to a selected (resampled) particle $\invcdf(\probe)$.
+The first methods we'll look at share the same core idea of [inverse transform sampling](https://en.wikipedia.org/wiki/Inverse_transform_sampling).^[A little while ago, I made another [post exploring density transformations](/posts/transform-pdf/) in the continuous case. Here we are doing this in a discrete setting.]
 
-If you haven't heard of inverse transform sampling before, this is actually a nice way to build the intuition. Think about **how to randomly place $\np$ probes** so that any particle
-$i$ gets selected $\np\normwt^\idx$ times on average. Try clicking
-on the CDF plot at right to place probes, and consider what strategy would you use for placing $\np$ probes, in order to have the distribution of resampled particles recreate the weight histogram on average.
+We can think of **partitioning** the unit interval into
+segments of width $\normwt^\idx$, and mapping from 'probe' locations on the unit interval to determine the resampled particles. More precisely, the cumulative distribution function (CDF) of the discrete distribution defined by the weights, $\cdf(\idx) = \sum_{j=1}^{\idx} \normwt^j$, defines this partition, and its inverse (the quantile function) it will map a value $\probe\in(0,1]$ to a selected (resampled) particle $\invcdf(\probe)$.^[{-} If you haven't heard of inverse transform sampling before, this is actually a nice way to build the intuition. Think about **how to randomly place $\np$ probes** so that any particle $i$ gets selected $\np\normwt^\idx$ times on average. <br><br> Try clicking on the CDF plot at right to place probes, and consider what strategy would you use for placing $\np$ probes, in order to have the distribution of resampled particles recreate the weight histogram on average.]
 
-**Drag bars** on left to change weights, or choose preset from dropdown. **Click on plot** to place 'probes.'
+
+::: {.callout .insight}
+- **Drag bars** on left to change weights, or choose from one of the preset options in the "Weights" dropdown below.\
+- **Click on plot** to place 'probes.'
+:::
 
 <canvas id="cv-sec2" class="panel"></canvas>
+
+
+<!-- Note, this smc-toolbar div is sticky, but that is bounded by the containing element's parent. The solution is in `initToolbar` in `src/smc-resampling/toolbar.js`. What it does: On page load it will find the top-level <section> (i.e. a direct child of <main>) that contains the toolbar, then reparent the toolbar to be a direct child of <main>, positioned immediately after that section  -->
 
 <div id="smc-toolbar" class="smc-toolbar">
 <div class="smc-toolbar-item" id="smc-toolbar-weights">
@@ -98,7 +101,7 @@ on the CDF plot at right to place probes, and consider what strategy would you u
 
 ## 3. Multinomial, stratified, and systematic resampling
 
-You may have found that the most natural idea is to use $\np$ independent draws from the uniform distribution.^[That is, inverse transform sampling. A little while ago, I made another [post exploring density transformations](/posts/transform-pdf/) in the continuous case. Here we are doing this in a discrete setting: Each uniform-distributed independent probe $\probe_k$ is transformed through the discrete quantile function $\invcdf$ to produce a sample from the particle-weight distribution, just as passing a uniform draw through a continuous inverse CDF yields a draw from the corresponding distribution.]
+You may have found that the most natural idea is to use $\np$ independent draws from the uniform distribution.
 This works, and leads to the first standard algorithm, **multinomial resampling**.
 We will then look at two other common strategies that reduce variance by spreading probes more evenly for lower variance.
 
@@ -117,8 +120,8 @@ positions = random(N)
 indices = np.searchsorted(cumulative_sum, positions)
 ```
 
-::: {.fullwidth}
-(Equivalent to `np.random.choice(N, size=N, replace=True, p=weights)`)
+::: {.wide}
+[Note, the one-liner `indices = np.random.choice(N, size=N, replace=True, p=weights)` would be functionally equivalent and looks simpler, but obscures the similarity to the other methods that we'll look at next.]
 :::
 
 

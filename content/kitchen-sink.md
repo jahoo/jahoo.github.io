@@ -42,7 +42,16 @@ need JavaScript, even for side notes.
 
 "Hanging punctuation" is really nice.\
 Unfortunately it's only supported in Safari on iOS and macOS.\
-"Does it work after line breaks," or just at the block start?
+"Does it work after line breaks," or just at the block start?\
+(And opening parentheses also count, right?)
+
+---They are punctuation.
+
+[As should opening brackets.]\
+
+)But not closing(\
+
+]Nor for brackets?[
 
 - - - - -
 
