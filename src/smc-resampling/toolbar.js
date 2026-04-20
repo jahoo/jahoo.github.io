@@ -27,7 +27,7 @@ export function initToolbar(opts) {
     var main = document.querySelector('main');
     if (toolbar && main && toolbar.parentElement !== main) {
         var section = toolbar.closest('main > section');
-        if (section) main.insertBefore(toolbar, section);
+        if (section) section.after(toolbar);
     }
 
     // ---- Element references ----
