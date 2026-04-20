@@ -18,7 +18,7 @@ MathJax = {
   tex: {
     inlineMath: [['\\(', '\\)'], ['$', '$']],
     displayMath: [['\\[', '\\]'], ['$$', '$$']]
-    , macros: { "state": "s", "rstate": "\\widetilde{\\state}", "target": "\\pi", "impwt": "\\rho", "normwt": "w", "np": "N", "cnt": "M", "gen": "{\\mathcal{G}}", "E": "{\\mathbb{E}}", "Var": "\\operatorname{Var}", "cdf": "F", "invcdf": "{F^{-1}}", "probe": "u", "resid": "\\widetilde{\\normwt}", "idx": "i" }
+    , macros: { "state": "s", "rstate": "\\widetilde{\\state}", "target": "\\pi", "impwt": "\\rho", "normwt": "w", "np": "N", "cnt": "M", "gen": "{\\mathcal{G}}", "E": "{\\mathbb{E}}", "Var": "\\operatorname{Var}", "cdf": "F", "invcdf": "{F^{-1}}", "probe": "x", "resid": "\\widetilde{\\normwt}", "idx": "i" }
   }
 };
 </script>
@@ -62,47 +62,64 @@ MathJax = {
     <strong>Contents</strong><label for="contents">⊕</label>
   <input type="checkbox" id="contents">
   <ul>
-  <li><a href="#why-and-how-to-resample"
-  id="toc-why-and-how-to-resample">1. Why and how to resample</a>
+  <li><a href="#why-to-resample" id="toc-why-to-resample"><span
+  class="toc-section-number">1</span> Why to resample</a>
   <ul>
   <li><a href="#the-first-moment-unbiasedness-condition"
-  id="toc-the-first-moment-unbiasedness-condition">The first-moment
-  (unbiasedness) condition</a></li>
+  id="toc-the-first-moment-unbiasedness-condition"><span
+  class="toc-section-number">1.1</span> The first-moment (unbiasedness)
+  condition</a></li>
   </ul></li>
+  <li><a href="#some-standard-methods"
+  id="toc-some-standard-methods"><span
+  class="toc-section-number">2</span> Some standard methods</a>
+  <ul>
   <li><a href="#inverse-transform-sampling"
-  id="toc-inverse-transform-sampling">2. Inverse transform
+  id="toc-inverse-transform-sampling"><span
+  class="toc-section-number">2.1</span> Inverse transform
   sampling</a></li>
   <li><a href="#multinomial-stratified-and-systematic-resampling"
-  id="toc-multinomial-stratified-and-systematic-resampling">3.
-  Multinomial, stratified, and systematic resampling</a>
+  id="toc-multinomial-stratified-and-systematic-resampling"><span
+  class="toc-section-number">2.2</span> Multinomial, stratified, and
+  systematic resampling</a>
   <ul>
   <li><a href="#multinomial-resampling"
-  id="toc-multinomial-resampling">Multinomial resampling</a></li>
+  id="toc-multinomial-resampling"><span
+  class="toc-section-number">2.2.1</span> Multinomial
+  resampling</a></li>
   <li><a href="#stratified-resampling"
-  id="toc-stratified-resampling">Stratified resampling</a></li>
+  id="toc-stratified-resampling"><span
+  class="toc-section-number">2.2.2</span> Stratified resampling</a></li>
   <li><a href="#systematic-resampling"
-  id="toc-systematic-resampling">Systematic resampling</a></li>
-  <li><a href="#systematic-can-be-higher-variance-than-multinomial"
-  id="toc-systematic-can-be-higher-variance-than-multinomial">⚠︎
-  Systematic can be higher variance than multinomial</a></li>
+  id="toc-systematic-resampling"><span
+  class="toc-section-number">2.2.3</span> Systematic resampling</a></li>
+  <li><a href="#sec:counterexample" id="toc-sec:counterexample"><span
+  class="toc-section-number">2.2.4</span> ⚠︎ Systematic can be higher
+  variance than multinomial</a></li>
   </ul></li>
-  <li><a href="#residual-resampling" id="toc-residual-resampling">4.
-  Residual resampling</a></li>
-  <li><a href="#comparison" id="toc-comparison">5. Comparison</a></li>
+  <li><a href="#residual-resampling" id="toc-residual-resampling"><span
+  class="toc-section-number">2.3</span> Residual resampling</a></li>
+  <li><a href="#sec:comparison" id="toc-sec:comparison"><span
+  class="toc-section-number">2.4</span> Comparison</a></li>
   <li><a href="#other-resampling-schemes"
-  id="toc-other-resampling-schemes">6. Other resampling schemes</a>
+  id="toc-other-resampling-schemes"><span
+  class="toc-section-number">2.5</span> Other resampling schemes</a>
   <ul>
   <li><a href="#branch-kill-resampling"
-  id="toc-branch-kill-resampling">Branch-kill resampling</a></li>
-  <li><a href="#other-extensions" id="toc-other-extensions">Other
-  extensions</a></li>
+  id="toc-branch-kill-resampling"><span
+  class="toc-section-number">2.5.1</span> Branch-kill
+  resampling</a></li>
+  <li><a href="#even-more-methods" id="toc-even-more-methods"><span
+  class="toc-section-number">2.5.2</span> Even more methods…</a></li>
+  </ul></li>
   </ul></li>
   <li><a href="#resampling-methods-in-action"
-  id="toc-resampling-methods-in-action">7. Resampling methods in
-  action</a>
+  id="toc-resampling-methods-in-action"><span
+  class="toc-section-number">3</span> Resampling methods in action</a>
   <ul>
   <li><a href="#comparing-methods-over-many-runs"
-  id="toc-comparing-methods-over-many-runs">Comparing methods over many
+  id="toc-comparing-methods-over-many-runs"><span
+  class="toc-section-number">3.1</span> Comparing methods over many
   runs</a></li>
   </ul></li>
   <li><a href="#bibliography" id="toc-bibliography">References</a></li>
@@ -128,8 +145,9 @@ many asymptotically identical methods, in practice it matters which one
 you choose. In this post, I’m making some visualizations to explore some
 standard resampling schemes, and get intuitions about why they work, and
 why you might choose one over another.</p>
-<section id="why-and-how-to-resample" class="level2">
-<h2>1. Why and how to resample</h2>
+<section id="why-to-resample" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Why to
+resample</h1>
 <p>SMC relies on importance sampling. So let’s start quickly recapping
 that, and defining some notation. We approximate a target distribution
 <span class="math inline">\(\target(\cdot)\)</span> with a set of
@@ -217,8 +235,10 @@ affect both the variance of our estimates and how quickly path diversity
 is lost. The rest of this post explores several resampling methods,
 visualizes their differences, to help build intuition for why some would
 perform better than others.</p>
-<section id="the-first-moment-unbiasedness-condition" class="level3">
-<h3>The first-moment (unbiasedness) condition</h3>
+<section id="the-first-moment-unbiasedness-condition" class="level2"
+data-number="1.1">
+<h2 data-number="1.1"><span class="header-section-number">1.1</span> The
+first-moment (unbiasedness) condition</h2>
 <p>For any resampling method to be unbiased, the expected number of
 copies made of each particle must be proportional to its weight. That
 is, <span class="math inline">\(\cnt^\idx\sim r\)</span> be the number
@@ -233,49 +253,67 @@ class="math inline">\(\sum_{\idx=1}^{\np} \frac{1}{\np}
 f(\rstate^\idx)\)</span> form an unbiased estimator of the original
 weighted sum <span class="math inline">\(\sum_\idx \normwt^\idx
 f(\state^\idx)\)</span>.</p>
+</section>
+</section>
+<section id="some-standard-methods" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Some
+standard methods</h1>
 <p>We’ll focus on visualizing and understanding four canonical methods:
 <strong>multinomial</strong>, <strong>stratified</strong>,
-<strong>systematic</strong>, and <strong>residual</strong>
-resampling.<span
-class="sidenote-wrapper"><label for="sn-4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-4" class="margin-toggle"/><span
-class="sidenote">These methods all satisfy this ‘first-moment
-condition.’ However, higher moments can differ greatly between schemes
-(as we’ll see, looking at variance).<br />
-<br />
-</span></span></p>
-</section>
-</section>
-<section id="inverse-transform-sampling" class="level2">
-<h2>2. Inverse transform sampling</h2>
+<strong>systematic</strong>, and <strong>residual</strong> resampling.
+These methods all satisfy this ‘first-moment condition.’ However, higher
+moments can differ greatly between schemes (as we’ll see, looking at
+variance).</p>
+<section id="inverse-transform-sampling" class="level2"
+data-number="2.1">
+<h2 data-number="2.1"><span class="header-section-number">2.1</span>
+Inverse transform sampling</h2>
 <p>The first methods we’ll look at share the same core idea of <a
 href="https://en.wikipedia.org/wiki/Inverse_transform_sampling">inverse
-transform sampling</a>. We can think of partitioning the unit interval
-into segments of width <span
-class="math inline">\(\normwt^\idx\)</span>, and mapping from ‘probe’
-locations on the unit interval to determine the resampled particles.
-More precisely, the cumulative distribution function (CDF) of the
-discrete distribution defined by the weights, <span
-class="math inline">\(\cdf(\idx) = \sum_{j=1}^{\idx} \normwt^j\)</span>,
-defines this partition, and its inverse (the quantile function) it will
-map a value <span class="math inline">\(\probe\in(0,1]\)</span> to a
-selected (resampled) particle <span
-class="math inline">\(\invcdf(\probe)\)</span>.</p>
-<p>If you haven’t heard of inverse transform sampling before, this is
-actually a nice way to build the intuition. Think about <strong>how to
-randomly place <span class="math inline">\(\np\)</span> probes</strong>
-so that any particle <span class="math inline">\(i\)</span> gets
-selected <span class="math inline">\(\np\normwt^\idx\)</span> times on
-average. Try clicking on the CDF plot at right to place probes, and
+transform sampling</a>.<span
+class="sidenote-wrapper"><label for="sn-4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-4" class="margin-toggle"/><span
+class="sidenote">A little while ago, I made another <a
+href="/posts/transform-pdf/">post exploring density transformations</a>
+in the continuous case. Here we are doing this in a discrete
+setting.<br />
+<br />
+</span></span></p>
+<p>We can think of <strong>partitioning</strong> the unit interval into
+segments of width <span class="math inline">\(\normwt^\idx\)</span>, and
+mapping from ‘probe’ locations on the unit interval to determine the
+resampled particles. More precisely, the cumulative distribution
+function (CDF) of the discrete distribution defined by the weights,
+<span class="math inline">\(\cdf(\idx) = \sum_{j=1}^{\idx}
+\normwt^j\)</span>, defines this partition, and its inverse (the
+quantile function) it will map a value <span
+class="math inline">\(\probe\in(0,1]\)</span> to a selected (resampled)
+particle <span class="math inline">\(\invcdf(\probe)\)</span>.<span
+class="sidenote-wrapper"><label for="sn-5" class="margin-toggle">&#8853;</label><input type="checkbox" id="sn-5" class="margin-toggle"/><span
+class="marginnote">If you haven’t heard of inverse transform sampling
+before, this is actually a nice way to build the intuition. Think about
+<strong>how to randomly place <span class="math inline">\(\np\)</span>
+probes</strong> so that any particle <span
+class="math inline">\(i\)</span> gets selected <span
+class="math inline">\(\np\normwt^\idx\)</span> times on average.
+<br><br> Try clicking on the CDF plot at right to place probes, and
 consider what strategy would you use for placing <span
 class="math inline">\(\np\)</span> probes, in order to have the
 distribution of resampled particles recreate the weight histogram on
-average.</p>
-<p><strong>Drag bars</strong> on left to change weights, or choose
-preset from dropdown. <strong>Click on plot</strong> to place
-‘probes.’</p>
+average.<br />
+<br />
+</span></span></p>
+<div class="callout insight">
+<ul>
+<li><strong>Drag bars</strong> on left to change weights, or choose from
+one of the preset options in the “Weights” dropdown below.<br />
+</li>
+<li><strong>Click on plot</strong> to place ‘probes.’</li>
+</ul>
+</div>
 <canvas id="cv-sec2" class="panel">
 </canvas>
-<div id="smc-toolbar" class="smc-toolbar">
+<!-- Note, this smc-toolbar div is sticky, but that is bounded by the containing element's parent. The solution is in `initToolbar` in `src/smc-resampling/toolbar.js`. What it does: On page load it will find the top-level <section> (i.e. a direct child of <main>) that contains the toolbar, then reparent the toolbar to be a direct child of <main>, positioned immediately after that section  -->
+<div id="smc-toolbar" class="smc-toolbar wide extra-wide">
 <div id="smc-toolbar-weights" class="smc-toolbar-item">
 <span class="smc-toolbar-label">Weights:</span>
 <div id="smc-toolbar-dropdown" class="smc-toolbar-dropdown">
@@ -307,28 +345,18 @@ style="display:none;">
 </div>
 </section>
 <section id="multinomial-stratified-and-systematic-resampling"
-class="level2">
-<h2>3. Multinomial, stratified, and systematic resampling</h2>
+class="level2" data-number="2.2">
+<h2 data-number="2.2"><span class="header-section-number">2.2</span>
+Multinomial, stratified, and systematic resampling</h2>
 <p>You may have found that the most natural idea is to use <span
 class="math inline">\(\np\)</span> independent draws from the uniform
-distribution.<span
-class="sidenote-wrapper"><label for="sn-5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-5" class="margin-toggle"/><span
-class="sidenote">That is, inverse transform sampling. A little while
-ago, I made another <a href="/posts/transform-pdf/">post exploring
-density transformations</a> in the continuous case. Here we are doing
-this in a discrete setting: Each uniform-distributed independent probe
-<span class="math inline">\(\probe_k\)</span> is transformed through the
-discrete quantile function <span class="math inline">\(\invcdf\)</span>
-to produce a sample from the particle-weight distribution, just as
-passing a uniform draw through a continuous inverse CDF yields a draw
-from the corresponding distribution.<br />
-<br />
-</span></span> This works, and leads to the first standard algorithm,
+distribution. This works, and leads to the first standard algorithm,
 <strong>multinomial resampling</strong>. We will then look at two other
 common strategies that reduce variance by spreading probes more evenly
 for lower variance.</p>
-<section id="multinomial-resampling" class="level3">
-<h3>Multinomial resampling</h3>
+<section id="multinomial-resampling" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1"><span class="header-section-number">2.2.1</span>
+Multinomial resampling</h3>
 <p>Draw <span class="math inline">\(\np\)</span> independent uniforms
 <span class="math inline">\(\probe_1, \ldots, \probe_\np
 \overset{\text{iid}}{\sim} \mathrm{Uniform}(0,1)\)</span> and map each
@@ -341,9 +369,11 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a hr
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>positions <span class="op">=</span> random(N)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: map probes through the inverse CDF → ancestor indices</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>indices <span class="op">=</span> np.searchsorted(cumulative_sum, positions)</span></code></pre></div>
-<div class="fullwidth">
-<p>(Equivalent to
-<code>np.random.choice(N, size=N, replace=True, p=weights)</code>)</p>
+<div class="wide">
+<p>[Note, the one-liner
+<code>indices = np.random.choice(N, size=N, replace=True, p=weights)</code>
+would be functionally equivalent and looks simpler, but obscures the
+similarity to the other methods that we’ll look at next.]</p>
 </div>
 <!-- 
 <details markdown="1" style="font-size:0.85em; color:#555; margin:0.3em 0 0.8em;">
@@ -390,20 +420,8 @@ class="math inline">\(K\)</span>:
 trials</button></p>
 </div>
 </div>
-<div id="var-multi" class="var-display">
-
-</div>
-<div id="est-multi" class="est-section">
-<div class="testfn-row">
-<p><span>Estimator distribution for <span
-class="math inline">\(f(\state^\idx)=\)</span></span>
-<select class="testfn-select"></select></p>
-</div>
-<canvas id="cv-est-multi" class="panel panel-short">
-</canvas>
-</div>
 <div class="callout proof">
-<p><span class="proof-label">Unbiasedness.</span> Each probe <span
+<p><span class="proof-label">Unbiasedness</span> Each probe <span
 class="math inline">\(\probe_k\)</span> is independently <span
 class="math inline">\(\mathrm{Uniform}(0,1)\)</span>, so it lands in
 particle <span class="math inline">\(\idx\)</span>’s CDF segment (of
@@ -412,28 +430,21 @@ probability <span class="math inline">\(\normwt^\idx\)</span>. With
 <span class="math inline">\(\np\)</span> independent probes, <span
 class="math inline">\(\cnt^\idx \sim \mathrm{Binomial}(\np,
 \normwt^\idx)\)</span> and <span class="math inline">\(\E[\cnt^\idx] =
-\np\,\normwt^\idx\)</span>. ∎</p>
+\np\,\normwt^\idx.\)</span></p>
 </div>
 </section>
-<section id="stratified-resampling" class="level3">
-<h3>Stratified resampling</h3>
+<section id="stratified-resampling" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2"><span class="header-section-number">2.2.2</span>
+Stratified resampling</h3>
 <p>You may have noticed that because the probes are all independently
 sampled in multinomial resampling, they can cluster and leave gaps. This
-leads to undesirable extra variance. <em>Stratified resampling</em>
-introduces a technique to spread them more evenly: Partition <span
-class="math inline">\([0,1]\)</span> into <span
-class="math inline">\(\np\)</span> equal <strong>strata</strong> <span
-class="math inline">\(\bigl(\frac{k-1}{\np},\,
-\frac{k}{\np}\bigr)_{k=1}^{\np}\)</span> and draw one independent
-uniform within each, resulting in lower variance.<span
-class="sidenote-wrapper"><label for="sn-6" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-6" class="margin-toggle"/><span
-class="sidenote">See <span class="citation"
-data-cites="douc.r:2005">Douc et al. (<a href="#ref-douc.r:2005"
-role="doc-biblioref">2005</a>)</span> for proof that <span
-class="math inline">\(\Var_{\text{strat}} \leq
-\Var_{\text{mult}}\)</span>.<br />
-<br />
-</span></span></p>
+leads to undesirable extra variance (consider in particulr the case
+where the weights are roughly uniform).</p>
+<p><em>Stratified resampling</em> introduces a technique to spread them
+more evenly: Partition <span class="math inline">\([0,1]\)</span> into
+<span class="math inline">\(\np\)</span> equal <strong>strata</strong>
+<span class="math inline">\(\bigl(\frac{k-1}{\np},\,
+\frac{k}{\np}\bigr)_{k=1}^{\np}\)</span></p>
 <div class="sourceCode" id="cb2"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Steps 1 &amp; 3 as above; only step 2 changes:</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># one uniform draw per stratum instead of N independent</span></span>
@@ -462,20 +473,8 @@ class="math inline">\(K\)</span>:
 trials</button></p>
 </div>
 </div>
-<div id="var-strat" class="var-display">
-
-</div>
-<div id="est-strat" class="est-section">
-<div class="testfn-row">
-<p><span>Estimator distribution for <span
-class="math inline">\(f(\state^\idx) =\)</span></span>
-<select class="testfn-select"></select></p>
-</div>
-<canvas id="cv-est-strat" class="panel panel-short">
-</canvas>
-</div>
 <div class="callout proof">
-<p><span class="proof-label">Unbiasedness.</span> Write <span
+<p><span class="proof-label">Unbiasedness</span> Write <span
 class="math inline">\(\mathbf{1}_k^\idx\)</span> for the indicator that
 stratum <span class="math inline">\(k\)</span>’s probe lands in particle
 <span class="math inline">\(\idx\)</span>’s segment. Within stratum
@@ -491,11 +490,12 @@ class="math inline">\(\E[\cnt^\idx] = \sum_{k=1}^{\np}
 = \np\,\normwt^\idx\)</span>, since the strata tile <span
 class="math inline">\([0,1]\)</span> and particle <span
 class="math inline">\(\idx\)</span>’s segment has total length <span
-class="math inline">\(\normwt^\idx\)</span>. ∎</p>
+class="math inline">\(\normwt^\idx.\)</span></p>
 </div>
 </section>
-<section id="systematic-resampling" class="level3">
-<h3>Systematic resampling</h3>
+<section id="systematic-resampling" class="level3" data-number="2.2.3">
+<h3 data-number="2.2.3"><span class="header-section-number">2.2.3</span>
+Systematic resampling</h3>
 <p>Notice that stratified resampling still uses <span
 class="math inline">\(\np\)</span> random draws to place the probe in
 each stratum. Another standard technique called <em>systematic
@@ -528,20 +528,8 @@ class="math inline">\(K\)</span>:
 <span class="math inline">\(K\)</span> trials</button></p>
 </div>
 </div>
-<div id="var-sys" class="var-display">
-
-</div>
-<div id="est-sys" class="est-section">
-<div class="testfn-row">
-<p><span>Estimator distribution for <span
-class="math inline">\(f(\state^\idx) =\)</span></span>
-<select class="testfn-select"></select></p>
-</div>
-<canvas id="cv-est-sys" class="panel panel-short">
-</canvas>
-</div>
 <div class="callout proof">
-<p><span class="proof-label">Unbiasedness.</span> The offset <span
+<p><span class="proof-label">Unbiasedness</span> The offset <span
 class="math inline">\(U\)</span> is <span
 class="math inline">\(\mathrm{Uniform}(0, 1/\np)\)</span>, so each probe
 <span class="math inline">\(\probe_k = U + (k{-}1)/\np\)</span> is
@@ -550,42 +538,46 @@ class="math inline">\(\mathrm{Uniform}\bigl(\frac{k-1}{\np},\,
 \frac{k}{\np}\bigr)\)</span>, the same distribution as the stratified
 probe in stratum <span class="math inline">\(k\)</span>. The same tiling
 argument gives <span class="math inline">\(\E[\cnt^\idx] =
-\np\,\normwt^\idx\)</span>.∎</p>
+\np\,\normwt^\idx.\)</span></p>
 </div>
 <p>Note that the probes are no longer independent. A single <span
 class="math inline">\(U\)</span> determines all of them. The marginal
 distributions are identical to stratified, so unbiasedness holds, but
 the joint distribution differs (and so also the variance).</p>
 </section>
-<section id="systematic-can-be-higher-variance-than-multinomial"
-class="level3">
-<h3>⚠︎ Systematic can be higher variance than multinomial</h3>
-<p><span class="citation" data-cites="douc.r:2005">Douc et al. (<a
+<section id="sec:counterexample" class="level3" data-number="2.2.4">
+<h3 data-number="2.2.4"><span class="header-section-number">2.2.4</span>
+⚠︎ Systematic can be higher variance than multinomial</h3>
+<p>It might seem like systematic resampling will always be at least as
+good as multinomial in terms of variance. And indeed <span
+class="citation" data-cites="douc.r:2005">Douc et al. (<a
 href="#ref-douc.r:2005" role="doc-biblioref">2005, Section
-3.4</a>)</span> give the following counterexample to the “frequently
-encountered conjecture that systematic resampling dominates multinomial
-resampling in terms of conditional variance.” It’s an example showing
-that the correlation becomes pathological when <span
-class="math inline">\(f\)</span> aligns with a periodic weight pattern
-matching the comb spacing.</p>
-<p>With alternating weights (high, low, high, low, …) and <span
+3.4</a>)</span> describe the “frequently encountered conjecture that
+systematic resampling dominates multinomial resampling in terms of
+conditional variance.” But, <strong>the conjecture is false</strong>,
+and they give the following counterexample.</p>
+<p>Consider a case where weights are a ‘comb’ alternating large, small,
+large, small, and the test function <span
 class="math inline">\(f(\state^\idx) = \mathbf{1}[\idx \text{
-even}]\)</span>, the comb teeth land either all on even or split
-evenly—producing a <strong>bimodal</strong> estimator. The systematic
-variance is <span
+even}]\)</span>.<span
+class="sidenote-wrapper"><label for="sn-6" class="margin-toggle">&#8853;</label><input type="checkbox" id="sn-6" class="margin-toggle"/><span
+class="marginnote">To see this in action, set weights to the
+“Alternating” preset, and <span class="math inline">\(f\)</span> to
+<span class="math inline">\(\mathbf{1}[\idx \text{ even}]\)</span>, and
+look at the variance in the head to head comparison in <a
+href="#sec:comparison">§ 2.4</a>. Try switching to other test functions
+(e.g., mean position) to see the effect vanish when <span
+class="math inline">\(f\)</span> is not aligned with the weight
+periodicity.<br />
+<br />
+</span></span> In this case, systematic resampling leads to samples that
+are all on the ‘large’ weights, or split uniformly, producing a
+<strong>bimodal</strong> estimator. The systematic variance is <span
 class="math inline">\((\normwt_{\mathrm{even}}-\tfrac{1}{2})(1-\normwt_{\mathrm{even}})\)</span>,
 <strong>constant in <span class="math inline">\(\np\)</span></strong>,
 while multinomial’s decreases as <span
 class="math inline">\(\normwt_{\mathrm{even}}(1 -
 \normwt_{\mathrm{even}})/\np\)</span>.</p>
-<p>To see this in action, set <span class="math inline">\(f\)</span> to
-<span class="math inline">\(\mathbf{1}[\idx \text{ even}]\)</span> and
-weights to “Alternating” in the head-to-head comparison (Section 5), and
-observe that the systematic estimator variance is larger than
-multinomial’s. Try switching to other test functions (e.g., mean
-position) to see the effect vanish when <span
-class="math inline">\(f\)</span> is not aligned with the weight
-periodicity.</p>
 <p><strong>Note.</strong> This counterexample depends on the particle
 ordering.<span
 class="sidenote-wrapper"><label for="sn-7" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-7" class="margin-toggle"/><span
@@ -603,8 +595,9 @@ its theoretical analysis is considerably harder.<br />
 </span></span></p>
 </section>
 </section>
-<section id="residual-resampling" class="level2">
-<h2>4. Residual resampling</h2>
+<section id="residual-resampling" class="level2" data-number="2.3">
+<h2 data-number="2.3"><span class="header-section-number">2.3</span>
+Residual resampling</h2>
 <p>We could also consider a deterministic-stochastic hybrid, where some
 particles are deterministically set, and others are allocated randomly.
 In <em>residual resampling</em>, we give particle <span
@@ -668,20 +661,8 @@ class="math inline">\(K\)</span>:
 trials</button></p>
 </div>
 </div>
-<div id="var-resid" class="var-display">
-
-</div>
-<div id="est-resid" class="est-section">
-<div class="testfn-row">
-<p><span>Estimator distribution for <span
-class="math inline">\(f(\state^\idx) =\)</span></span>
-<select class="testfn-select"></select></p>
-</div>
-<canvas id="cv-est-resid" class="panel panel-short">
-</canvas>
-</div>
 <div class="callout proof">
-<p><span class="proof-label">Unbiasedness.</span> Phase 1 gives particle
+<p><span class="proof-label">Unbiasedness</span> Phase 1 gives particle
 <span class="math inline">\(\idx\)</span> exactly <span
 class="math inline">\(\lfloor \np\normwt^\idx \rfloor\)</span> copies.
 Phase 2 resamples <span class="math inline">\(R = \np - \sum_j \lfloor
@@ -696,25 +677,35 @@ class="math inline">\(\idx\)</span> is <span class="math inline">\(R
 \np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor\)</span>. Adding the
 two phases: <span class="math inline">\(\E[\cnt^\idx] = \lfloor
 \np\normwt^\idx \rfloor + (\np\normwt^\idx - \lfloor
-\np\normwt^\idx \rfloor) = \np\,\normwt^\idx\)</span>. ∎</p>
+\np\normwt^\idx \rfloor) = \np\,\normwt^\idx.\)</span></p>
 </div>
 </section>
-<section id="comparison" class="level2">
-<h2>5. Comparison</h2>
+<section id="sec:comparison" class="level2" data-number="2.4">
+<h2 data-number="2.4"><span class="header-section-number">2.4</span>
+Comparison</h2>
 <p>Comparing all four methods on the same weights: Colored error bars
 show mean count <span class="math inline">\(\pm\)</span> 1 std over
-<span class="math inline">\(K\)</span> trials.</p>
+<span class="math inline">\(K\)</span> trials.<span
+class="sidenote-wrapper"><label for="sn-9" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-9" class="margin-toggle"/><span
+class="sidenote">Click the “set to counterexample” button to set weights
+and test function <span class="math inline">\(f\)</span> to the
+pathological values in order to show the counterexample described in <a
+href="#sec:counterexample">§ 2.2.4</a> above, where variance of
+systematic resampling is larger than multinomial.<br />
+<br />
+</span></span></p>
 <div class="control-box">
 <div class="control-row">
 <p><label style="font-size:0.85em; color:#555;"><span
 class="math inline">\(K\)</span>:
 <input type="range" id="slider-K-all" min="100" max="10000" value="1000" step="100" style="width:120px; vertical-align:middle;">
 <span id="val-K-all">1000</span></label>
-<button id="btn-run-all" style="font-weight:600;">Run all four</button>
-<span style="flex:1;"></span>
-<button id="btn-set-counterexample" style="font-size:0.85em;">Douc et
-al. counterexample</button>
-<button id="btn-reset-counterexample" style="font-size:0.85em; display:none;">Reset</button></p>
+<button id="btn-run-all" style="font-size:0.85em;">Run <span
+class="math inline">\(K\)</span> trials</button> <span
+style="flex:1;"></span>
+<button id="btn-set-counterexample" style="font-size:0.65em;">Set to
+counterexample</button>
+<button id="btn-reset-counterexample" style="font-size:0.65em; display:none;">Reset</button></p>
 </div>
 </div>
 <div id="est-comparison" class="est-section">
@@ -781,22 +772,25 @@ bound</td>
 </tbody>
 </table>
 </section>
-<section id="other-resampling-schemes" class="level2">
-<h2>6. Other resampling schemes</h2>
+<section id="other-resampling-schemes" class="level2" data-number="2.5">
+<h2 data-number="2.5"><span class="header-section-number">2.5</span>
+Other resampling schemes</h2>
 <p>The four methods above are the most widely used, but they are not the
 only options.</p>
-<section id="branch-kill-resampling" class="level3">
-<h3>Branch-kill resampling</h3>
+<section id="branch-kill-resampling" class="level3" data-number="2.5.1">
+<h3 data-number="2.5.1"><span class="header-section-number">2.5.1</span>
+Branch-kill resampling</h3>
 <p>The methods above all produce exactly <span
-class="math inline">\(\np\)</span> resampled particles. Branch-kill
-relaxes this: Each particle <span class="math inline">\(\idx\)</span>
-independently gets <span class="math inline">\(\lfloor \np\normwt^\idx
-\rfloor\)</span> deterministic copies plus one bonus copy with
-probability <span class="math inline">\(\np\normwt^\idx - \lfloor
-\np\normwt^\idx \rfloor\)</span>. No shared CDF or residual phase
-needed. The total <span class="math inline">\(\sum_\idx
-\cnt^\idx\)</span> fluctuates around <span
-class="math inline">\(\np\)</span> rather than equalling it exactly.</p>
+class="math inline">\(\np\)</span> resampled particles. “Branch-kill”
+resampling relaxes that requirement: Each particle <span
+class="math inline">\(\idx\)</span> independently gets <span
+class="math inline">\(\lfloor \np\normwt^\idx \rfloor\)</span>
+deterministic copies plus one bonus copy with probability <span
+class="math inline">\(\np\normwt^\idx - \lfloor \np\normwt^\idx
+\rfloor\)</span>. No shared CDF or residual phase needed. The total
+<span class="math inline">\(\sum_\idx \cnt^\idx\)</span> fluctuates
+around <span class="math inline">\(\np\)</span> rather than equalling it
+exactly.</p>
 <div class="sourceCode" id="cb4"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># For each particle independently:</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>num_copies <span class="op">=</span> np.floor(N <span class="op">*</span> weights)</span>
@@ -805,7 +799,7 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a hr
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>bonus <span class="op">=</span> (u <span class="op">&gt;=</span> <span class="dv">1</span> <span class="op">-</span> p_bonus)    <span class="co"># inverse CDF: right of step → bonus</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>num_copies <span class="op">+=</span> bonus <span class="co"># total may differ from N</span></span></code></pre></div>
 <div class="callout proof">
-<p><span class="proof-label">Unbiasedness.</span> Particle <span
+<p><span class="proof-label">Unbiasedness</span> Particle <span
 class="math inline">\(i\)</span> receives <span
 class="math inline">\(\lfloor \np\normwt^\idx \rfloor\)</span>
 deterministic copies plus one bonus copy with probability <span
@@ -813,7 +807,7 @@ class="math inline">\(\np\normwt^\idx - \lfloor
 \np\normwt^\idx \rfloor\)</span>. So <span
 class="math inline">\(\E[\cnt^\idx] = \lfloor \np\normwt^\idx \rfloor +
 (\np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor) =
-\np\,\normwt^\idx\)</span>. ∎</p>
+\np\,\normwt^\idx.\)</span></p>
 </div>
 <canvas id="cv-bk" class="panel">
 </canvas>
@@ -833,21 +827,10 @@ class="math inline">\(K\)</span>:
 <span class="math inline">\(K\)</span> trials</button></p>
 </div>
 </div>
-<div id="var-bk" class="var-display">
-
-</div>
-<div id="est-bk" class="est-section">
-<div class="testfn-row">
-<p><span>Estimator distribution for <span
-class="math inline">\(f(\state^\idx) =\)</span></span>
-<select class="testfn-select"></select></p>
-</div>
-<canvas id="cv-est-bk" class="panel panel-short">
-</canvas>
-</div>
 </section>
-<section id="other-extensions" class="level3">
-<h3>Other extensions</h3>
+<section id="even-more-methods" class="level3" data-number="2.5.2">
+<h3 data-number="2.5.2"><span class="header-section-number">2.5.2</span>
+Even more methods…</h3>
 <ul>
 <li><p><strong>Rounding-copy resampling.</strong> Like branch-kill, but
 fully deterministic: each particle gets <span
@@ -855,19 +838,18 @@ class="math inline">\(\mathrm{round}(\np\normwt^\idx)\)</span> copies.
 This uses zero random draws, but sacrifices the strict unbiasedness
 condition (the bias per particle is at most <span
 class="math inline">\(0.5/\np\)</span>, vanishing as <span
-class="math inline">\(\np\)</span> grows). See <span class="citation"
-data-cites="li.t:2015">Li et al. (<a href="#ref-li.t:2015"
-role="doc-biblioref">2015</a>)</span>.</p></li>
-<li><p><strong>Optimal transport resampling.</strong> Rather than
-mapping through a CDF, one can frame resampling as a discrete optimal
-transport problem, minimizing the expected distance between the original
-and resampled particle positions. This preserves spatial structure
-better than CDF-based methods but is more expensive.</p></li>
+class="math inline">\(\np\)</span> grows).</p></li>
+<li><p>See <span class="citation" data-cites="li.t:2015">Li et al. (<a
+href="#ref-li.t:2015" role="doc-biblioref">2015</a>)</span> for this and
+a few more.</p></li>
 </ul>
 </section>
 </section>
-<section id="resampling-methods-in-action" class="level2">
-<h2>7. Resampling methods in action</h2>
+</section>
+<section id="resampling-methods-in-action" class="level1"
+data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span>
+Resampling methods in action</h1>
 <p>To see how the choice of resampling method affects particle diversity
 in practice, here is the same random walk model from the introduction,
 now with a method selector.</p>
@@ -908,8 +890,10 @@ Fix seed:
 </canvas>
 <canvas id="cv-pf-diagnostics" style="width:100%; height:80px; border:1px solid #eee; border-radius:3px;">
 </canvas>
-<section id="comparing-methods-over-many-runs" class="level3">
-<h3>Comparing methods over many runs</h3>
+<section id="comparing-methods-over-many-runs" class="level2"
+data-number="3.1">
+<h2 data-number="3.1"><span class="header-section-number">3.1</span>
+Comparing methods over many runs</h2>
 <p>To see the typical behavior rather than a single random run, we can
 see what happens over many runs of the same method. The plot below shows
 path degeneracy (unique ancestors at t=1) over <span
@@ -1025,7 +1009,7 @@ href="https://doi.org/10.1561/2200000074">https://doi.org/10.1561/2200000074</a>
 <script src="/assets/js/smc-resampling.bundle.js"></script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-04-19 17:02</span>
+    <span class="last-modified">Last modified: 2026-04-20 12:28</span>
   </div>
 </footer>
 </body>

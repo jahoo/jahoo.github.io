@@ -32,7 +32,7 @@
     const s = arr.reduce((a, b) => a + b, 0);
     if (s > 0) for (let i = 0; i < arr.length; i++) arr[i] /= s;
   }
-  function countIndices2(indices, n) {
+  function countIndices(indices, n) {
     const c = new Array(n).fill(0);
     for (const idx of indices) c[idx]++;
     return c;
@@ -165,10 +165,6 @@
       values: () => Array.from({ length: N }, (_, i) => i % 2 === 0 ? 1 : 0)
     }
   };
-  function getTestFnLabel() {
-    const t = TEST_FNS[testFnKey];
-    return typeof t.latexLabel === "function" ? t.latexLabel() : t.latexLabel;
-  }
   function getTestFnValues() {
     return TEST_FNS[testFnKey].values();
   }
@@ -178,7 +174,7 @@
     const allCounts = new Array(K);
     for (let t = 0; t < K; t++) {
       const idx = method(weights2);
-      const c = countIndices2(idx, N);
+      const c = countIndices(idx, N);
       allCounts[t] = c;
       for (let i = 0; i < N; i++) {
         sums[i] += c[i];
@@ -1194,26 +1190,6 @@
       }
     };
   }
-  function drawEstDist(canvasId, sec, color, label, weights2) {
-    var cv = document.getElementById(canvasId);
-    if (!cv) return;
-    if (cv.offsetWidth === 0 || cv.offsetHeight === 0) return;
-    var hist = sec.hist;
-    if (!hist || !hist.allCounts) {
-      resetCanvas(cv);
-      return;
-    }
-    var ev = evalEstimators(hist, weights2);
-    if (!ev) {
-      resetCanvas(cv);
-      return;
-    }
-    drawEstimatorDist(
-      cv,
-      [{ estimators: ev.estimators, color, label }],
-      ev.trueVal
-    );
-  }
   function drawCompEstDist(compData2, weights2) {
     var cv = document.getElementById("cv-est-all");
     if (!cv || !compData2) {
@@ -1240,6 +1216,13 @@
   // src/smc-resampling/toolbar.js
   function initToolbar(opts) {
     var getWeights2 = opts.getWeights;
+    var toolbar = document.getElementById("smc-toolbar");
+    if (toolbar) {
+      var section = toolbar.closest("section");
+      if (section && toolbar.parentElement !== section.parentElement) {
+        section.after(toolbar);
+      }
+    }
     var sparkline = document.getElementById("smc-toolbar-sparkline");
     var dropdownBtn = document.getElementById("smc-toolbar-dropdown-btn");
     var dropdownText = document.getElementById("smc-toolbar-dropdown-text");
@@ -1348,9 +1331,8 @@
         phase2Select.value = mainPhase2.value;
       });
     }
-    function tick() {
-      updateSparkline();
-      var testfnTrigger = document.getElementById("btn-run-multi");
+    function updateReveal() {
+      var testfnTrigger = document.getElementById("sec:comparison");
       var phase2Trigger = document.getElementById("cv-sec6");
       if (testfnItem && testfnTrigger) {
         testfnItem.style.display = testfnTrigger.getBoundingClientRect().top < 50 ? "flex" : "none";
@@ -1358,11 +1340,16 @@
       if (phase2Item && phase2Trigger) {
         phase2Item.style.display = phase2Trigger.getBoundingClientRect().top < 50 ? "flex" : "none";
       }
-      requestAnimationFrame(tick);
     }
+    window.addEventListener("scroll", updateReveal, { passive: true });
+    window.addEventListener("resize", updateReveal);
+    updateReveal();
     lastJSON = "";
     updateSparkline();
-    requestAnimationFrame(tick);
+    setInterval(function() {
+      updateSparkline();
+      updateReveal();
+    }, 100);
   }
 
   // src/smc-resampling/main.js
@@ -1608,12 +1595,6 @@
     window.addEventListener("touchend", onUp);
     canvas.addEventListener("mouseleave", onLeave);
   }
-  function setMathHTML(id, html) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    el.innerHTML = html;
-    if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([el]);
-  }
   function redrawAll() {
     drawSection2();
     drawMethodSection(cvSec3, sec3, METHOD_COLORS.multinomial, null, weights);
@@ -1625,13 +1606,6 @@
     drawResidualSection(cvSec6, sec6, weights);
     drawBranchKillSection(cvBK, secBK, weights);
     drawComparisonPanel(weights, compData);
-    drawEstDist("cv-est-multi", sec3, METHOD_COLORS.multinomial, "Multinomial", weights);
-    drawEstDist("cv-est-strat", sec4, METHOD_COLORS.stratified, "Stratified", weights);
-    drawEstDist("cv-est-sys", sec5, METHOD_COLORS.systematic, "Systematic", weights);
-    var p2 = getResidualPhase2() || "multinomial";
-    var p2Short = { multinomial: "Multi", stratified: "Strat", systematic: "Syst" };
-    drawEstDist("cv-est-resid", sec6, METHOD_COLORS.residual, "Resid-" + (p2Short[p2] || p2), weights);
-    drawEstDist("cv-est-bk", secBK, METHOD_COLORS.branchkill, "Branch-kill", weights);
     drawCompEstDist(compData, weights);
   }
   initSec2Events(cvSec2);
@@ -1662,7 +1636,7 @@
       var sysProbes = [];
       for (var k = 0; k < N; k++) sysProbes.push({ u: sec5.offset + k / N });
       sec5.probes = sysProbes;
-      sec5.counts = countIndices2(sysProbes.map(function(p) {
+      sec5.counts = countIndices(sysProbes.map(function(p) {
         return searchSorted(cs, p.u);
       }), N);
       redrawAll();
@@ -1687,12 +1661,12 @@
       return { u };
     });
     var indices = method(weights);
-    sec.counts = countIndices2(indices, N);
+    sec.counts = countIndices(indices, N);
     if (method === resample.multinomial) {
       sec.probes = draws.map(function(u) {
         return { u };
       });
-      sec.counts = countIndices2(draws.map(function(u) {
+      sec.counts = countIndices(draws.map(function(u) {
         return searchSorted(cs, u);
       }), N);
     } else if (method === resample.stratified) {
@@ -1702,7 +1676,7 @@
       sec.probes = ps.map(function(u) {
         return { u };
       });
-      sec.counts = countIndices2(ps.map(function(u) {
+      sec.counts = countIndices(ps.map(function(u) {
         return searchSorted(cs, u);
       }), N);
     }
@@ -1718,9 +1692,6 @@
       sec.counts = null;
       sec.hist = null;
       sec.mode = "none";
-      document.getElementById("var-" + prefix).textContent = "";
-      var estEl = document.getElementById("est-" + prefix);
-      if (estEl) estEl.classList.remove("visible");
       redrawAll();
     });
     var slider = document.getElementById("slider-K-" + prefix);
@@ -1733,14 +1704,6 @@
       sec.hist = runTrials(method, K, weights);
       sec.mode = "ktrials";
       sec.probes = [];
-      var ev = evalEstimators(sec.hist, weights);
-      var estStd = ev ? Math.sqrt(ev.estVar) : 0;
-      setMathHTML(
-        "var-" + prefix,
-        "std of estimator " + getTestFnLabel() + " = " + estStd.toFixed(4) + "  (" + K + " trials)"
-      );
-      var estEl = document.getElementById("est-" + prefix);
-      if (estEl) estEl.classList.add("visible");
       redrawAll();
     });
   }
@@ -1754,7 +1717,7 @@
     var sysProbes = [];
     for (var k = 0; k < N; k++) sysProbes.push({ u: sec5.offset + k / N });
     sec5.probes = sysProbes;
-    sec5.counts = countIndices2(sysProbes.map(function(p) {
+    sec5.counts = countIndices(sysProbes.map(function(p) {
       return searchSorted(cs, p.u);
     }), N);
     redrawAll();
@@ -1763,9 +1726,6 @@
     sec5.counts = null;
     sec5.hist = null;
     sec5.mode = "none";
-    document.getElementById("var-sys").textContent = "";
-    var estEl = document.getElementById("est-sys");
-    if (estEl) estEl.classList.remove("visible");
     redrawAll();
   });
   (function() {
@@ -1779,14 +1739,6 @@
       sec5.hist = runTrials(resample.systematic, K, weights);
       sec5.mode = "ktrials";
       sec5.probes = [];
-      var ev = evalEstimators(sec5.hist, weights);
-      var estStd = ev ? Math.sqrt(ev.estVar) : 0;
-      setMathHTML(
-        "var-sys",
-        "std of estimator " + getTestFnLabel() + " = " + estStd.toFixed(4) + "  (" + K + " trials)"
-      );
-      var estEl = document.getElementById("est-sys");
-      if (estEl) estEl.classList.add("visible");
       redrawAll();
     });
   })();
@@ -1887,9 +1839,6 @@
     sec6.residualProbes = [];
     sec6.hist = null;
     sec6.mode = "none";
-    document.getElementById("var-resid").textContent = "";
-    var estEl = document.getElementById("est-resid");
-    if (estEl) estEl.classList.remove("visible");
     redrawAll();
   });
   document.getElementById("btn-clear-resid").addEventListener("click", function() {
@@ -1899,9 +1848,6 @@
     sec6.residualProbes = [];
     sec6.hist = null;
     sec6.mode = "none";
-    document.getElementById("var-resid").textContent = "";
-    var estEl = document.getElementById("est-resid");
-    if (estEl) estEl.classList.remove("visible");
     redrawAll();
   });
   (function() {
@@ -1916,14 +1862,6 @@
         return resample.residual(w, getResidualPhase2());
       }, K, weights);
       sec6.mode = "ktrials";
-      var ev = evalEstimators(sec6.hist, weights);
-      var estStd = ev ? Math.sqrt(ev.estVar) : 0;
-      setMathHTML(
-        "var-resid",
-        "std of estimator " + getTestFnLabel() + " = " + estStd.toFixed(4) + "  (" + K + " trials)"
-      );
-      var estEl = document.getElementById("est-resid");
-      if (estEl) estEl.classList.add("visible");
       redrawAll();
     });
   })();
@@ -1952,9 +1890,6 @@
     secBK.totalCounts = null;
     secBK.hist = null;
     secBK.mode = "none";
-    document.getElementById("var-bk").textContent = "";
-    var estEl = document.getElementById("est-bk");
-    if (estEl) estEl.classList.remove("visible");
     redrawAll();
   });
   (function() {
@@ -1967,14 +1902,6 @@
       var K = parseInt(slider.value, 10);
       secBK.hist = runTrials(resample.branchkill, K, weights);
       secBK.mode = "ktrials";
-      var ev = evalEstimators(secBK.hist, weights);
-      var estStd = ev ? Math.sqrt(ev.estVar) : 0;
-      setMathHTML(
-        "var-bk",
-        "std of estimator " + getTestFnLabel() + " = " + estStd.toFixed(4) + "  (" + K + " trials)"
-      );
-      var estEl = document.getElementById("est-bk");
-      if (estEl) estEl.classList.add("visible");
       redrawAll();
     });
   })();
@@ -2027,18 +1954,6 @@
       allTestFnSelects.forEach(function(s) {
         s.value = getTestFnKey();
       });
-      [["multi", sec3], ["strat", sec4], ["sys", sec5], ["resid", sec6]].forEach(function(pair) {
-        var prefix = pair[0], sec = pair[1];
-        if (sec.hist && sec.hist.allCounts) {
-          var ev = evalEstimators(sec.hist, weights);
-          if (ev) {
-            setMathHTML(
-              "var-" + prefix,
-              "std of estimator " + getTestFnLabel() + " = " + Math.sqrt(ev.estVar).toFixed(4) + "  (" + sec.hist.K + " trials)"
-            );
-          }
-        }
-      });
       if (compData) {
         ["multi", "strat", "sys", "resid"].forEach(function(key) {
           var ev = evalEstimators(compData[key], weights);
@@ -2049,13 +1964,6 @@
             document.getElementById("comp-std-" + key).textContent = std;
           }
         });
-      }
-      if (secBK.hist) {
-        var evBK = evalEstimators(secBK.hist, weights);
-        if (evBK) setMathHTML(
-          "var-bk",
-          "std of estimator " + getTestFnLabel() + " = " + Math.sqrt(evBK.estVar).toFixed(4) + "  (" + secBK.hist.K + " trials)"
-        );
       }
       setTimeout(redrawAll, 0);
     });
