@@ -462,7 +462,7 @@ We should see multinomial show worse path degeneracy than the lower-variance alt
 <label style="font-size:0.85em; color:#555;">$K$:
 <input type="range" id="slider-pf-K" min="10" max="1000" value="50" step="10" style="width:80px; vertical-align:middle;">
 <span id="val-pf-K">50</span></label>
-<button id="btn-pf-ktrials" style="font-weight:600;">Run K trials (all methods)</button>
+<button id="btn-pf-ktrials">Run $K$ trials</button>
 </div>
 </div>
 
