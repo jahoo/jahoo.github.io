@@ -223,7 +223,7 @@ canvas.panel-short { height: 200px; }
    Floating right lets the text flow around it on that line and pushes the
    mark to the right edge. */
 .callout.proof > :last-child::after {
-    content: "∎";
+    content: "□";
     float: right;
     margin-left: 0.5em;
 }
