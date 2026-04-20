@@ -17,6 +17,10 @@
     /* Width is controlled by the `wide` class on the element (see
        Jez's theme.css — .wide switches to main-width + sidenote span). */
     box-sizing: border-box;
+    /* .wide sets overflow-x: auto, which would clip the dropdown menu
+       (absolutely-positioned and extending below the toolbar). Restore
+       visible overflow so the menu can spill out. */
+    overflow: visible;
 }
 .smc-toolbar-item {
     display: flex;
