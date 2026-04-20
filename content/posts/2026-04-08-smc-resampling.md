@@ -73,7 +73,7 @@ segments of width $\normwt^\idx$, and mapping from 'probe' locations on the unit
 
 <!-- Note, this smc-toolbar div is sticky, but that is bounded by the containing element's parent. The solution is in `initToolbar` in `src/smc-resampling/toolbar.js`. What it does: On page load it will find the top-level <section> (i.e. a direct child of <main>) that contains the toolbar, then reparent the toolbar to be a direct child of <main>, positioned immediately after that section  -->
 
-<div id="smc-toolbar" class="smc-toolbar wide extra-wide">
+<div id="smc-toolbar" class="smc-toolbar">
 <div class="smc-toolbar-item" id="smc-toolbar-weights">
 <span class="smc-toolbar-label">Weights:</span>
 <div class="smc-toolbar-dropdown" id="smc-toolbar-dropdown">
@@ -172,7 +172,7 @@ Each probe $\probe_k$ is independently $\mathrm{Uniform}(0,1)$, so it
 lands in particle $\idx$'s CDF segment (of width $\normwt^\idx$) with
 probability $\normwt^\idx$. With $\np$ independent probes,
 $\cnt^\idx \sim \mathrm{Binomial}(\np, \normwt^\idx)$ and
-$\E[\cnt^\idx] = \np\,\normwt^\idx$. ∎
+$\E[\cnt^\idx] = \np\,\normwt^\idx.$
 :::
 
 ### Stratified resampling
@@ -217,7 +217,7 @@ overlap between stratum $k$ and particle $\idx$'s CDF interval,
 scaled by $\np$. Summing over all strata:
 $\E[\cnt^\idx] = \sum_{k=1}^{\np} \E[\mathbf{1}_k^\idx]
 = \np\,\normwt^\idx$, since the strata tile $[0,1]$ and particle $\idx$'s
-segment has total length $\normwt^\idx$. ∎
+segment has total length $\normwt^\idx.$
 :::
 
 ### Systematic resampling
@@ -253,7 +253,7 @@ The offset $U$ is $\mathrm{Uniform}(0, 1/\np)$, so each probe
 $\probe_k = U + (k{-}1)/\np$ is marginally
 $\mathrm{Uniform}\bigl(\frac{k-1}{\np},\, \frac{k}{\np}\bigr)$, the
 same distribution as the stratified probe in stratum $k$. The
-same tiling argument gives $\E[\cnt^\idx] = \np\,\normwt^\idx$.∎
+same tiling argument gives $\E[\cnt^\idx] = \np\,\normwt^\idx.$
 :::
 
 Note that the probes are no longer independent. A single $U$ determines all of them. The marginal distributions are identical to stratified, so unbiasedness holds, but the joint distribution differs (and so also the variance).
@@ -311,7 +311,7 @@ of whichever CDF method is used for phase 2, the expected
 number of phase-2 copies of particle $\idx$ is $R \cdot \resid^\idx =
 \np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor$. Adding the two phases:
 $\E[\cnt^\idx] = \lfloor \np\normwt^\idx \rfloor + (\np\normwt^\idx - \lfloor
-\np\normwt^\idx \rfloor) = \np\,\normwt^\idx$. ∎
+\np\normwt^\idx \rfloor) = \np\,\normwt^\idx.$
 :::
 
 
@@ -324,7 +324,7 @@ Comparing all four methods on the same weights: Colored error bars show mean cou
 <label style="font-size:0.85em; color:#555;">$K$:
 <input type="range" id="slider-K-all" min="100" max="10000" value="1000" step="100" style="width:120px; vertical-align:middle;">
 <span id="val-K-all">1000</span></label>
-<button id="btn-run-all" style="font-weight:600;">Run all four</button>
+<button id="btn-run-all" style="font-size:0.85em;">Compare methods variance</button>
 <span style="flex:1;"></span>
 <button id="btn-set-counterexample" style="font-size:0.85em;">Set Douc et al. counterexample</button>
 <button id="btn-reset-counterexample" style="font-size:0.85em; display:none;">Reset</button>
@@ -377,7 +377,10 @@ num_copies += bonus # total may differ from N
 
 ::: {.callout .proof}
 [Unbiasedness.]{.proof-label}
-
+Particle $i$ receives $\lfloor \np\normwt^\idx \rfloor$ deterministic
+copies plus one bonus copy with probability $\np\normwt^\idx - \lfloor
+\np\normwt^\idx \rfloor$. So $\E[\cnt^\idx] = \lfloor \np\normwt^\idx \rfloor +
+(\np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor) = \np\,\normwt^\idx.$
 :::
 
 <canvas id="cv-bk" class="panel"></canvas>

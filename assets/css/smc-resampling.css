@@ -219,6 +219,14 @@ canvas.panel-short { height: 200px; }
     border-left-color: var(--s-border, #ddd);
     background: var(--s-surface, #f6f8fa);
 }
+/* Auto-append a Q.E.D. tombstone at the end of the last line of a .proof.
+   Floating right lets the text flow around it on that line and pushes the
+   mark to the right edge. */
+.callout.proof > :last-child::after {
+    content: "∎";
+    float: right;
+    margin-left: 0.5em;
+}
 .proof-label {
     font-weight: bold;
     font-style: italic;
