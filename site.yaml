@@ -9,6 +9,15 @@ description: >
   PhD in Linguistics from McGill University.
 bibliography: assets/bibliography/default.bib
 bib-source: source.bib
+
+# pandoc-crossref config: @sec:foo, @fig:foo, @tbl:foo, @eq:foo refs
+# resolve to clickable links. Prefixes are dropped so the markdown can
+# read naturally (e.g. "in section @sec:comparison" → "in section 5").
+linkReferences: true
+secPrefix: ["", ""]
+figPrefix: ["", ""]
+tblPrefix: ["", ""]
+eqnPrefix: ["", ""]
 nav:
   - text: home
     url: /

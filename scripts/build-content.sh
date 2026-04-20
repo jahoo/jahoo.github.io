@@ -12,7 +12,8 @@ PANDOC_COMMON="--standalone \
   --from markdown+tex_math_single_backslash \
   --template assets/vendor/pandoc-markdown-css-theme/template.html5 \
   --include-before-body templates/navbar.html \
-  --section-divs --mathjax --citeproc \
+  --section-divs --mathjax \
+  --filter pandoc-crossref --citeproc \
   --csl assets/bibliography/apa.csl"
 FILTER_FLAGS=""
 for f in filters/*.lua; do
