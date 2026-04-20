@@ -16,6 +16,20 @@ import { normalize, getResidualPhase2 } from './algorithms.js';
 export function initToolbar(opts) {
     var getWeights = opts.getWeights;
 
+    // ---- Hoist toolbar out of its authored <section> up to <main> ----
+    // With Pandoc's --section-divs, the toolbar sits inside the <section>
+    // started by "## 2. Inverse transform sampling". `position: sticky`
+    // is confined to its parent, so once the user scrolls past Section 2
+    // the toolbar unsticks. Re-parent it to <main> (directly before the
+    // section it came from) so it visually appears in roughly the same
+    // place but sticks across the rest of the post.
+    var toolbar = document.getElementById('smc-toolbar');
+    var main = document.querySelector('main');
+    if (toolbar && main && toolbar.parentElement !== main) {
+        var section = toolbar.closest('main > section');
+        if (section) main.insertBefore(toolbar, section);
+    }
+
     // ---- Element references ----
     var sparkline    = document.getElementById('smc-toolbar-sparkline');
     var dropdownBtn  = document.getElementById('smc-toolbar-dropdown-btn');

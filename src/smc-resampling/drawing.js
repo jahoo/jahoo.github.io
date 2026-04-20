@@ -5,6 +5,7 @@
 
 import { N, PALETTE, METHOD_COLORS } from './config.js';
 import {
+    countIndices,
     cumulativeSum,
     searchSorted,
     resetCanvas,

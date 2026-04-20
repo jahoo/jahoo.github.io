@@ -34,7 +34,7 @@ content:
 # ---- JS bundling ----
 js: $(JS_BUNDLES)
 
-$(OUTDIR)/assets/js/%.bundle.js: src/%/index.js $(shell find src/lib -name '*.js' 2>/dev/null)
+$(OUTDIR)/assets/js/%.bundle.js: src/%/index.js $(shell find src -name '*.js' 2>/dev/null)
 	@mkdir -p $(dir $@)
 	@echo "Bundle: $<"
 	@$(ESBUILD) $< --bundle --outfile=$@
