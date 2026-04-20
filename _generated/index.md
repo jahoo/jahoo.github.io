@@ -5,7 +5,7 @@ hide-post-title: true
 css: [/assets/css/index.css]
 ---
 
-# about
+# about {.unnumbered}
 
 Hi. [I](/assets/j2024.jpeg)'m Jacob. Some things I'm interested in are human language processing and inference algorithms. My research builds on probabilistic models of cognition, using information theory, algorithmic complexity, and tools from linguistics and machine learning.
 
@@ -19,7 +19,7 @@ I sometimes post about things on the [blog](/posts/).
 
 ----
 
-# publications
+# publications {.unnumbered}
 
 <ul class="social-media-list">
   <li><a href="https://scholar.google.com/citations?user=koLi2TwAAAAJ">Google Scholar</a></li>
