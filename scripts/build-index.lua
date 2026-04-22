@@ -1,5 +1,5 @@
 -- scripts/build-index.lua
--- Blog listing generator: scans content posts and explorations,
+-- Blog listing generator: scans content in content/posts/,
 -- emits _generated/posts.md with a formatted listing page.
 -- Run via: pandoc lua scripts/build-index.lua
 

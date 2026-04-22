@@ -8,7 +8,7 @@
 
 **Tech Stack:** Node (ES modules) + `js-yaml`. Pandoc templates/filters unchanged. Tests via `node --test`.
 
-**Reference spec:** `docs/specs/2026-04-17-phase3-publications-page.md`
+**Reference spec:** `docs/superpowers/specs/2026-04-17-phase3-publications-page.md`
 
 ---
 
@@ -1257,12 +1257,12 @@ git commit -m "Phase 3: main() reads pubs.yaml, writes pubs.md + pubs.bib"
 
 - [ ] **Step 1: Create `pubs.yaml` at repo root**
 
-Translate all 9 entries from `_bibliography/pubs.bib`. Use the schema in `docs/specs/2026-04-17-phase3-publications-page.md`. The file order will be re-sorted by the build, but writing newest-first is easiest to read.
+Translate all 9 entries from `_bibliography/pubs.bib`. Use the schema in `docs/superpowers/specs/2026-04-17-phase3-publications-page.md`. The file order will be re-sorted by the build, but writing newest-first is easiest to read.
 
 Full content:
 ```yaml
 # Publications, newest first.
-# Schema: see docs/specs/2026-04-17-phase3-publications-page.md
+# Schema: see docs/superpowers/specs/2026-04-17-phase3-publications-page.md
 #
 # Required: id, title, authors, year, type, venue
 # Optional: month, day, venue_full, venue_url, pages, publisher, address,

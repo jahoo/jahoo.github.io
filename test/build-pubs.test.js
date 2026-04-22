@@ -17,7 +17,7 @@ import {
   sortEntries,
   validateEntry,
   generateHtmlEntry,
-  generateHomepage,
+  generatePubList,
   expandHome, loadBibSource,
   parseBib, indexByKey, extractArxivEprints, extractEntriesByKey,
   mapCslType,
@@ -69,17 +69,45 @@ test('formatAuthorsHtml: single author', () => {
   assert.equal(formatAuthorsHtml(['Jacob Louis Hoover']), 'Jacob Louis Hoover');
 });
 
-test('formatAuthorsHtml: two authors', () => {
+test('formatAuthorsHtml: two authors (apostrophes in names are escaped)', () => {
   assert.equal(
     formatAuthorsHtml(['Jacob Louis Hoover', "Timothy J. O'Donnell"]),
-    "Jacob Louis Hoover, Timothy J. O'Donnell"
+    'Jacob Louis Hoover, Timothy J. O&#39;Donnell'
   );
 });
 
-test('formatAuthorsHtml: equal contribution markers', () => {
+test('formatAuthorsHtml: co_first marks first N authors with superscript ∗', () => {
+  const html = formatAuthorsHtml(['Alice Smith', 'Bob Jones', 'Carol Lee'], 2);
+  assert.match(html, /Alice Smith<sup[^>]*>∗<\/sup>, Bob Jones<sup[^>]*>∗<\/sup>, Carol Lee$/);
+});
+
+test('formatAuthorsHtml: co_last marks last M authors with superscript ‡', () => {
+  const html = formatAuthorsHtml(['Alice Smith', 'Bob Jones', 'Carol Lee'], 0, 2);
+  assert.match(html, /^Alice Smith, Bob Jones<sup[^>]*>‡<\/sup>, Carol Lee<sup[^>]*>‡<\/sup>$/);
+});
+
+test('formatAuthorsHtml: mark <sup>s carry a title tooltip', () => {
+  const html = formatAuthorsHtml(['A', 'B'], 1, 1);
+  assert.match(html, /<sup[^>]*title="∗ Co-first author"[^>]*>∗<\/sup>/);
+  assert.match(html, /<sup[^>]*title="‡ Co-senior author"[^>]*>‡<\/sup>/);
+});
+
+test('formatAuthorsHtml: co_first and co_last can overlap (both marks)', () => {
+  const html = formatAuthorsHtml(['Alice', 'Bob'], 2, 2);
+  assert.match(html, /Alice<sup[^>]*>∗<\/sup><sup[^>]*>‡<\/sup>, Bob<sup[^>]*>∗<\/sup><sup[^>]*>‡<\/sup>/);
+});
+
+test('formatAuthorsHtml: defaults to no marks', () => {
   assert.equal(
-    formatAuthorsHtml(['Alice Smith', 'Bob Jones', 'Carol Lee'], [0, 1]),
-    'Alice Smith*, Bob Jones*, Carol Lee'
+    formatAuthorsHtml(['Alice Smith', 'Bob Jones']),
+    'Alice Smith, Bob Jones'
+  );
+});
+
+test('formatAuthorsHtml: escapes HTML-unsafe chars in names', () => {
+  assert.match(
+    formatAuthorsHtml(['Alice & Co']),
+    /^Alice &amp; Co$/
   );
 });
 
@@ -295,16 +323,35 @@ test('validateEntry: rejects non-array authors', () => {
   );
 });
 
-test('validateEntry: rejects out-of-range equal_contribution index', () => {
+test('validateEntry: rejects co_first greater than authors.length', () => {
   assert.throws(
-    () => validateEntry({ ...minimalEntry, authors: ['A B'], equal_contribution: [5] }),
-    /equal_contribution/
+    () => validateEntry({ ...minimalEntry, authors: ['A B'], co_first: 5 }),
+    /co_first/
   );
 });
 
-test('validateEntry: accepts valid equal_contribution', () => {
+test('validateEntry: rejects co_last greater than authors.length', () => {
+  assert.throws(
+    () => validateEntry({ ...minimalEntry, authors: ['A B'], co_last: 3 }),
+    /co_last/
+  );
+});
+
+test('validateEntry: rejects non-integer co_first', () => {
+  assert.throws(
+    () => validateEntry({ ...minimalEntry, authors: ['A B', 'C D'], co_first: 1.5 }),
+    /co_first/
+  );
+});
+
+test('validateEntry: accepts valid co_first and co_last', () => {
   assert.doesNotThrow(() =>
-    validateEntry({ ...minimalEntry, authors: ['A B', 'C D'], equal_contribution: [0, 1] })
+    validateEntry({
+      ...minimalEntry,
+      authors: ['A B', 'C D', 'E F'],
+      co_first: 2,
+      co_last: 1,
+    })
   );
 });
 
@@ -379,10 +426,19 @@ test('generateHtmlEntry: renders status tag', () => {
   assert.match(html, /<span class="pub-status">preprint<\/span>/);
 });
 
-test('generateHtmlEntry: renders equal contribution asterisks', () => {
-  const eq = { ...htmlFixture, equal_contribution: [0, 1] };
-  const html = generateHtmlEntry(eq);
-  assert.match(html, /Jacob Louis Hoover\*, Wenyu Du\*/);
+test('generateHtmlEntry: co_first marks first N authors with superscript ∗', () => {
+  const e = { ...htmlFixture, co_first: 2 };
+  const html = generateHtmlEntry(e);
+  assert.match(html, /Jacob Louis Hoover<sup[^>]*>∗<\/sup>, Wenyu Du<sup[^>]*>∗<\/sup>/);
+});
+
+test('generateHtmlEntry: co_last marks last M authors with superscript ‡', () => {
+  const e = { ...htmlFixture, co_last: 2 };
+  const html = generateHtmlEntry(e);
+  assert.match(
+    html,
+    /Alessandro Sordoni<sup[^>]*>‡<\/sup>, Timothy J\. O&#39;Donnell<sup[^>]*>‡<\/sup>/
+  );
 });
 
 test('generateHtmlEntry: renders links.other list', () => {
@@ -521,7 +577,7 @@ test('adaptEntry: copies extras.link_label onto entry', () => {
 });
 
 // ------------------------------------------------------------
-// Document wrapper
+// Pub-list partial
 // ------------------------------------------------------------
 
 const docEntries = [
@@ -531,37 +587,32 @@ const docEntries = [
   },
   {
     id: 'b', title: 'B', authors: ['P Q', 'R S'], year: 2022, type: 'misc',
-    venue: 'W', equal_contribution: [0, 1],
+    venue: 'W', co_first: 2,
   },
 ];
 
-const SAMPLE_ABOUT = 'Hi, I am someone. Some [link](https://example.com) content here.';
-
-test('generateHomepage: has front matter, about section, publications section', () => {
-  const md = generateHomepage(SAMPLE_ABOUT, docEntries);
-  assert.match(md, /^---$/m);
-  assert.match(md, /^title: home$/m);
-  assert.match(md, /^page-style: site$/m);
-  assert.match(md, /^hide-post-title: true$/m);
-  assert.match(md, /^# about$/m);
-  assert.match(md, /Hi, I am someone/);
-  assert.match(md, /^# publications$/m);
+test('generatePubList: wraps items in a pandoc raw-html pub-list block', () => {
+  const md = generatePubList(docEntries);
+  assert.match(md, /^```\{=html\}$/m);
   assert.match(md, /<ul class="pub-list">/);
   assert.match(md, /<li class="pub">/);
-  assert.match(md, /scholar\.google\.com/);
-  assert.match(md, /surname is Vigly/);
+  assert.match(md, /<\/ul>\n```/);
 });
 
-test('generateHomepage: about section precedes publications section', () => {
-  const md = generateHomepage(SAMPLE_ABOUT, docEntries);
-  assert.ok(md.indexOf('# about') < md.indexOf('# publications'));
+test('generatePubList: co-first footnote only when co_first > 0 on some entry', () => {
+  const md = generatePubList(docEntries);
+  assert.match(md, /<sup[^>]*>∗<\/sup> Co-first authorship/);
+  const mdNoCF = generatePubList([docEntries[0]]);
+  assert.doesNotMatch(mdNoCF, /Co-first authorship/);
 });
 
-test('generateHomepage: equal-contribution footnote only when used', () => {
-  const md = generateHomepage(SAMPLE_ABOUT, docEntries);
-  assert.match(md, /\* Equal contribution/);
-  const mdNoEq = generateHomepage(SAMPLE_ABOUT, [docEntries[0]]);
-  assert.doesNotMatch(mdNoEq, /\* Equal contribution/);
+test('generatePubList: co-senior footnote only when co_last > 0 on some entry', () => {
+  const noCL = generatePubList(docEntries);
+  assert.doesNotMatch(noCL, /Co-senior authorship/);
+  const withCL = generatePubList([
+    { ...docEntries[0], authors: ['A', 'B', 'C'], co_last: 2 },
+  ]);
+  assert.match(withCL, /<sup[^>]*>‡<\/sup> Co-senior authorship/);
 });
 
 // ------------------------------------------------------------
@@ -971,15 +1022,17 @@ test('adaptEntry: thesis uses publisher as school (not duplicated)', () => {
   assert.equal(e.links.url, 'https://example.com/thesis');
 });
 
-test('adaptEntry: extras note + status + equal_contribution', () => {
+test('adaptEntry: extras note + status + co_first + co_last', () => {
   const e = adaptEntry(cslInproceedings, {
     note: 'Best Paper',
     status: 'preprint',
-    equal_contribution: [0, 1],
+    co_first: 2,
+    co_last: 1,
   });
   assert.equal(e.note, 'Best Paper');
   assert.equal(e.status, 'preprint');
-  assert.deepEqual(e.equal_contribution, [0, 1]);
+  assert.equal(e.co_first, 2);
+  assert.equal(e.co_last, 1);
 });
 
 test('adaptEntry: links merge — extras add to bib-derived', () => {

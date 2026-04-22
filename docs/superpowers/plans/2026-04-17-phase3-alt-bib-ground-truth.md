@@ -8,7 +8,7 @@
 
 **Tech Stack:** Node (ES modules), `@citation-js/core` + `@citation-js/plugin-bibtex`, Pandoc (unchanged downstream).
 
-**Reference spec:** `docs/specs/2026-04-17-phase3-alt-bib-ground-truth.md`
+**Reference spec:** `docs/superpowers/specs/2026-04-17-phase3-alt-bib-ground-truth.md`
 
 ---
 
@@ -1219,7 +1219,7 @@ Content:
 ```yaml
 # Publications listed on /pubs-bib/.
 # Bibliographic data comes from source.bib; this file holds only
-# website-specific extras. Schema: see docs/specs/2026-04-17-phase3-alt-bib-ground-truth.md
+# website-specific extras. Schema: see docs/superpowers/specs/2026-04-17-phase3-alt-bib-ground-truth.md
 
 - key: chan.r:2026arxiv
   status: preprint
@@ -1460,7 +1460,7 @@ The path on the right-hand side is wherever your bib actually lives; `source.bib
 
 Bibliographic fields (title, authors, year, venue_full, DOI, URL) are pulled from the bib. The `venue` overlay is a short display label; without it, the page falls back to the `shortjournal`/`shortseries`/`eventtitle`/`container-title` from the bib, in that order.
 
-**Differences from the YAML variant.** `/pubs/` (from `pubs.yaml`) duplicates bib data in YAML; `/pubs-bib/` (from `pubs-bib.yaml` + source.bib) keeps bib data canonical in the bib and overlays only extras. Same renderer, different data source. See `docs/specs/2026-04-17-phase3-alt-bib-ground-truth.md`.
+**Differences from the YAML variant.** `/pubs/` (from `pubs.yaml`) duplicates bib data in YAML; `/pubs-bib/` (from `pubs-bib.yaml` + source.bib) keeps bib data canonical in the bib and overlays only extras. Same renderer, different data source. See `docs/superpowers/specs/2026-04-17-phase3-alt-bib-ground-truth.md`.
 ````
 
 - [ ] **Step 2: Update the build-commands list**

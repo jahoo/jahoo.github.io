@@ -7,7 +7,6 @@ description: >
   Scientific Program Coordinator at CHI FRO, LLC.
   Formerly Postdoc at MIT, Department of Brain and Cognitive Sciences.
   PhD in Linguistics from McGill University.
-bibliography: assets/bibliography/default.bib
 bib-source: source.bib
 
 # pandoc-crossref config: @sec:foo, @fig:foo, @tbl:foo, @eq:foo refs

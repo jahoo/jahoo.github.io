@@ -8,7 +8,7 @@
 
 **Tech Stack:** Make, bash, git worktrees, rsync. No new dependencies.
 
-**Reference spec:** `docs/specs/2026-04-17-phase4-remove-jekyll.md`
+**Reference spec:** `docs/superpowers/specs/2026-04-17-phase4-remove-jekyll.md`
 
 ---
 

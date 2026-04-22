@@ -4,7 +4,7 @@
 
 **Goal:** Get the full Pandoc + Make + esbuild pipeline working end-to-end for the SMC resampling exploration, validating every piece before migrating the rest of the site.
 
-**Architecture:** Pandoc compiles markdown to HTML via a custom template and Lua filters. esbuild bundles ES module JavaScript. Make orchestrates both. browser-sync serves the output with live reload. See `docs/specs/2026-04-15-pandoc-migration-design.md` for the full design spec.
+**Architecture:** Pandoc compiles markdown to HTML via a custom template and Lua filters. esbuild bundles ES module JavaScript. Make orchestrates both. browser-sync serves the output with live reload. See `docs/superpowers/specs/2026-04-15-pandoc-migration-design.md` for the full design spec.
 
 **Tech Stack:** Pandoc 3.9, Make, esbuild, browser-sync, fswatch, Node.js (v24)
 
@@ -53,7 +53,7 @@ assets/explorations-base.css    # source for assets/css/base.css
 **Files:**
 - Create: `package.json`
 - Create: `site.yaml`
-- Create directory structure: `templates/`, `filters/`, `content/explorations/`, `src/lib/`, `src/smc-resampling/`, `scripts/`, `test/lib/`, `test/smc-resampling/`, `assets/css/`, `assets/bibliography/`, `docs/plans/`
+- Create directory structure: `templates/`, `filters/`, `content/explorations/`, `src/lib/`, `src/smc-resampling/`, `scripts/`, `test/lib/`, `test/smc-resampling/`, `assets/css/`, `assets/bibliography/`, `docs/superpowers/plans/`
 
 - [ ] **Step 1: Create the migration branch**
 

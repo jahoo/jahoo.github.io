@@ -16,16 +16,24 @@ STATIC_DIRS := assets/css assets/js assets/fonts assets/images assets/bibliograp
 ROOT_HTML   := interactive-divergence-fitting.html interactive-kl-fitting.html
 PRESENTATION_DIRS := $(wildcard 20[0-9][0-9]-*/)
 
-.PHONY: all clean content js assets static-html serve test generate pubs deploy
+.PHONY: all clean content js assets static-html serve test generate pubs homepage posts-index deploy
 
 all: generate content js assets static-html
 
-# ---- Generate listing + publications ----
-generate: pubs
-	@pandoc lua scripts/build-index.lua
+# ---- Generate listing + publications + homepage ----
+generate: homepage posts-index
 
+# bib-driven pub list → _generated/_pub-list.md (partial)
 pubs:
 	@node scripts/build-pubs.js
+
+# splice @cat/@paste includes in content/_index.md → _generated/index.md
+homepage: pubs
+	@node scripts/expand-includes.js content/_index.md _generated/index.md
+
+# blog listing → _generated/posts.md
+posts-index:
+	@pandoc lua scripts/build-index.lua
 
 # ---- Content compilation (delegates to script for date-stripping + external files) ----
 content:

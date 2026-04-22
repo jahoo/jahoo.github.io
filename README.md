@@ -2,7 +2,9 @@
 
 Built with a Pandoc + Make + esbuild pipeline. Content authored as markdown in `content/`; homepage publications driven by `pubs.yaml` (a list of bib keys) plus a gitignored `source.bib` symlink at the repo root pointing at the local BibLaTeX library.
 
-See `docs/authoring.md` for the full authoring guide.
+Docs:
+- [docs/authoring.md](docs/authoring.md) — authoring guide (new posts, front matter, math, citations, build commands).
+- [docs/pubs.md](docs/pubs.md) — `pubs.yaml` schema (fields, merge rules with `source.bib`, validation).
 
 #### Local development
 - Edit on the `source` branch.

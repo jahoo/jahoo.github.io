@@ -9,11 +9,10 @@
 //     equal-contribution marks)
 //
 // Emits:
-//   - _generated/pubs.md            (Pandoc markdown; compiled into /pubs/)
-//   - assets/bibliography/pubs.bib  (filter of source.bib — verbatim entries
-//                                    for the keys listed in pubs.yaml, with
-//                                    Zotero's local-path `file` field and
-//                                    other private metadata stripped)
+//   - _generated/_pub-list.md       (pub-list HTML block, partial; spliced
+//                                    into the homepage template by
+//                                    scripts/expand-includes.js via the
+//                                    <!-- @paste pub-list --> marker)
 //
 // All pure helpers are exported for unit testing.
 
@@ -42,11 +41,26 @@ export function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => HTML_ESCAPES[c]);
 }
 
-export function formatAuthorsHtml(authors, equalContribution = []) {
-  const marked = authors.map((a, i) =>
-    equalContribution.includes(i) ? `${a}*` : a
-  );
-  return marked.join(', ');
+// coFirst: N → first N authors get a superscript ∗ (co-first authorship).
+// coLast:  M → last M  authors get a superscript ‡ (co-senior authorship).
+// The two regions may overlap (e.g. a two-author paper with coFirst=2 and
+// coLast=2 marks both authors with ∗‡); overlap is legal, not validated out.
+// Returns HTML — author names are escaped internally, so callers should not
+// wrap the result in escapeHtml().
+const CO_FIRST_MARK =
+  '<sup class="pub-mark" title="∗ Co-first author">∗</sup>';
+const CO_LAST_MARK =
+  '<sup class="pub-mark" title="‡ Co-senior author">‡</sup>';
+export function formatAuthorsHtml(authors, coFirst = 0, coLast = 0) {
+  const n = authors.length;
+  return authors
+    .map((a, i) => {
+      let s = escapeHtml(a);
+      if (i < coFirst) s += CO_FIRST_MARK;
+      if (i >= n - coLast) s += CO_LAST_MARK;
+      return s;
+    })
+    .join(', ');
 }
 
 export function buildPdfUrl(path) {
@@ -171,16 +185,13 @@ export function validateEntry(entry) {
       `[${id}] type "${entry.type}" not in ${[...ALLOWED_TYPES].join(', ')}`
     );
   }
-  if (entry.equal_contribution) {
-    if (!Array.isArray(entry.equal_contribution)) {
-      throw new Error(`[${id}] equal_contribution must be a list of indices`);
-    }
-    for (const idx of entry.equal_contribution) {
-      if (!Number.isInteger(idx) || idx < 0 || idx >= entry.authors.length) {
-        throw new Error(
-          `[${id}] equal_contribution index ${idx} out of range (authors.length=${entry.authors.length})`
-        );
-      }
+  for (const field of ['co_first', 'co_last']) {
+    const v = entry[field];
+    if (v == null) continue;
+    if (!Number.isInteger(v) || v < 0 || v > entry.authors.length) {
+      throw new Error(
+        `[${id}] ${field} must be an integer in [0, authors.length=${entry.authors.length}], got ${v}`
+      );
     }
   }
   if (entry.links?.other) {
@@ -266,8 +277,10 @@ function renderExtras(links, bibHtml, linkLabelOverride) {
 
 export function generateHtmlEntry(paper) {
   const title = escapeHtml(stripTitleBraces(paper.title));
-  const authors = escapeHtml(
-    formatAuthorsHtml(paper.authors, paper.equal_contribution ?? [])
+  // formatAuthorsHtml returns HTML (escaped names + <sup> mark tags); do not
+  // re-wrap in escapeHtml or the <sup> tags get escaped too.
+  const authors = formatAuthorsHtml(
+    paper.authors, paper.co_first ?? 0, paper.co_last ?? 0
   );
   const primaryUrl = getPrimaryUrl(paper.links);
 
@@ -297,38 +310,16 @@ export function generateHtmlEntry(paper) {
   ].join('\n');
 }
 
-const GOOGLE_SCHOLAR_URL =
-  'https://scholar.google.com/citations?user=koLi2TwAAAAJ';
-
-const NAME_NOTE = `*Note on my name:* My surname is Vigly. Prior to September 2024, my surname was Hoover, which is now a middle name.`;
-
-// Homepage = "about" section + "publications" section + name-change note.
-// aboutMarkdown is the body of content/_about.md (plain markdown, no front
-// matter); `entries` is the sorted publications list (already bib-highlighted).
-export function generateHomepage(aboutMarkdown, entries) {
-  const hasEqual = entries.some(
-    (e) => e.equal_contribution && e.equal_contribution.length > 0
-  );
+// Pub-list partial: raw-HTML block of pub items plus optional legend
+// footnotes for the co-first (∗) and co-senior (‡) author marks. Output is
+// spliced into the homepage template (content/_index.md) at <!-- @paste
+// pub-list -->.
+export function generatePubList(entries) {
+  const hasCoFirst = entries.some((e) => e.co_first > 0);
+  const hasCoLast = entries.some((e) => e.co_last > 0);
   const items = entries.map((e) => generateHtmlEntry(e)).join('\n');
 
   const parts = [
-    '---',
-    'title: home',
-    'page-style: site',
-    'hide-post-title: true',
-    'css: [/assets/css/index.css]',
-    '---',
-    '',
-    '# about {.unnumbered}',
-    '',
-    aboutMarkdown.trim(),
-    '',
-    '# publications {.unnumbered}',
-    '',
-    '<ul class="social-media-list">',
-    `  <li><a href="${GOOGLE_SCHOLAR_URL}">Google Scholar</a></li>`,
-    '</ul>',
-    '',
     '```{=html}',
     '<ul class="pub-list">',
     items,
@@ -336,10 +327,12 @@ export function generateHomepage(aboutMarkdown, entries) {
     '```',
     '',
   ];
-  if (hasEqual) {
-    parts.push('<p class="pub-footnote">* Equal contribution</p>', '');
+  if (hasCoFirst) {
+    parts.push('<p class="pub-footnote"><sup class="pub-mark">∗</sup> Co-first authorship</p>', '');
   }
-  parts.push('---', '', NAME_NOTE, '');
+  if (hasCoLast) {
+    parts.push('<p class="pub-footnote"><sup class="pub-mark">‡</sup> Co-senior authorship</p>', '');
+  }
   return parts.join('\n');
 }
 
@@ -412,9 +405,9 @@ export function extractArxivEprints(bibText) {
 }
 
 // Extract raw biblatex entries verbatim (preserving original cite keys and
-// formatting) for the given set of keys. Used to emit the downloadable
-// pubs.bib — citation-js's serializer rewrites cite keys, which we don't
-// want for this download.
+// formatting) for the given set of keys. Used to produce the per-entry
+// bib shown in each publication's [bib] expand-box — citation-js's serializer
+// rewrites cite keys, which we don't want.
 export function extractEntriesByKey(bibText, keys) {
   const wanted = new Set(keys);
   const pieces = [];
@@ -428,7 +421,8 @@ export function extractEntriesByKey(bibText, keys) {
   return pieces.length === 0 ? '' : pieces.join('\n\n') + '\n';
 }
 
-// Fields stripped from entries before writing the downloadable bib.
+// Fields stripped from entries before showing them in the per-entry [bib]
+// expand-box on the page.
 // - `file`: Zotero writes absolute local paths — would leak private filesystem layout.
 // - `abstract`, `keywords`, `urldate`, `langid`, `pubstate`, `eprintclass`: internal
 //   Zotero metadata not useful for readers who want to cite the work.
@@ -592,7 +586,8 @@ export function adaptEntry(csl, extras = {}, arxivEprints = new Map()) {
   if (note) entry.note = note;
 
   if (extras.status) entry.status = extras.status;
-  if (extras.equal_contribution) entry.equal_contribution = extras.equal_contribution;
+  if (extras.co_first != null) entry.co_first = extras.co_first;
+  if (extras.co_last != null) entry.co_last = extras.co_last;
   if (extras.link_label) entry.link_label = extras.link_label;
 
   if (Object.keys(links).length > 0) entry.links = links;
@@ -738,24 +733,12 @@ function main() {
     e.bibHtml = highlighted[i];
   });
 
-  // 7. Read the about fragment and render the homepage.
-  const aboutPath = 'content/_about.md';
-  if (!existsSync(aboutPath)) {
-    console.error(`${aboutPath} not found (the about-section source for the homepage)`);
-    process.exit(1);
-  }
-  const aboutMarkdown = readFileSync(aboutPath, 'utf8');
+  // 7. Write the pub-list partial. The homepage template
+  // (content/_index.md) splices this in via <!-- @paste pub-list -->
+  // when scripts/expand-includes.js runs.
   ensureDir('_generated');
-  writeFileSync('_generated/index.md', generateHomepage(aboutMarkdown, sorted));
-  console.log(`Generated: _generated/index.md (${sorted.length} entries)`);
-
-  // 8. Write the filtered bib download.
-  const biblatex = stripLeakyFields(
-    extractEntriesByKey(bibText, sorted.map((e) => e.id))
-  );
-  ensureDir('assets/bibliography');
-  writeFileSync('assets/bibliography/pubs.bib', biblatex);
-  console.log(`Generated: assets/bibliography/pubs.bib (${sorted.length} entries)`);
+  writeFileSync('_generated/_pub-list.md', generatePubList(sorted));
+  console.log(`Generated: _generated/_pub-list.md (${sorted.length} entries)`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

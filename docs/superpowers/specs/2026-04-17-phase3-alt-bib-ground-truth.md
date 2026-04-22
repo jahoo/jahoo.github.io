@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-17
 **Status:** Draft (exploration)
-**Parallel to:** `docs/specs/2026-04-17-phase3-publications-page.md` (YAML-ground-truth version, now built and deployed at `/pubs/`)
+**Parallel to:** `docs/superpowers/specs/2026-04-17-phase3-publications-page.md` (YAML-ground-truth version, now built and deployed at `/pubs/`)
 
 ## Motivation
 

@@ -310,7 +310,7 @@ The script scans `content/posts/` and `content/explorations/`, reads front matte
 
 ## Adding a publication
 
-The publications page at `/pubs/` is generated from two inputs:
+The publications section of the homepage is generated from two inputs:
 
 1. **`source.bib`** at the repo root — a gitignored symlink pointing at your local BibLaTeX file (the bibliographic source of truth). Create it once:
 
@@ -318,79 +318,15 @@ The publications page at `/pubs/` is generated from two inputs:
    ln -s ~/all-biblatex.bib source.bib
    ```
 
-   Wherever on the right-hand side your bib actually lives; `source.bib` is what the build reads. The file must be in BibLaTeX format — Zotero's "Better BibLaTeX" export works; classic BibTeX largely works modulo a few field-name differences. If the symlink is missing or broken, `node scripts/build-pubs.js` exits with a clear error pointing at this command.
+   Wherever on the right-hand side your bib actually lives; `source.bib` is what the build reads. The file must be in BibLaTeX format — Zotero's "Better BibLaTeX" export works. If the symlink is missing or broken, `node scripts/build-pubs.js` exits with an error pointing at this command.
 
 2. **`pubs.yaml`** at the repo root — a list of the bib keys to include, with only website-specific extras layered on top. Bibliographic data (title, authors, year, venue_full, DOI, URL, arxiv ID) is pulled from the bib; you don't retype it.
 
-### `pubs.yaml` entry schema
-
-```yaml
-- key: surname.f:YEARkey           # required; must exist in source.bib
-  venue: SHORT 2024                # optional: short display label
-                                   #   (falls back to bib shortjournal/eventtitle/
-                                   #    container-title; "arXiv" for arxiv-only
-                                   #    preprints with no other venue info)
-  venue_url: https://…             # optional: link for the venue label
-  note: "Outstanding Paper Award"  # optional: shown in parens after venue
-  status: preprint                 # optional: small tag (preprint | dissertation |
-                                   #   forthcoming | in-press | submitted | …)
-  equal_contribution: [0, 1]       # optional: 0-based author indices get a *
-  link_label: "Open Mind"          # optional: override the auto-derived label
-                                   #   on the first link button (the one going
-                                   #   to the primary URL). By default the label
-                                   #   is inferred from the URL — known
-                                   #   publishers / preprint servers get a name
-                                   #   like [ACL Anthology], [arXiv], [PsyArXiv],
-                                   #   [OpenReview], [OSF], [bioRxiv], [DOI];
-                                   #   everything else falls back to [link].
-  links:
-    url: https://…                 # optional: override the primary title link
-    code: https://…                # link buttons — any subset of:
-    slides: talk.pdf               #   code, slides, poster, handout, pdf
-    poster: poster.pdf             #   (bare filename → /assets/pdfs/; URL passes through)
-    handout: handout.pdf           #   preprint, openreview, video, lingbuzz (URL)
-    pdf: paper.pdf                 #   other: [{label, url}, ...] for custom buttons
-    preprint: https://…
-    openreview: https://…
-    video: https://…
-    lingbuzz: "000371"
-    other:
-      - label: "surprisal explorer"
-        url: https://…
-```
-
-### Merge rules (bib + extras)
-
-| Entry field | Source |
-|---|---|
-| `title`, `authors`, `year`, `month`, `day`, `type` | from bib |
-| `venue` | extras override; else bib short-form; else full container-title; else "arXiv" for arxiv-only |
-| `venue_full`, `pages`, `publisher`, `address`, `doi`, `editor` | from bib |
-| `venue_url`, `status`, `equal_contribution` | extras only |
-| `note` | extras override; else bib note |
-| `links.url` | extras override; else bib URL |
-| `links.doi_url` | derived from bib DOI |
-| `links.arxiv` | derived from bib's `eprint`+`eprinttype=arXiv` (citation-js drops these, so we regex-scan the raw bib for them) |
-| `links.{code, preprint, slides, poster, handout, video, openreview, lingbuzz, pdf, other}` | extras only |
-
-Primary URL priority for the title link: `links.url` → `links.doi_url` → `links.arxiv` → `links.openreview` → `links.preprint`. The canonical DOI wins over any preprint when a paper is published.
+Schema, merge rules, and validation: see [docs/pubs.md](pubs.md).
 
 ### Running the build
 
-Save `pubs.yaml` (or `source.bib`) with `make serve` running and the page regenerates automatically. Otherwise run `make pubs` (just the pubs build) or `make` (full site).
-
-The build also writes `assets/bibliography/pubs.bib` — a verbatim extract of the entries you listed, with Zotero's private `file` field (and other internal metadata like `abstract`, `keywords`, `urldate`) stripped. The BibTeX link at the top of the page points at this download.
-
-### Validation
-
-`scripts/build-pubs.js` checks:
-
-- All `key`s exist in `source.bib` (errors with a list of missing keys)
-- `type` is one of the allowed values
-- `equal_contribution` indices are in range
-- `links.other` entries have both `label` and `url`
-
-It warns (not errors) if `pdf` / `slides` / `poster` / `handout` reference a file not found under `assets/pdfs/`.
+Save `pubs.yaml` (or `source.bib`) with `make serve` running and the page regenerates automatically. Otherwise run `make homepage` (recompose the homepage) or `make` (full site).
 
 ## Build commands
 
@@ -398,7 +334,8 @@ It warns (not errors) if `pdf` / `slides` / `poster` / `handout` reference a fil
 make            # full parallel build (generate listing + pubs + content + JS + assets)
 make serve      # dev server with live reload
 make content    # rebuild only markdown → HTML
-make pubs       # regenerate pubs.md + pubs.bib from pubs.yaml + source.bib
+make pubs       # regenerate _generated/_pub-list.md from pubs.yaml + source.bib
+make homepage   # recompose _generated/index.md from content/_index.md
 make js         # rebundle only JS
 make assets     # sync only static assets (CSS, fonts, images)
 make test       # run JS tests

@@ -6,7 +6,7 @@ On 2026-04-17 the site moved off Jekyll entirely.
 
 **After:** Pandoc + Make + esbuild. The homepage's publications section is driven by `pubs.yaml` + a local `source.bib` symlink (→ the user's `~/all-biblatex.bib`). Deploys run locally via `make deploy` — no CI. GitHub Pages now serves `static`.
 
-See [`docs/specs/2026-04-15-pandoc-migration-design.md`](specs/2026-04-15-pandoc-migration-design.md) for the original migration design, and the Phase 3 / Phase 4 specs in `docs/specs/` for the details of the switchover.
+See [`docs/superpowers/specs/2026-04-15-pandoc-migration-design.md`](superpowers/specs/2026-04-15-pandoc-migration-design.md) for the original migration design, and the Phase 3 / Phase 4 specs in `docs/superpowers/specs/` for the details of the switchover.
 
 ## Branch layout after the sunset
 

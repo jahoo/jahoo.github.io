@@ -80,9 +80,13 @@ done
 # ---- Generated pages (_generated/*.md) ----
 # Special case: _generated/index.md is the homepage; it goes to _site/index.html
 # directly (no index/ subdirectory). Everything else follows the usual pattern.
+# `_`-prefixed files are partials consumed by other build steps (e.g.
+# _generated/_pub-list.md is spliced into the homepage by expand-includes.js),
+# not standalone pages.
 for src in _generated/*.md; do
   [ -f "$src" ] || continue
   basename=$(basename "$src" .md)
+  case "$basename" in _*) continue ;; esac
   if [ "$basename" = "index" ]; then
     dest="$OUTDIR/index.html"
   else

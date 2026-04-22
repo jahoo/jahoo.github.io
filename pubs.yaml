@@ -1,8 +1,8 @@
-# Publications listed on /pubs-bib/.
-# Bibliographic data comes from source.bib (symlink to ~/all-biblatex.bib);
-# this file holds only website-specific extras.
+# Publications listed in the homepage's publications section.
+# Bibliographic data comes from source.bib (symlink to the user's BibLaTeX
+# file); this file holds only website-specific extras.
 #
-# Schema: see docs/specs/2026-04-17-phase3-alt-bib-ground-truth.md
+# Schema: see docs/pubs.md
 
 - key: chan.r:2026arxiv
   status: preprint
@@ -20,6 +20,8 @@
   status: preprint
 
 - key: lipkin.b:2025
+  co_first: 2
+  co_last: 3
   venue: CoLM 2025
   venue_url: https://colmweb.org/2025/
   note: "Outstanding Paper Award"
