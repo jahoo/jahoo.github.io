@@ -74,7 +74,7 @@ segments of width $\normwt^\idx$, and mapping from 'probe' locations on the unit
 
 <!-- Note, this smc-toolbar div is sticky, but that is bounded by the containing element's parent. The solution is in `initToolbar` in `src/smc-resampling/toolbar.js`. What it does: On page load it will find the top-level <section> (i.e. a direct child of <main>) that contains the toolbar, then reparent the toolbar to be a direct child of <main>, positioned immediately after that section  -->
 
-<div id="smc-toolbar" class="smc-toolbar wide extra-wide">
+<div id="smc-toolbar" class="smc-toolbar">
 <div class="smc-toolbar-item" id="smc-toolbar-weights">
 <span class="smc-toolbar-label">Weights:</span>
 <div class="smc-toolbar-dropdown" id="smc-toolbar-dropdown">
@@ -88,15 +88,17 @@ segments of width $\normwt^\idx$, and mapping from 'probe' locations on the unit
 </div>
 <div class="smc-toolbar-item" id="smc-toolbar-testfn" style="display:none;">
 <span class="smc-toolbar-label">$f$:</span>
-<select class="testfn-select" id="smc-toolbar-testfn-select"></select>
+<div class="smc-toolbar-dropdown" id="smc-toolbar-testfn-dropdown">
+<button class="smc-toolbar-dropdown-btn" id="smc-toolbar-testfn-btn" type="button"></button>
+<div class="smc-toolbar-dropdown-menu" id="smc-toolbar-testfn-menu"></div>
+</div>
 </div>
 <div class="smc-toolbar-item" id="smc-toolbar-phase2" style="display:none;">
 <span class="smc-toolbar-label">Residual–</span>
-<select id="smc-toolbar-phase2-select">
-<option value="multinomial">Multinomial</option>
-<option value="stratified">Stratified</option>
-<option value="systematic">Systematic</option>
-</select>
+<div class="smc-toolbar-dropdown" id="smc-toolbar-phase2-dropdown">
+<button class="smc-toolbar-dropdown-btn" id="smc-toolbar-phase2-btn" type="button"></button>
+<div class="smc-toolbar-dropdown-menu" id="smc-toolbar-phase2-menu"></div>
+</div>
 </div>
 </div>
 
@@ -113,12 +115,10 @@ $\probe_1, \ldots, \probe_\np \overset{\text{iid}}{\sim} \mathrm{Uniform}(0,1)$
 and map each through the inverse CDF. The counts $(\cnt^1, \ldots, \cnt^\np)$ follow a multinomial distribution.
 
 ```python
-# Step 1: build the inverse CDF (shared by all three CDF-based methods)
-cumulative_sum = np.cumsum(weights)
-# Step 2: choose N independent uniform probes
-positions = random(N)
-# Step 3: map probes through the inverse CDF → ancestor indices
-indices = np.searchsorted(cumulative_sum, positions)
+def multinomial_resample(weights, N):
+    cumulative_sum = np.cumsum(weights) # Step 1: inverse CDF
+    positions = random(N) # Step 2: N independent uniform probes
+    return np.searchsorted(cumulative_sum, positions) # Step 3: probes → indices
 ```
 
 ::: {.wide}
@@ -184,9 +184,10 @@ You may have noticed that because the probes are all independently sampled in mu
 **strata** $\bigl(\frac{k-1}{\np},\, \frac{k}{\np}\bigr)_{k=1}^{\np}$
 
 ```python
-# Steps 1 & 3 as above; only step 2 changes:
-# one uniform draw per stratum instead of N independent
-positions = (random(N) + range(N)) / N
+def stratified_resample(weights, N):
+    cumulative_sum = np.cumsum(weights) # Step 1 (same as above)
+    positions = (random(N) + range(N)) / N # Step 2: one uniform per stratum
+    return np.searchsorted(cumulative_sum, positions) # Step 3 (same as above)
 ```
 
 ::: {.callout .insight}
@@ -229,9 +230,10 @@ $\probe_k = U + (k{-}1)/\np$.
 The probes form an equally-spaced comb. **Drag the green handle** to slide it, or click **Random offset** to sample.
 
 ```python
-# Steps 1 & 3 as above; only step 2 changes:
-# a single random offset → N equally-spaced probes
-positions = (random() + np.arange(N)) / N
+def systematic_resample(weights, N):
+    cumulative_sum = np.cumsum(weights) # Step 1 (same as above)
+    positions = (random() + np.arange(N)) / N # Step 2: one offset for all N probes
+    return np.searchsorted(cumulative_sum, positions) # Step 3 (same as above)
 ```
 
 <canvas id="cv-sec5" class="panel"></canvas>
@@ -272,14 +274,19 @@ Consider a case where weights are a 'comb' alternating large, small, large, smal
 We could also consider a deterministic-stochastic hybrid, where some particles are deterministically set, and others are allocated randomly. In *residual resampling*, we give particle $\idx$ exactly $\lfloor \np\normwt^\idx \rfloor$ copies, then fill the remaining $R = \np - \sum_\idx \lfloor \np\normwt^\idx \rfloor$ slots by resampling on the **residual weights** $\resid^\idx = (\np\normwt^\idx - \lfloor \np\normwt^\idx \rfloor)/R$. This nondeterministic part of the algorithm could be done using any of the three CDF methods (select below).^[{-} $\Var_{\text{resid}} \leq \Var_{\text{mult}}$ when phase 2 uses multinomial or stratified resampling [@douc.r:2005]. The deterministic phase removes variance for the integer parts; the phase-2 choice affects only the residual variance. Note that residual-systematic does not have this guarantee, since systematic resampling can hit the same counterexample on the residual weights.] The right plot shows the residual CDF (solid) overlaid on the original weights CDF (dotted). For highly skewed weights, you can see that first allocating the deterministic weights makes the residual CDF much more even than the original was.
 
 
-<div class="highlighter-rouge code-sidenote" id="resid-code"><div class="highlight"><pre class="highlight"><code><span class="c1"># Phase 1 (deterministic): guaranteed copies from the integer part</span>
-num_copies = np.floor(N * weights) <span class="c1"># ⌊Nwⁱ⌋</span>
-R = N - sum(num_copies)  <span class="c1"># remaining slots</span>
-<span class="c1"># Phase 2 (stochastic): <span id="resid-phase2-comment">multinomial</span> on the fractional remainders</span>
+```python
+# Phase 1 (deterministic): guaranteed copies from the integer part
+num_copies = np.floor(N * weights) # ⌊Nwⁱ⌋
+R = N - sum(num_copies) # remaining slots
+
+# Phase 2 (stochastic): resample on the fractional remainders
 residual = weights * N - num_copies
-residual /= sum(residual)<span class="c1"># normalize residuals</span>
-<span id="resid-phase2-code">positions = random(R)    <span class="c1"># multinomial: R independent probes</span></span>
-indexes[k:N] = np.searchsorted(cumsum(residual), positions)</code></pre></div></div>
+residual /= sum(residual) # normalize residuals
+indexes[k:N] = resample_residuals(residual, R)
+```
+
+where the phase-2 subroutine `resample_residuals` is any of the three CDF-based methods above
+(choose with the dropdown):
 
 <label style="font-size:0.85em; color:#555;">Phase 2 method:
 <select id="select-resid-phase2" style="padding:2px 4px; border:1px solid #ccc; border-radius:3px; font-size:1em;">
@@ -287,6 +294,22 @@ indexes[k:N] = np.searchsorted(cumsum(residual), positions)</code></pre></div></
 <option value="stratified">Stratified</option>
 <option value="systematic">Systematic</option>
 </select></label>
+
+::: {#resid-binding-group}
+
+```{.python .resid-binding data-method="multinomial"}
+resample_residuals = multinomial_resample
+```
+
+```{.python .resid-binding data-method="stratified"}
+resample_residuals = stratified_resample
+```
+
+```{.python .resid-binding data-method="systematic"}
+resample_residuals = systematic_resample
+```
+
+:::
 
 <canvas id="cv-sec6" class="panel"></canvas>
 
@@ -371,8 +394,8 @@ The methods above all produce exactly $\np$ resampled particles. "Branch-kill" r
 # For each particle independently:
 num_copies = np.floor(N * weights)
 p_bonus = N * weights - num_copies # fractional part
-u = np.random.rand(N)    # one uniform draw per particle
-bonus = (u >= 1 - p_bonus)    # inverse CDF: right of step → bonus
+u = np.random.rand(N) # one uniform draw per particle
+bonus = (u >= 1 - p_bonus) # inverse CDF: right of step → bonus
 num_copies += bonus # total may differ from N
 ```
 
