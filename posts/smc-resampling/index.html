@@ -19,6 +19,27 @@ MathJax = {
     inlineMath: [['\\(', '\\)'], ['$', '$']],
     displayMath: [['\\[', '\\]'], ['$$', '$$']]
     , macros: { "state": "s", "rstate": "\\widetilde{\\state}", "target": "\\pi", "impwt": "\\rho", "normwt": "w", "np": "N", "cnt": "M", "gen": "{\\mathcal{G}}", "E": "{\\mathbb{E}}", "Var": "\\operatorname{Var}", "cdf": "F", "invcdf": "{F^{-1}}", "probe": "x", "resid": "\\widetilde{\\normwt}", "idx": "i" }
+  },
+  options: {
+    // Disable click-to-explore on math. Without these, clicking on a
+    // rendered formula (e.g. math inside a button label) gets intercepted
+    // by MathJax's a11y explorer and highlights subexpressions instead of
+    // triggering the underlying button. The right-click context menu is
+    // still available.
+    //
+    // MathJax v4 has no single `explorer` setting — the feature is split
+    // across enrich (semantic tree), speech, braille, inTabOrder. Turning
+    // off enrich alone is enough to stop the click behavior (no tree for
+    // the explorer to walk), but we also zero the others so they don't
+    // appear enabled in the right-click menu.
+    menuOptions: {
+      settings: {
+        enrich: false,
+        speech: false,
+        braille: false,
+        inTabOrder: false
+      }
+    }
   }
 };
 </script>
@@ -313,7 +334,7 @@ one of the preset options in the “Weights” dropdown below.<br />
 <canvas id="cv-sec2" class="panel">
 </canvas>
 <!-- Note, this smc-toolbar div is sticky, but that is bounded by the containing element's parent. The solution is in `initToolbar` in `src/smc-resampling/toolbar.js`. What it does: On page load it will find the top-level <section> (i.e. a direct child of <main>) that contains the toolbar, then reparent the toolbar to be a direct child of <main>, positioned immediately after that section  -->
-<div id="smc-toolbar" class="smc-toolbar wide extra-wide">
+<div id="smc-toolbar" class="smc-toolbar">
 <div id="smc-toolbar-weights" class="smc-toolbar-item">
 <span class="smc-toolbar-label">Weights:</span>
 <div id="smc-toolbar-dropdown" class="smc-toolbar-dropdown">
@@ -330,17 +351,26 @@ class="smc-toolbar-dropdown-arrow">▾</span>
 </div>
 <div id="smc-toolbar-testfn" class="smc-toolbar-item"
 style="display:none;">
-<p><span class="smc-toolbar-label"><span
+<span class="smc-toolbar-label"><span
 class="math inline">\(f\)</span>:</span>
-<select class="testfn-select" id="smc-toolbar-testfn-select"></select></p>
+<div id="smc-toolbar-testfn-dropdown" class="smc-toolbar-dropdown">
+<button class="smc-toolbar-dropdown-btn" id="smc-toolbar-testfn-btn" type="button">
+</button>
+<div id="smc-toolbar-testfn-menu" class="smc-toolbar-dropdown-menu">
+
+</div>
+</div>
 </div>
 <div id="smc-toolbar-phase2" class="smc-toolbar-item"
 style="display:none;">
-<p><span class="smc-toolbar-label">Residual–</span>
-<select id="smc-toolbar-phase2-select">
-<option value="multinomial">Multinomial</option>
-<option value="stratified">Stratified</option>
-<option value="systematic">Systematic</option> </select></p>
+<span class="smc-toolbar-label">Residual–</span>
+<div id="smc-toolbar-phase2-dropdown" class="smc-toolbar-dropdown">
+<button class="smc-toolbar-dropdown-btn" id="smc-toolbar-phase2-btn" type="button">
+</button>
+<div id="smc-toolbar-phase2-menu" class="smc-toolbar-dropdown-menu">
+
+</div>
+</div>
 </div>
 </div>
 </section>
@@ -363,12 +393,10 @@ Multinomial resampling</h3>
 through the inverse CDF. The counts <span class="math inline">\((\cnt^1,
 \ldots, \cnt^\np)\)</span> follow a multinomial distribution.</p>
 <div class="sourceCode" id="cb1"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: build the inverse CDF (shared by all three CDF-based methods)</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>cumulative_sum <span class="op">=</span> np.cumsum(weights)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: choose N independent uniform probes</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>positions <span class="op">=</span> random(N)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: map probes through the inverse CDF → ancestor indices</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>indices <span class="op">=</span> np.searchsorted(cumulative_sum, positions)</span></code></pre></div>
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> multinomial_resample(weights, N):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    cumulative_sum <span class="op">=</span> np.cumsum(weights) <span class="co"># Step 1: inverse CDF</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    positions <span class="op">=</span> random(N) <span class="co"># Step 2: N independent uniform probes</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.searchsorted(cumulative_sum, positions) <span class="co"># Step 3: probes → indices</span></span></code></pre></div>
 <div class="wide">
 <p>[Note, the one-liner
 <code>indices = np.random.choice(N, size=N, replace=True, p=weights)</code>
@@ -446,9 +474,10 @@ more evenly: Partition <span class="math inline">\([0,1]\)</span> into
 <span class="math inline">\(\bigl(\frac{k-1}{\np},\,
 \frac{k}{\np}\bigr)_{k=1}^{\np}\)</span></p>
 <div class="sourceCode" id="cb2"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Steps 1 &amp; 3 as above; only step 2 changes:</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># one uniform draw per stratum instead of N independent</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>positions <span class="op">=</span> (random(N) <span class="op">+</span> <span class="bu">range</span>(N)) <span class="op">/</span> N</span></code></pre></div>
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> stratified_resample(weights, N):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    cumulative_sum <span class="op">=</span> np.cumsum(weights) <span class="co"># Step 1 (same as above)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    positions <span class="op">=</span> (random(N) <span class="op">+</span> <span class="bu">range</span>(N)) <span class="op">/</span> N <span class="co"># Step 2: one uniform per stratum</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.searchsorted(cumulative_sum, positions) <span class="co"># Step 3 (same as above)</span></span></code></pre></div>
 <div class="callout insight">
 <p>Each stratum gets exactly one probe, so we can bound the counts <span
 class="math inline">\(\lfloor \np\normwt^\idx \rfloor \leq \cnt^\idx
@@ -507,9 +536,10 @@ class="math inline">\(U \sim \mathrm{Uniform}(0, 1/\np)\)</span> and set
 handle</strong> to slide it, or click <strong>Random offset</strong> to
 sample.</p>
 <div class="sourceCode" id="cb3"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Steps 1 &amp; 3 as above; only step 2 changes:</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># a single random offset → N equally-spaced probes</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>positions <span class="op">=</span> (random() <span class="op">+</span> np.arange(N)) <span class="op">/</span> N</span></code></pre></div>
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> systematic_resample(weights, N):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    cumulative_sum <span class="op">=</span> np.cumsum(weights) <span class="co"># Step 1 (same as above)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    positions <span class="op">=</span> (random() <span class="op">+</span> np.arange(N)) <span class="op">/</span> N <span class="co"># Step 2: one offset for all N probes</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.searchsorted(cumulative_sum, positions) <span class="co"># Step 3 (same as above)</span></span></code></pre></div>
 <canvas id="cv-sec5" class="panel">
 </canvas>
 <div class="control-box">
@@ -625,23 +655,30 @@ weights.<br />
 the original weights CDF (dotted). For highly skewed weights, you can
 see that first allocating the deterministic weights makes the residual
 CDF much more even than the original was.</p>
-<div id="resid-code" class="highlighter-rouge code-sidenote">
-<div class="highlight">
-<pre class="highlight"><code><span class="c1"># Phase 1 (deterministic): guaranteed copies from the integer part</span>
-num_copies = np.floor(N * weights) <span class="c1"># ⌊Nwⁱ⌋</span>
-R = N - sum(num_copies)  <span class="c1"># remaining slots</span>
-<span class="c1"># Phase 2 (stochastic): <span id="resid-phase2-comment">multinomial</span> on the fractional remainders</span>
-residual = weights * N - num_copies
-residual /= sum(residual)<span class="c1"># normalize residuals</span>
-<span id="resid-phase2-code">positions = random(R)    <span class="c1"># multinomial: R independent probes</span></span>
-indexes[k:N] = np.searchsorted(cumsum(residual), positions)</code></pre>
-</div>
-</div>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Phase 1 (deterministic): guaranteed copies from the integer part</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>num_copies <span class="op">=</span> np.floor(N <span class="op">*</span> weights) <span class="co"># ⌊Nwⁱ⌋</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>R <span class="op">=</span> N <span class="op">-</span> <span class="bu">sum</span>(num_copies) <span class="co"># remaining slots</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Phase 2 (stochastic): resample on the fractional remainders</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>residual <span class="op">=</span> weights <span class="op">*</span> N <span class="op">-</span> num_copies</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>residual <span class="op">/=</span> <span class="bu">sum</span>(residual) <span class="co"># normalize residuals</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>indexes[k:N] <span class="op">=</span> resample_residuals(residual, R)</span></code></pre></div>
+<p>where the phase-2 subroutine <code>resample_residuals</code> is any
+of the three CDF-based methods above (choose with the dropdown):</p>
 <p><label style="font-size:0.85em; color:#555;">Phase 2 method:
 <select id="select-resid-phase2" style="padding:2px 4px; border:1px solid #ccc; border-radius:3px; font-size:1em;">
 <option value="multinomial">Multinomial</option>
 <option value="stratified">Stratified</option>
 <option value="systematic">Systematic</option> </select></label></p>
+<div id="resid-binding-group">
+<div class="sourceCode" id="cb5" data-method="multinomial"><pre
+class="sourceCode python resid-binding"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>resample_residuals <span class="op">=</span> multinomial_resample</span></code></pre></div>
+<div class="sourceCode" id="cb6" data-method="stratified"><pre
+class="sourceCode python resid-binding"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>resample_residuals <span class="op">=</span> stratified_resample</span></code></pre></div>
+<div class="sourceCode" id="cb7" data-method="systematic"><pre
+class="sourceCode python resid-binding"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>resample_residuals <span class="op">=</span> systematic_resample</span></code></pre></div>
+</div>
 <canvas id="cv-sec6" class="panel">
 </canvas>
 <div class="control-box">
@@ -791,13 +828,13 @@ class="math inline">\(\np\normwt^\idx - \lfloor \np\normwt^\idx
 <span class="math inline">\(\sum_\idx \cnt^\idx\)</span> fluctuates
 around <span class="math inline">\(\np\)</span> rather than equalling it
 exactly.</p>
-<div class="sourceCode" id="cb4"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># For each particle independently:</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>num_copies <span class="op">=</span> np.floor(N <span class="op">*</span> weights)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>p_bonus <span class="op">=</span> N <span class="op">*</span> weights <span class="op">-</span> num_copies <span class="co"># fractional part</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>u <span class="op">=</span> np.random.rand(N)    <span class="co"># one uniform draw per particle</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>bonus <span class="op">=</span> (u <span class="op">&gt;=</span> <span class="dv">1</span> <span class="op">-</span> p_bonus)    <span class="co"># inverse CDF: right of step → bonus</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>num_copies <span class="op">+=</span> bonus <span class="co"># total may differ from N</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># For each particle independently:</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>num_copies <span class="op">=</span> np.floor(N <span class="op">*</span> weights)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>p_bonus <span class="op">=</span> N <span class="op">*</span> weights <span class="op">-</span> num_copies <span class="co"># fractional part</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>u <span class="op">=</span> np.random.rand(N) <span class="co"># one uniform draw per particle</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>bonus <span class="op">=</span> (u <span class="op">&gt;=</span> <span class="dv">1</span> <span class="op">-</span> p_bonus) <span class="co"># inverse CDF: right of step → bonus</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>num_copies <span class="op">+=</span> bonus <span class="co"># total may differ from N</span></span></code></pre></div>
 <div class="callout proof">
 <p><span class="proof-label">Unbiasedness</span> Particle <span
 class="math inline">\(i\)</span> receives <span
@@ -1008,7 +1045,7 @@ href="https://doi.org/10.1561/2200000074">https://doi.org/10.1561/2200000074</a>
 <script src="/assets/js/smc-resampling.bundle.js"></script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-04-20 12:37</span>
+    <span class="last-modified">Last modified: 2026-04-22 08:53</span>
   </div>
 </footer>
 </body>

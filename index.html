@@ -17,6 +17,27 @@ MathJax = {
   tex: {
     inlineMath: [['\\(', '\\)'], ['$', '$']],
     displayMath: [['\\[', '\\]'], ['$$', '$$']]
+  },
+  options: {
+    // Disable click-to-explore on math. Without these, clicking on a
+    // rendered formula (e.g. math inside a button label) gets intercepted
+    // by MathJax's a11y explorer and highlights subexpressions instead of
+    // triggering the underlying button. The right-click context menu is
+    // still available.
+    //
+    // MathJax v4 has no single `explorer` setting — the feature is split
+    // across enrich (semantic tree), speech, braille, inTabOrder. Turning
+    // off enrich alone is enough to stop the click behavior (no tree for
+    // the explorer to walk), but we also zero the others so they don't
+    // appear enabled in the right-click menu.
+    menuOptions: {
+      settings: {
+        enrich: false,
+        speech: false,
+        braille: false,
+        inTabOrder: false
+      }
+    }
   }
 };
 </script>
@@ -109,7 +130,7 @@ Scholar</a>
 </li>
 <li class="pub">
   <a class="pub-title" href="https://openreview.net/forum?id=3BmPSFAdq3">Fast Controlled Generation from Language Models with Adaptive Weighted Rejection Sampling</a>
-  <span class="pub-author">Ben Lipkin, Benjamin LeBrun, Jacob Hoover Vigly, João Loula, David R. MacIver, Li Du, Jason Eisner, Ryan Cotterell, Vikash Mansinghka, Timothy J. O&#39;Donnell, Alexander K. Lew, Tim Vieira</span>
+  <span class="pub-author">Ben Lipkin<sup class="pub-mark" title="∗ Co-first author">∗</sup>, Benjamin LeBrun<sup class="pub-mark" title="∗ Co-first author">∗</sup>, Jacob Hoover Vigly, João Loula, David R. MacIver, Li Du, Jason Eisner, Ryan Cotterell, Vikash Mansinghka, Timothy J. O&#39;Donnell<sup class="pub-mark" title="‡ Co-senior author">‡</sup>, Alexander K. Lew<sup class="pub-mark" title="‡ Co-senior author">‡</sup>, Tim Vieira<sup class="pub-mark" title="‡ Co-senior author">‡</sup></span>
   <a class="pub-venue" href="https://colmweb.org/2025/">CoLM 2025</a> <span class="pub-note">(Outstanding Paper Award)</span>
   <div class="pub-extras">
     <a class="extra openreview" href="https://openreview.net/forum?id=3BmPSFAdq3">OpenReview</a>
@@ -402,6 +423,12 @@ Scholar</a>
 
 </li>
 </ul>
+<p class="pub-footnote">
+<sup class="pub-mark">∗</sup> Co-first authorship
+</p>
+<p class="pub-footnote">
+<sup class="pub-mark">‡</sup> Co-senior authorship
+</p>
 <hr />
 <p><em>Note on my name:</em> My surname is Vigly. Prior to September
 2024, my surname was Hoover, which is now a middle name.</p>
@@ -467,7 +494,7 @@ Scholar</a>
 </script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-04-20 12:41</span>
+    <span class="last-modified">Last modified: 2026-04-22 08:54</span>
   </div>
 </footer>
 </body>
