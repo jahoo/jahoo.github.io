@@ -191,8 +191,6 @@ function initCompareViz() {
     updateResidualLabel();
     var mainP2 = document.getElementById('select-resid-phase2');
     if (mainP2) mainP2.addEventListener('change', function () { updateResidualLabel(); });
-    var toolbarP2 = document.getElementById('smc-toolbar-phase2-select');
-    if (toolbarP2) toolbarP2.addEventListener('change', function () { updateResidualLabel(); });
 }
 
 // ================================================================
@@ -423,9 +421,7 @@ function initKTrials() {
     if (sliderN) sliderN.addEventListener('change', triggerRun);
     if (sliderK) sliderK.addEventListener('change', triggerRun);
     var mainP2 = document.getElementById('select-resid-phase2');
-    var toolbarP2 = document.getElementById('smc-toolbar-phase2-select');
     if (mainP2) mainP2.addEventListener('change', triggerRun);
-    if (toolbarP2) toolbarP2.addEventListener('change', triggerRun);
 
     triggerRun();
 }

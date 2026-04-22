@@ -29,7 +29,7 @@ import {
     drawEstDist,
     drawCompEstDist,
 } from './drawing.js';
-import { initToolbar } from './toolbar.js';
+import { initToolbar, TESTFN_OPTIONS } from './toolbar.js';
 
 // ================================================================
 //  STATE
@@ -489,6 +489,9 @@ if (btnSetCounter) {
         weights = PRESETS.alternating();
         setTestFnKey('evenodd');
         document.querySelectorAll('.testfn-select').forEach(function (s) { s.value = 'evenodd'; });
+        // Notify toolbar custom dropdown (programmatic value changes don't fire change)
+        var firstSel = document.querySelector('.testfn-select');
+        if (firstSel) firstSel.dispatchEvent(new Event('change'));
         clearAll();
         redrawAll();
         if (btnResetCounter) btnResetCounter.style.display = 'inline';
@@ -503,6 +506,8 @@ if (btnResetCounter) {
         if (counterPreTestFn) {
             setTestFnKey(counterPreTestFn);
             document.querySelectorAll('.testfn-select').forEach(function (s) { s.value = counterPreTestFn; });
+            var firstSel = document.querySelector('.testfn-select');
+            if (firstSel) firstSel.dispatchEvent(new Event('change'));
             counterPreTestFn = null;
         }
         clearAll();
@@ -544,24 +549,28 @@ document.getElementById('btn-resample-resid').addEventListener('click', function
     sec6.mode = 'single';
     redrawAll();
 });
-// Phase-2 method selector
+// Phase-2 method selector. The residual algorithm code block is static and
+// calls `resample_residuals(...)`; alongside it we render three pre-
+// syntax-highlighted binding code blocks (one per phase-2 method), and
+// show exactly the one matching the current selection — preserving Pandoc
+// Skylighting without any runtime text surgery on highlighted tokens.
+function updateResidBinding(method) {
+    var group = document.getElementById('resid-binding-group');
+    if (!group) return;
+    group.querySelectorAll('[data-method]').forEach(function (el) {
+        el.classList.toggle('active', el.dataset.method === method);
+    });
+}
+
 document.getElementById('select-resid-phase2').addEventListener('change', function (e) {
     setResidualPhase2(e.target.value);
-    var commentEl = document.getElementById('resid-phase2-comment');
-    var codeEl = document.getElementById('resid-phase2-code');
-    if (commentEl && codeEl) {
-        commentEl.textContent = getResidualPhase2();
-        var codeLines = {
-            multinomial: 'positions = random(R)                               <span class="c1"># multinomial: R independent probes</span>',
-            stratified:  'positions = (random(R) + range(R)) / R              <span class="c1"># stratified: one probe per stratum</span>',
-            systematic:  'positions = (random() + np.arange(R)) / R           <span class="c1"># systematic: single-offset comb</span>',
-        };
-        codeEl.innerHTML = codeLines[getResidualPhase2()] || codeLines.multinomial;
-    }
+    updateResidBinding(e.target.value);
     sec6.detCounts = null; sec6.stoCounts = null; sec6.totalCounts = null;
     sec6.residualProbes = []; sec6.hist = null; sec6.mode = 'none';
     redrawAll();
 });
+// Show the default binding at init so exactly one is visible on first paint.
+updateResidBinding(getResidualPhase2());
 
 document.getElementById('btn-clear-resid').addEventListener('click', function () {
     sec6.detCounts = null; sec6.stoCounts = null; sec6.totalCounts = null;
@@ -639,20 +648,15 @@ document.getElementById('btn-clear-bk').addEventListener('click', function () {
     });
 })();
 
-// Test function selectors
-var testFnOptions = [
-    { value: 'position', label: 'i/N  (mean position)' },
-    { value: 'indicator', label: '1[i=4]  (single particle)' },
-    { value: 'tail', label: '1[i\u22655]  (upper tail)' },
-    { value: 'square', label: '(i/N)\u00B2  (squared position)' },
-    { value: 'evenodd', label: '1[i even]  (even/odd class)' },
-];
+// Test function selectors — inline <select>s in the prose. Labels are
+// short plain-text forms; the toolbar's custom dropdown renders the
+// LaTeX forms of the same options (from TESTFN_OPTIONS in toolbar.js).
 var allTestFnSelects = document.querySelectorAll('.testfn-select');
 allTestFnSelects.forEach(function (sel) {
-    testFnOptions.forEach(function (opt) {
+    TESTFN_OPTIONS.forEach(function (opt) {
         var o = document.createElement('option');
         o.value = opt.value;
-        o.textContent = opt.label;
+        o.textContent = opt.text;
         sel.appendChild(o);
     });
     sel.value = getTestFnKey();

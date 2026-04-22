@@ -1,11 +1,15 @@
 /* SMC Resampling — interactive element styles only.
    Typography and layout come from base.css + post.css. */
 
-/* --- Sticky toolbar --- */
+/* --- Pinned toolbar ---
+   Not CSS-sticky: position:sticky is scoped to the nearest block-formatting-
+   context ancestor, which unsticks the toolbar the moment you scroll past
+   its containing subsection. initToolbar() in src/smc-resampling/toolbar.js
+   leaves the element in normal flow at its authored position, then applies
+   `.smc-toolbar-pinned` (position:fixed) when scroll passes the authored
+   anchor, with a same-height `.smc-toolbar-placeholder` holding the spot
+   in flow so the layout doesn't jump. */
 .smc-toolbar {
-    position: sticky;
-    top: 0;
-    z-index: 20;
     background: var(--s-surface, #f6f8fa);
     border: 1px solid #ddd;
     border-radius: 6px;
@@ -17,11 +21,49 @@
     /* Width is controlled by the `wide` class on the element (see
        Jez's theme.css — .wide switches to main-width + sidenote span). */
     box-sizing: border-box;
-    /* Content stays on one line; horizontal scroll when it overflows. */
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: visible;
+    /* Wrap to multiple rows when items don't fit (e.g. on narrow viewports).
+       overflow: visible is a deliberate override — Jez's .wide applies
+       `overflow-x: auto`, which would clip the weights-preset dropdown menu
+       that escapes the toolbar box downward. */
+    flex-wrap: wrap;
+    row-gap: 6px;
+    overflow: visible;
 }
+.smc-toolbar-pinned {
+    /* Full viewport width pinned at top, regardless of viewport size.
+       initToolbar reparents the toolbar to <body> on pin so no ancestor
+       containing block can offset or constrain it. The toolbar keeps its
+       .wide.extra-wide classes from authored markup — those apply negative
+       margins and >100% widths (to span past the content column into the
+       TOC margin), which conflict with full-viewport pinning. `!important`
+       beats the theme's `.wide.extra-wide` rules (same specificity; would
+       otherwise lose to them because of source order). */
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    z-index: 20;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+}
+.smc-toolbar-placeholder {
+    /* Height is set inline to the toolbar's offsetHeight when pinned;
+       empty/zero when unpinned. Never has its own content. */
+}
+
+/* Phase-2 binding code blocks: three Pandoc-highlighted variants wrapping
+   `resample_residuals = <method>_resample`. main.js flips the `.active`
+   class on the wrapper [data-method] div so exactly one is visible at any
+   time, matching the #select-resid-phase2 dropdown. Pandoc puts the
+   `data-method` attribute on the outer `<div class="sourceCode">` wrapper
+   and the `.resid-binding` class on the inner `<pre>`, so we target the
+   wrapper div for visibility. */
+#resid-binding-group > [data-method] { display: none; }
+#resid-binding-group > [data-method].active { display: block; }
 .smc-toolbar-item {
     display: flex;
     align-items: center;
@@ -41,27 +83,13 @@
     font-size: 0.85em;
     font-family: inherit;
     line-height: 1;
-}
-.smc-toolbar-dropdown-btn:hover { border-color: #999; }
-
-/* Native <select>s inside the toolbar get the same visual as the custom
-   dropdown-btn for consistency. Arrow stays browser-default on the right. */
-.smc-toolbar select {
-    appearance: none;
-    -webkit-appearance: none;
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 22px 2px 6px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    background: #fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'><path d='M0 0l5 6 5-6z' fill='%23888'/></svg>") no-repeat right 6px center / 8px 5px;
-    cursor: pointer;
-    font-size: 0.85em;
-    font-family: inherit;
-    line-height: 1;
+    /* Same height across all three toolbar dropdowns. The weights dropdown's
+       36×24 sparkline sets the lower bound; f + phase-2 triggers (text or
+       MathJax) inherit this height so they visually align. */
+    min-height: 28px;
     color: #444;
 }
-.smc-toolbar select:hover { border-color: #999; }
+.smc-toolbar-dropdown-btn:hover { border-color: #999; }
 .smc-toolbar-dropdown-arrow { font-size: 0.7em; color: #888; }
 #smc-toolbar-dropdown-text { color: #444; }
 #smc-toolbar-sparkline { border-radius: 1px; display: block; }
@@ -88,6 +116,11 @@
     cursor: pointer;
     font-size: 0.85em;
     color: #333;
+    /* Consistent height across weights/f/phase-2 dropdown menus. Weights
+       rows have a 24px sparkline canvas; text/MathJax rows match via
+       min-height so the menus look uniform. */
+    min-height: 34px;
+    box-sizing: border-box;
 }
 .smc-toolbar-dropdown-row:hover { background: #f0f0f0; }
 .smc-toolbar-dropdown-row.active { font-weight: bold; color: var(--s-accent, #467); }

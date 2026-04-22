@@ -32,6 +32,27 @@ MathJax = {
 $if(mathjax-macros-json)$
     , macros: $mathjax-macros-json$
 $endif$
+  },
+  options: {
+    // Disable click-to-explore on math. Without these, clicking on a
+    // rendered formula (e.g. math inside a button label) gets intercepted
+    // by MathJax's a11y explorer and highlights subexpressions instead of
+    // triggering the underlying button. The right-click context menu is
+    // still available.
+    //
+    // MathJax v4 has no single `explorer` setting — the feature is split
+    // across enrich (semantic tree), speech, braille, inTabOrder. Turning
+    // off enrich alone is enough to stop the click behavior (no tree for
+    // the explorer to walk), but we also zero the others so they don't
+    // appear enabled in the right-click menu.
+    menuOptions: {
+      settings: {
+        enrich: false,
+        speech: false,
+        braille: false,
+        inTabOrder: false
+      }
+    }
   }
 };
 </script>
