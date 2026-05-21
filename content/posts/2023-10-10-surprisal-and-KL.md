@@ -32,6 +32,8 @@ Since KL is nonnegative, R can take on values between 0 and the surprisal. Put a
 
 ### Interactive illustration
 
+See [new version here](https://postylem.github.io/belief-update-viz/) [experimental].
+
 Manipulate prior and likelihood sliders below to see posterior and resulting surprisal partition:
 
 <div class="wide full-width">
