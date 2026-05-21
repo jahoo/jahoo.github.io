@@ -9,6 +9,7 @@
   font-style: normal;
   font-weight: normal;
   src: local('Linux Biolinum Outline Regular'),
+       url('/assets/fonts/LinBiolinum/LinBiolinum_aU.woff2') format('woff2'),
        url('/assets/fonts/LinBiolinum/LinBiolinum_aU.woff') format('woff');
   font-display: swap;
 }
@@ -17,6 +18,7 @@
   font-style: normal;
   font-weight: normal;
   src: local('Linux Libertine'),
+       url('/assets/fonts/LinLibertine/LinLibertine_Re-4.1_.8_.woff2') format('woff2'),
        url('/assets/fonts/LinLibertine/LinLibertine_Re-4.1_.8_.woff') format('woff');
   font-display: swap;
 }
