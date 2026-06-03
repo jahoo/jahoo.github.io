@@ -1,6 +1,6 @@
 import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { withSeed } from '../../src/lib/prng.js';
+import { withSeed } from '../lib/prng.js';
 import {
     cumulativeSum,
     normalize,
@@ -11,8 +11,8 @@ import {
     evalEstimators,
     getTestFnValues,
     setTestFnKey,
-} from '../../src/smc-resampling/algorithms.js';
-import { N } from '../../src/smc-resampling/config.js';
+} from './algorithms.js';
+import { N } from './config.js';
 
 // Helper: uniform weights
 const uniform = () => new Array(N).fill(1 / N);

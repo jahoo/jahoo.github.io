@@ -42,7 +42,7 @@ content:
 # ---- JS bundling ----
 js: $(JS_BUNDLES)
 
-$(OUTDIR)/assets/js/%.bundle.js: src/%/index.js $(shell find src -name '*.js' 2>/dev/null)
+$(OUTDIR)/assets/js/%.bundle.js: src/%/index.js $(shell find src -name '*.js' ! -name '*.test.js' 2>/dev/null)
 	@mkdir -p $(dir $@)
 	@echo "Bundle: $<"
 	@$(ESBUILD) $< --bundle --outfile=$@
@@ -72,7 +72,7 @@ serve:
 	@bash scripts/serve.sh
 
 test:
-	@node --test 'test/**/*.test.js'
+	@node --test 'src/**/*.test.js' 'test/**/*.test.js'
 
 clean:
 	@if [ -d "$(OUTDIR)" ]; then trash "$(OUTDIR)"; fi

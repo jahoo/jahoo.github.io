@@ -28,9 +28,9 @@ title: My Exploration Title
 date: 2026-04-15
 author: Jacob Hoover Vigly
 js:
-  - my-topic              # loads /assets/js/my-topic.bundle.js (built by esbuild from src/my-topic/index.js)
+  - /assets/js/my-topic.bundle.js   # built by esbuild from src/my-topic/index.js
 css:
-  - my-topic.css          # loads /assets/css/my-topic.css
+  - /assets/css/my-topic.css
 bibliography: assets/my-topic/references.bib   # per-page bib (overrides site default)
 link-citations: true
 mathjax-macros: assets/my-topic/macros.json     # custom LaTeX macros for MathJax
@@ -273,11 +273,11 @@ For control panels, toggle switches, grouped buttons, sliders — write raw HTML
 
 ### JS architecture
 
-Each exploration has an entry point at `src/<name>/index.js` that esbuild bundles. Shared code goes in `src/lib/`. Reference the bundle in front matter:
+Each exploration has an entry point at `src/<name>/index.js` that esbuild bundles to `/assets/js/<name>.bundle.js`. Shared code goes in `src/lib/`. Tests live next to the code they test (`src/<name>/*.test.js`, run by `make test`); they are not bundled. Reference the bundle by full path in front matter (`js:` and `css:` values are emitted verbatim):
 
 ```yaml
 js:
-  - my-exploration    # → /assets/js/my-exploration.bundle.js
+  - /assets/js/my-exploration.bundle.js
 ```
 
 The JS runs after the DOM is ready. Find elements by ID:

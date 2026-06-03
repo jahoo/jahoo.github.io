@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { sliderToT, tToSlider, SLIDER_MAX } from '../../src/temperature/sliderscale.js';
-import { T_MIN, T_MAX } from '../../src/temperature/config.js';
+import { sliderToT, tToSlider, SLIDER_MAX } from './sliderscale.js';
+import { T_MIN, T_MAX } from './config.js';
 
 // The slider axis is beta = 1/T, increasing left -> right.
 

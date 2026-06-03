@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { createPRNG, withSeed } from '../../src/lib/prng.js';
+import { createPRNG, withSeed } from './prng.js';
 
 describe('createPRNG', () => {
     it('produces deterministic sequences from the same seed', () => {

@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { temper, normalize, isNegativeTemp } from '../../src/temperature/model.js';
+import { temper, normalize, isNegativeTemp } from './model.js';
 
 // Helper: sum of an array
 const sum = (a) => a.reduce((x, y) => x + y, 0);
