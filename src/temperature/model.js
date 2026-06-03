@@ -43,3 +43,19 @@ export function temper(p, T) {
     const m = Math.max(...logp.filter(Number.isFinite));
     return normalize(logp.map(l => Math.exp(l - m)));
 }
+
+// Top-p (nucleus) truncation: order elements by probability descending —
+// ties broken deterministically by lower index — keep the smallest prefix
+// whose cumulative mass reaches rho, zero out the rest, and renormalize.
+// rho = 1 is the identity. Returns a new array.
+export function truncateTopP(p, rho) {
+    const order = p.map((_, i) => i).sort((a, b) => (p[b] - p[a]) || (a - b));
+    const kept = new Set();
+    let cum = 0;
+    for (const i of order) {
+        kept.add(i);
+        cum += p[i];
+        if (cum >= rho - 1e-12) break;
+    }
+    return normalize(p.map((v, i) => (kept.has(i) ? v : 0)));
+}

@@ -4,7 +4,7 @@
 // ================================================================
 
 import { K, MIN_P, BASE_COLOR, PRESETS } from './config.js';
-import { temper, normalize, isNegativeTemp } from './model.js';
+import { temper, normalize, isNegativeTemp, truncateTopP } from './model.js';
 import { sliderToT, tToSlider, SLIDER_MAX } from './sliderscale.js';
 import {
     resetCanvas,
@@ -21,11 +21,12 @@ import {
 
 let probs = normalize(PRESETS.unimodal); // the base distribution p
 let T = 1;
+let rho = 1; // top-p truncation threshold applied to the tempered distribution
 let negative = false; // hidden toggle: symlog axis extending past ∞ to T < 0
 let L = null;         // current canvas layout, set on every redraw
 
-let cv, slider, readout, readoutBeta, preset, negToggle, ticksWrap,
-    dirsWrap; // DOM, bound in init()
+let cv, slider, readout, readoutBeta, rhoSlider, rhoReadout, preset,
+    negToggle, ticksWrap, dirsWrap; // DOM, bound in init()
 
 // ================================================================
 //  READOUTS + SLIDER LABELS
@@ -115,6 +116,9 @@ function redraw() {
     L = layout(w, h);
 
     const tempered = temper(probs, T);
+    const truncated = truncateTopP(tempered, rho);
+    // at rho = 1 truncation is the identity: no underlay
+    const underlay = rho < 1 ? tempered : null;
     const color = tempColor(T);
 
     // pre-normalization log values beta·log p — shown whenever beta >= 0
@@ -133,22 +137,25 @@ function redraw() {
         label: { sym: 'p' },
         handles: true,
     });
-    drawProbPanel(ctx, L, L.panel(1, 0), tempered, {
+    drawProbPanel(ctx, L, L.panel(1, 0), truncated, {
         color,
         label: { sym: 'p', sup: '(T)' },
+        underlay,
     });
     drawLogPanel(ctx, L, L.panel(0, 1), probs.map(Math.log), {
         color: BASE_COLOR,
         label: { pre: 'log ', sym: 'p' },
     });
-    drawLogPanel(ctx, L, L.panel(1, 1), tempered.map(Math.log), {
+    drawLogPanel(ctx, L, L.panel(1, 1), truncated.map(Math.log), {
         color,
         label: { pre: 'log ', sym: 'p', sup: '(T)' },
         ghost,
+        underlay: underlay && underlay.map(Math.log),
     });
 
     if (readout) readout.textContent = fmtT(T);
     if (readoutBeta) readoutBeta.textContent = fmtBeta(T);
+    if (rhoReadout) rhoReadout.textContent = typeset(Number(rho.toPrecision(3)).toString());
     if (slider) slider.style.setProperty('--temp-accent', color);
 }
 
@@ -215,6 +222,8 @@ export function init() {
     slider = document.getElementById('temp-slider');
     readout = document.getElementById('temp-readout');
     readoutBeta = document.getElementById('temp-readout-beta');
+    rhoSlider = document.getElementById('temp-rho');
+    rhoReadout = document.getElementById('temp-rho-readout');
     preset = document.getElementById('temp-preset');
     negToggle = document.getElementById('temp-negative');
     ticksWrap = document.querySelector('.temp-slider-ticks');
@@ -225,6 +234,13 @@ export function init() {
         slider.max = String(SLIDER_MAX);
         slider.addEventListener('input', () => {
             T = sliderToT(Number(slider.value), negative);
+            redraw();
+        });
+    }
+
+    if (rhoSlider) {
+        rhoSlider.addEventListener('input', () => {
+            rho = Number(rhoSlider.value) / Number(rhoSlider.max);
             redraw();
         });
     }

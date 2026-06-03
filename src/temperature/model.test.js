@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { temper, normalize, isNegativeTemp } from './model.js';
+import { temper, normalize, isNegativeTemp, truncateTopP } from './model.js';
 
 // Helper: sum of an array
 const sum = (a) => a.reduce((x, y) => x + y, 0);
@@ -110,6 +110,48 @@ describe('temper', () => {
         const p = temper(normalize([1e-300, 1, 1e-300]), 0.01);
         assert.ok(p.every(Number.isFinite));
         assert.ok(Math.abs(sum(p) - 1.0) < 1e-12);
+    });
+});
+
+describe('truncateTopP', () => {
+    it('is the identity at rho = 1', () => {
+        const p = [0.5, 0.3, 0.2];
+        assertClose(truncateTopP(p, 1), p);
+    });
+
+    it('keeps the smallest prefix (by descending prob) with mass >= rho', () => {
+        // 0.5 < 0.6, so the nucleus is {0.5, 0.3}; 0.2 is zeroed
+        assertClose(truncateTopP([0.5, 0.3, 0.2], 0.6), [0.625, 0.375, 0]);
+    });
+
+    it('keeps only the argmax when rho <= the max probability', () => {
+        assertClose(truncateTopP([0.5, 0.3, 0.2], 0.5), [1, 0, 0]);
+        assertClose(truncateTopP([0.5, 0.3, 0.2], 0.1), [1, 0, 0]);
+    });
+
+    it('breaks ties at the cutoff deterministically by lower index', () => {
+        // 0.4 + first 0.3 reaches 0.5; the tied 0.3 at index 2 is dropped
+        assertClose(truncateTopP([0.4, 0.3, 0.3], 0.5), [0.4 / 0.7, 0.3 / 0.7, 0]);
+        // same probabilities, tied pair first: index 0 wins the tie
+        assertClose(truncateTopP([0.3, 0.3, 0.4], 0.5), [0.3 / 0.7, 0, 0.4 / 0.7]);
+    });
+
+    it('truncates by value, not position', () => {
+        assertClose(truncateTopP([0.2, 0.5, 0.3], 0.6), [0, 0.625, 0.375]);
+    });
+
+    it('always returns a normalized distribution', () => {
+        for (const rho of [0.05, 0.3, 0.7, 1]) {
+            const q = truncateTopP([0.05, 0.08, 0.12, 0.30, 0.20, 0.12, 0.08, 0.05], rho);
+            assert.ok(Math.abs(sum(q) - 1) < 1e-12, `rho=${rho}`);
+        }
+    });
+
+    it('preserves zeros and does not mutate its input', () => {
+        const p = [0.7, 0.3, 0];
+        const q = truncateTopP(p, 0.95);
+        assert.equal(q[2], 0);
+        assert.deepStrictEqual(p, [0.7, 0.3, 0]);
     });
 });
 

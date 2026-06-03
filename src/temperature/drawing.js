@@ -155,8 +155,28 @@ function drawUniformRef(ctx, P, y, label) {
     }
 }
 
+// Low-opacity bars showing a distribution before some transformation
+// (e.g. the tempered distribution before top-p truncation).
+function drawUnderlay(ctx, L, P, values, color, yOf, yBase) {
+    values.forEach((v, i) => {
+        const cx = L.barX(P, i);
+        const y = yOf(v);
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.15;
+        ctx.fillRect(cx - L.barW / 2, Math.min(y, yBase), L.barW, Math.abs(y - yBase));
+        ctx.globalAlpha = 0.3;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(cx - L.barW / 2, y);
+        ctx.lineTo(cx + L.barW / 2, y);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+    });
+}
+
 // --- Probability-space panel ---
-// opts: { color, label: {pre, sym, sup}, handles: bool }
+// opts: { color, label: {pre, sym, sup}, handles: bool, underlay: array|null }
 
 export function drawProbPanel(ctx, L, P, values, opts) {
     // baseline (x-axis)
@@ -175,6 +195,10 @@ export function drawProbPanel(ctx, L, P, values, opts) {
     }
 
     drawUniformRef(ctx, P, L.probY(P, 1 / K), '1/K');
+
+    if (opts.underlay) {
+        drawUnderlay(ctx, L, P, opts.underlay, opts.color, v => L.probY(P, v), y0);
+    }
 
     values.forEach((v, i) => {
         const cx = L.barX(P, i);
@@ -201,9 +225,10 @@ export function drawProbPanel(ctx, L, P, values, opts) {
 }
 
 // --- Log-space panel ---
-// opts: { color, label: {pre, sym, sup}, ghost: array|null }
+// opts: { color, label: {pre, sym, sup}, ghost: array|null, underlay: array|null }
 // `ghost` marks the pre-normalization values beta·log p as horizontal
-// ticks, with a dotted connector to the bar end: the common -log Z shift.
+// ticks, with a dotted connector to the tempered value: the common
+// -log Z shift (so connectors end on the underlay when one is shown).
 // Values below LOG_FLOOR are clamped: bars get a triangle at the floor,
 // ghost ticks an inverted caret.
 
@@ -225,6 +250,10 @@ export function drawLogPanel(ctx, L, P, values, opts) {
     }
 
     drawUniformRef(ctx, P, L.logY(P, Math.log(1 / K)), 'log 1/K');
+
+    if (opts.underlay) {
+        drawUnderlay(ctx, L, P, opts.underlay, opts.color, l => L.logY(P, l), y0);
+    }
 
     // bars hang down from the 0-line
     values.forEach((v, i) => {
@@ -263,7 +292,7 @@ export function drawLogPanel(ctx, L, P, values, opts) {
             ctx.globalAlpha = 0.5;
             ctx.beginPath();
             ctx.moveTo(cx, yG);
-            ctx.lineTo(cx, L.logY(P, values[i]));
+            ctx.lineTo(cx, L.logY(P, (opts.underlay || values)[i]));
             ctx.stroke();
             ctx.restore();
             ctx.lineWidth = 1.5;

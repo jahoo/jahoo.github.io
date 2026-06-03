@@ -57,6 +57,10 @@ as $T \to \infty$ ($\beta \to 0$), $p^{(T)}$ flattens toward uniform over the su
 <option value="custom" hidden>custom</option>
 </select>
 </div>
+<div class="temp-rho-wrap">
+<div class="temp-rho-label"><span class="temp-controls-label">top-$p$ =&nbsp;</span><span id="temp-rho-readout">1</span></div>
+<input type="range" id="temp-rho" min="10" max="1000" value="1000">
+</div>
 </div>
 
 <div class="temp-neg-note">
@@ -64,4 +68,4 @@ Mathematically, nothing stops us from taking $T<0$, it just reverses things...
 <label class="temp-neg-toggle"><input type="checkbox" id="temp-negative"> allow $T<0$</label>
 </div>
 
-**Top row:** the base distribution $p$ (drag bars to edit) and the tempered $p^{(T)}$. **Bottom row:** the same two distributions in log space, where temperature scaling is linear: bars are scaled by $\beta$, then shifted by the common offset $-\log Z_T$ (in the right panel, ticks mark the pre-normalization values $\beta \log p_i$; the dotted segments are the shift). Dashed line: the uniform distribution, i.e.\ the $\beta\to 0$ limit.
+**Top row:** the base distribution $p$ (drag bars to edit) and the tempered $p^{(T)}$. **Bottom row:** the same two distributions in log space, where temperature scaling is linear: bars are scaled by $\beta$, then shifted by the common offset $-\log Z_T$ (in the right panel, ticks mark the pre-normalization values $\beta \log p_i$; the dotted segments are the shift). Dashed line: the uniform distribution, i.e.\ the $\beta\to 0$ limit. The top-$p$ slider truncates the tempered distribution to its nucleus (the smallest set of highest-probability elements whose mass reaches the threshold, with ties broken by index) and renormalizes.
