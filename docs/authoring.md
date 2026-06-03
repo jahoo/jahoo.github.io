@@ -28,9 +28,9 @@ title: My Exploration Title
 date: 2026-04-15
 author: Jacob Hoover Vigly
 js:
-  - /assets/js/my-topic.bundle.js   # built by esbuild from src/my-topic/index.js
+  - src/my-topic               # dir of the bundle's source; built and served as /assets/js/my-topic.bundle.js
 css:
-  - /assets/css/my-topic.css
+  - assets/css/my-topic.css    # served as /assets/css/my-topic.css
 bibliography: assets/my-topic/references.bib   # per-page bib (overrides site default)
 link-citations: true
 mathjax-macros: assets/my-topic/macros.json     # custom LaTeX macros for MathJax
@@ -273,11 +273,13 @@ For control panels, toggle switches, grouped buttons, sliders — write raw HTML
 
 ### JS architecture
 
-Each exploration has an entry point at `src/<name>/index.js` that esbuild bundles to `/assets/js/<name>.bundle.js`. Shared code goes in `src/lib/`. Tests live next to the code they test (`src/<name>/*.test.js`, run by `make test`); they are not bundled. Reference the bundle by full path in front matter (`js:` and `css:` values are emitted verbatim):
+Each exploration has an entry point at `src/<name>/index.js` that esbuild bundles to `/assets/js/<name>.bundle.js`. Shared code goes in `src/lib/`. Tests live next to the code they test (`src/<name>/*.test.js`, run by `make test`); they are not bundled.
+
+Reference the bundle in front matter by its **source directory** — a real path in the repo, so a reader of the YAML can find the code. Like `css:` (and `bibliography:`, `mathjax-macros:`), the value is repo-relative; `filters/asset-paths.lua` resolves both keys to served URLs at build time (`src/<name>` → `/assets/js/<name>.bundle.js`, `assets/...` → `/assets/...`; anything else, e.g. absolute URLs, is emitted verbatim):
 
 ```yaml
 js:
-  - /assets/js/my-exploration.bundle.js
+  - src/my-exploration
 ```
 
 The JS runs after the DOM is ready. Find elements by ID:

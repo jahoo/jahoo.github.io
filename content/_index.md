@@ -2,7 +2,7 @@
 title: home
 page-style: site
 hide-post-title: true
-css: [/assets/css/index.css]
+css: [assets/css/index.css]
 ---
 
 # about {.unnumbered}

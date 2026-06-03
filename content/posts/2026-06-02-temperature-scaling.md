@@ -4,9 +4,9 @@ date: 2026-06-02
 author: Jacob Hoover Vigly
 tags: [exploration]
 js:
-  - /assets/js/temperature.bundle.js
+  - src/temperature
 css:
-  - /assets/css/temperature.css
+  - assets/css/temperature.css
 ---
 
 *What modifying temperature does to a distribution.*
