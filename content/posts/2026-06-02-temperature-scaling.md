@@ -4,7 +4,7 @@ date: 2026-06-02
 author: Jacob Hoover Vigly
 tags: [exploration]
 js:
-  - temperature
+  - /assets/js/temperature.bundle.js
 css:
   - /assets/css/temperature.css
 ---

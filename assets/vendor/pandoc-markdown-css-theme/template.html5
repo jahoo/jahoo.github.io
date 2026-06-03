@@ -185,7 +185,7 @@ $for(include-after)$
 $include-after$
 $endfor$
 $for(js)$
-<script src="/assets/js/$js$.bundle.js"></script>
+<script src="$js$"></script>
 $endfor$
 <footer class="site-footer">
   <div class="wrapper">

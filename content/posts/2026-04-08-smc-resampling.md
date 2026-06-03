@@ -4,7 +4,7 @@ date: 2026-04-08
 author: Jacob Hoover Vigly
 tags: [exploration]
 js:
-  - smc-resampling
+  - /assets/js/smc-resampling.bundle.js
 css:
   - /assets/css/smc-resampling.css
 bibliography: assets/smc-resampling/references.bib
