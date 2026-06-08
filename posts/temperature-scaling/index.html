@@ -156,6 +156,14 @@ class="math inline">\(p\)</span>:</label> <select id="temp-preset">
 <option value="zipf">zipf</option>
 <option value="custom" hidden>custom</option> </select></p>
 </div>
+<div class="temp-rho-wrap">
+<div class="temp-rho-label">
+<span class="temp-controls-label">top-<span
+class="math inline">\(p\)</span> = </span><span
+id="temp-rho-readout">1</span>
+</div>
+<p><input type="range" id="temp-rho" min="10" max="1000" value="1000"></p>
+</div>
 </div>
 <div class="temp-neg-note">
 <p>Mathematically, nothing stops us from taking <span
@@ -173,7 +181,11 @@ class="math inline">\(\beta\)</span>, then shifted by the common offset
 ticks mark the pre-normalization values <span
 class="math inline">\(\beta \log p_i\)</span>; the dotted segments are
 the shift). Dashed line: the uniform distribution, i.e. the <span
-class="math inline">\(\beta\to 0\)</span> limit.</p>
+class="math inline">\(\beta\to 0\)</span> limit. The top-<span
+class="math inline">\(p\)</span> slider truncates the tempered
+distribution to its nucleus (the smallest set of highest-probability
+elements whose mass reaches the threshold, with ties broken by index)
+and renormalizes.</p>
 </main>
 
 <script>
@@ -236,7 +248,7 @@ class="math inline">\(\beta\to 0\)</span> limit.</p>
 <script src="/assets/js/temperature.bundle.js"></script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-06-03 15:48</span>
+    <span class="last-modified">Last modified: 2026-06-03 16:55</span>
   </div>
 </footer>
 </body>

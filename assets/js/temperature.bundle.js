@@ -42,6 +42,17 @@
     const m = Math.max(...logp.filter(Number.isFinite));
     return normalize(logp.map((l) => Math.exp(l - m)));
   }
+  function truncateTopP(p, rho2) {
+    const order = p.map((_, i) => i).sort((a, b) => p[b] - p[a] || a - b);
+    const kept = /* @__PURE__ */ new Set();
+    let cum = 0;
+    for (const i of order) {
+      kept.add(i);
+      cum += p[i];
+      if (cum >= rho2 - 1e-12) break;
+    }
+    return normalize(p.map((v, i) => kept.has(i) ? v : 0));
+  }
 
   // src/temperature/sliderscale.js
   var SLIDER_MAX = 1e3;
@@ -192,6 +203,23 @@
       ctx.fillText(label, P.x + P.w + 4, y);
     }
   }
+  function drawUnderlay(ctx, L2, P, values, color, yOf, yBase) {
+    values.forEach((v, i) => {
+      const cx = L2.barX(P, i);
+      const y = yOf(v);
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.15;
+      ctx.fillRect(cx - L2.barW / 2, Math.min(y, yBase), L2.barW, Math.abs(y - yBase));
+      ctx.globalAlpha = 0.3;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx - L2.barW / 2, y);
+      ctx.lineTo(cx + L2.barW / 2, y);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    });
+  }
   function drawProbPanel(ctx, L2, P, values, opts) {
     const y0 = L2.probY(P, 0);
     ctx.strokeStyle = "#999";
@@ -205,6 +233,9 @@
       drawTick(ctx, P.x, L2.probY(P, 1), "1");
     }
     drawUniformRef(ctx, P, L2.probY(P, 1 / K), "1/K");
+    if (opts.underlay) {
+      drawUnderlay(ctx, L2, P, opts.underlay, opts.color, (v) => L2.probY(P, v), y0);
+    }
     values.forEach((v, i) => {
       const cx = L2.barX(P, i);
       const yTop = L2.probY(P, v);
@@ -239,6 +270,9 @@
       drawTick(ctx, P.x, yFloor, String(LOG_FLOOR));
     }
     drawUniformRef(ctx, P, L2.logY(P, Math.log(1 / K)), "log 1/K");
+    if (opts.underlay) {
+      drawUnderlay(ctx, L2, P, opts.underlay, opts.color, (l) => L2.logY(P, l), y0);
+    }
     values.forEach((v, i) => {
       const cx = L2.barX(P, i);
       const clamped = v < LOG_FLOOR;
@@ -273,7 +307,7 @@
         ctx.globalAlpha = 0.5;
         ctx.beginPath();
         ctx.moveTo(cx, yG);
-        ctx.lineTo(cx, L2.logY(P, values[i]));
+        ctx.lineTo(cx, L2.logY(P, (opts.underlay || values)[i]));
         ctx.stroke();
         ctx.restore();
         ctx.lineWidth = 1.5;
@@ -297,12 +331,15 @@
   // src/temperature/main.js
   var probs = normalize(PRESETS.unimodal);
   var T = 1;
+  var rho = 1;
   var negative = false;
   var L = null;
   var cv;
   var slider;
   var readout;
   var readoutBeta;
+  var rhoSlider;
+  var rhoReadout;
   var preset;
   var negToggle;
   var ticksWrap;
@@ -365,6 +402,8 @@
     const { ctx, w, h } = resetCanvas(cv);
     L = layout(w, h);
     const tempered = temper(probs, T);
+    const truncated = truncateTopP(tempered, rho);
+    const underlay = rho < 1 ? tempered : null;
     const color = tempColor(T);
     const ghost = isNegativeTemp(T) ? null : probs.map((p) => {
       if (p <= 0) return -Infinity;
@@ -377,21 +416,24 @@
       label: { sym: "p" },
       handles: true
     });
-    drawProbPanel(ctx, L, L.panel(1, 0), tempered, {
+    drawProbPanel(ctx, L, L.panel(1, 0), truncated, {
       color,
-      label: { sym: "p", sup: "(T)" }
+      label: { sym: "p", sup: "(T)" },
+      underlay
     });
     drawLogPanel(ctx, L, L.panel(0, 1), probs.map(Math.log), {
       color: BASE_COLOR,
       label: { pre: "log ", sym: "p" }
     });
-    drawLogPanel(ctx, L, L.panel(1, 1), tempered.map(Math.log), {
+    drawLogPanel(ctx, L, L.panel(1, 1), truncated.map(Math.log), {
       color,
       label: { pre: "log ", sym: "p", sup: "(T)" },
-      ghost
+      ghost,
+      underlay: underlay && underlay.map(Math.log)
     });
     if (readout) readout.textContent = fmtT(T);
     if (readoutBeta) readoutBeta.textContent = fmtBeta(T);
+    if (rhoReadout) rhoReadout.textContent = typeset(Number(rho.toPrecision(3)).toString());
     if (slider) slider.style.setProperty("--temp-accent", color);
   }
   function setProb(i, target) {
@@ -437,6 +479,8 @@
     slider = document.getElementById("temp-slider");
     readout = document.getElementById("temp-readout");
     readoutBeta = document.getElementById("temp-readout-beta");
+    rhoSlider = document.getElementById("temp-rho");
+    rhoReadout = document.getElementById("temp-rho-readout");
     preset = document.getElementById("temp-preset");
     negToggle = document.getElementById("temp-negative");
     ticksWrap = document.querySelector(".temp-slider-ticks");
@@ -446,6 +490,12 @@
       slider.max = String(SLIDER_MAX);
       slider.addEventListener("input", () => {
         T = sliderToT(Number(slider.value), negative);
+        redraw();
+      });
+    }
+    if (rhoSlider) {
+      rhoSlider.addEventListener("input", () => {
+        rho = Number(rhoSlider.value) / Number(rhoSlider.max);
         redraw();
       });
     }

@@ -46,7 +46,7 @@
    auto-switch between light/dark track themes depending on the accent's
    luminance, which flickers as the temperature color sweeps the range.
    Fixed neutral track + temperature-colored thumb instead. */
-#temp-slider {
+.temp-controls input[type="range"] {
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
@@ -54,12 +54,12 @@
     background: transparent;
     margin: 0;
 }
-#temp-slider::-webkit-slider-runnable-track {
+.temp-controls input[type="range"]::-webkit-slider-runnable-track {
     height: 4px;
     border-radius: 2px;
     background: #dfe2e6;
 }
-#temp-slider::-webkit-slider-thumb {
+.temp-controls input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 14px;
     height: 14px;
@@ -68,25 +68,25 @@
     background: var(--temp-accent, rgb(150, 156, 164));
     margin-top: -5px; /* center 14px thumb on 4px track */
 }
-#temp-slider::-moz-range-track {
+.temp-controls input[type="range"]::-moz-range-track {
     height: 4px;
     border-radius: 2px;
     background: #dfe2e6;
 }
-#temp-slider::-moz-range-thumb {
+.temp-controls input[type="range"]::-moz-range-thumb {
     width: 14px;
     height: 14px;
     border-radius: 50%;
     border: none;
     background: var(--temp-accent, rgb(150, 156, 164));
 }
-#temp-slider:focus-visible {
+.temp-controls input[type="range"]:focus-visible {
     outline: none;
 }
-#temp-slider:focus-visible::-webkit-slider-thumb {
+.temp-controls input[type="range"]:focus-visible::-webkit-slider-thumb {
     box-shadow: 0 0 0 3px rgba(70, 102, 119, 0.3);
 }
-#temp-slider:focus-visible::-moz-range-thumb {
+.temp-controls input[type="range"]:focus-visible::-moz-range-thumb {
     box-shadow: 0 0 0 3px rgba(70, 102, 119, 0.3);
 }
 
@@ -123,6 +123,34 @@
     top: 0;
     transform: translateX(-50%);
     white-space: nowrap;
+}
+
+/* Top-p truncation slider: its own full-width row below the first */
+.temp-rho-wrap {
+    flex-basis: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.temp-rho-wrap input[type="range"] {
+    flex: 1;
+}
+
+/* Pandoc paragraph-wraps the bare <input>; let the paragraph stretch so
+   the slider fills the row */
+.temp-rho-wrap p {
+    flex: 1;
+}
+
+.temp-rho-label {
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+#temp-rho-readout {
+    font-variant-numeric: tabular-nums;
+    color: #333;
 }
 
 .temp-preset-wrap {
