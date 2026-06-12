@@ -204,15 +204,40 @@ export function computeLandscapes(res, _retry) {
         return { dmu: -Eq_dlogp, dsigma: -1 / sigma - Eq_z_dlogp };
     }
 
+    // Multi-start descent. Steps along the natural-gradient direction —
+    // the (μ, σ) gradient preconditioned by the Gaussian Fisher inverse
+    // diag(σ², σ²/2) — with a backtracking line search for the step size.
+    //
+    // The preconditioned direction is Newton-like for the KL objectives
+    // (fast, exact convergence into the broad flat valleys where the old
+    // fixed-step GD stalled short and left the markers mislocated). The
+    // line search keeps it from overshooting on χ², whose curvature the
+    // Gaussian Fisher does not match, and guarantees monotone descent for
+    // every objective, so the markers land on true minima and agree with
+    // where the live optimizer settles.
     function optimizeGeneric(evalFn, gradFn, startMu, startSigma) {
         let mu = startMu, sigma = startSigma;
-        for (let i = 0; i < 500; i++) {
+        let f = evalFn(mu, sigma);
+        for (let i = 0; i < 300; i++) {
             const g = gradFn(mu, sigma);
-            mu -= 0.02 * g.dmu;
-            sigma -= 0.5 * 0.02 * g.dsigma;
-            sigma = Math.max(0.1, sigma);
+            const s2 = sigma * sigma;
+            let dMu = s2 * g.dmu;          // Fisher^{-1} · grad
+            let dSig = (s2 / 2) * g.dsigma;
+            const norm = Math.hypot(dMu, dSig);
+            if (norm < 1e-7) break;        // gradient ≈ 0: converged
+            if (norm > 10) { const s = 10 / norm; dMu *= s; dSig *= s; }
+            // Backtracking line search: largest t ∈ {1, ½, ¼, …} that decreases f.
+            let t = 1, improved = false;
+            for (let b = 0; b < 12; b++) {
+                const nmu = mu - t * dMu;
+                const nsig = Math.max(0.1, sigma - t * dSig);
+                const nf = evalFn(nmu, nsig);
+                if (isFinite(nf) && nf < f) { mu = nmu; sigma = nsig; f = nf; improved = true; break; }
+                t *= 0.5;
+            }
+            if (!improved) break;          // no descent step found: at a minimum
         }
-        return { mu, sigma, kl: evalFn(mu, sigma) };
+        return { mu, sigma, kl: f };
     }
 
     function multiStartOptimize(evalFn, gradFn) {
