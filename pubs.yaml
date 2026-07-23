@@ -7,6 +7,10 @@
 - key: chan.r:2026arxiv
   status: preprint
 
+- key: clark.t:2025
+  venue: EMNLP 2025
+  venue_url: https://aclanthology.org/events/emnlp-2025/
+
 - key: vigly.j:2025cogsci
   venue: CogSci 2025
   venue_url: https://cognitivesciencesociety.org/cogsci-2025/

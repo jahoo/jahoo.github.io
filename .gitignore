@@ -10,12 +10,17 @@ source.bib
 
 # LaTeX build artifacts (e.g. from compiling the CV)
 *.aux
+*.bbl
 *.bcf
+*.blg
 *.bpx
+*.fdb_latexmk
+*.fls
 *.log
 *.out
 *.run.xml
 *.synctex.gz
+*.xdv
 
 # Transient git worktree used by `make deploy`
 _deploy
