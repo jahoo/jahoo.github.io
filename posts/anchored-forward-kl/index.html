@@ -453,8 +453,8 @@ class="math inline">\(\beta\)</span>:</span>
 </div>
 <p>As you slide <span class="math inline">\(\beta\)</span> between <span
 class="math inline">\(0\)</span> and <span
-class="math inline">\(\infty\)</span>, note how the mixture weight <span
-class="math inline">\(\alpha\)</span> interpolates between <span
+class="math inline">\(\infty\)</span>, mixture weight <span
+class="math inline">\(\alpha_\beta\)</span> interpolates between <span
 class="math inline">\(1\)</span> and <span
 class="math inline">\(Z\)</span>.<span
 class="sidenote-wrapper"><label for="sn-5" class="margin-toggle">&#8853;</label><input type="checkbox" id="sn-5" class="margin-toggle"/><span
@@ -470,13 +470,17 @@ class="math inline">\(1 - \frac{1-\Z}{\Z}\,e^{-1/\beta}\)</span>; the
 dashed line is <span class="math inline">\(\Z\)</span>, the <span
 class="math inline">\(\beta \to \infty\)</span> limit.</em><br />
 <br />
-</span></span> Equivalently, in the geometry of the mixture: every
-anchored optimum lives on the segment between the posterior and the
-antiposterior; the prior sits on it at weight <span
-class="math inline">\(\Z\)</span>, and raising <span
-class="math inline">\(\beta\)</span> slides the dot — the optimum —
-rightward from the posterior toward the prior, never past it (this dot
-is draggable too):</p>
+</span></span> In the geometry of the mixture, the optimum <span
+class="math inline">\(\proposal^\star_\beta\)</span> lives on the
+segment between the posterior and the antiposterior. [Recall <span
+class="math inline">\(\proposal^\star_\beta =\alpha_\beta\,\vposterior +
+(1 - \alpha_\beta)\,\antiposterior\)</span>.] Raising <span
+class="math inline">\(\beta\)</span> slides the optimum from the
+posterior toward the prior (at <span
+class="math inline">\(\beta=\infty\)</span> weight <span
+class="math inline">\(\alpha_\beta=\Z\)</span>, the <span
+class="math inline">\(\proposal^\star_\beta = \prior = \Z\,\vposterior +
+(1 - \Z)\,\antiposterior\)</span>).</p>
 <canvas id="cv-akl-segment" class="viz-mount" style="height:90px;width:100%"></canvas>
 </section>
 <section id="a-continuous-potential" class="level1" data-number="3">
@@ -730,7 +734,7 @@ reading, is special to the binary case.)</p>
 <script src="/assets/js/anchored-kl.bundle.js"></script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-07-31 18:10</span>
+    <span class="last-modified">Last modified: 2026-07-31 18:21</span>
   </div>
 </footer>
 </body>

@@ -340,26 +340,45 @@
       ctx.lineTo(x, y + 6);
       ctx.stroke();
     });
-    ctx.font = "italic 15px Georgia, serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = data.validColor;
-    ctx.fillText("\u03C0", x0, y + 18);
-    ctx.save();
-    ctx.translate(x1, y + 18);
-    ctx.rotate(Math.PI);
-    ctx.fillStyle = data.invalidColor;
-    ctx.fillText("\u03C0", 0, 1);
-    ctx.restore();
     ctx.strokeStyle = "#555";
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.moveTo(xZ, y - 6);
     ctx.lineTo(xZ, y + 6);
     ctx.stroke();
-    drawLabel(ctx, xZ, y + 23, [
-      { text: "p", font: IT },
-      { text: " (Z)", font: "10px Georgia, serif" }
+    ctx.font = "italic 15px Georgia, serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = data.validColor;
+    ctx.fillText("\u03C0", x0, y + 18);
+    const zClear = xZ - x0 > 14 && x1 - xZ > 14;
+    if (zClear) {
+      ctx.font = IT;
+      ctx.fillStyle = "#555";
+      ctx.fillText("p", xZ, y + 18);
+    }
+    ctx.save();
+    ctx.translate(x1, y + 18);
+    ctx.rotate(Math.PI);
+    ctx.font = "italic 15px Georgia, serif";
+    ctx.fillStyle = data.invalidColor;
+    ctx.fillText("\u03C0", 0, 1);
+    ctx.restore();
+    const vy = y + 32;
+    ctx.font = "9px " + SANS;
+    ctx.fillStyle = "#999";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("1", x0, vy);
+    ctx.fillText("0", x1, vy);
+    if (zClear) {
+      ctx.font = "italic 9px Georgia, serif";
+      ctx.fillText("Z", xZ, vy);
+    }
+    drawLabel(ctx, x0 - 20, vy + 3, [
+      { text: "\u03B1", font: "italic 11px Georgia, serif", color: "#999" },
+      { text: "\u03B2", font: "italic 8px Georgia, serif", dy: 2, color: "#999" },
+      { text: ":", font: "9px " + SANS, color: "#999" }
     ]);
     const xA = xOf(data.alpha);
     ctx.fillStyle = data.dotColor || "#444";
