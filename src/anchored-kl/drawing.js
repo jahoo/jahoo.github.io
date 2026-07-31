@@ -364,29 +364,52 @@ export function drawSegment(ctx, w, h, data) {
         ctx.stroke();
     });
 
-    // endpoint glyphs below the ends: pi (posterior), turned pi (antiposterior)
-    ctx.font = 'italic 15px Georgia, serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = data.validColor;
-    ctx.fillText('π', x0, y + 18);
-    ctx.save();
-    ctx.translate(x1, y + 18);
-    ctx.rotate(Math.PI);
-    ctx.fillStyle = data.invalidColor;
-    ctx.fillText('π', 0, 1); // slight nudge so the rotated glyph sits level
-    ctx.restore();
-
-    // the prior's position (weight Z), labeled below
+    // the prior's tick (at weight Z)
     ctx.strokeStyle = '#555';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.moveTo(xZ, y - 6);
     ctx.lineTo(xZ, y + 6);
     ctx.stroke();
-    drawLabel(ctx, xZ, y + 23, [
-        { text: 'p', font: IT },
-        { text: ' (Z)', font: '10px Georgia, serif' },
+
+    // symbols row below the line: pi (posterior), p (prior), turned pi
+    // (antiposterior)
+    ctx.font = 'italic 15px Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = data.validColor;
+    ctx.fillText('π', x0, y + 18);
+    const zClear = xZ - x0 > 14 && x1 - xZ > 14; // room for the p/Z labels
+    if (zClear) {
+        ctx.font = IT;
+        ctx.fillStyle = '#555';
+        ctx.fillText('p', xZ, y + 18);
+    }
+    ctx.save();
+    ctx.translate(x1, y + 18);
+    ctx.rotate(Math.PI);
+    ctx.font = 'italic 15px Georgia, serif';
+    ctx.fillStyle = data.invalidColor;
+    ctx.fillText('π', 0, 1); // slight nudge so the rotated glyph sits level
+    ctx.restore();
+
+    // values row: the axis is the mixture weight alpha_beta, running from
+    // 1 at the posterior end down to 0 at the antiposterior end
+    const vy = y + 32;
+    ctx.font = '9px ' + SANS;
+    ctx.fillStyle = '#999';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('1', x0, vy);
+    ctx.fillText('0', x1, vy);
+    if (zClear) {
+        ctx.font = 'italic 9px Georgia, serif';
+        ctx.fillText('Z', xZ, vy);
+    }
+    drawLabel(ctx, x0 - 20, vy + 3, [
+        { text: 'α', font: 'italic 11px Georgia, serif', color: '#999' },
+        { text: 'β', font: 'italic 8px Georgia, serif', dy: 2, color: '#999' },
+        { text: ':', font: '9px ' + SANS, color: '#999' },
     ]);
 
     // the optimum: a dot at alpha, labeled above
