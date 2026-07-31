@@ -1,0 +1,169 @@
+/* Anchored forward KL — interactive element styles only.
+   Typography and layout come from base.css + post.css. */
+
+/* Global-setup toolbar (support size K). position:sticky pins it to the
+   top of the viewport while its containing <section> (the visualization
+   section) is in view, and releases it after — cf. the heavier JS-pinned
+   toolbar in smc-resampling, which needed to outlive its section. */
+.akl-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0.4em 0 1.2em;
+    padding: 6px 12px;
+    background: var(--s-surface, #f6f8fa);
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.85em;
+}
+
+.akl-toolbar-value {
+    font-variant-numeric: tabular-nums;
+    color: #333;
+    min-width: 1.6em;
+}
+
+/* Defensive: neutralize Pandoc paragraph-wrapping inside the toolbar. */
+.akl-toolbar p {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* The live alpha(beta) plot in the margin note. */
+.akl-alpha-canvas {
+    display: block;
+    width: 100%;
+    height: 150px;
+    margin: 0.2em 0 0.4em;
+}
+
+.akl-controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0.4em 0 1.2em;
+    padding: 6px 12px;
+    background: var(--s-surface, #f6f8fa);
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.85em;
+    flex-wrap: wrap;
+    row-gap: 4px;
+}
+
+.akl-controls-label {
+    color: #666;
+    font-size: 0.9em;
+    white-space: nowrap;
+}
+
+/* Fixed-width readout block so the slider doesn't shift as digits change */
+.akl-readouts {
+    display: flex;
+    flex-direction: column;
+    min-width: 9em;
+    line-height: 1.4;
+}
+#akl-readout-beta,
+#akl-readout-alpha,
+#akl-readout-eps {
+    font-variant-numeric: tabular-nums;
+    color: #333;
+}
+
+.akl-slider-wrap {
+    flex: 1;
+    min-width: 160px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Fixed neutral track + accent-colored thumb (accent set from JS:
+   posterior blue at beta = 0 fading to prior gray at beta = infinity). */
+.akl-controls input[type="range"],
+.akl-toolbar input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 18px; /* generous hit area */
+    background: transparent;
+    margin: 0;
+}
+.akl-controls input[type="range"]::-webkit-slider-runnable-track,
+.akl-toolbar input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 2px;
+    background: #dfe2e6;
+}
+.akl-controls input[type="range"]::-webkit-slider-thumb,
+.akl-toolbar input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: none;
+    background: var(--akl-accent, rgb(150, 156, 164));
+    margin-top: -5px; /* center 14px thumb on 4px track */
+}
+.akl-controls input[type="range"]::-moz-range-track,
+.akl-toolbar input[type="range"]::-moz-range-track {
+    height: 4px;
+    border-radius: 2px;
+    background: #dfe2e6;
+}
+.akl-controls input[type="range"]::-moz-range-thumb,
+.akl-toolbar input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: none;
+    background: var(--akl-accent, rgb(150, 156, 164));
+}
+.akl-controls input[type="range"]:focus-visible,
+.akl-toolbar input[type="range"]:focus-visible {
+    outline: none;
+}
+.akl-controls input[type="range"]:focus-visible::-webkit-slider-thumb,
+.akl-toolbar input[type="range"]:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 3px rgba(70, 102, 119, 0.3);
+}
+.akl-controls input[type="range"]:focus-visible::-moz-range-thumb,
+.akl-toolbar input[type="range"]:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 3px rgba(70, 102, 119, 0.3);
+}
+
+/* The K slider is compact (overrides the shared width: 100% above). */
+.akl-toolbar input[type="range"] {
+    width: 150px;
+    flex: none;
+}
+
+/* Tick labels are absolutely positioned by JS at the thumb-center
+   position of each snap. */
+.akl-slider-ticks {
+    position: relative;
+    height: 1.2em;
+    font-size: 0.8em;
+    color: #999;
+    line-height: 1.1;
+}
+.akl-slider-ticks span {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+/* Defensive: if Pandoc paragraph-wraps loose inline content inside the
+   controls, neutralize the paragraph margins. */
+.akl-controls p {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
