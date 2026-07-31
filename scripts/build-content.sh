@@ -33,7 +33,12 @@ build_one() {
   local lastmod
   lastmod=$(stat -f '%Sm' -t '%Y-%m-%d %H:%M' "$src" 2>/dev/null || date -r "$src" '+%Y-%m-%d %H:%M' 2>/dev/null || echo "")
   local extra_flags=""
-  head -30 "$src" | grep -q '^toc: *true' && extra_flags="--toc"
+  head -30 "$src" | grep -q '^toc: *true' && extra_flags="$extra_flags --toc"
+  # `unlisted: true` keeps a post out of the blog listing (see build-index.lua);
+  # the noindex header keeps it out of search results, so the URL is
+  # shareable-by-link without the page becoming publicly discoverable.
+  head -30 "$src" | grep -q '^unlisted: *true' && \
+    extra_flags="$extra_flags --include-in-header templates/noindex.html"
   echo "Build: $src"
   pandoc "$src" $PANDOC_COMMON $FILTER_FLAGS $extra_flags --metadata last-modified="$lastmod" -o "$dest"
 }

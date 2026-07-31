@@ -58,6 +58,30 @@ highlighted: true
 
 Posts tagged `paper` or `dissertation` typically get this.
 
+### Unlisted posts
+
+To deploy a post without linking it from the blog listing — e.g. to share a
+work-in-progress with a few people before it goes live — add:
+
+```yaml
+unlisted: true
+```
+
+The page builds and deploys at its normal URL (`/posts/<slug>/`), so the link
+works for anyone you send it to, but it doesn't appear on `/posts/` and it gets
+a `<meta name="robots" content="noindex, nofollow">` header so search engines
+skip it. Nothing else about the page changes. Delete the line and redeploy to
+make it a real post.
+
+Two caveats: the URL is guessable, and the markdown source is public on the
+`source` branch — this is "not advertised", not "private". For something less
+guessable, give the file a random-ish slug while it's unlisted (the URL changes
+when you rename it later).
+
+Compare `published: false`, which is for drafts that shouldn't be reachable at
+all — it also hides the post from the listing, but the page is still built, so
+prefer `unlisted: true` when you actually want to share the link.
+
 ### Tags
 
 Preserve tags for categorization. Use inline list format:
@@ -308,7 +332,7 @@ The listing page at `/posts.html` is auto-generated from post front matter by `s
 pandoc lua scripts/build-index.lua
 ```
 
-The script scans `content/posts/` and `content/explorations/`, reads front matter, and writes `_generated/posts.md`.
+The script scans `content/posts/` and `content/explorations/`, reads front matter, and writes `_generated/posts.md`. Posts with `unlisted: true` or `published: false` are skipped (see [Unlisted posts](#unlisted-posts)).
 
 ## Adding a publication
 

@@ -108,7 +108,11 @@ local function collect_entries(dir)
       local text = system.read_file(path)
       if text then
         local meta = parse_front_matter(text)
-        if meta and meta.published ~= false then
+        -- Two ways to stay out of the listing: `published: false` (draft,
+        -- shouldn't exist as a page at all) and `unlisted: true` (page is
+        -- built and deployed at its normal URL, shareable by link, just not
+        -- advertised here — see build-content.sh for the noindex header).
+        if meta and meta.published ~= false and meta.unlisted ~= true then
           local raw_slug = name:gsub("%.md$", "")
           local clean_slug = strip_date(raw_slug)
           local entry = {
