@@ -180,8 +180,8 @@ At the other end, the approach to the prior is slow: $\alpha_\beta - \Z \approx 
 </div>
 </div>
 
-As you slide $\beta$ between $0$ and $\infty$, note how the mixture weight $\alpha$ interpolates between $1$ and $Z$.^[{-} `<canvas id="cv-akl-alpha" class="akl-alpha-canvas"></canvas>`{=html} *Live: $\alpha_\beta$ as a function of $\beta$ (log scale), for the $\Z$ currently configured in the visualization. The dot marks the selected $\beta$ (drag it --- it's the same $\beta$ as the slider); the dotted curve is the small-$\beta$ approximation $1 - \frac{1-\Z}{\Z}\,e^{-1/\beta}$; the dashed line is $\Z$, the $\beta \to \infty$ limit.*]
-Equivalently, in the geometry of the mixture: every anchored optimum lives on the segment between the posterior and the antiposterior; the prior sits on it at weight $\Z$, and raising $\beta$ slides the dot --- the optimum --- rightward from the posterior toward the prior, never past it (this dot is draggable too):
+As you slide $\beta$ between $0$ and $\infty$, mixture weight $\alpha_\beta$ interpolates between $1$ and $Z$.^[{-} `<canvas id="cv-akl-alpha" class="akl-alpha-canvas"></canvas>`{=html} *Live: $\alpha_\beta$ as a function of $\beta$ (log scale), for the $\Z$ currently configured in the visualization. The dot marks the selected $\beta$ (drag it --- it's the same $\beta$ as the slider); the dotted curve is the small-$\beta$ approximation $1 - \frac{1-\Z}{\Z}\,e^{-1/\beta}$; the dashed line is $\Z$, the $\beta \to \infty$ limit.*]
+In the geometry of the mixture, the optimum $\proposal^\star_\beta$ lives on the segment between the posterior and the antiposterior. [Recall $\proposal^\star_\beta =\alpha_\beta\,\vposterior + (1 - \alpha_\beta)\,\antiposterior$.] Raising $\beta$ slides the optimum from the posterior toward the prior (at $\beta=\infty$ weight $\alpha_\beta=\Z$, the $\proposal^\star_\beta = \prior = \Z\,\vposterior + (1 - \Z)\,\antiposterior$).
 
 ::: {.viz #cv-akl-segment canvas="true" height="90px" width="100%"}
 :::
