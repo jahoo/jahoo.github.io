@@ -40,7 +40,10 @@ $endfor$
 MathJax = {
   tex: {
     inlineMath: [['\\(', '\\)'], ['$$', '$$']],
-    displayMath: [['\\[', '\\]'], ['$$$$', '$$$$']]
+    displayMath: [['\\[', '\\]'], ['$$$$', '$$$$']],
+    // AMS-style numbering: only {equation}/{align} environments get
+    // numbers, so ordinary $$ displays stay untagged.
+    tags: 'ams'
 $if(mathjax-macros-json)$
     , macros: $mathjax-macros-json$
 $endif$

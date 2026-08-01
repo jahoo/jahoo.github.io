@@ -13,16 +13,17 @@ mathjax-macros: assets/anchored-kl/macros.json
 
 *What distribution does forward-KL training actually aim at, if you include a reverse-KL-to-the-prior regularization term?*
 
-Suppose we're interested in training a distribution $\proposal$ to be like a target distribution $\posterior$, defined as a prior distribution $\prior$ shaped by a potential function $\potential \ge 0$ as:
+Suppose we're interested in training a probability distribution $\proposal(\str)$ to be like a target distribution $\posterior(\str)$, in a posterior inference setting, where that target (posterior) is defined as *prior* $\prior$ shaped by a *potential* (likelihood) function $\potential \ge 0$. That is,
 $$
 \posterior(\str) \defeq \frac{\prior(\str)\,\potential(\str)}{\Z},
 \qquad
 \Z \defeq \sum_{\str} \prior(\str)\,\potential(\str).
 $$
-We have access to $\prior$ and $\potential$, but not to the normalized $\posterior$, and we're trying to learn a proposal distribution $\proposal$ to minimize the forward KL divergence
+We'll suppose we have access to $\prior$ and $\potential$, but not to the normalized $\posterior$, and we're trying to learn $\proposal$ to minimize the forward KL divergence
 $$
 \KL{\posterior}{\proposal}.
 $$
+
 In an unconstrained setting, that's obviously minimized at $\proposal = \posterior$. But, if learning dynamics make this unstable to approach,^[TODO: flesh out why that might be the case. For now, just take it as a fact.] one thing that has worked in practice is to instead minimize the objective with a reverse-KL regularizer penalizing a proposal that strays from the prior:
 $$
 \mathcal{L}_\beta(\proposal) \defeq \KL{\posterior}{\proposal} + \beta\,\KL{\proposal}{\prior},
@@ -32,9 +33,9 @@ $$
 $$
 \proposal^\star_\beta \defeq \operatorname{argmin}_{\proposal}\, \mathcal{L}_\beta(\proposal).
 $$
-What distribution is this? Well, one thing that's immediately clear is that if $\beta = 0$, we return to the un-regularized setting, and the optimal proposal $\proposal^\star_\beta = \posterior$.^[And of course, in the other extreme  $\proposal^\star_\beta\to\prior$ as $\beta\to\infty$.] What is the solution when $\beta$ is something in between?
+The question that motivates this note is: **What distribution is this $\proposal^\star_\beta$?** Well, one thing that's immediately clear is, at $\beta = 0$ we return to the un-regularized setting, and $\proposal^\star_\beta = \posterior$.^[And of course, in the other extreme  $\proposal^\star_\beta\to\prior$ as $\beta\to\infty$.] What is the solution for general $\beta \in (0, \infty)$?
 
-# A binary potential
+# With a binary potential
 
 Assume for now that the potential $\potential$ is a **binary** function: It partitions the support of $\prior$ into two bins---the set $\valid \defeq \{\str : \potential(\str) = 1\}$ of *valid* elements, and its complement, $\validc$, the *invalid* ones, where $\potential = 0$.  Our posterior inference problem is then one of **conditioning on the event of validity**, with $\Z = \prior(\valid)$ being the total probability of the valid set under the prior.
 
@@ -57,15 +58,15 @@ Why must the optimum lie on this segment? To see, think of describing the distri
 - on $\validc$, only the anchor has a preference, namely it pulls toward $\antiposterior$. 
 
 So the optimum solution matches both bin shapes exactly --- which is just to say it lies on the segment. All that's left to decide is the single number $\alpha$: how much weight to put on the valid set. And *here* the two terms of the objective genuinely disagree: the forward KL wants $\alpha$ pushed all the way up to $1$ (the posterior's value), while the anchor wants it held down at $\Z$ (the prior's). Balancing them is a one-variable calculus problem (worked out in the folded derivation below), and its solution --- the optimal weight --- is the value $\alpha_\beta$ satisfying
-$$
+\begin{equation}\label{eq:alpha-fixed-point}
 \alpha_\beta = \frac{\Z}{\Z + e^{-1/(\alpha_\beta \beta)}\,(1 - \Z)}.
-$$
+\end{equation}
 The weight appears on both sides of this equation, but consistently so: the right-hand side is continuous and strictly decreasing in $\alpha_\beta$, so exactly one value satisfies it.^[This is also how the visualization below computes $\alpha_\beta$: bisection on the difference between the two sides of this equation, which changes sign exactly once on $(\Z, 1)$.]
 
 <details style="font-size:0.9em; margin:0.3em 0 1.2em;">
 <summary style="cursor:pointer; color:#444;">Derivation of the optimum $\proposal^\star_\beta$</summary>
 
-**Goal.** Minimize $\mathcal{L}_\beta(\proposal) = \KL{\vposterior}{\proposal} + \beta\,\KL{\proposal}{\prior}$ over all distributions $\proposal$ on the support of the prior, and show that the minimizer is the mixture $\alpha_\beta\,\vposterior + (1 - \alpha_\beta)\,\antiposterior$, with the weight $\alpha_\beta$ given by the fixed-point equation of the main text.
+**Goal.** Minimize $\mathcal{L}_\beta(\proposal) = \KL{\vposterior}{\proposal} + \beta\,\KL{\proposal}{\prior}$ over all distributions $\proposal$ on the support of the prior, and show that the minimizer is the mixture $\alpha_\beta\,\vposterior + (1 - \alpha_\beta)\,\antiposterior$, with the weight $\alpha_\beta$ given by $\eqref{eq:alpha-fixed-point}$ of the main text.
 
 **Step 1: reduce to the segment.** Write $\alpha \defeq \proposal(\valid)$. Both KL terms decompose over the partition $\{\valid, \validc\}$ (the chain rule for KL: the divergence between the bin masses, plus the mass-weighted divergences within bins):
 
@@ -188,34 +189,42 @@ describing the segment point at the fixed-point weight, as claimed.
 </details>
 
 <details style="font-size:0.9em; margin:0.3em 0 1.2em;">
-<summary style="cursor:pointer; color:#444;">Aside: solving the fixed point in closed form (Lambert $W$)</summary>
+<summary style="cursor:pointer; color:#444;">Aside: Solving the fixed point in closed form (with the Lambert $W$)</summary>
 
-The fixed point is transcendental --- no *elementary* closed form exists --- but it does untangle into the **Lambert $W$ function**, the inverse of $w \mapsto w\,e^{w}$. Substitute $x \defeq 1/\alpha_\beta$ and clear the denominator:
+Equation $\eqref{eq:alpha-fixed-point}$ is transcendental---no 'elementary' closed form solution for $\alpha_\beta$ exists, but it does untangle into the [**Lambert $W$ function**](https://en.wikipedia.org/wiki/Lambert_W_function), the inverse of $w \mapsto w\,e^{w}$:
 
 $$
 \begin{aligned}
-(x - 1)\, e^{x/\beta}
+\Bigl(\frac{1}{\alpha_\beta} - 1\Bigr)\, e^{1/(\alpha_\beta \beta)}
 &= \frac{1-\Z}{\Z}
-&& \explain{substitute $x = 1/\alpha_\beta$; rearrange}
+&& \explain{rearrange $\eqref{eq:alpha-fixed-point}$}
+\\[6pt]
+\bigl(\frac{1}{\alpha_\beta} - 1\bigr)\frac{1}{\beta}\; e^{(\frac{1}{\alpha_\beta} - 1)\frac{1}{\beta}}
+&= \frac{1-\Z}{\Z\,\beta}\; e^{-1/\beta}
+&& \explain{divide both sides by $\beta\, e^{1/\beta}$}
 \\[6pt]
 s\, e^{s}
 &= \frac{1-\Z}{\Z\,\beta}\; e^{-1/\beta}
-&& \explain{$s \defeq (x - 1)/\beta$; divide by $\beta\, e^{1/\beta}$}
+&& \explain{let $s \defeq \bigl(\frac{1}{\alpha_\beta} - 1\bigr)\frac{1}{\beta}$}
+\\[6pt]
+s
+&= W_0\!\Bigl(\frac{1-\Z}{\Z\,\beta}\, e^{-1/\beta}\Bigr)
+&& \explain{invert $s \mapsto s\,e^{s}$}
 \\[6pt]
 \alpha_\beta
 &= \frac{1}{1 + \beta\, W_0\!\Bigl(\dfrac{1-\Z}{\Z\,\beta}\, e^{-1/\beta}\Bigr)}
-&& \explain{$s = W_0(\cdot)$; invert $x = 1 + \beta s$}
+&& \explain{solve for $\alpha_\beta$}
 \end{aligned}
 $$
 
-The argument of $W$ is positive, so this lands on the principal branch $W_0$, where the solution is unique --- the same uniqueness that strict convexity of $f$ gave above. And since the argument tends to $0$ at *both* ends of the $\beta$ axis, the two asymptotic regimes of the next aside fall out of the single expansion $W_0(u) \approx u$: as $\beta \to 0$, $1 - \alpha_\beta \approx \beta\,W_0(\cdot) \approx \frac{1-\Z}{\Z}\, e^{-1/\beta}$; as $\beta \to \infty$, $\beta\,W_0(\cdot) \to \frac{1-\Z}{\Z}$, so $\alpha_\beta \to \Z$ (and the next order gives $\alpha_\beta - \Z \approx (1-\Z)/\beta$).
+The argument of $W$ is positive, so this lands on the principal branch $W_0$, where the solution is unique (the same uniqueness that strict convexity of $f$ gave above).
 
 </details>
 
 <details style="font-size:0.9em; margin:0.3em 0 1.2em;">
-<summary style="cursor:pointer; color:#444;">Aside: how the weight $\alpha_\beta$ moves with $\beta$</summary>
+<summary style="cursor:pointer; color:#444;">Aside: How the weight $\alpha_\beta$ moves with $\beta$</summary>
 
-It slides monotonically from $1$ at $\beta = 0$ (recovering $\vposterior$) down to $\Z$ as $\beta \to \infty$ (recovering $\prior$, which sits on the same segment at weight $\Z$) --- but very asymmetrically. The fixed-point equation says the *odds* of invalidity under the optimum are the prior odds, discounted:
+It slides monotonically from $1$ at $\beta = 0$ (recovering $\vposterior$) down to $\Z$ as $\beta \to \infty$ (recovering $\prior$, which sits on the same segment at weight $\Z$) --- but very asymmetrically. Equation $\eqref{eq:alpha-fixed-point}$ says the *odds* of invalidity under the optimum are the prior odds, discounted:
 $$
 \frac{1 - \alpha_\beta}{\alpha_\beta} \;=\; e^{-1/(\alpha_\beta \beta)}\; \frac{1-\Z}{\Z}.
 $$
@@ -224,11 +233,15 @@ $$
 1 - \alpha_\beta \;\approx\; \frac{1 - \Z}{\Z}\, e^{-1/\beta}
 \qquad (\beta \to 0).
 $$
-At the other end, the approach to the prior is slow: $\alpha_\beta - \Z \approx (1 - \Z)/\beta$ as $\beta \to \infty$.
+At the other end, the approach to the prior is slow: $\alpha_\beta - \Z \approx (1 - \Z)\frac{1}{\beta}$ as $\beta \to \infty$.
+
+Both regimes also fall out of the closed form of the previous aside in a single stroke: the argument of $W_0$ tends to $0$ at *both* ends of the $\beta$ axis, so the one expansion $W_0(u) \approx u$ covers them --- as $\beta \to 0$, $1 - \alpha_\beta \approx \beta\,W_0(\cdot) \approx \frac{1-\Z}{\Z}\, e^{-1/\beta}$, recovering the approximation above; and as $\beta \to \infty$, $\beta\,W_0(\cdot) \to \frac{1-\Z}{\Z}$, so $\alpha_\beta \to \Z$, with $\alpha_\beta - \Z \approx (1 - \Z)\frac{1}{\beta}$ at the next order.
 
 </details>
 
-**TL;DR**: Raising $\beta$ conditions *softly*: conditioned on being valid, the anchored optimum *is* the posterior, for every $\beta$ --- the entire cost of the anchor is the vestigial invalid mass $1 - \alpha_\beta$, and even that is spent antiposterior-shaped, i.e., still proportionally to the prior. And since $\alpha_\beta \in (\Z, 1)$ strictly, the optimum always sits properly between the two distributions we care about: it conditions less sharply than the posterior, but never relaxes past the prior.
+**TL;DR**: 
+Sliding $\beta$ from zero toward infinity, scales $\alpha_\beta$ from $1$ down toward $\Z$.
+As $\beta$ increases, essentially softens the condition on validity in the optimum solution. For small $\beta$, the mass on the invalid set is *exponentially* small (so the optimum remains practially identical to the posterior), while at the other extreme, for very large $\beta$ the optimum approaches the prior only slowly.^[More precisely at the small-$\beta$ end $$1 - \alpha_\beta \approx \frac{1-\Z}{\Z}\, e^{-1/\beta}$$ and at the other end, $$\alpha_\beta - \Z \approx (1 - \Z)\frac{1}{\beta}$$$ (both of these approximations are worked out in the asides above; and the small-$\beta$ approximation is the dotted curve in the margin plot below).]
 
 # Interactive visualization
 
@@ -266,15 +279,17 @@ In the geometry of the mixture, the optimum $\proposal^\star_\beta$ lives on the
 
 # A continuous potential
 
-Next, let's explore how this works with a continuous $\potential$ rather than a binary one. Now we can think of the problem, rather than as conditioning on the event of $V$ being true, as computing the posterior given the *likelihood* of $V$, as a random variable. That is, it's really the same setting as above --- but where above we assumed validity was a deterministic function of $\str$, here we let it be a random variable, with a likelihood $\Pr(V \mid \str)$ that takes values anywhere in $[0, 1]$, rather than only in $\{0, 1\}$.
+Next, let's explore how this works with a continuous $\potential$ rather than a binary one. It's really the same setting as above, but where above we assumed validity was a deterministic function of $\str$, here we let validity be a binary random variable $V$, with likelihood function $\str\mapsto\Pr(V=\mathtt{true} \mid \str)$ that takes values anywhere in $[0, 1]$, rather than only in $\{0, 1\}$.^[Requiring $\potential \le 1$ costs nothing relative to the intro's general $\potential \ge 0$: scaling the potential by a positive constant changes neither the posterior nor the anchored optimum (the objective depends on $\potential$ only through $\posterior$), so any bounded potential can be rescaled into $[0, 1]$.]
 
-In this more general setting the two-bin structure is gone --- there is no event to condition on, and no posterior--antiposterior segment --- so we'll need a *per-element* description of the optimum instead. Here is the binary-case optimum from above, rewritten element by element:
+In this more general setting the two-bin structure is gone: Validity no longer sharply partitions the support into valid and invalid regions. Any given $\str$ may be valid with some probability, so there is no valid set to restrict to, and no posterior--antiposterior segment. We'll need a *per-element* description of the optimum instead. 
+
+Here is the binary-case optimum from above, rewritten element by element:
 $$
 \proposal^\star_\beta(\str) \;\propto\; \prior(\str)\,\max\{\potential(\str),\, \varepsilon_\beta\},
 \qquad
 \varepsilon_\beta \defeq e^{-1/(\alpha_\beta \beta)},
 $$
-with $\alpha_\beta$ the mixture weight from before (and $\varepsilon_\beta \approx e^{-1/\beta}$, since $\alpha_\beta$ is close to $1$ for small $\beta$). Read this way, the anchored optimum is itself the *exact* posterior of a modified inference problem: the same prior, with the potential *softened* by flooring it at $\varepsilon_\beta$. Where conditioning multiplies invalid elements' prior mass by $0$, anchoring multiplies it by $\varepsilon_\beta$ --- violating the constraint costs $\log(1/\varepsilon_\beta) = 1/(\alpha_\beta\beta)$ nats, instead of $\infty$.
+with $\alpha_\beta$ the mixture weight from before (and $\varepsilon_\beta \approx e^{-1/\beta}$, since $\alpha_\beta$ is close to $1$ for small $\beta$). Read this way, the anchored optimum is itself the *exact* posterior of a modified inference problem: Take the same prior, use a *softened* potential, defined by flooring it at $\varepsilon_\beta$. Where hard conditioning multiplies invalid elements' prior mass by $0$, anchoring multiplies it by $\varepsilon_\beta$.^[In log space, a multiplicative factor is an additive penalty: multiplying an element's mass by $\varepsilon_\beta$ shifts its log-probability down by $\log(1/\varepsilon_\beta) = 1/(\alpha_\beta\beta)$ nats, relative to the prior (before renormalization). So being invalid is no longer *forbidden* (an infinite log-penalty, mass multiplied by $0$) but comes at a cost of $1/(\alpha_\beta\beta)$ nats: This price blows up as $\beta \to 0$ (recovering hard conditioning) and vanishes as $\beta \to \infty$ (leaving the prior untouched).]
 
 <details style="font-size:0.9em; margin:0.3em 0 1.2em;">
 <summary style="cursor:pointer; color:#444;">Derivation: minimizing $\mathcal{L}_\beta$ pointwise, via the Lagrangian</summary>
