@@ -29,7 +29,10 @@
 MathJax = {
   tex: {
     inlineMath: [['\\(', '\\)'], ['$', '$']],
-    displayMath: [['\\[', '\\]'], ['$$', '$$']]
+    displayMath: [['\\[', '\\]'], ['$$', '$$']],
+    // AMS-style numbering: only {equation}/{align} environments get
+    // numbers, so ordinary $ displays stay untagged.
+    tags: 'ams'
     , macros: { "state": "s", "rstate": "\\widetilde{\\state}", "target": "\\pi", "impwt": "\\rho", "normwt": "w", "np": "N", "cnt": "M", "gen": "{\\mathcal{G}}", "E": "{\\mathbb{E}}", "Var": "\\operatorname{Var}", "cdf": "F", "invcdf": "{F^{-1}}", "probe": "x", "resid": "\\widetilde{\\normwt}", "idx": "i" }
   },
   options: {

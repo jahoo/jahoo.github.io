@@ -28,7 +28,10 @@
 MathJax = {
   tex: {
     inlineMath: [['\\(', '\\)'], ['$', '$']],
-    displayMath: [['\\[', '\\]'], ['$$', '$$']]
+    displayMath: [['\\[', '\\]'], ['$$', '$$']],
+    // AMS-style numbering: only {equation}/{align} environments get
+    // numbers, so ordinary $ displays stay untagged.
+    tags: 'ams'
   },
   options: {
     // Disable click-to-explore on math. Without these, clicking on a

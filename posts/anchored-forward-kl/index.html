@@ -29,7 +29,10 @@
 MathJax = {
   tex: {
     inlineMath: [['\\(', '\\)'], ['$', '$']],
-    displayMath: [['\\[', '\\]'], ['$$', '$$']]
+    displayMath: [['\\[', '\\]'], ['$$', '$$']],
+    // AMS-style numbering: only {equation}/{align} environments get
+    // numbers, so ordinary $ displays stay untagged.
+    tags: 'ams'
     , macros: { "str": "{\\boldsymbol{y}}", "prior": "p", "posterior": "\\pi", "vposterior": "{\\textcolor[RGB]{41,128,185}{\\pi}}", "antiposterior": "{\\textcolor[RGB]{192,57,43}{\\style{display:inline-block;transform:rotate(180deg)}{\\pi}}}", "proposal": "q", "potential": "r", "valid": "{\\textcolor[RGB]{41,128,185}{\\mathcal{V}}}", "validc": "{\\textcolor[RGB]{192,57,43}{\\mathcal{V}^{\\mathsf{c}}}}", "Z": "Z", "DKL": "{D_{\\mathrm{KL}}}", "KL": ["\\DKL(#1\\,\\|\\,#2)", 2], "defeq": "\\triangleq", "explain": [ "{\\color{gray}[\\textit{#1}]}", 1 ] }
   },
   options: {
@@ -99,25 +102,28 @@ regularization</h1>
 <main>
 <p><em>What distribution does forward-KL training actually aim at, if
 you include a reverse-KL-to-the-prior regularization term?</em></p>
-<p>Suppose we’re interested in training a distribution <span
-class="math inline">\(\proposal\)</span> to be like a target
-distribution <span class="math inline">\(\posterior\)</span>, defined as
-a prior distribution <span class="math inline">\(\prior\)</span> shaped
-by a potential function <span class="math inline">\(\potential \ge
-0\)</span> as: <span class="math display">\[
+<p>Suppose we’re interested in training a probability distribution <span
+class="math inline">\(\proposal(\str)\)</span> to be like a target
+distribution <span class="math inline">\(\posterior(\str)\)</span>, in a
+posterior inference setting, where that target (posterior) is defined as
+<em>prior</em> <span class="math inline">\(\prior\)</span> shaped by a
+<em>potential</em> (likelihood) function <span
+class="math inline">\(\potential \ge 0\)</span>. That is, <span
+class="math display">\[
 \posterior(\str) \defeq \frac{\prior(\str)\,\potential(\str)}{\Z},
 \qquad
 \Z \defeq \sum_{\str} \prior(\str)\,\potential(\str).
-\]</span> We have access to <span class="math inline">\(\prior\)</span>
-and <span class="math inline">\(\potential\)</span>, but not to the
-normalized <span class="math inline">\(\posterior\)</span>, and we’re
-trying to learn a proposal distribution <span
-class="math inline">\(\proposal\)</span> to minimize the forward KL
-divergence <span class="math display">\[
+\]</span> We’ll suppose we have access to <span
+class="math inline">\(\prior\)</span> and <span
+class="math inline">\(\potential\)</span>, but not to the normalized
+<span class="math inline">\(\posterior\)</span>, and we’re trying to
+learn <span class="math inline">\(\proposal\)</span> to minimize the
+forward KL divergence <span class="math display">\[
 \KL{\posterior}{\proposal}.
-\]</span> In an unconstrained setting, that’s obviously minimized at
-<span class="math inline">\(\proposal = \posterior\)</span>. But, if
-learning dynamics make this unstable to approach,<span
+\]</span></p>
+<p>In an unconstrained setting, that’s obviously minimized at <span
+class="math inline">\(\proposal = \posterior\)</span>. But, if learning
+dynamics make this unstable to approach,<span
 class="sidenote-wrapper"><label for="sn-0" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-0" class="margin-toggle"/><span
 class="sidenote">TODO: flesh out why that might be the case. For now,
 just take it as a fact.<br />
@@ -142,19 +148,21 @@ to the prior, to some optimum proposal, denoted as <span
 class="math display">\[
 \proposal^\star_\beta \defeq \operatorname{argmin}_{\proposal}\,
 \mathcal{L}_\beta(\proposal).
-\]</span> What distribution is this? Well, one thing that’s immediately
-clear is that if <span class="math inline">\(\beta = 0\)</span>, we
-return to the un-regularized setting, and the optimal proposal <span
+\]</span> The question that motivates this note is: <strong>What
+distribution is this <span
+class="math inline">\(\proposal^\star_\beta\)</span>?</strong> Well, one
+thing that’s immediately clear is, at <span class="math inline">\(\beta
+= 0\)</span> we return to the un-regularized setting, and <span
 class="math inline">\(\proposal^\star_\beta = \posterior\)</span>.<span
 class="sidenote-wrapper"><label for="sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-2" class="margin-toggle"/><span
 class="sidenote">And of course, in the other extreme <span
 class="math inline">\(\proposal^\star_\beta\to\prior\)</span> as <span
 class="math inline">\(\beta\to\infty\)</span>.<br />
 <br />
-</span></span> What is the solution when <span
-class="math inline">\(\beta\)</span> is something in between?</p>
-<section id="a-binary-potential" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> A
+</span></span> What is the solution for general <span
+class="math inline">\(\beta \in (0, \infty)\)</span>?</p>
+<section id="with-a-binary-potential" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> With a
 binary potential</h1>
 <p>Assume for now that the potential <span
 class="math inline">\(\potential\)</span> is a <strong>binary</strong>
@@ -243,12 +251,14 @@ anchor wants it held down at <span class="math inline">\(\Z\)</span>
 (the prior’s). Balancing them is a one-variable calculus problem (worked
 out in the folded derivation below), and its solution — the optimal
 weight — is the value <span class="math inline">\(\alpha_\beta\)</span>
-satisfying <span class="math display">\[
+satisfying <span
+class="math display">\[\begin{equation}\label{eq:alpha-fixed-point}
 \alpha_\beta = \frac{\Z}{\Z + e^{-1/(\alpha_\beta \beta)}\,(1 - \Z)}.
-\]</span> The weight appears on both sides of this equation, but
-consistently so: the right-hand side is continuous and strictly
-decreasing in <span class="math inline">\(\alpha_\beta\)</span>, so
-exactly one value satisfies it.<span
+\end{equation}\]</span> The weight appears on both sides of this
+equation, but consistently so: the right-hand side is continuous and
+strictly decreasing in <span
+class="math inline">\(\alpha_\beta\)</span>, so exactly one value
+satisfies it.<span
 class="sidenote-wrapper"><label for="sn-4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-4" class="margin-toggle"/><span
 class="sidenote">This is also how the visualization below computes <span
 class="math inline">\(\alpha_\beta\)</span>: bisection on the difference
@@ -268,8 +278,9 @@ over all distributions <span class="math inline">\(\proposal\)</span> on
 the support of the prior, and show that the minimizer is the mixture
 <span class="math inline">\(\alpha_\beta\,\vposterior + (1 -
 \alpha_\beta)\,\antiposterior\)</span>, with the weight <span
-class="math inline">\(\alpha_\beta\)</span> given by the fixed-point
-equation of the main text.</p>
+class="math inline">\(\alpha_\beta\)</span> given by <span
+class="math inline">\(\eqref{eq:alpha-fixed-point}\)</span> of the main
+text.</p>
 <p><strong>Step 1: reduce to the segment.</strong> Write <span
 class="math inline">\(\alpha \defeq \proposal(\valid)\)</span>. Both KL
 terms decompose over the partition <span class="math inline">\(\{\valid,
@@ -461,26 +472,32 @@ claimed.</p>
 </details>
 <details style="font-size:0.9em; margin:0.3em 0 1.2em;">
 <summary style="cursor:pointer; color:#444;">
-Aside: solving the fixed point in closed form (Lambert <span
+Aside: Solving the fixed point in closed form (with the Lambert <span
 class="math inline">\(W\)</span>)
 </summary>
-<p>The fixed point is transcendental — no <em>elementary</em> closed
-form exists — but it does untangle into the <strong>Lambert <span
-class="math inline">\(W\)</span> function</strong>, the inverse of <span
-class="math inline">\(w \mapsto w\,e^{w}\)</span>:</p>
+<p>Equation <span
+class="math inline">\(\eqref{eq:alpha-fixed-point}\)</span> is
+transcendental—no ‘elementary’ closed form solution for <span
+class="math inline">\(\alpha_\beta\)</span> exists, but it does untangle
+into the <a
+href="https://en.wikipedia.org/wiki/Lambert_W_function"><strong>Lambert
+<span class="math inline">\(W\)</span> function</strong></a>, the
+inverse of <span class="math inline">\(w \mapsto w\,e^{w}\)</span>:</p>
 <p><span class="math display">\[
 \begin{aligned}
 \Bigl(\frac{1}{\alpha_\beta} - 1\Bigr)\, e^{1/(\alpha_\beta \beta)}
 &amp;= \frac{1-\Z}{\Z}
-&amp;&amp; \explain{rearrange the fixed point}
+&amp;&amp; \explain{rearrange $\eqref{eq:alpha-fixed-point}$}
 \\[6pt]
-\frac{1/\alpha_\beta - 1}{\beta}\; e^{(1/\alpha_\beta - 1)/\beta}
+\bigl(\frac{1}{\alpha_\beta} - 1\bigr)\frac{1}{\beta}\;
+e^{(\frac{1}{\alpha_\beta} - 1)\frac{1}{\beta}}
 &amp;= \frac{1-\Z}{\Z\,\beta}\; e^{-1/\beta}
 &amp;&amp; \explain{divide both sides by $\beta\, e^{1/\beta}$}
 \\[6pt]
 s\, e^{s}
 &amp;= \frac{1-\Z}{\Z\,\beta}\; e^{-1/\beta}
-&amp;&amp; \explain{$s \defeq \bigl(1/\alpha_\beta - 1\bigr)/\beta$}
+&amp;&amp; \explain{let $s \defeq \bigl(\frac{1}{\alpha_\beta} -
+1\bigr)\frac{1}{\beta}$}
 \\[6pt]
 s
 &amp;= W_0\!\Bigl(\frac{1-\Z}{\Z\,\beta}\, e^{-1/\beta}\Bigr)
@@ -494,25 +511,13 @@ e^{-1/\beta}\Bigr)}
 \]</span></p>
 <p>The argument of <span class="math inline">\(W\)</span> is positive,
 so this lands on the principal branch <span
-class="math inline">\(W_0\)</span>, where the solution is unique — the
+class="math inline">\(W_0\)</span>, where the solution is unique (the
 same uniqueness that strict convexity of <span
-class="math inline">\(f\)</span> gave above. And since the argument
-tends to <span class="math inline">\(0\)</span> at <em>both</em> ends of
-the <span class="math inline">\(\beta\)</span> axis, the two asymptotic
-regimes of the next aside fall out of the single expansion <span
-class="math inline">\(W_0(u) \approx u\)</span>: as <span
-class="math inline">\(\beta \to 0\)</span>, <span
-class="math inline">\(1 - \alpha_\beta \approx \beta\,W_0(\cdot) \approx
-\frac{1-\Z}{\Z}\, e^{-1/\beta}\)</span>; as <span
-class="math inline">\(\beta \to \infty\)</span>, <span
-class="math inline">\(\beta\,W_0(\cdot) \to \frac{1-\Z}{\Z}\)</span>, so
-<span class="math inline">\(\alpha_\beta \to \Z\)</span> (and the next
-order gives <span class="math inline">\(\alpha_\beta - \Z \approx
-(1-\Z)/\beta\)</span>).</p>
+class="math inline">\(f\)</span> gave above).</p>
 </details>
 <details style="font-size:0.9em; margin:0.3em 0 1.2em;">
 <summary style="cursor:pointer; color:#444;">
-Aside: how the weight <span class="math inline">\(\alpha_\beta\)</span>
+Aside: How the weight <span class="math inline">\(\alpha_\beta\)</span>
 moves with <span class="math inline">\(\beta\)</span>
 </summary>
 <p>It slides monotonically from <span class="math inline">\(1\)</span>
@@ -522,9 +527,10 @@ class="math inline">\(\Z\)</span> as <span class="math inline">\(\beta
 \to \infty\)</span> (recovering <span
 class="math inline">\(\prior\)</span>, which sits on the same segment at
 weight <span class="math inline">\(\Z\)</span>) — but very
-asymmetrically. The fixed-point equation says the <em>odds</em> of
-invalidity under the optimum are the prior odds, discounted: <span
-class="math display">\[
+asymmetrically. Equation <span
+class="math inline">\(\eqref{eq:alpha-fixed-point}\)</span> says the
+<em>odds</em> of invalidity under the optimum are the prior odds,
+discounted: <span class="math display">\[
 \frac{1 - \alpha_\beta}{\alpha_\beta} \;=\; e^{-1/(\alpha_\beta
 \beta)}\; \frac{1-\Z}{\Z}.
 \]</span> For small <span class="math inline">\(\beta\)</span> (where
@@ -540,20 +546,47 @@ class="math display">\[
 1 - \alpha_\beta \;\approx\; \frac{1 - \Z}{\Z}\, e^{-1/\beta}
 \qquad (\beta \to 0).
 \]</span> At the other end, the approach to the prior is slow: <span
-class="math inline">\(\alpha_\beta - \Z \approx (1 - \Z)/\beta\)</span>
-as <span class="math inline">\(\beta \to \infty\)</span>.</p>
+class="math inline">\(\alpha_\beta - \Z \approx (1 -
+\Z)\frac{1}{\beta}\)</span> as <span class="math inline">\(\beta \to
+\infty\)</span>.</p>
+<p>Both regimes also fall out of the closed form of the previous aside
+in a single stroke: the argument of <span
+class="math inline">\(W_0\)</span> tends to <span
+class="math inline">\(0\)</span> at <em>both</em> ends of the <span
+class="math inline">\(\beta\)</span> axis, so the one expansion <span
+class="math inline">\(W_0(u) \approx u\)</span> covers them — as <span
+class="math inline">\(\beta \to 0\)</span>, <span
+class="math inline">\(1 - \alpha_\beta \approx \beta\,W_0(\cdot) \approx
+\frac{1-\Z}{\Z}\, e^{-1/\beta}\)</span>, recovering the approximation
+above; and as <span class="math inline">\(\beta \to \infty\)</span>,
+<span class="math inline">\(\beta\,W_0(\cdot) \to
+\frac{1-\Z}{\Z}\)</span>, so <span class="math inline">\(\alpha_\beta
+\to \Z\)</span>, with <span class="math inline">\(\alpha_\beta - \Z
+\approx (1 - \Z)\frac{1}{\beta}\)</span> at the next order.</p>
 </details>
-<p><strong>TL;DR</strong>: Raising <span
-class="math inline">\(\beta\)</span> conditions <em>softly</em>:
-conditioned on being valid, the anchored optimum <em>is</em> the
-posterior, for every <span class="math inline">\(\beta\)</span> — the
-entire cost of the anchor is the vestigial invalid mass <span
-class="math inline">\(1 - \alpha_\beta\)</span>, and even that is spent
-antiposterior-shaped, i.e., still proportionally to the prior. And since
-<span class="math inline">\(\alpha_\beta \in (\Z, 1)\)</span> strictly,
-the optimum always sits properly between the two distributions we care
-about: it conditions less sharply than the posterior, but never relaxes
-past the prior.</p>
+<p><strong>TL;DR</strong>: Sliding <span
+class="math inline">\(\beta\)</span> from zero toward infinity, scales
+<span class="math inline">\(\alpha_\beta\)</span> from <span
+class="math inline">\(1\)</span> down toward <span
+class="math inline">\(\Z\)</span>. As <span
+class="math inline">\(\beta\)</span> increases, essentially softens the
+condition on validity in the optimum solution. For small <span
+class="math inline">\(\beta\)</span>, the mass on the invalid set is
+<em>exponentially</em> small (so the optimum remains practially
+identical to the posterior), while at the other extreme, for very large
+<span class="math inline">\(\beta\)</span> the optimum approaches the
+prior only slowly.<span
+class="sidenote-wrapper"><label for="sn-5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-5" class="margin-toggle"/><span
+class="sidenote">More precisely at the small-<span
+class="math inline">\(\beta\)</span> end <span class="math display">\[1
+- \alpha_\beta \approx \frac{1-\Z}{\Z}\, e^{-1/\beta}\]</span> and at
+the other end, <span class="math display">\[\alpha_\beta - \Z \approx (1
+- \Z)\frac{1}{\beta}\]</span>$ (both of these approximations are worked
+out in the asides above; and the small-<span
+class="math inline">\(\beta\)</span> approximation is the dotted curve
+in the margin plot below).<br />
+<br />
+</span></span></p>
 </section>
 <section id="interactive-visualization" class="level1" data-number="2">
 <h1 data-number="2"><span class="header-section-number">2</span>
@@ -604,7 +637,7 @@ class="math inline">\(\infty\)</span>, mixture weight <span
 class="math inline">\(\alpha_\beta\)</span> interpolates between <span
 class="math inline">\(1\)</span> and <span
 class="math inline">\(Z\)</span>.<span
-class="sidenote-wrapper"><label for="sn-5" class="margin-toggle">&#8853;</label><input type="checkbox" id="sn-5" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-6" class="margin-toggle">&#8853;</label><input type="checkbox" id="sn-6" class="margin-toggle"/><span
 class="marginnote"><canvas id="cv-akl-alpha" class="akl-alpha-canvas"></canvas>
 <em>Live: <span class="math inline">\(\alpha_\beta\)</span> as a
 function of <span class="math inline">\(\beta\)</span> (log scale), for
@@ -634,22 +667,33 @@ class="math inline">\(\proposal^\star_\beta \to \prior = \Z\,\vposterior
 <h1 data-number="3"><span class="header-section-number">3</span> A
 continuous potential</h1>
 <p>Next, let’s explore how this works with a continuous <span
-class="math inline">\(\potential\)</span> rather than a binary one. Now
-we can think of the problem, rather than as conditioning on the event of
-<span class="math inline">\(V\)</span> being true, as computing the
-posterior given the <em>likelihood</em> of <span
-class="math inline">\(V\)</span>, as a random variable. That is, it’s
-really the same setting as above — but where above we assumed validity
+class="math inline">\(\potential\)</span> rather than a binary one. It’s
+really the same setting as above, but where above we assumed validity
 was a deterministic function of <span
-class="math inline">\(\str\)</span>, here we let it be a random
-variable, with a likelihood <span class="math inline">\(\Pr(V \mid
+class="math inline">\(\str\)</span>, here we let validity be a binary
+random variable <span class="math inline">\(V\)</span>, with likelihood
+function <span class="math inline">\(\str\mapsto\Pr(V=\mathtt{true} \mid
 \str)\)</span> that takes values anywhere in <span
 class="math inline">\([0, 1]\)</span>, rather than only in <span
-class="math inline">\(\{0, 1\}\)</span>.</p>
-<p>In this more general setting the two-bin structure is gone — there is
-no event to condition on, and no posterior–antiposterior segment — so
-we’ll need a <em>per-element</em> description of the optimum instead.
-Here is the binary-case optimum from above, rewritten element by
+class="math inline">\(\{0, 1\}\)</span>.<span
+class="sidenote-wrapper"><label for="sn-7" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-7" class="margin-toggle"/><span
+class="sidenote">Requiring <span class="math inline">\(\potential \le
+1\)</span> costs nothing relative to the intro’s general <span
+class="math inline">\(\potential \ge 0\)</span>: scaling the potential
+by a positive constant changes neither the posterior nor the anchored
+optimum (the objective depends on <span
+class="math inline">\(\potential\)</span> only through <span
+class="math inline">\(\posterior\)</span>), so any bounded potential can
+be rescaled into <span class="math inline">\([0, 1]\)</span>.<br />
+<br />
+</span></span></p>
+<p>In this more general setting the two-bin structure is gone: Validity
+no longer sharply partitions the support into valid and invalid regions.
+Any given <span class="math inline">\(\str\)</span> may be valid with
+some probability, so there is no valid set to restrict to, and no
+posterior–antiposterior segment. We’ll need a <em>per-element</em>
+description of the optimum instead.</p>
+<p>Here is the binary-case optimum from above, rewritten element by
 element: <span class="math display">\[
 \proposal^\star_\beta(\str) \;\propto\;
 \prior(\str)\,\max\{\potential(\str),\, \varepsilon_\beta\},
@@ -662,14 +706,28 @@ since <span class="math inline">\(\alpha_\beta\)</span> is close to
 <span class="math inline">\(1\)</span> for small <span
 class="math inline">\(\beta\)</span>). Read this way, the anchored
 optimum is itself the <em>exact</em> posterior of a modified inference
-problem: the same prior, with the potential <em>softened</em> by
-flooring it at <span class="math inline">\(\varepsilon_\beta\)</span>.
-Where conditioning multiplies invalid elements’ prior mass by <span
+problem: Take the same prior, use a <em>softened</em> potential, defined
+by flooring it at <span
+class="math inline">\(\varepsilon_\beta\)</span>. Where hard
+conditioning multiplies invalid elements’ prior mass by <span
 class="math inline">\(0\)</span>, anchoring multiplies it by <span
-class="math inline">\(\varepsilon_\beta\)</span> — violating the
-constraint costs <span class="math inline">\(\log(1/\varepsilon_\beta) =
-1/(\alpha_\beta\beta)\)</span> nats, instead of <span
-class="math inline">\(\infty\)</span>.</p>
+class="math inline">\(\varepsilon_\beta\)</span>.<span
+class="sidenote-wrapper"><label for="sn-8" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-8" class="margin-toggle"/><span
+class="sidenote">In log space, a multiplicative factor is an additive
+penalty: multiplying an element’s mass by <span
+class="math inline">\(\varepsilon_\beta\)</span> shifts its
+log-probability down by <span
+class="math inline">\(\log(1/\varepsilon_\beta) =
+1/(\alpha_\beta\beta)\)</span> nats, relative to the prior (before
+renormalization). So being invalid is no longer <em>forbidden</em> (an
+infinite log-penalty, mass multiplied by <span
+class="math inline">\(0\)</span>) but comes at a cost of <span
+class="math inline">\(1/(\alpha_\beta\beta)\)</span> nats: This price
+blows up as <span class="math inline">\(\beta \to 0\)</span> (recovering
+hard conditioning) and vanishes as <span class="math inline">\(\beta \to
+\infty\)</span> (leaving the prior untouched).<br />
+<br />
+</span></span></p>
 <details style="font-size:0.9em; margin:0.3em 0 1.2em;">
 <summary style="cursor:pointer; color:#444;">
 Derivation: minimizing <span
@@ -881,7 +939,7 @@ reading, is special to the binary case.)</p>
 <script src="/assets/js/anchored-kl.bundle.js"></script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-08-01 12:53</span>
+    <span class="last-modified">Last modified: 2026-08-01 14:15</span>
   </div>
 </footer>
 </body>
