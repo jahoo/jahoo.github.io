@@ -25,6 +25,32 @@ export function withProb(probs, i, target) {
         j === i ? target : Math.max(MIN_P, p * scale)));
 }
 
+// x * log(x / y), continuously extended to x = 0.
+const xlogx = (x, y) => (x === 0 ? 0 : x * Math.log(x / y));
+
+// KL between Bernoulli(a) and Bernoulli(Z) — d(a || Z) in the post.
+export function bernKL(a, Z) {
+    return xlogx(a, Z) + xlogx(1 - a, 1 - Z);
+}
+
+// d/da of bernKL(a, Z): the log odds ratio, strictly increasing on (0, 1).
+export function bernKLPrime(a, Z) {
+    return Math.log((a * (1 - Z)) / (Z * (1 - a)));
+}
+
+// The reduced objective f(a) = log(1/a) + beta * d(a || Z): the value of
+// L_beta at the segment point with weight a (finite beta only).
+export function fOfAlpha(Z, beta, a) {
+    return -Math.log(a) + beta * bernKL(a, Z);
+}
+
+// f'(a) = -1/a + beta * log( a(1-Z) / (Z(1-a)) ), strictly increasing on
+// (0, 1); its unique root is alpha_beta (NaN at a = 1 when beta = 0 —
+// callers stay strictly inside the interval).
+export function fPrimeOfAlpha(Z, beta, a) {
+    return -1 / a + beta * Math.log((a * (1 - Z)) / (Z * (1 - a)));
+}
+
 // Solve alpha = Z / (Z + exp(-1/(alpha*beta)) * (1-Z)) for alpha in [Z, 1].
 // The right-hand side is continuous and strictly decreasing in alpha, and
 // crosses the identity exactly once on (Z, 1): bisection.

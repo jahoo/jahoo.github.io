@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { MIN_P, DEFAULT_K, defaultPrior, defaultValid } from './config.js';
-import { normalize, withProb, solveAlpha, betaOfAlpha, epsBeta, anchoredOptimum } from './model.js';
+import { normalize, withProb, solveAlpha, betaOfAlpha, epsBeta, anchoredOptimum, bernKL, bernKLPrime, fOfAlpha, fPrimeOfAlpha } from './model.js';
 
 const sum = a => a.reduce((x, y) => x + y, 0);
 const close = (a, b, tol = 1e-9) =>
@@ -129,4 +129,78 @@ test('withProb sets the target and keeps the sum at 1', () => {
     close(sum(hi), 1);
     assert.ok(hi[0] >= 0.9, `high clamp, got ${hi[0]}`);
     assert.ok(hi.every(v => v > 0), 'no zeros after clamping');
+});
+
+test('bernKL is the Bernoulli KL, finite at the endpoints', () => {
+    close(bernKL(0.3, 0.3), 0);
+    close(bernKL(1, 0.3), Math.log(1 / 0.3));
+    close(bernKL(0, 0.3), Math.log(1 / 0.7));
+    close(bernKL(0.6, 0.2),
+        0.6 * Math.log(0.6 / 0.2) + 0.4 * Math.log(0.4 / 0.8));
+});
+
+test('fPrimeOfAlpha is the derivative of fOfAlpha', () => {
+    const h = 1e-6;
+    for (const z of [0.2, 0.6]) {
+        for (const beta of [0, 0.4, 3]) {
+            for (const a of [0.05, 0.3, 0.62, 0.9]) {
+                const num = (fOfAlpha(z, beta, a + h)
+                    - fOfAlpha(z, beta, a - h)) / (2 * h);
+                close(fPrimeOfAlpha(z, beta, a), num, 1e-4);
+            }
+        }
+    }
+});
+
+test('fPrimeOfAlpha vanishes at the solveAlpha root', () => {
+    for (const z of [0.1, 0.3, 0.7]) {
+        for (const beta of [0.05, 0.5, 2, 20]) {
+            const a = solveAlpha(z, beta);
+            close(fPrimeOfAlpha(z, beta, a), 0, 1e-6);
+        }
+    }
+});
+
+test('fOfAlpha is minimized at the solveAlpha root', () => {
+    for (const z of [0.15, 0.5]) {
+        for (const beta of [0.1, 1, 10]) {
+            const fmin = fOfAlpha(z, beta, solveAlpha(z, beta));
+            for (let i = 1; i < 100; i++) {
+                const v = fOfAlpha(z, beta, i / 100);
+                assert.ok(v >= fmin - 1e-9,
+                    `f(${i / 100}) = ${v} below f(alpha_beta) = ${fmin}`);
+            }
+        }
+    }
+});
+
+test('fOfAlpha is finite at alpha = 1', () => {
+    close(fOfAlpha(0.3, 2, 1), 2 * Math.log(1 / 0.3));
+});
+
+test('bernKLPrime is the derivative of bernKL', () => {
+    const h = 1e-6;
+    for (const z of [0.2, 0.6]) {
+        for (const a of [0.05, 0.3, 0.62, 0.9]) {
+            const num = (bernKL(a + h, z) - bernKL(a - h, z)) / (2 * h);
+            close(bernKLPrime(a, z), num, 1e-4);
+        }
+    }
+});
+
+test('fPrimeOfAlpha and bernKLPrime are strictly increasing in alpha', () => {
+    for (const z of [0.1, 0.3, 0.7]) {
+        for (const beta of [0, 0.05, 0.5, 2, 20]) {
+            for (let i = 1; i < 99; i++) {
+                const a = i / 100;
+                assert.ok(fPrimeOfAlpha(z, beta, a) < fPrimeOfAlpha(z, beta, a + 0.01),
+                    `f' not increasing at z=${z}, beta=${beta}, a=${a}`);
+            }
+        }
+        for (let i = 1; i < 99; i++) {
+            const a = i / 100;
+            assert.ok(bernKLPrime(a, z) < bernKLPrime(a + 0.01, z),
+                `bernKL' not increasing at z=${z}, a=${a}`);
+        }
+    }
 });

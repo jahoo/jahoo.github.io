@@ -112,7 +112,21 @@ f''(\alpha)
 \end{aligned}
 $$
 
-Since $f'(\alpha) \to -\infty$ as $\alpha \to 0^{+}$ and $f'(\alpha) \to +\infty$ as $\alpha \to 1^{-}$, there is a unique interior minimizer $\alpha_\beta$, the root of $f'$:
+Since $f'(\alpha) \to -\infty$ as $\alpha \to 0^{+}$ and $f'(\alpha) \to +\infty$ as $\alpha \to 1^{-}$, there is a unique interior minimizer $\alpha_\beta$, the root of $f'$. Both facts are visible live below: $f$ falls and then rises (top panel), so the strictly increasing $f'$ climbs through zero exactly once (bottom panel) --- at the marked point, $\alpha_\beta$, which for every *finite* $\beta$ lies strictly between $\Z$ and $1$. Move $\beta$ and watch the balance shift: small $\beta$ leaves the minimizer pinned near the posterior's $\alpha = 1$; large $\beta$ drags it toward the prior's $\alpha = \Z$. (It is the same $\beta$ --- and the same valid mass $\Z$ --- as in the visualization further below; the marker is draggable. At the $\beta = 0$ endpoint $f$ collapses to $\log\frac{1}{\alpha}$, falling all the way to the boundary minimizer $\alpha = 1$ ($f'$ never reaches zero); at the $\beta = \infty$ endpoint the panels show the normalized limit $f/\beta = d(\alpha \,\|\, \Z)$, whose minimum sits at $\alpha = \Z$.)
+
+::: {.viz #cv-akl-f canvas="true" height="280px" width="100%"}
+:::
+
+<div class="akl-controls">
+<span class="akl-controls-label">$\beta$:</span>
+<div class="akl-slider-wrap">
+<input type="range" id="akl-beta-f" min="0" max="1000" value="425">
+<div class="akl-slider-ticks"><span>0</span><span>1</span><span>∞</span></div>
+</div>
+<div><span class="akl-controls-label">$\beta$ =&nbsp;</span><span id="akl-readout-beta-f">0.5</span></div>
+</div>
+
+Setting $f'(\alpha_\beta) = 0$ and rearranging describes that marked point as a fixed point:
 
 $$
 \begin{aligned}
@@ -134,7 +148,32 @@ $$
 \qquad
 \alpha_\beta = \frac{\Z}{\Z + e^{-1/(\alpha_\beta \beta)}\,(1 - \Z)} \;\in\; (\Z, 1)
 $$
---- the segment point at the fixed-point weight, as claimed.
+describing the segment point at the fixed-point weight, as claimed.
+
+</details>
+
+<details style="font-size:0.9em; margin:0.3em 0 1.2em;">
+<summary style="cursor:pointer; color:#444;">Aside: solving the fixed point in closed form (Lambert $W$)</summary>
+
+The fixed point is transcendental --- no *elementary* closed form exists --- but it does untangle into the **Lambert $W$ function**, the inverse of $w \mapsto w\,e^{w}$. Substitute $x \defeq 1/\alpha_\beta$ and clear the denominator:
+
+$$
+\begin{aligned}
+(x - 1)\, e^{x/\beta}
+&= \frac{1-\Z}{\Z}
+&& \explain{substitute $x = 1/\alpha_\beta$; rearrange}
+\\[6pt]
+s\, e^{s}
+&= \frac{1-\Z}{\Z\,\beta}\; e^{-1/\beta}
+&& \explain{$s \defeq (x - 1)/\beta$; divide by $\beta\, e^{1/\beta}$}
+\\[6pt]
+\alpha_\beta
+&= \frac{1}{1 + \beta\, W_0\!\Bigl(\dfrac{1-\Z}{\Z\,\beta}\, e^{-1/\beta}\Bigr)}
+&& \explain{$s = W_0(\cdot)$; invert $x = 1 + \beta s$}
+\end{aligned}
+$$
+
+The argument of $W$ is positive, so this lands on the principal branch $W_0$, where the solution is unique --- the same uniqueness that strict convexity of $f$ gave above. And since the argument tends to $0$ at *both* ends of the $\beta$ axis, the two asymptotic regimes of the next aside fall out of the single expansion $W_0(u) \approx u$: as $\beta \to 0$, $1 - \alpha_\beta \approx \beta\,W_0(\cdot) \approx \frac{1-\Z}{\Z}\, e^{-1/\beta}$; as $\beta \to \infty$, $\beta\,W_0(\cdot) \to \frac{1-\Z}{\Z}$, so $\alpha_\beta \to \Z$ (and the next order gives $\alpha_\beta - \Z \approx (1-\Z)/\beta$).
 
 </details>
 

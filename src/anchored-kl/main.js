@@ -11,10 +11,11 @@ import {
 } from './config.js';
 import {
     normalize, withProb, solveAlpha, betaOfAlpha, anchoredOptimum,
+    bernKL, bernKLPrime, fOfAlpha, fPrimeOfAlpha,
 } from './model.js';
 import {
     resetCanvas, getPos, layoutMain,
-    drawHBarCol, drawPotentialCol, drawAlphaCurve, drawSegment,
+    drawHBarCol, drawPotentialCol, drawAlphaCurve, drawSegment, drawFPlot,
 } from './drawing.js';
 
 // ================================================================
@@ -27,9 +28,9 @@ let valid = defaultValid(k);            // boolean mask: the potential r
 let beta = DEFAULT_BETA;
 
 let L = null;                 // main-canvas layout, set on every redraw
-let hitM = null, hitS = null; // dot hit-test info from the beta plots
-let cvMain, cvM, cvS, slider, kSlider; // DOM, bound in init()
-let roBeta, roAlpha, roZ, roK, ticksWrap;
+let hitM = null, hitS = null, hitF = null; // dot hit-test info from the beta plots
+let cvMain, cvM, cvS, cvF, slider, sliderF, kSlider; // DOM, bound in init()
+let roBeta, roAlpha, roZ, roK, roBetaF;
 
 // ================================================================
 //  BETA SLIDER
@@ -56,15 +57,16 @@ const THUMB_W = 14; // keep in sync with the slider thumb width in the CSS
 const thumbX = f => `calc(${THUMB_W / 2}px + ${f} * (100% - ${THUMB_W}px))`;
 
 function buildTickLabels() {
-    if (!ticksWrap) return;
     // 1 is the log-midpoint of [BETA_MIN, BETA_MAX]
     const ticks = [['0', 0], ['1', 0.5], ['∞', 1]];
-    ticksWrap.replaceChildren(...ticks.map(([text, f]) => {
-        const s = document.createElement('span');
-        s.textContent = text;
-        s.style.left = thumbX(f);
-        return s;
-    }));
+    document.querySelectorAll('.akl-slider-ticks').forEach(wrap => {
+        wrap.replaceChildren(...ticks.map(([text, f]) => {
+            const s = document.createElement('span');
+            s.textContent = text;
+            s.style.left = thumbX(f);
+            return s;
+        }));
+    });
 }
 
 // Thumb accent: valid blue at beta = 0 (posterior) fading to neutral
@@ -154,14 +156,19 @@ function redraw() {
 
     redrawMargin(alpha, Z);
 
+    redrawF(alpha, Z);
+
     if (roBeta) roBeta.textContent = fmtBeta(beta);
+    if (roBetaF) roBetaF.textContent = fmtBeta(beta);
     if (roAlpha) roAlpha.textContent = Z >= 1 ? '1' : fmtProb(alpha);
     if (roZ) roZ.textContent = fmtProb(Z);
-    if (slider) {
-        // beta can also be set by dragging a dot; keep the thumb in sync
-        slider.value = String(betaToSlider(beta));
-        slider.style.setProperty('--akl-accent', accentColor());
-    }
+    [slider, sliderF].forEach(s => {
+        if (!s) return;
+        // beta can also be set by dragging a dot or the other slider;
+        // keep every thumb in sync
+        s.value = String(betaToSlider(beta));
+        s.style.setProperty('--akl-accent', accentColor());
+    });
 }
 
 // The margin plot: alpha_beta over the whole beta axis for the current Z,
@@ -192,13 +199,55 @@ function redrawMargin(alpha, Z) {
     });
 }
 
+// The f plot in the derivation fold: the reduced objective f and its
+// derivative over alpha, for the current Z and beta. At beta = infinity
+// the drawn shape is the normalized limit f/beta = d(alpha || Z).
+function fShapes(Z, b) {
+    if (b === Infinity) {
+        return {
+            f: a => bernKL(a, Z),
+            fp: a => bernKLPrime(a, Z),
+            fLabel: 'f∕β', fpLabel: 'f′∕β',
+        };
+    }
+    return {
+        f: a => fOfAlpha(Z, b, a),
+        fp: a => fPrimeOfAlpha(Z, b, a),
+        fLabel: 'f', fpLabel: 'f′',
+    };
+}
+
+function redrawF(alpha, Z) {
+    if (!cvF) return;
+    hitF = null;
+    const { ctx, w, h } = resetCanvas(cvF);
+    if (w < 40) return; // zero-size inside the closed <details>
+    if (Z <= 0 || Z >= 1) return; // degenerate mask: nothing to plot
+    const { f, fp, fLabel, fpLabel } = fShapes(Z, beta);
+    const N = 240, lo = 0.002, hi = 0.998;
+    const fCurve = [], fpCurve = [];
+    for (let i = 0; i <= N; i++) {
+        const a = lo + (i / N) * (hi - lo);
+        fCurve.push({ a, y: f(a) });
+        fpCurve.push({ a, y: fp(a) });
+    }
+    // clamp the marker strictly inside (0, 1): at beta = 0 the minimizer
+    // sits on the boundary alpha = 1, where f' is not evaluable
+    const aDot = Math.max(lo, Math.min(hi, alpha));
+    hitF = drawFPlot(ctx, w, h, {
+        fCurve, fpCurve, Z, alpha: aDot,
+        fAtAlpha: f(aDot), fpAtAlpha: fp(aDot),
+        fLabel, fpLabel, dotColor: accentColor(),
+    });
+}
+
 // ================================================================
 //  MAIN-CANVAS INTERACTION
 //  Potential column: click/drag-paint to toggle validity.
 //  Prior column: drag bar tips horizontally (auto-renormalizing).
 // ================================================================
 
-let dragKind = null; // 'bar' | 'paint' | 'dotM' | 'dotS' | null
+let dragKind = null; // 'bar' | 'paint' | 'dotM' | 'dotS' | 'dotF' | null
 let dragIdx = -1;
 let paintVal = null;
 
@@ -246,9 +295,10 @@ function onDown(e) {
 // ---- The beta dots: the same parameter, grabbable in every plot ----
 
 function dotHit(hit, pos) {
-    return !!(hit && hit.dot
-        && Math.abs(pos.x - hit.dot.x) < 12
-        && Math.abs(pos.y - hit.dot.y) < 14);
+    if (!hit) return false;
+    const dots = hit.dots || (hit.dot ? [hit.dot] : []);
+    return dots.some(d =>
+        Math.abs(pos.x - d.x) < 12 && Math.abs(pos.y - d.y) < 14);
 }
 
 function betaFromMargin(x) {
@@ -258,6 +308,15 @@ function betaFromMargin(x) {
 function betaFromSegment(x) {
     const Z = probs.reduce((s, p, i) => s + (valid[i] ? p : 0), 0);
     let b = betaOfAlpha(Z, hitS.alphaOfX(x));
+    // snap outside the slider's range, consistent with its endpoints
+    if (b < BETA_MIN) b = 0;
+    if (b > BETA_MAX) b = Infinity;
+    return b;
+}
+
+function betaFromF(x) {
+    const Z = probs.reduce((s, p, i) => s + (valid[i] ? p : 0), 0);
+    let b = betaOfAlpha(Z, hitF.alphaOfX(x));
     // snap outside the slider's range, consistent with its endpoints
     if (b < BETA_MIN) b = 0;
     if (b > BETA_MAX) b = Infinity;
@@ -292,6 +351,10 @@ function onMove(e) {
     } else if (dragKind === 'dotS') {
         e.preventDefault();
         beta = betaFromSegment(getPos(cvS, e).x);
+        redraw();
+    } else if (dragKind === 'dotF') {
+        e.preventDefault();
+        beta = betaFromF(getPos(cvF, e).x);
         redraw();
     } else if (dragKind === 'bar') {
         e.preventDefault();
@@ -333,13 +396,15 @@ export function init() {
     cvMain = document.getElementById('cv-akl-main');
     cvM = document.getElementById('cv-akl-alpha');
     cvS = document.getElementById('cv-akl-segment');
+    cvF = document.getElementById('cv-akl-f');
     slider = document.getElementById('akl-beta');
+    sliderF = document.getElementById('akl-beta-f');
     kSlider = document.getElementById('akl-k');
     roBeta = document.getElementById('akl-readout-beta');
     roAlpha = document.getElementById('akl-readout-alpha');
     roZ = document.getElementById('akl-readout-z');
     roK = document.getElementById('akl-readout-k');
-    ticksWrap = document.querySelector('.akl-slider-ticks');
+    roBetaF = document.getElementById('akl-readout-beta-f');
     if (!cvMain) return;
 
     cvMain.style.height = mainHeight() + 'px';
@@ -349,6 +414,15 @@ export function init() {
         slider.value = String(betaToSlider(beta));
         slider.addEventListener('input', () => {
             beta = sliderToBeta(Number(slider.value));
+            redraw();
+        });
+    }
+
+    if (sliderF) {
+        sliderF.max = String(SLIDER_MAX);
+        sliderF.value = String(betaToSlider(beta));
+        sliderF.addEventListener('input', () => {
+            beta = sliderToBeta(Number(sliderF.value));
             redraw();
         });
     }
@@ -373,10 +447,16 @@ export function init() {
     document.querySelectorAll('.margin-toggle').forEach(t =>
         t.addEventListener('change', () => setTimeout(redraw, 0)));
 
+    // The f plot's canvas has zero size while its <details> is closed;
+    // repaint when the fold opens (same trick as the margin toggle).
+    const fold = cvF && cvF.closest('details');
+    if (fold) fold.addEventListener('toggle', () => redraw());
+
     cvMain.addEventListener('mousedown', onDown);
     cvMain.addEventListener('touchstart', onDown, { passive: false });
     bindBetaDot(cvM, 'dotM', () => hitM, betaFromMargin);
     bindBetaDot(cvS, 'dotS', () => hitS, betaFromSegment);
+    bindBetaDot(cvF, 'dotF', () => hitF, betaFromF);
     window.addEventListener('mousemove', onMove);
     window.addEventListener('touchmove', onMove, { passive: false });
     window.addEventListener('mouseup', onUp);

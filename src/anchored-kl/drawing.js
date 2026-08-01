@@ -322,6 +322,161 @@ export function drawAlphaCurve(ctx, w, h, data) {
     };
 }
 
+// --- f plot: the reduced objective and its derivative over alpha ---
+// Two stacked panels sharing one alpha axis in [0, 1]: f(alpha) on top,
+// f'(alpha) below. The f window shows the valley: from the minimum up to
+// FP_WINDOW nats above it (f explodes at alpha -> 0, so a full-range
+// y-axis would flatten the interesting region); the f' window spans the
+// slopes at the two edges of that visible valley, so both panels always
+// describe the same stretch of curve. Curves are clipped to their panels
+// like the margin plot's approx curve. data:
+//   fCurve, fpCurve     — [{a, y}] samples, a increasing, strictly in (0,1)
+//   Z                   — light dashed reference through both panels
+//   alpha               — the minimizer alpha_beta (dashed line + dots)
+//   fAtAlpha, fpAtAlpha — exact dot heights
+//   fLabel, fpLabel     — panel labels ('f'/'f′'; 'f∕β'/'f′∕β' at beta = ∞)
+//   dotColor            — css color for the marker dots
+// Returns { dots, alphaOfX } for hit-testing/dragging the marker.
+
+const FP_WINDOW = 3; // nats of f shown above its minimum
+
+export function drawFPlot(ctx, w, h, data) {
+    const left = 34, right = 10, top = 8, bottom = 20, gap = 16;
+    const W = w - left - right;
+    const H = h - top - bottom - gap;
+    if (W < 40 || H < 60) return null;
+    const fh = Math.round(H * 0.55);
+    const F = { y: top, h: fh };            // f panel
+    const D = { y: top + fh + gap, h: H - fh }; // f' panel
+    const xOf = a => left + Math.max(0, Math.min(1, a)) * W;
+
+    // y-window for f: the valley, from the minimum up to FP_WINDOW nats
+    // (or the curve's own max, if it never rises that far)
+    const ys = data.fCurve.map(p => p.y).filter(Number.isFinite);
+    if (!ys.length) return null; // no finite samples: nothing to draw
+    const fmin = Math.min(...ys);
+    const fmax = Math.max(fmin + 1e-6,
+        Math.min(Math.max(...ys), fmin + FP_WINDOW));
+    // alpha-extent of the visible valley; f' spans its slopes
+    const vis = data.fCurve.filter(p => p.y <= fmax);
+    const nearest = (curve, a) => curve.reduce((b, p) =>
+        Math.abs(p.a - a) < Math.abs(b.a - a) ? p : b);
+    let pLo = nearest(data.fpCurve, vis[0].a).y;
+    let pHi = nearest(data.fpCurve, vis[vis.length - 1].a).y;
+    if (!(pHi - pLo > 1e-6)) { pLo -= 1; pHi += 1; } // degenerate window
+    const yF = v => F.y + ((fmax - v) / (fmax - fmin)) * F.h;
+    const yD = v => D.y + ((pHi - v) / (pHi - pLo)) * D.h;
+
+    // spines: light left edge per panel, alpha axis under the lower one
+    ctx.strokeStyle = '#ccc';
+    ctx.lineWidth = 1;
+    [F, D].forEach(P => {
+        ctx.beginPath();
+        ctx.moveTo(left, P.y);
+        ctx.lineTo(left, P.y + P.h);
+        ctx.stroke();
+    });
+    ctx.strokeStyle = '#999';
+    ctx.beginPath();
+    ctx.moveTo(left, D.y + D.h);
+    ctx.lineTo(left + W, D.y + D.h);
+    ctx.stroke();
+
+    // alpha ticks: 0, Z (italic), 1, plus the axis name
+    ctx.font = '9px ' + SANS;
+    ctx.fillStyle = '#999';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    const ty = D.y + D.h + 5;
+    ctx.fillText('0', xOf(0), ty);
+    ctx.fillText('1', xOf(1), ty);
+    ctx.font = 'italic 9px Georgia, serif';
+    ctx.fillText('Z', xOf(data.Z), ty);
+    ctx.font = 'italic 10px Georgia, serif';
+    ctx.fillText('α', xOf(0.5), ty);
+
+    // panel labels in the left margin
+    drawLabel(ctx, left - 18, F.y + 12, [{ text: data.fLabel, font: IT }]);
+    drawLabel(ctx, left - 18, D.y + 12, [{ text: data.fpLabel, font: IT }]);
+
+    // light dashed vertical at Z through both panels
+    ctx.save();
+    ctx.strokeStyle = '#ddd';
+    ctx.setLineDash([3, 4]);
+    ctx.beginPath();
+    ctx.moveTo(xOf(data.Z), F.y);
+    ctx.lineTo(xOf(data.Z), D.y + D.h);
+    ctx.stroke();
+    ctx.restore();
+
+    // dashed zero line in the f' panel, when zero is in the window
+    if (pLo < 0 && pHi > 0) {
+        ctx.save();
+        ctx.strokeStyle = '#bbb';
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath();
+        ctx.moveTo(left, yD(0));
+        ctx.lineTo(left + W, yD(0));
+        ctx.stroke();
+        ctx.restore();
+        ctx.font = '9px ' + SANS;
+        ctx.fillStyle = '#999';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('0', left - 4, yD(0));
+    }
+
+    // dashed vertical at the minimizer, through both panels
+    ctx.save();
+    ctx.strokeStyle = '#aaa';
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.moveTo(xOf(data.alpha), F.y);
+    ctx.lineTo(xOf(data.alpha), D.y + D.h);
+    ctx.stroke();
+    ctx.restore();
+
+    // the curves, clipped to their panels
+    const drawCurve = (pts, yMap, P) => {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(left, P.y - 1, W, P.h + 2);
+        ctx.clip();
+        ctx.strokeStyle = '#444';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        let pen = false;
+        pts.forEach(p => {
+            if (!Number.isFinite(p.y)) { pen = false; return; }
+            const x = xOf(p.a), y = yMap(p.y);
+            if (!pen) { ctx.moveTo(x, y); pen = true; }
+            else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        ctx.restore();
+    };
+    drawCurve(data.fCurve, yF, F);
+    drawCurve(data.fpCurve, yD, D);
+
+    // marker dots at (alpha, f) and (alpha, f'), clamped into the panels
+    const clampY = (y, P) => Math.max(P.y, Math.min(P.y + P.h, y));
+    const dots = [
+        { x: xOf(data.alpha), y: clampY(yF(data.fAtAlpha), F) },
+        { x: xOf(data.alpha), y: clampY(yD(data.fpAtAlpha), D) },
+    ];
+    ctx.fillStyle = data.dotColor || '#444';
+    dots.forEach(d => {
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, 3.2, 0, 2 * Math.PI);
+        ctx.fill();
+    });
+
+    return {
+        dots,
+        alphaOfX: x => Math.max(0, Math.min(1, (x - left) / W)),
+    };
+}
+
 // --- Segment diagram: the posterior–antiposterior chord ---
 // A 1-D picture of the geometry: every anchored optimum lies on the
 // segment between the posterior (mixture weight 1) and the antiposterior
