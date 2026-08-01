@@ -3,7 +3,6 @@ title: Forward KL minimization with reverse KL-to-prior regularization
 date: 2026-07-31
 author: Jacob Hoover Vigly
 tags: [exploration]
-unlisted: true
 js:
   - src/anchored-kl
 css:
