@@ -33,7 +33,7 @@ MathJax = {
     // AMS-style numbering: only {equation}/{align} environments get
     // numbers, so ordinary $ displays stay untagged.
     tags: 'ams'
-    , macros: { "str": "{\\boldsymbol{y}}", "prior": "p", "posterior": "\\pi", "vposterior": "{\\textcolor[RGB]{41,128,185}{\\pi}}", "antiposterior": "{\\textcolor[RGB]{192,57,43}{\\style{display:inline-block;transform:rotate(180deg)}{\\pi}}}", "proposal": "q", "potential": "r", "valid": "{\\textcolor[RGB]{41,128,185}{\\mathcal{V}}}", "validc": "{\\textcolor[RGB]{192,57,43}{\\mathcal{V}^{\\mathsf{c}}}}", "Z": "Z", "DKL": "{D_{\\mathrm{KL}}}", "KL": ["\\DKL(#1\\,\\|\\,#2)", 2], "defeq": "\\triangleq", "explain": [ "{\\color{gray}[\\textit{#1}]}", 1 ] }
+    , macros: { "str": "{\\boldsymbol{y}}", "prior": "p", "posterior": "\\pi", "vposterior": "{\\textcolor[RGB]{41,128,185}{\\pi}}", "antiposterior": "{\\textcolor[RGB]{192,57,43}{\\style{display:inline-block;transform:rotate(180deg)}{\\pi}}}", "proposal": "q", "potential": "\\varphi", "valid": "{\\textcolor[RGB]{41,128,185}{\\mathcal{V}}}", "validc": "{\\textcolor[RGB]{192,57,43}{\\mathcal{V}^{\\mathsf{c}}}}", "Z": "Z", "DKL": "{D_{\\mathrm{KL}}}", "KL": ["\\DKL(#1\\,\\|\\,#2)", 2], "defeq": "\\triangleq", "explain": [ "{\\color{gray}[\\textit{#1}]}", 1 ] }
   },
   options: {
     // Disable click-to-explore on math. Without these, clicking on a
@@ -933,8 +933,13 @@ class="math inline">\(\tilde{\potential}(0) = \varepsilon_\beta\)</span>
 and <em>compresses</em> high ones — the continuous generalization of
 <span class="math inline">\(\max\{\potential,
 \varepsilon_\beta\}\)</span>. Watch it above as you move <span
-class="math inline">\(\beta\)</span>; the dots mark the potential values
-configured above.</p>
+class="math inline">\(\beta\)</span>: the dotted diagonal is the
+identity <span class="math inline">\(\tilde{\potential} =
+\potential\)</span> (the <span class="math inline">\(\beta = 0\)</span>
+limit), the dashed line is the floor <span
+class="math inline">\(\varepsilon_\beta\)</span>, and the dots mark the
+potential values configured above — drag them along the curve to change
+the potential.</p>
 </blockquote>
 </section>
 </section>
@@ -1000,7 +1005,7 @@ configured above.</p>
 <script src="/assets/js/anchored-kl.bundle.js"></script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-08-01 16:25</span>
+    <span class="last-modified">Last modified: 2026-08-01 17:14</span>
   </div>
 </footer>
 </body>

@@ -190,7 +190,7 @@
     return { top, bottom, rowsH, rowH, barH, rowY, rowAt, pot, prior, post, opt };
   }
   var TITLES = {
-    pot: { parts: [{ text: "r", font: IT }], word: "potential" },
+    pot: { parts: [{ text: "\u03C6", font: IT }], word: "potential" },
     prior: { parts: [{ text: "p", font: IT }], word: "prior" },
     post: {
       parts: [{ text: "\u03C0", font: IT, color: "rgb(41, 128, 185)" }],
@@ -535,18 +535,18 @@
     ctx.fillText("0", xOf(0), ty);
     ctx.fillText("1", xOf(1), ty);
     ctx.font = "italic 11px Georgia, serif";
-    ctx.fillText("r", xOf(0.5), ty);
+    ctx.fillText("\u03C6", xOf(0.5), ty);
     ctx.font = "9px " + SANS;
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
     ctx.fillText("1", left - 4, yOf(1));
     ctx.fillText("0", left - 4, yOf(0));
     drawLabel(ctx, left - 16, yOf(0.5) + 4, [
-      { text: "r\u0303", font: "italic 11px Georgia, serif", color: "#999" }
+      { text: "\u03C6\u0303", font: "italic 11px Georgia, serif", color: "#999" }
     ]);
     ctx.save();
     ctx.strokeStyle = "#ddd";
-    ctx.setLineDash([3, 4]);
+    ctx.setLineDash([2, 3]);
     ctx.beginPath();
     ctx.moveTo(xOf(0), yOf(0));
     ctx.lineTo(xOf(1), yOf(1));
@@ -575,13 +575,17 @@
       else ctx.lineTo(xOf(p.x), yOf(p.y));
     });
     ctx.stroke();
-    (data.dots || []).forEach((d) => {
+    const hitDots = (data.dots || []).map((d, i) => {
       ctx.fillStyle = d.color || "#444";
       ctx.beginPath();
       ctx.arc(xOf(d.x), yOf(d.y), 3, 0, 2 * Math.PI);
       ctx.fill();
+      return { x: xOf(d.x), y: yOf(d.y), i };
     });
-    return {};
+    return {
+      dots: hitDots,
+      phiOfX: (x) => Math.max(0, Math.min(1, (x - left) / W))
+    };
   }
   function drawSegment(ctx, w, h, data) {
     const left = 40, right = 14;
@@ -944,7 +948,7 @@
     cv.addEventListener("touchstart", onDotDown, { passive: false });
     cv.addEventListener("mousemove", (e) => {
       if (dragKind) return;
-      cv.style.cursor = dotHit(hitGetter(), getPos(cv, e)) ? "grab" : "";
+      cv.style.cursor = dotHit(hitGetter(), getPos(cv, e)) ? "ew-resize" : "";
     });
   }
   function onMove(e) {
@@ -1053,6 +1057,7 @@
   var phi = defaultPhi(k2);
   var beta2 = DEFAULT_BETA;
   var L2 = null;
+  var hitR = null;
   var cvMain2;
   var cvR;
   var slider2;
@@ -1112,6 +1117,7 @@
       });
     }
     if (cvR) {
+      hitR = null;
       const { ctx, w, h } = resetCanvas(cvR);
       const N = 160;
       const curve = Array.from({ length: N + 1 }, (_, i) => {
@@ -1119,7 +1125,7 @@
         return { x, y: softened(x) };
       });
       const dots = phi.map((v, i) => ({ x: v, y: softened(v), color: colors[i] }));
-      drawReshapeCurve(ctx, w, h, { curve, eps, dots });
+      hitR = drawReshapeCurve(ctx, w, h, { curve, eps, dots });
     }
     if (roBeta2) roBeta2.textContent = fmtBeta(beta2);
     if (roEps) roEps.textContent = fmtProb(eps);
@@ -1131,6 +1137,22 @@
   }
   var dragKind2 = null;
   var dragIdx2 = -1;
+  function dotRAt(pos) {
+    if (!hitR) return -1;
+    let best = -1, bestD = Infinity;
+    hitR.dots.forEach((d) => {
+      const dx = pos.x - d.x, dy = pos.y - d.y;
+      if (Math.abs(dx) < 12 && Math.abs(dy) < 14 && dx * dx + dy * dy < bestD) {
+        bestD = dx * dx + dy * dy;
+        best = d.i;
+      }
+    });
+    return best;
+  }
+  function dotRDragTo(pos) {
+    phi[dragIdx2] = hitR.phiOfX(pos.x);
+    redraw2();
+  }
   function inCol2(pos, P, pad = 10) {
     return pos.x >= P.x - pad && pos.x <= P.x + P.w + pad;
   }
@@ -1172,6 +1194,20 @@
       barDragTo2(pos);
     }
   }
+  function onDownR(e) {
+    const pos = getPos(cvR, e);
+    const i = dotRAt(pos);
+    if (i === -1) return;
+    dragKind2 = "dotR";
+    dragIdx2 = i;
+    dragXmax2 = niceXmax2(Math.max(
+      ...probs2,
+      ...computePosterior2(),
+      ...contOptimum(probs2, phi, beta2).q
+    ));
+    e.preventDefault();
+    dotRDragTo(pos);
+  }
   function onMove2(e) {
     if (dragKind2 === "phi") {
       e.preventDefault();
@@ -1179,6 +1215,9 @@
     } else if (dragKind2 === "bar") {
       e.preventDefault();
       barDragTo2(getPos(cvMain2, e));
+    } else if (dragKind2 === "dotR") {
+      e.preventDefault();
+      dotRDragTo(getPos(cvR, e));
     } else if (!e.touches && L2 && cvMain2) {
       const pos = getPos(cvMain2, e);
       const i = L2.rowAt(pos.y);
@@ -1229,6 +1268,14 @@
     }
     cvMain2.addEventListener("mousedown", onDown2);
     cvMain2.addEventListener("touchstart", onDown2, { passive: false });
+    if (cvR) {
+      cvR.addEventListener("mousedown", onDownR);
+      cvR.addEventListener("touchstart", onDownR, { passive: false });
+      cvR.addEventListener("mousemove", (e) => {
+        if (dragKind2) return;
+        cvR.style.cursor = dotRAt(getPos(cvR, e)) !== -1 ? "ew-resize" : "";
+      });
+    }
     window.addEventListener("mousemove", onMove2);
     window.addEventListener("touchmove", onMove2, { passive: false });
     window.addEventListener("mouseup", onUp2);
