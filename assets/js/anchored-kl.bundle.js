@@ -7,23 +7,27 @@
   var BETA_MIN = 0.01;
   var BETA_MAX = 100;
   var DEFAULT_BETA = 0.5;
-  var defaultPrior = (k2) => Array.from({ length: k2 }, (_, i) => Math.exp(-((i - (k2 - 1) / 2) ** 2) / (2 * (k2 / 5) ** 2)));
-  function defaultValid(k2) {
-    const lo = Math.round(0.35 * k2), hi = Math.round(0.65 * k2);
-    const v = Array.from({ length: k2 }, (_, i) => !(i >= lo && i < hi));
-    if (v.every(Boolean)) v[k2 - 1] = false;
+  var defaultPrior = (k3) => Array.from({ length: k3 }, (_, i) => Math.exp(-((i - (k3 - 1) / 2) ** 2) / (2 * (k3 / 5) ** 2)));
+  function defaultValid(k3) {
+    const lo = Math.round(0.35 * k3), hi = Math.round(0.65 * k3);
+    const v = Array.from({ length: k3 }, (_, i) => !(i >= lo && i < hi));
+    if (v.every(Boolean)) v[k3 - 1] = false;
     return v;
   }
+  var defaultPhi = (k3) => Array.from({ length: k3 }, (_, i) => {
+    const t = (i - (k3 - 1) / 2) / (k3 / 6);
+    return 0.05 + 0.9 / (1 + Math.exp(-t));
+  });
 
   // src/anchored-kl/model.js
   function normalize(arr) {
     const s = arr.reduce((a, b) => a + b, 0);
     return arr.map((v) => v / s);
   }
-  function withProb(probs2, i, target) {
-    target = Math.max(MIN_P, Math.min(1 - (probs2.length - 1) * MIN_P, target));
-    const scale = (1 - target) / (1 - probs2[i]);
-    return normalize(probs2.map((p, j) => j === i ? target : Math.max(MIN_P, p * scale)));
+  function withProb(probs3, i, target) {
+    target = Math.max(MIN_P, Math.min(1 - (probs3.length - 1) * MIN_P, target));
+    const scale = (1 - target) / (1 - probs3[i]);
+    return normalize(probs3.map((p, j) => j === i ? target : Math.max(MIN_P, p * scale)));
   }
   var xlogx = (x, y) => x === 0 ? 0 : x * Math.log(x / y);
   function bernKL(a, Z) {
@@ -32,18 +36,18 @@
   function bernKLPrime(a, Z) {
     return Math.log(a * (1 - Z) / (Z * (1 - a)));
   }
-  function fOfAlpha(Z, beta2, a) {
-    return -Math.log(a) + beta2 * bernKL(a, Z);
+  function fOfAlpha(Z, beta3, a) {
+    return -Math.log(a) + beta3 * bernKL(a, Z);
   }
-  function fPrimeOfAlpha(Z, beta2, a) {
-    return -1 / a + beta2 * Math.log(a * (1 - Z) / (Z * (1 - a)));
+  function fPrimeOfAlpha(Z, beta3, a) {
+    return -1 / a + beta3 * Math.log(a * (1 - Z) / (Z * (1 - a)));
   }
-  function solveAlpha(Z, beta2) {
+  function solveAlpha(Z, beta3) {
     if (Z >= 1) return 1;
     if (Z <= 0) return 0;
-    if (beta2 === 0) return 1;
-    if (beta2 === Infinity) return Z;
-    const g = (a) => Z / (Z + Math.exp(-1 / (a * beta2)) * (1 - Z));
+    if (beta3 === 0) return 1;
+    if (beta3 === Infinity) return Z;
+    const g = (a) => Z / (Z + Math.exp(-1 / (a * beta3)) * (1 - Z));
     let lo = Z, hi = 1;
     for (let it = 0; it < 100; it++) {
       const mid = (lo + hi) / 2;
@@ -57,19 +61,79 @@
     if (alpha <= Z) return Infinity;
     return 1 / (alpha * Math.log(alpha * (1 - Z) / (Z * (1 - alpha))));
   }
-  function epsBeta(alpha, beta2) {
-    if (beta2 === Infinity) return 1;
-    return Math.exp(-1 / (alpha * beta2));
+  function epsBeta(alpha, beta3) {
+    if (beta3 === Infinity) return 1;
+    return Math.exp(-1 / (alpha * beta3));
   }
-  function anchoredOptimum(prior, valid2, beta2) {
+  function anchoredOptimum(prior, valid2, beta3) {
     const p = normalize(prior);
     const Z = p.reduce((s, v, i) => s + (valid2[i] ? v : 0), 0);
     if (Z <= 0) return { q: p, alpha: 0, eps: 1, Z: 0 };
     if (Z >= 1) return { q: p, alpha: 1, eps: 1, Z: 1 };
-    const alpha = solveAlpha(Z, beta2);
-    const eps = epsBeta(alpha, beta2);
+    const alpha = solveAlpha(Z, beta3);
+    const eps = epsBeta(alpha, beta3);
     const q = normalize(p.map((v, i) => v * (valid2[i] ? 1 : eps)));
     return { q, alpha, eps, Z };
+  }
+  function rOfPhiAt(phi2, Z, beta3, c) {
+    const r0 = Math.exp(-c / beta3);
+    if (phi2 <= 0) return r0;
+    const g = (r) => Z * r * (beta3 * Math.log(r) + c);
+    let hi = Math.max(r0 * 2, 1);
+    while (g(hi) < phi2) hi *= 2;
+    let lo = r0;
+    for (let it = 0; it < 80; it++) {
+      const mid = (lo + hi) / 2;
+      if (g(mid) < phi2) lo = mid;
+      else hi = mid;
+    }
+    return (lo + hi) / 2;
+  }
+  function contOptimum(prior, phi2, beta3) {
+    const p = normalize(prior);
+    const Z = p.reduce((s, v, i) => s + v * phi2[i], 0);
+    const flat = { rOf: () => 1, softened: () => 1, c: NaN, eps: 1, Z };
+    if (Z <= 0) return { q: p.slice(), ...flat };
+    if (beta3 === Infinity) return { q: p.slice(), ...flat };
+    if (beta3 === 0) {
+      return {
+        q: normalize(p.map((v, i) => v * phi2[i])),
+        rOf: (x) => x / Z,
+        softened: (x) => x,
+        c: NaN,
+        eps: 0,
+        Z
+      };
+    }
+    const T = (c2) => p.reduce((s, v, i) => s + v * rOfPhiAt(phi2[i], Z, beta3, c2), 0);
+    let cLo = 0, cHi = 0, step = 1;
+    while (T(cLo) < 1) {
+      cLo -= step;
+      step *= 2;
+    }
+    step = 1;
+    while (T(cHi) > 1) {
+      cHi += step;
+      step *= 2;
+    }
+    for (let it = 0; it < 80; it++) {
+      const mid = (cLo + cHi) / 2;
+      if (T(mid) > 1) cLo = mid;
+      else cHi = mid;
+    }
+    const c = (cLo + cHi) / 2;
+    const rOf = (x) => rOfPhiAt(x, Z, beta3, c);
+    const r1 = rOf(1);
+    const softened = (x) => rOf(x) / r1;
+    return {
+      q: normalize(p.map((v, i) => v * rOf(phi2[i]))),
+      // tidy bisection residue
+      rOf,
+      softened,
+      c,
+      eps: softened(0),
+      Z
+    };
   }
 
   // src/anchored-kl/drawing.js
@@ -108,17 +172,16 @@
   var IT = "italic 14px Georgia, serif";
   var IT_SM = "italic 9px Georgia, serif";
   var fmtTick = (v) => Number(v.toPrecision(2)).toString();
-  function layoutMain(w, h, k2) {
+  function layoutMain(w, h, k3, { potW = 54 } = {}) {
     const top = 34, bottom = 24, left = 10, right = 12, gap = 26;
-    const potW = 54;
     const probW = Math.max(40, (w - left - right - potW - 3 * gap) / 3);
     const rowsH = h - top - bottom;
-    const rowH = rowsH / k2;
+    const rowH = rowsH / k3;
     const barH = Math.min(rowH * 0.6, 20);
     const rowY = (i) => top + (i + 0.5) * rowH;
     const rowAt = (y) => {
       const i = Math.floor((y - top) / rowH);
-      return i >= 0 && i < k2 ? i : -1;
+      return i >= 0 && i < k3 ? i : -1;
     };
     const pot = { x: left, w: potW };
     const prior = { x: left + potW + gap, w: probW };
@@ -142,51 +205,51 @@
       word: "optimum"
     }
   };
-  function drawTitle(ctx, L2, P, key) {
+  function drawTitle(ctx, L3, P, key) {
     const t = TITLES[key];
     const cx = P.x + P.w / 2;
-    drawLabel(ctx, cx, L2.top - 20, t.parts);
+    drawLabel(ctx, cx, L3.top - 20, t.parts);
     ctx.font = "9px " + SANS;
     ctx.fillStyle = "#999";
     ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
-    ctx.fillText(t.word, cx, L2.top - 8);
+    ctx.fillText(t.word, cx, L3.top - 8);
   }
-  function drawBaseline(ctx, L2, P) {
+  function drawBaseline(ctx, L3, P) {
     ctx.strokeStyle = "#999";
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(P.x, L2.top);
-    ctx.lineTo(P.x, L2.top + L2.rowsH);
+    ctx.moveTo(P.x, L3.top);
+    ctx.lineTo(P.x, L3.top + L3.rowsH);
     ctx.stroke();
   }
-  function xTick(ctx, L2, x, label, align = "center") {
+  function xTick(ctx, L3, x, label, align = "center") {
     ctx.strokeStyle = "#999";
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(x, L2.top + L2.rowsH);
-    ctx.lineTo(x, L2.top + L2.rowsH + 4);
+    ctx.moveTo(x, L3.top + L3.rowsH);
+    ctx.lineTo(x, L3.top + L3.rowsH + 4);
     ctx.stroke();
     ctx.font = "9px " + SANS;
     ctx.fillStyle = "#888";
     ctx.textAlign = align;
     ctx.textBaseline = "top";
-    ctx.fillText(label, x, L2.top + L2.rowsH + 6);
+    ctx.fillText(label, x, L3.top + L3.rowsH + 6);
   }
-  function drawHBarCol(ctx, L2, P, values, opts) {
-    const k2 = values.length;
-    drawBaseline(ctx, L2, P);
-    drawTitle(ctx, L2, P, opts.title);
-    xTick(ctx, L2, P.x, "0", "left");
-    xTick(ctx, L2, P.x + P.w, fmtTick(opts.xmax), "right");
-    if (1 / k2 <= opts.xmax) {
-      const xU = P.x + 1 / k2 / opts.xmax * P.w;
+  function drawHBarCol(ctx, L3, P, values, opts) {
+    const k3 = values.length;
+    drawBaseline(ctx, L3, P);
+    drawTitle(ctx, L3, P, opts.title);
+    xTick(ctx, L3, P.x, "0", "left");
+    xTick(ctx, L3, P.x + P.w, fmtTick(opts.xmax), "right");
+    if (opts.uniformRef !== false && 1 / k3 <= opts.xmax) {
+      const xU = P.x + 1 / k3 / opts.xmax * P.w;
       ctx.save();
       ctx.strokeStyle = "#ccc";
       ctx.setLineDash([3, 4]);
       ctx.beginPath();
-      ctx.moveTo(xU, L2.top);
-      ctx.lineTo(xU, L2.top + L2.rowsH);
+      ctx.moveTo(xU, L3.top);
+      ctx.lineTo(xU, L3.top + L3.rowsH);
       ctx.stroke();
       ctx.restore();
       if (opts.title === "prior") {
@@ -194,56 +257,56 @@
         ctx.fillStyle = "#aaa";
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
-        ctx.fillText("1/K", xU, L2.top + L2.rowsH + 6);
+        ctx.fillText("1/K", xU, L3.top + L3.rowsH + 6);
       }
     }
     ctx.save();
     ctx.beginPath();
-    ctx.rect(P.x, L2.top, P.w, L2.rowsH);
+    ctx.rect(P.x, L3.top, P.w, L3.rowsH);
     ctx.clip();
     values.forEach((v, i) => {
-      const cy = L2.rowY(i);
+      const cy = L3.rowY(i);
       const len = v / opts.xmax * P.w;
       const color = opts.colors[i];
       ctx.fillStyle = color;
       ctx.globalAlpha = 0.45;
-      ctx.fillRect(P.x, cy - L2.barH / 2, len, L2.barH);
+      ctx.fillRect(P.x, cy - L3.barH / 2, len, L3.barH);
       ctx.globalAlpha = 1;
       ctx.strokeStyle = color;
       ctx.lineWidth = 1;
-      ctx.strokeRect(P.x, cy - L2.barH / 2, len, L2.barH);
+      ctx.strokeRect(P.x, cy - L3.barH / 2, len, L3.barH);
       if (opts.handles) {
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(P.x + len, cy - L2.barH / 2);
-        ctx.lineTo(P.x + len, cy + L2.barH / 2);
+        ctx.moveTo(P.x + len, cy - L3.barH / 2);
+        ctx.lineTo(P.x + len, cy + L3.barH / 2);
         ctx.stroke();
       }
     });
     ctx.restore();
   }
-  function drawPotentialCol(ctx, L2, P, valid2, colors) {
-    drawBaseline(ctx, L2, P);
-    drawTitle(ctx, L2, P, "pot");
-    xTick(ctx, L2, P.x, "0", "left");
-    xTick(ctx, L2, P.x + P.w, "1", "right");
+  function drawPotentialCol(ctx, L3, P, valid2, colors) {
+    drawBaseline(ctx, L3, P);
+    drawTitle(ctx, L3, P, "pot");
+    xTick(ctx, L3, P.x, "0", "left");
+    xTick(ctx, L3, P.x + P.w, "1", "right");
     valid2.forEach((isValid, i) => {
-      const cy = L2.rowY(i);
+      const cy = L3.rowY(i);
       const color = isValid ? colors.valid : colors.invalid;
       if (isValid) {
         ctx.fillStyle = color;
         ctx.globalAlpha = 0.45;
-        ctx.fillRect(P.x, cy - L2.barH / 2, P.w, L2.barH);
+        ctx.fillRect(P.x, cy - L3.barH / 2, P.w, L3.barH);
         ctx.globalAlpha = 1;
         ctx.strokeStyle = color;
         ctx.lineWidth = 1;
-        ctx.strokeRect(P.x, cy - L2.barH / 2, P.w, L2.barH);
+        ctx.strokeRect(P.x, cy - L3.barH / 2, P.w, L3.barH);
       } else {
         ctx.strokeStyle = color;
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(P.x + 1.5, cy - L2.barH / 2);
-        ctx.lineTo(P.x + 1.5, cy + L2.barH / 2);
+        ctx.moveTo(P.x + 1.5, cy - L3.barH / 2);
+        ctx.lineTo(P.x + 1.5, cy + L3.barH / 2);
         ctx.stroke();
       }
     });
@@ -451,6 +514,75 @@
       alphaOfX: (x) => Math.max(0, Math.min(1, (x - left) / W))
     };
   }
+  function drawReshapeCurve(ctx, w, h, data) {
+    const left = 34, right = 14, top = 10, bottom = 22;
+    const W = w - left - right, H = h - top - bottom;
+    if (W < 40 || H < 40) return null;
+    const xOf = (x) => left + x * W;
+    const yOf = (y) => top + (1 - y) * H;
+    ctx.strokeStyle = "#999";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(left, top);
+    ctx.lineTo(left, top + H);
+    ctx.lineTo(left + W, top + H);
+    ctx.stroke();
+    ctx.font = "9px " + SANS;
+    ctx.fillStyle = "#999";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    const ty = top + H + 5;
+    ctx.fillText("0", xOf(0), ty);
+    ctx.fillText("1", xOf(1), ty);
+    ctx.font = "italic 11px Georgia, serif";
+    ctx.fillText("r", xOf(0.5), ty);
+    ctx.font = "9px " + SANS;
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    ctx.fillText("1", left - 4, yOf(1));
+    ctx.fillText("0", left - 4, yOf(0));
+    drawLabel(ctx, left - 16, yOf(0.5) + 4, [
+      { text: "r\u0303", font: "italic 11px Georgia, serif", color: "#999" }
+    ]);
+    ctx.save();
+    ctx.strokeStyle = "#ddd";
+    ctx.setLineDash([3, 4]);
+    ctx.beginPath();
+    ctx.moveTo(xOf(0), yOf(0));
+    ctx.lineTo(xOf(1), yOf(1));
+    ctx.stroke();
+    ctx.restore();
+    if (data.eps < 0.995) {
+      ctx.save();
+      ctx.strokeStyle = "#bbb";
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(left, yOf(data.eps));
+      ctx.lineTo(left + W, yOf(data.eps));
+      ctx.stroke();
+      ctx.restore();
+      ctx.font = "italic 9px Georgia, serif";
+      ctx.fillStyle = "#999";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.fillText("\u03B5", left + W + 4, yOf(data.eps));
+    }
+    ctx.strokeStyle = "#444";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    data.curve.forEach((p, i) => {
+      if (i === 0) ctx.moveTo(xOf(p.x), yOf(p.y));
+      else ctx.lineTo(xOf(p.x), yOf(p.y));
+    });
+    ctx.stroke();
+    (data.dots || []).forEach((d) => {
+      ctx.fillStyle = d.color || "#444";
+      ctx.beginPath();
+      ctx.arc(xOf(d.x), yOf(d.y), 3, 0, 2 * Math.PI);
+      ctx.fill();
+    });
+    return {};
+  }
   function drawSegment(ctx, w, h, data) {
     const left = 40, right = 14;
     const x0 = left, x1 = w - right;
@@ -535,27 +667,7 @@
     };
   }
 
-  // src/anchored-kl/main.js
-  var k = DEFAULT_K;
-  var probs = normalize(defaultPrior(k));
-  var valid = defaultValid(k);
-  var beta = DEFAULT_BETA;
-  var L = null;
-  var hitM = null;
-  var hitS = null;
-  var hitF = null;
-  var cvMain;
-  var cvM;
-  var cvS;
-  var cvF;
-  var slider;
-  var sliderF;
-  var kSlider;
-  var roBeta;
-  var roAlpha;
-  var roZ;
-  var roK;
-  var roBetaF;
+  // src/anchored-kl/controls.js
   var SLIDER_MAX = 1e3;
   function sliderToBeta(v) {
     if (v <= 0) return 0;
@@ -581,8 +693,8 @@
       }));
     });
   }
-  function accentColor() {
-    const f = betaToSlider(beta) / SLIDER_MAX;
+  function accentColor(beta3) {
+    const f = betaToSlider(beta3) / SLIDER_MAX;
     const a = [41, 128, 185], b = [150, 156, 164];
     const rgb = [0, 1, 2].map((i) => Math.round(a[i] + (b[i] - a[i]) * f));
     return `rgb(${rgb.join(",")})`;
@@ -599,6 +711,38 @@
     if (v < 1e-3) return typeset(v.toExponential(2));
     return typeset(Number(v.toPrecision(3)).toString());
   };
+  function dotHit(hit, pos) {
+    if (!hit) return false;
+    const dots = hit.dots || (hit.dot ? [hit.dot] : []);
+    return dots.some((d) => Math.abs(pos.x - d.x) < 12 && Math.abs(pos.y - d.y) < 14);
+  }
+  function bindDropdownClose() {
+    document.querySelectorAll(".akl-k-dropdown").forEach((drop) => document.addEventListener("pointerdown", (e) => {
+      if (drop.open && !drop.contains(e.target)) drop.open = false;
+    }));
+  }
+
+  // src/anchored-kl/main.js
+  var k = DEFAULT_K;
+  var probs = normalize(defaultPrior(k));
+  var valid = defaultValid(k);
+  var beta = DEFAULT_BETA;
+  var L = null;
+  var hitM = null;
+  var hitS = null;
+  var hitF = null;
+  var cvMain;
+  var cvM;
+  var cvS;
+  var cvF;
+  var slider;
+  var sliderF;
+  var kSlider;
+  var roBeta;
+  var roAlpha;
+  var roZ;
+  var roK;
+  var roBetaF;
   function mainHeight() {
     const rowH = k <= 10 ? 28 : k <= 20 ? 22 : 14;
     return 34 + k * rowH + 26;
@@ -646,7 +790,7 @@
       hitS = drawSegment(ctx, w, h, {
         Z,
         alpha,
-        dotColor: accentColor(),
+        dotColor: accentColor(beta),
         validColor: VALID_COLOR,
         invalidColor: INVALID_COLOR
       });
@@ -660,7 +804,7 @@
     [slider, sliderF].forEach((s) => {
       if (!s) return;
       s.value = String(betaToSlider(beta));
-      s.style.setProperty("--akl-accent", accentColor());
+      s.style.setProperty("--akl-accent", accentColor(beta));
     });
   }
   function redrawMargin(alpha, Z) {
@@ -683,7 +827,7 @@
       approx,
       Z,
       dot: { f: betaToSlider(beta) / SLIDER_MAX, a: alpha },
-      dotColor: accentColor()
+      dotColor: accentColor(beta)
     });
   }
   function fShapes(Z, b) {
@@ -726,7 +870,7 @@
       fpAtAlpha: fp(aDot),
       fLabel,
       fpLabel,
-      dotColor: accentColor()
+      dotColor: accentColor(beta)
     });
   }
   var dragKind = null;
@@ -768,11 +912,6 @@
       e.preventDefault();
       barDragTo(pos);
     }
-  }
-  function dotHit(hit, pos) {
-    if (!hit) return false;
-    const dots = hit.dots || (hit.dot ? [hit.dot] : []);
-    return dots.some((d) => Math.abs(pos.x - d.x) < 12 && Math.abs(pos.y - d.y) < 14);
   }
   function betaFromMargin(x) {
     return sliderToBeta(Math.round(hitM.fOfX(x) * SLIDER_MAX));
@@ -878,12 +1017,6 @@
         redraw();
       });
     }
-    const kDrop = document.querySelector(".akl-k-dropdown");
-    if (kDrop) {
-      document.addEventListener("pointerdown", (e) => {
-        if (kDrop.open && !kDrop.contains(e.target)) kDrop.open = false;
-      });
-    }
     if (kSlider) {
       kSlider.value = String(k);
       if (roK) roK.textContent = String(k);
@@ -911,14 +1044,204 @@
     window.addEventListener("mouseup", onUp);
     window.addEventListener("touchend", onUp);
     window.addEventListener("resize", redraw);
-    buildTickLabels();
     redraw();
   }
 
+  // src/anchored-kl/main-continuous.js
+  var k2 = DEFAULT_K;
+  var probs2 = normalize(defaultPrior(k2));
+  var phi = defaultPhi(k2);
+  var beta2 = DEFAULT_BETA;
+  var L2 = null;
+  var cvMain2;
+  var cvR;
+  var slider2;
+  var kSlider2;
+  var roBeta2;
+  var roEps;
+  var roZ2;
+  var roK2;
+  function mainHeight2() {
+    const rowH = k2 <= 10 ? 28 : k2 <= 20 ? 22 : 14;
+    return 34 + k2 * rowH + 26;
+  }
+  var dragXmax2 = null;
+  function niceXmax2(m) {
+    return Math.min(1, Math.max(0.1, Math.ceil(m * 1.08 * 20) / 20));
+  }
+  function phiColor(v) {
+    const red = [192, 57, 43], blue = [41, 128, 185];
+    const rgb = [0, 1, 2].map((i) => Math.round(red[i] + (blue[i] - red[i]) * v));
+    return `rgb(${rgb.join(",")})`;
+  }
+  function computePosterior2() {
+    const Z = probs2.reduce((s, p, i) => s + p * phi[i], 0);
+    return Z > 0 ? normalize(probs2.map((p, i) => p * phi[i])) : probs2.slice();
+  }
+  function redraw2() {
+    if (!cvMain2) return;
+    const { q, softened, eps, Z } = contOptimum(probs2, phi, beta2);
+    const posterior = computePosterior2();
+    const xmax = dragXmax2 ?? niceXmax2(Math.max(...probs2, ...posterior, ...q));
+    const colors = phi.map(phiColor);
+    {
+      const { ctx, w, h } = resetCanvas(cvMain2);
+      L2 = layoutMain(w, h, k2, { potW: 90 });
+      drawHBarCol(ctx, L2, L2.pot, phi, {
+        colors,
+        xmax: 1,
+        title: "pot",
+        handles: true,
+        uniformRef: false
+      });
+      drawHBarCol(ctx, L2, L2.prior, probs2, {
+        colors,
+        xmax,
+        title: "prior",
+        handles: true
+      });
+      drawHBarCol(ctx, L2, L2.post, posterior, {
+        colors,
+        xmax,
+        title: "post"
+      });
+      drawHBarCol(ctx, L2, L2.opt, q, {
+        colors,
+        xmax,
+        title: "opt"
+      });
+    }
+    if (cvR) {
+      const { ctx, w, h } = resetCanvas(cvR);
+      const N = 160;
+      const curve = Array.from({ length: N + 1 }, (_, i) => {
+        const x = i / N;
+        return { x, y: softened(x) };
+      });
+      const dots = phi.map((v, i) => ({ x: v, y: softened(v), color: colors[i] }));
+      drawReshapeCurve(ctx, w, h, { curve, eps, dots });
+    }
+    if (roBeta2) roBeta2.textContent = fmtBeta(beta2);
+    if (roEps) roEps.textContent = fmtProb(eps);
+    if (roZ2) roZ2.textContent = fmtProb(Z);
+    if (slider2) {
+      slider2.value = String(betaToSlider(beta2));
+      slider2.style.setProperty("--akl-accent", accentColor(beta2));
+    }
+  }
+  var dragKind2 = null;
+  var dragIdx2 = -1;
+  function inCol2(pos, P, pad = 10) {
+    return pos.x >= P.x - pad && pos.x <= P.x + P.w + pad;
+  }
+  function phiDragTo(pos) {
+    const P = L2.pot;
+    phi[dragIdx2] = Math.max(0, Math.min(1, (pos.x - P.x) / P.w));
+    redraw2();
+  }
+  function barDragTo2(pos) {
+    const P = L2.prior;
+    const target = (pos.x - P.x) / P.w * dragXmax2;
+    probs2 = withProb(probs2, dragIdx2, target);
+    redraw2();
+  }
+  function onDown2(e) {
+    if (!L2) return;
+    const pos = getPos(cvMain2, e);
+    const i = L2.rowAt(pos.y);
+    if (i === -1) return;
+    if (inCol2(pos, L2.pot)) {
+      dragKind2 = "phi";
+      dragIdx2 = i;
+      e.preventDefault();
+      phiDragTo(pos);
+    } else if (inCol2(pos, L2.prior)) {
+      dragKind2 = "bar";
+      dragIdx2 = i;
+      dragXmax2 = niceXmax2(Math.max(
+        ...probs2,
+        ...computePosterior2(),
+        ...contOptimum(probs2, phi, beta2).q
+      ));
+      e.preventDefault();
+      barDragTo2(pos);
+    }
+  }
+  function onMove2(e) {
+    if (dragKind2 === "phi") {
+      e.preventDefault();
+      phiDragTo(getPos(cvMain2, e));
+    } else if (dragKind2 === "bar") {
+      e.preventDefault();
+      barDragTo2(getPos(cvMain2, e));
+    } else if (!e.touches && L2 && cvMain2) {
+      const pos = getPos(cvMain2, e);
+      const i = L2.rowAt(pos.y);
+      cvMain2.style.cursor = i !== -1 && (inCol2(pos, L2.pot) || inCol2(pos, L2.prior)) ? "ew-resize" : "";
+    }
+  }
+  function onUp2() {
+    if (dragKind2 === "bar") {
+      dragKind2 = null;
+      dragXmax2 = null;
+      redraw2();
+    }
+    dragKind2 = null;
+    dragIdx2 = -1;
+  }
+  function initContinuous() {
+    cvMain2 = document.getElementById("cv-akl-c-main");
+    cvR = document.getElementById("cv-akl-c-reshape");
+    slider2 = document.getElementById("akl-c-beta");
+    kSlider2 = document.getElementById("akl-c-k");
+    roBeta2 = document.getElementById("akl-c-readout-beta");
+    roEps = document.getElementById("akl-c-readout-eps");
+    roZ2 = document.getElementById("akl-c-readout-z");
+    roK2 = document.getElementById("akl-c-readout-k");
+    if (!cvMain2) return;
+    cvMain2.style.height = mainHeight2() + "px";
+    if (slider2) {
+      slider2.max = String(SLIDER_MAX);
+      slider2.value = String(betaToSlider(beta2));
+      slider2.addEventListener("input", () => {
+        beta2 = sliderToBeta(Number(slider2.value));
+        redraw2();
+      });
+    }
+    if (kSlider2) {
+      kSlider2.value = String(k2);
+      if (roK2) roK2.textContent = String(k2);
+      kSlider2.addEventListener("input", () => {
+        const next = Number(kSlider2.value);
+        if (next === k2) return;
+        k2 = next;
+        probs2 = normalize(defaultPrior(k2));
+        phi = defaultPhi(k2);
+        if (roK2) roK2.textContent = String(k2);
+        cvMain2.style.height = mainHeight2() + "px";
+        redraw2();
+      });
+    }
+    cvMain2.addEventListener("mousedown", onDown2);
+    cvMain2.addEventListener("touchstart", onDown2, { passive: false });
+    window.addEventListener("mousemove", onMove2);
+    window.addEventListener("touchmove", onMove2, { passive: false });
+    window.addEventListener("mouseup", onUp2);
+    window.addEventListener("touchend", onUp2);
+    window.addEventListener("resize", redraw2);
+    redraw2();
+  }
+
   // src/anchored-kl/index.js
-  if (document.readyState !== "loading") {
+  function boot() {
     init();
+    initContinuous();
+    buildTickLabels();
+    bindDropdownClose();
+  }
+  if (document.readyState !== "loading") {
+    boot();
   } else {
-    document.addEventListener("DOMContentLoaded", init);
+    document.addEventListener("DOMContentLoaded", boot);
   }
 })();

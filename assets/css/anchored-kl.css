@@ -209,8 +209,8 @@
 }
 
 /* The K slider is compact (overrides the shared width: 100% above);
-   the beta slider in the same toolbar keeps its full flexible width. */
-.akl-toolbar input#akl-k {
+   targets K sliders in the dropdown panels. */
+.akl-k-panel input[type="range"] {
     width: 150px;
     flex: none;
 }
