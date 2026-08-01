@@ -427,6 +427,14 @@ export function init() {
         });
     }
 
+    // The K dropdown chip: close its floating panel on any click outside.
+    const kDrop = document.querySelector('.akl-k-dropdown');
+    if (kDrop) {
+        document.addEventListener('pointerdown', e => {
+            if (kDrop.open && !kDrop.contains(e.target)) kDrop.open = false;
+        });
+    }
+
     if (kSlider) {
         kSlider.value = String(k);
         if (roK) roK.textContent = String(k);

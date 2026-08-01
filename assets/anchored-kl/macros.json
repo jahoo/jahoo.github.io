@@ -12,5 +12,8 @@
   "DKL": "{D_{\\mathrm{KL}}}",
   "KL": ["\\DKL(#1\\,\\|\\,#2)", 2],
   "defeq": "\\triangleq",
-  "explain": ["{\\color{gray}\\textit{[#1]}}", 1]
+  "explain": [
+    "{\\color{gray}[\\textit{#1}]}",
+    1
+  ]
 }

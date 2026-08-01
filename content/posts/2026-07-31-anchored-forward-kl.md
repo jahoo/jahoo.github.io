@@ -60,7 +60,7 @@ So the optimum solution matches both bin shapes exactly --- which is just to say
 $$
 \alpha_\beta = \frac{\Z}{\Z + e^{-1/(\alpha_\beta \beta)}\,(1 - \Z)}.
 $$
-The weight appears on both sides of this equation, but consistently so: the right-hand side is continuous and strictly decreasing in $\alpha_\beta$, so exactly one value satisfies it.^[This is also how the visualization below computes $\alpha_\beta$: bisection on this equation.]
+The weight appears on both sides of this equation, but consistently so: the right-hand side is continuous and strictly decreasing in $\alpha_\beta$, so exactly one value satisfies it.^[This is also how the visualization below computes $\alpha_\beta$: bisection on the difference between the two sides of this equation, which changes sign exactly once on $(\Z, 1)$.]
 
 <details style="font-size:0.9em; margin:0.3em 0 1.2em;">
 <summary style="cursor:pointer; color:#444;">Derivation of the optimum $\proposal^\star_\beta$</summary>
@@ -69,18 +69,41 @@ The weight appears on both sides of this equation, but consistently so: the righ
 
 **Step 1: reduce to the segment.** Write $\alpha \defeq \proposal(\valid)$. Both KL terms decompose over the partition $\{\valid, \validc\}$ (the chain rule for KL: the divergence between the bin masses, plus the mass-weighted divergences within bins):
 
+For the forward KL, the sum runs over $\valid$ only, and there the proposal factors into bin mass times within-bin shape:
+
 $$
 \begin{aligned}
 \KL{\vposterior}{\proposal}
-&= \log\frac{1}{\alpha}
-+ \KL{\vposterior}{\proposal(\cdot \mid \valid)}
+&= \sum_{\str \in \valid} \vposterior(\str)\, \log\frac{\vposterior(\str)}{\proposal(\str)}
 && \explain{$\vposterior$ puts mass $1$ on $\valid$}
 \\[6pt]
+&= \sum_{\str \in \valid} \vposterior(\str)\, \log\frac{\vposterior(\str)}{\alpha\,\proposal(\str \mid \valid)}
+&& \explain{$\proposal(\str) = \alpha\,\proposal(\str \mid \valid)$ on $\valid$}
+\\[6pt]
+&= \log\frac{1}{\alpha}
++ \KL{\vposterior}{\proposal(\cdot \mid \valid)}
+&& \explain{split the log; $\vposterior(\valid) = 1$}
+\end{aligned}
+$$
+
+For the anchor, both bins contribute; factor each side into bin mass times within-bin shape ($\prior = \Z\,\vposterior$ on $\valid$ and $(1{-}\Z)\,\antiposterior$ on $\validc$):
+
+$$
+\begin{aligned}
 \KL{\proposal}{\prior}
+&= \sum_{\str \in \valid} \alpha\,\proposal(\str \mid \valid)\, \log\frac{\alpha\,\proposal(\str \mid \valid)}{\Z\,\vposterior(\str)}
+\;+ \sum_{\str \in \validc} (1{-}\alpha)\,\proposal(\str \mid \validc)\, \log\frac{(1{-}\alpha)\,\proposal(\str \mid \validc)}{(1{-}\Z)\,\antiposterior(\str)}
+\\[6pt]
+&= \alpha \log\frac{\alpha}{\Z}
++ (1{-}\alpha) \log\frac{1{-}\alpha}{1{-}\Z}
++ \alpha\,\KL{\proposal(\cdot \mid \valid)}{\vposterior}
++ (1{-}\alpha)\,\KL{\proposal(\cdot \mid \validc)}{\antiposterior}
+&& \explain{split the logs; each conditional sums to $1$}
+\\[6pt]
 &= d(\alpha \,\|\, \Z)
 + \alpha\,\KL{\proposal(\cdot \mid \valid)}{\vposterior}
 + (1{-}\alpha)\,\KL{\proposal(\cdot \mid \validc)}{\antiposterior}
-&& \explain{$\prior(\cdot \mid \valid) = \vposterior$, $\prior(\cdot \mid \validc) = \antiposterior$}
+&& \explain{the leading terms are a Bernoulli KL}
 \end{aligned}
 $$
 
@@ -89,10 +112,20 @@ with $d(\alpha \,\|\, \Z) \defeq \alpha \log\frac{\alpha}{\Z} + (1-\alpha)\log\f
 $$
 \begin{aligned}
 \mathcal{L}_\beta(\proposal)
+&= \KL{\vposterior}{\proposal} + \beta\,\KL{\proposal}{\prior}
+&& \explain{the anchored objective}
+\\[6pt]
+&= \log\frac{1}{\alpha} + \beta\, d(\alpha \,\|\, \Z)
+\\
+&\qquad + \KL{\vposterior}{\proposal(\cdot \mid \valid)}
++ \beta\,\alpha\, \KL{\proposal(\cdot \mid \valid)}{\vposterior}
++ \beta\,(1{-}\alpha)\, \KL{\proposal(\cdot \mid \validc)}{\antiposterior}
+&& \explain{substitute the two decompositions}
+\\[6pt]
 &= f(\alpha)
 + \underbrace{\KL{\vposterior}{\proposal(\cdot \mid \valid)} + \beta\,\alpha\, \KL{\proposal(\cdot \mid \valid)}{\vposterior}}_{\ge\, 0}
 + \underbrace{\beta\,(1{-}\alpha)\, \KL{\proposal(\cdot \mid \validc)}{\antiposterior}}_{\ge\, 0}
-&& \explain{$f(\alpha) \defeq \log\frac{1}{\alpha} + \beta\, d(\alpha \| \Z)$}
+&& \explain{define $f(\alpha) \defeq \log\frac{1}{\alpha} + \beta\, d(\alpha \| \Z)$}
 \end{aligned}
 $$
 
@@ -112,18 +145,20 @@ f''(\alpha)
 \end{aligned}
 $$
 
-Since $f'(\alpha) \to -\infty$ as $\alpha \to 0^{+}$ and $f'(\alpha) \to +\infty$ as $\alpha \to 1^{-}$, there is a unique interior minimizer $\alpha_\beta$, the root of $f'$. Both facts are visible live below: $f$ falls and then rises (top panel), so the strictly increasing $f'$ climbs through zero exactly once (bottom panel) --- at the marked point, $\alpha_\beta$, which for every *finite* $\beta$ lies strictly between $\Z$ and $1$. Move $\beta$ and watch the balance shift: small $\beta$ leaves the minimizer pinned near the posterior's $\alpha = 1$; large $\beta$ drags it toward the prior's $\alpha = \Z$. (It is the same $\beta$ --- and the same valid mass $\Z$ --- as in the visualization further below; the marker is draggable. At the $\beta = 0$ endpoint $f$ collapses to $\log\frac{1}{\alpha}$, falling all the way to the boundary minimizer $\alpha = 1$ ($f'$ never reaches zero); at the $\beta = \infty$ endpoint the panels show the normalized limit $f/\beta = d(\alpha \,\|\, \Z)$, whose minimum sits at $\alpha = \Z$.)
+Since $f'(\alpha) \to -\infty$ as $\alpha \to 0^{+}$ and $f'(\alpha) \to +\infty$ as $\alpha \to 1^{-}$, there is a unique interior minimizer $\alpha_\beta$, the root of $f'$. Both facts are visible live below for any *finite* $\beta$: $f$ falls and then rises (top panel), so the strictly increasing $f'$ climbs through zero exactly once (bottom panel) --- at the marked point, $\alpha_\beta$, strictly between $\Z$ and $1$. Move $\beta$ and watch the balance shift: small $\beta$ leaves the minimizer pinned near the posterior's $\alpha = 1$; large $\beta$ drags it toward the prior's $\alpha = \Z$. (It is the same $\beta$ --- and the same valid mass $\Z$ --- as in the visualization further below; the marker is draggable. At the $\beta = 0$ endpoint $f$ collapses to $\log\frac{1}{\alpha}$, falling all the way to the boundary minimizer $\alpha = 1$ ($f'$ never reaches zero); at the $\beta = \infty$ endpoint the panels show the normalized limit $f/\beta = d(\alpha \,\|\, \Z)$, whose minimum sits at $\alpha = \Z$.)
 
 ::: {.viz #cv-akl-f canvas="true" height="280px" width="100%"}
 :::
 
-<div class="akl-controls">
+<div class="akl-controls akl-sticky">
 <span class="akl-controls-label">$\beta$:</span>
 <div class="akl-slider-wrap">
 <input type="range" id="akl-beta-f" min="0" max="1000" value="425">
 <div class="akl-slider-ticks"><span>0</span><span>1</span><span>∞</span></div>
 </div>
+<div class="akl-readouts">
 <div><span class="akl-controls-label">$\beta$ =&nbsp;</span><span id="akl-readout-beta-f">0.5</span></div>
+</div>
 </div>
 
 Setting $f'(\alpha_\beta) = 0$ and rearranging describes that marked point as a fixed point:
@@ -198,26 +233,29 @@ At the other end, the approach to the prior is slow: $\alpha_\beta - \Z \approx 
 # Interactive visualization
 
 <div class="akl-toolbar" id="akl-toolbar">
+<details class="akl-k-dropdown">
+<summary>$K$ = <span class="akl-toolbar-value" id="akl-readout-k">10</span></summary>
+<div class="akl-k-panel">
 <span class="akl-controls-label">support size $K$:</span>
 <input type="range" id="akl-k" min="2" max="40" value="10">
-<span class="akl-toolbar-value" id="akl-readout-k">10</span>
 </div>
-
-::: {.viz #cv-akl-main canvas="true" height="340px" width="100%"}
-:::
-
-<div class="akl-controls">
-<div class="akl-readouts">
-<div><span class="akl-controls-label">$\beta$ =&nbsp;</span><span id="akl-readout-beta">0.5</span></div>
-<div><span class="akl-controls-label">$\alpha_\beta$ =&nbsp;</span><span id="akl-readout-alpha">–</span></div>
-<div><span class="akl-controls-label">$\Z$ =&nbsp;</span><span id="akl-readout-z">–</span></div>
-</div>
+</details>
+<div class="akl-toolbar-group akl-toolbar-group-beta">
 <span class="akl-controls-label">$\beta$:</span>
 <div class="akl-slider-wrap">
 <input type="range" id="akl-beta" min="0" max="1000" value="425">
 <div class="akl-slider-ticks"><span>0</span><span>1</span><span>∞</span></div>
 </div>
 </div>
+<div class="akl-readouts">
+<div><span class="akl-controls-label">$\beta$ =&nbsp;</span><span id="akl-readout-beta">0.5</span></div>
+<div><span class="akl-controls-label">$\alpha_\beta$ =&nbsp;</span><span id="akl-readout-alpha">–</span></div>
+<div><span class="akl-controls-label">$\Z$ =&nbsp;</span><span id="akl-readout-z">–</span></div>
+</div>
+</div>
+
+::: {.viz #cv-akl-main canvas="true" height="340px" width="100%"}
+:::
 
 As you slide $\beta$ between $0$ and $\infty$, mixture weight $\alpha_\beta$ interpolates between $1$ and $Z$.^[{-} `<canvas id="cv-akl-alpha" class="akl-alpha-canvas"></canvas>`{=html} *Live: $\alpha_\beta$ as a function of $\beta$ (log scale), for the $\Z$ currently configured in the visualization. The dot marks the selected $\beta$ (drag it --- it's the same $\beta$ as the slider); the dotted curve is the small-$\beta$ approximation $1 - \frac{1-\Z}{\Z}\,e^{-1/\beta}$; the dashed line is $\Z$, the $\beta \to \infty$ limit.*]
 In the geometry of the mixture, the optimum $\proposal^\star_\beta$ lives on the segment between the posterior and the antiposterior. [Recall $\proposal^\star_\beta =\alpha_\beta\,\vposterior + (1 - \alpha_\beta)\,\antiposterior$.] Raising $\beta$ slides the optimum from the posterior toward the prior (as $\beta\to\infty$ weight $\alpha_\beta\to\Z$, and $\proposal^\star_\beta \to \prior = \Z\,\vposterior + (1 - \Z)\,\antiposterior$).

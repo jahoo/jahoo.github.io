@@ -11,7 +11,9 @@
     z-index: 30;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 14px;
+    flex-wrap: wrap;
+    row-gap: 4px;
     margin: 0.4em 0 1.2em;
     padding: 6px 12px;
     background: var(--s-surface, #f6f8fa);
@@ -24,6 +26,75 @@
     font-variant-numeric: tabular-nums;
     color: #333;
     min-width: 1.6em;
+}
+
+/* Groups inside the combined toolbar: the flexible beta group's slider
+   stretches to fill the row. */
+.akl-toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.akl-toolbar-group-beta {
+    flex: 1;
+    min-width: 220px;
+}
+
+/* The K control folds into a small dropdown chip: the slider only
+   appears in a floating panel when the chip is clicked. */
+.akl-k-dropdown {
+    position: relative;
+    flex: none;
+}
+
+.akl-k-dropdown > summary {
+    list-style: none;
+    cursor: pointer;
+    white-space: nowrap;
+    color: #666;
+    font-size: 0.9em;
+    padding: 2px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.akl-k-dropdown > summary::-webkit-details-marker {
+    display: none;
+}
+
+.akl-k-dropdown > summary::after {
+    content: ' ▾';
+    color: #999;
+}
+
+.akl-k-dropdown[open] > summary::after {
+    content: ' ▴';
+    color: #999;
+}
+
+.akl-k-panel {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    white-space: nowrap;
+    background: var(--s-surface, #f6f8fa);
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* In the toolbar the readouts stay a fixed-width stacked column in a
+   smaller font, so changing digits never reflows the bar. */
+.akl-toolbar .akl-readouts {
+    font-size: 0.85em;
+    line-height: 1.35;
+    min-width: 8.5em;
 }
 
 /* Defensive: neutralize Pandoc paragraph-wrapping inside the toolbar. */
@@ -137,10 +208,20 @@
     box-shadow: 0 0 0 3px rgba(70, 102, 119, 0.3);
 }
 
-/* The K slider is compact (overrides the shared width: 100% above). */
-.akl-toolbar input[type="range"] {
+/* The K slider is compact (overrides the shared width: 100% above);
+   the beta slider in the same toolbar keeps its full flexible width. */
+.akl-toolbar input#akl-k {
     width: 150px;
     flex: none;
+}
+
+/* Sticky variant: the derivation fold's beta controls pin to the top of
+   the viewport while their containing <details> is in view --- the same
+   mechanism as the toolbar. */
+.akl-controls.akl-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 30;
 }
 
 /* Tick labels are absolutely positioned by JS at the thumb-center
