@@ -27,6 +27,7 @@ let phi = defaultPhi(k);
 let beta = DEFAULT_BETA;
 
 let L = null;
+let hitR = null; // reshape-curve hit info: dots draggable along the curve
 let cvMain, cvR, slider, kSlider;
 let roBeta, roEps, roZ, roK;
 
@@ -83,6 +84,7 @@ function redraw() {
     }
 
     if (cvR) {
+        hitR = null;
         const { ctx, w, h } = resetCanvas(cvR);
         const N = 160;
         const curve = Array.from({ length: N + 1 }, (_, i) => {
@@ -90,7 +92,7 @@ function redraw() {
             return { x, y: softened(x) };
         });
         const dots = phi.map((v, i) => ({ x: v, y: softened(v), color: colors[i] }));
-        drawReshapeCurve(ctx, w, h, { curve, eps, dots });
+        hitR = drawReshapeCurve(ctx, w, h, { curve, eps, dots });
     }
 
     if (roBeta) roBeta.textContent = fmtBeta(beta);
@@ -106,10 +108,32 @@ function redraw() {
 //  INTERACTION
 //  Potential column: drag bar tips to any value in [0, 1].
 //  Prior column: drag bar tips horizontally (auto-renormalizing).
+//  Reshape curve: drag a dot along the curve to set that element's
+//  potential (the same edit as its bar, in the curve's coordinates).
 // ================================================================
 
-let dragKind = null; // 'phi' | 'bar' | null
+let dragKind = null; // 'phi' | 'bar' | 'dotR' | null
 let dragIdx = -1;
+
+// The reshape-curve dot under the pointer, or -1 (nearest wins when
+// dots overlap, which happens for elements with similar potentials).
+function dotRAt(pos) {
+    if (!hitR) return -1;
+    let best = -1, bestD = Infinity;
+    hitR.dots.forEach(d => {
+        const dx = pos.x - d.x, dy = pos.y - d.y;
+        if (Math.abs(dx) < 12 && Math.abs(dy) < 14 && dx * dx + dy * dy < bestD) {
+            bestD = dx * dx + dy * dy;
+            best = d.i;
+        }
+    });
+    return best;
+}
+
+function dotRDragTo(pos) {
+    phi[dragIdx] = hitR.phiOfX(pos.x);
+    redraw();
+}
 
 function inCol(pos, P, pad = 10) {
     return pos.x >= P.x - pad && pos.x <= P.x + P.w + pad;
@@ -150,6 +174,18 @@ function onDown(e) {
     }
 }
 
+function onDownR(e) {
+    const pos = getPos(cvR, e);
+    const i = dotRAt(pos);
+    if (i === -1) return;
+    dragKind = 'dotR';
+    dragIdx = i;
+    dragXmax = niceXmax(Math.max(...probs, ...computePosterior(),
+        ...contOptimum(probs, phi, beta).q));
+    e.preventDefault();
+    dotRDragTo(pos);
+}
+
 function onMove(e) {
     if (dragKind === 'phi') {
         e.preventDefault();
@@ -157,6 +193,9 @@ function onMove(e) {
     } else if (dragKind === 'bar') {
         e.preventDefault();
         barDragTo(getPos(cvMain, e));
+    } else if (dragKind === 'dotR') {
+        e.preventDefault();
+        dotRDragTo(getPos(cvR, e));
     } else if (!e.touches && L && cvMain) {
         // hover affordance
         const pos = getPos(cvMain, e);
@@ -220,6 +259,14 @@ export function initContinuous() {
 
     cvMain.addEventListener('mousedown', onDown);
     cvMain.addEventListener('touchstart', onDown, { passive: false });
+    if (cvR) {
+        cvR.addEventListener('mousedown', onDownR);
+        cvR.addEventListener('touchstart', onDownR, { passive: false });
+        cvR.addEventListener('mousemove', e => {
+            if (dragKind) return;
+            cvR.style.cursor = dotRAt(getPos(cvR, e)) !== -1 ? 'ew-resize' : '';
+        });
+    }
     window.addEventListener('mousemove', onMove);
     window.addEventListener('touchmove', onMove, { passive: false });
     window.addEventListener('mouseup', onUp);

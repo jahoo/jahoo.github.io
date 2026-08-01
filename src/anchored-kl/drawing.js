@@ -3,7 +3,7 @@
 //  Canvas layout + rendering. One main canvas with four columns of
 //  horizontal bars over a shared row grid (one row per element):
 //
-//    [ r (potential) | p (prior) | π (posterior) | q*β (optimum) ]
+//    [ φ (potential) | p (prior) | π (posterior) | q*β (optimum) ]
 //
 //  plus the beta-segment diagram and the margin alpha(beta) plot.
 // ================================================================
@@ -80,7 +80,7 @@ export function layoutMain(w, h, k, { potW = 54 } = {}) {
 
 // Column titles: symbol on one line, gray word beneath.
 const TITLES = {
-    pot: { parts: [{ text: 'r', font: IT }], word: 'potential' },
+    pot: { parts: [{ text: 'φ', font: IT }], word: 'potential' },
     prior: { parts: [{ text: 'p', font: IT }], word: 'prior' },
     post: {
         parts: [{ text: 'π', font: IT, color: 'rgb(41, 128, 185)' }],
@@ -485,7 +485,9 @@ export function drawFPlot(ctx, w, h, data) {
 //   curve — [{x, y}] samples of φ̃ over x in [0, 1], x increasing
 //   eps   — the floor φ̃(0) (dashed reference, skipped when ≈ 1)
 //   dots  — [{x, y, color}] the configured potential values on the curve
-// Returns {} (nothing draggable here), or null if the area is too small.
+// Returns { dots, phiOfX } for hit-testing/dragging the dots along the
+// curve (dots carry canvas coords + the element index; phiOfX maps a
+// canvas x back to a potential value), or null if the area is too small.
 
 export function drawReshapeCurve(ctx, w, h, data) {
     const left = 34, right = 14, top = 10, bottom = 22;
@@ -503,7 +505,7 @@ export function drawReshapeCurve(ctx, w, h, data) {
     ctx.lineTo(left + W, top + H);
     ctx.stroke();
 
-    // ticks and axis labels: raw potential r along x, softened r-tilde up y
+    // ticks and axis labels: raw potential φ along x, softened φ-tilde up y
     ctx.font = '9px ' + SANS;
     ctx.fillStyle = '#999';
     ctx.textAlign = 'center';
@@ -512,20 +514,21 @@ export function drawReshapeCurve(ctx, w, h, data) {
     ctx.fillText('0', xOf(0), ty);
     ctx.fillText('1', xOf(1), ty);
     ctx.font = 'italic 11px Georgia, serif';
-    ctx.fillText('r', xOf(0.5), ty);
+    ctx.fillText('φ', xOf(0.5), ty);
     ctx.font = '9px ' + SANS;
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
     ctx.fillText('1', left - 4, yOf(1));
     ctx.fillText('0', left - 4, yOf(0));
     drawLabel(ctx, left - 16, yOf(0.5) + 4, [
-        { text: 'r̃', font: 'italic 11px Georgia, serif', color: '#999' },
+        { text: 'φ̃', font: 'italic 11px Georgia, serif', color: '#999' },
     ]);
 
-    // dashed identity diagonal: the beta -> 0 limit (exact conditioning)
+    // dotted identity diagonal: the beta -> 0 limit (exact conditioning);
+    // dotted rather than dashed so it can't be confused with the eps line
     ctx.save();
     ctx.strokeStyle = '#ddd';
-    ctx.setLineDash([3, 4]);
+    ctx.setLineDash([2, 3]);
     ctx.beginPath();
     ctx.moveTo(xOf(0), yOf(0));
     ctx.lineTo(xOf(1), yOf(1));
@@ -559,15 +562,20 @@ export function drawReshapeCurve(ctx, w, h, data) {
     });
     ctx.stroke();
 
-    // the configured potential values, as dots on the curve
-    (data.dots || []).forEach(d => {
+    // the configured potential values, as dots on the curve (draggable:
+    // sliding a dot along the curve sets that element's potential)
+    const hitDots = (data.dots || []).map((d, i) => {
         ctx.fillStyle = d.color || '#444';
         ctx.beginPath();
         ctx.arc(xOf(d.x), yOf(d.y), 3, 0, 2 * Math.PI);
         ctx.fill();
+        return { x: xOf(d.x), y: yOf(d.y), i };
     });
 
-    return {};
+    return {
+        dots: hitDots,
+        phiOfX: x => Math.max(0, Math.min(1, (x - left) / W)),
+    };
 }
 
 // --- Segment diagram: the posterior–antiposterior chord ---

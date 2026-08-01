@@ -28,7 +28,7 @@ import {
 
 let k = DEFAULT_K;                      // support size
 let probs = normalize(defaultPrior(k)); // the prior p
-let valid = defaultValid(k);            // boolean mask: the potential r
+let valid = defaultValid(k);            // boolean mask: the potential φ
 let beta = DEFAULT_BETA;
 
 let L = null;                 // main-canvas layout, set on every redraw
@@ -271,7 +271,7 @@ function bindBetaDot(cv, kind, hitGetter, betaAt) {
     cv.addEventListener('touchstart', onDotDown, { passive: false });
     cv.addEventListener('mousemove', e => {
         if (dragKind) return;
-        cv.style.cursor = dotHit(hitGetter(), getPos(cv, e)) ? 'grab' : '';
+        cv.style.cursor = dotHit(hitGetter(), getPos(cv, e)) ? 'ew-resize' : '';
     });
 }
 

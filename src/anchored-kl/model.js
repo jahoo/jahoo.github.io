@@ -3,7 +3,7 @@
 //  Pure math, no DOM. The anchored objective is
 //      L_beta(q) = KL(pi || q) + beta * KL(q || p),
 //  with pi = p conditioned on the valid set V (binary potential).
-//  Its minimizer is q* ∝ p · max{r, eps} with
+//  Its minimizer is q* ∝ p · max{φ, eps} with
 //      eps = exp(-1/(alpha*beta)),  alpha = q*(V) = Z / (Z + eps(1-Z)),
 //  the unique fixed point of the displayed pair (Z = p(V)).
 // ================================================================

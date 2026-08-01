@@ -5,7 +5,7 @@
   "vposterior": "{\\textcolor[RGB]{41,128,185}{\\pi}}",
   "antiposterior": "{\\textcolor[RGB]{192,57,43}{\\style{display:inline-block;transform:rotate(180deg)}{\\pi}}}",
   "proposal": "q",
-  "potential": "r",
+  "potential": "\\varphi",
   "valid": "{\\textcolor[RGB]{41,128,185}{\\mathcal{V}}}",
   "validc": "{\\textcolor[RGB]{192,57,43}{\\mathcal{V}^{\\mathsf{c}}}}",
   "Z": "Z",
