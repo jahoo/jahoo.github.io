@@ -26,6 +26,18 @@ strip_date() {
   echo "$1" | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//'
 }
 
+# Per-page front-matter dependencies: a page embeds its mathjax-macros
+# JSON (injected into the head by the template) and resolves citations
+# against its bibliography at build time, so it must rebuild when either
+# file changes — not only when the markdown does.
+deps_newer() {
+  local src="$1" dest="$2" dep
+  for dep in $(head -30 "$src" | sed -nE 's/^(mathjax-macros|bibliography): *//p' | tr -d '"'"'"); do
+    [ -f "$dep" ] && [ "$dep" -nt "$dest" ] && return 0
+  done
+  return 1
+}
+
 # Build a single markdown file to an output path
 build_one() {
   local src="$1" dest="$2"
@@ -50,8 +62,8 @@ for src in content/posts/*.md; do
   slug=$(strip_date "$basename")
   dest="$OUTDIR/posts/$slug/index.html"
 
-  # Check if source is newer than destination
-  if [ "$src" -nt "$dest" ] || [ assets/vendor/pandoc-markdown-css-theme/template.html5 -nt "$dest" ] || [ templates/navbar.html -nt "$dest" ] || [ site.yaml -nt "$dest" ]; then
+  # Check if source (or a per-page dependency) is newer than destination
+  if [ "$src" -nt "$dest" ] || [ assets/vendor/pandoc-markdown-css-theme/template.html5 -nt "$dest" ] || [ templates/navbar.html -nt "$dest" ] || [ site.yaml -nt "$dest" ] || deps_newer "$src" "$dest"; then
     build_one "$src" "$dest"
   fi
 
@@ -77,7 +89,7 @@ for src in content/*.md; do
   basename=$(basename "$src" .md)
   case "$basename" in _*) continue ;; esac
   dest="$OUTDIR/$basename/index.html"
-  if [ "$src" -nt "$dest" ] || [ assets/vendor/pandoc-markdown-css-theme/template.html5 -nt "$dest" ] || [ templates/navbar.html -nt "$dest" ]; then
+  if [ "$src" -nt "$dest" ] || [ assets/vendor/pandoc-markdown-css-theme/template.html5 -nt "$dest" ] || [ templates/navbar.html -nt "$dest" ] || deps_newer "$src" "$dest"; then
     build_one "$src" "$dest"
   fi
 done
@@ -97,7 +109,7 @@ for src in _generated/*.md; do
   else
     dest="$OUTDIR/$basename/index.html"
   fi
-  if [ "$src" -nt "$dest" ] || [ assets/vendor/pandoc-markdown-css-theme/template.html5 -nt "$dest" ] || [ templates/navbar.html -nt "$dest" ]; then
+  if [ "$src" -nt "$dest" ] || [ assets/vendor/pandoc-markdown-css-theme/template.html5 -nt "$dest" ] || [ templates/navbar.html -nt "$dest" ] || deps_newer "$src" "$dest"; then
     build_one "$src" "$dest"
   fi
 done
