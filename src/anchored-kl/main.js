@@ -17,6 +17,10 @@ import {
     resetCanvas, getPos, layoutMain,
     drawHBarCol, drawPotentialCol, drawAlphaCurve, drawSegment, drawFPlot,
 } from './drawing.js';
+import {
+    SLIDER_MAX, sliderToBeta, betaToSlider, buildTickLabels,
+    accentColor, fmtBeta, fmtProb, dotHit,
+} from './controls.js';
 
 // ================================================================
 //  STATE
@@ -32,70 +36,6 @@ let hitM = null, hitS = null, hitF = null; // dot hit-test info from the beta pl
 let cvMain, cvM, cvS, cvF, slider, sliderF, kSlider; // DOM, bound in init()
 let roBeta, roAlpha, roZ, roK, roBetaF;
 
-// ================================================================
-//  BETA SLIDER
-//  Log scale over [BETA_MIN, BETA_MAX] with the exact endpoints
-//  snapping to beta = 0 (posterior) and beta = infinity (prior).
-// ================================================================
-
-const SLIDER_MAX = 1000;
-
-function sliderToBeta(v) {
-    if (v <= 0) return 0;
-    if (v >= SLIDER_MAX) return Infinity;
-    return BETA_MIN * Math.pow(BETA_MAX / BETA_MIN, v / SLIDER_MAX);
-}
-
-function betaToSlider(b) {
-    if (b === 0) return 0;
-    if (b === Infinity) return SLIDER_MAX;
-    const f = Math.log(b / BETA_MIN) / Math.log(BETA_MAX / BETA_MIN);
-    return Math.round(Math.max(0, Math.min(1, f)) * SLIDER_MAX);
-}
-
-const THUMB_W = 14; // keep in sync with the slider thumb width in the CSS
-const thumbX = f => `calc(${THUMB_W / 2}px + ${f} * (100% - ${THUMB_W}px))`;
-
-function buildTickLabels() {
-    // 1 is the log-midpoint of [BETA_MIN, BETA_MAX]
-    const ticks = [['0', 0], ['1', 0.5], ['∞', 1]];
-    document.querySelectorAll('.akl-slider-ticks').forEach(wrap => {
-        wrap.replaceChildren(...ticks.map(([text, f]) => {
-            const s = document.createElement('span');
-            s.textContent = text;
-            s.style.left = thumbX(f);
-            return s;
-        }));
-    });
-}
-
-// Thumb accent: valid blue at beta = 0 (posterior) fading to neutral
-// gray at beta = infinity (prior).
-function accentColor() {
-    const f = betaToSlider(beta) / SLIDER_MAX;
-    const a = [41, 128, 185], b = [150, 156, 164];
-    const rgb = [0, 1, 2].map(i => Math.round(a[i] + (b[i] - a[i]) * f));
-    return `rgb(${rgb.join(',')})`;
-}
-
-// ================================================================
-//  READOUTS
-// ================================================================
-
-const typeset = s => s.replace('-', '−');
-
-function fmtBeta(b) {
-    if (b === 0) return '0';
-    if (b === Infinity) return '∞';
-    return typeset(Number(b.toPrecision(3)).toString());
-}
-
-const fmtProb = v => {
-    if (v === 0) return '0';
-    if (v === 1) return '1';
-    if (v < 1e-3) return typeset(v.toExponential(2));
-    return typeset(Number(v.toPrecision(3)).toString());
-};
 
 // ================================================================
 //  REDRAW
@@ -149,7 +89,7 @@ function redraw() {
     if (cvS) {
         const { ctx, w, h } = resetCanvas(cvS);
         hitS = drawSegment(ctx, w, h, {
-            Z, alpha, dotColor: accentColor(),
+            Z, alpha, dotColor: accentColor(beta),
             validColor: VALID_COLOR, invalidColor: INVALID_COLOR,
         });
     }
@@ -167,7 +107,7 @@ function redraw() {
         // beta can also be set by dragging a dot or the other slider;
         // keep every thumb in sync
         s.value = String(betaToSlider(beta));
-        s.style.setProperty('--akl-accent', accentColor());
+        s.style.setProperty('--akl-accent', accentColor(beta));
     });
 }
 
@@ -195,7 +135,7 @@ function redrawMargin(alpha, Z) {
     hitM = drawAlphaCurve(ctx, w, h, {
         curve, approx, Z,
         dot: { f: betaToSlider(beta) / SLIDER_MAX, a: alpha },
-        dotColor: accentColor(),
+        dotColor: accentColor(beta),
     });
 }
 
@@ -237,7 +177,7 @@ function redrawF(alpha, Z) {
     hitF = drawFPlot(ctx, w, h, {
         fCurve, fpCurve, Z, alpha: aDot,
         fAtAlpha: f(aDot), fpAtAlpha: fp(aDot),
-        fLabel, fpLabel, dotColor: accentColor(),
+        fLabel, fpLabel, dotColor: accentColor(beta),
     });
 }
 
@@ -293,13 +233,6 @@ function onDown(e) {
 }
 
 // ---- The beta dots: the same parameter, grabbable in every plot ----
-
-function dotHit(hit, pos) {
-    if (!hit) return false;
-    const dots = hit.dots || (hit.dot ? [hit.dot] : []);
-    return dots.some(d =>
-        Math.abs(pos.x - d.x) < 12 && Math.abs(pos.y - d.y) < 14);
-}
 
 function betaFromMargin(x) {
     return sliderToBeta(Math.round(hitM.fOfX(x) * SLIDER_MAX));
@@ -427,14 +360,6 @@ export function init() {
         });
     }
 
-    // The K dropdown chip: close its floating panel on any click outside.
-    const kDrop = document.querySelector('.akl-k-dropdown');
-    if (kDrop) {
-        document.addEventListener('pointerdown', e => {
-            if (kDrop.open && !kDrop.contains(e.target)) kDrop.open = false;
-        });
-    }
-
     if (kSlider) {
         kSlider.value = String(k);
         if (roK) roK.textContent = String(k);
@@ -471,6 +396,5 @@ export function init() {
     window.addEventListener('touchend', onUp);
     window.addEventListener('resize', redraw);
 
-    buildTickLabels();
     redraw();
 }

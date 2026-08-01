@@ -4,9 +4,18 @@
 // ================================================================
 
 import { init } from './main.js';
+import { initContinuous } from './main-continuous.js';
+import { buildTickLabels, bindDropdownClose } from './controls.js';
+
+function boot() {
+    init();
+    initContinuous();
+    buildTickLabels();
+    bindDropdownClose();
+}
 
 if (document.readyState !== 'loading') {
-    init();
+    boot();
 } else {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', boot);
 }

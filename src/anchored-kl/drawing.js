@@ -59,9 +59,8 @@ const fmtTick = v => Number(v.toPrecision(2)).toString();
 // values are just 0/1); the three probability columns share their width
 // and their x-scale, so bar lengths are comparable across them.
 
-export function layoutMain(w, h, k) {
+export function layoutMain(w, h, k, { potW = 54 } = {}) {
     const top = 34, bottom = 24, left = 10, right = 12, gap = 26;
-    const potW = 54;
     const probW = Math.max(40, (w - left - right - potW - 3 * gap) / 3);
     const rowsH = h - top - bottom;
     const rowH = rowsH / k;
@@ -143,7 +142,7 @@ export function drawHBarCol(ctx, L, P, values, opts) {
     xTick(ctx, L, P.x + P.w, fmtTick(opts.xmax), 'right');
 
     // dashed reference at the uniform distribution
-    if (1 / k <= opts.xmax) {
+    if (opts.uniformRef !== false && 1 / k <= opts.xmax) {
         const xU = P.x + (1 / k / opts.xmax) * P.w;
         ctx.save();
         ctx.strokeStyle = '#ccc';
@@ -475,6 +474,100 @@ export function drawFPlot(ctx, w, h, data) {
         dots,
         alphaOfX: x => Math.max(0, Math.min(1, (x - left) / W)),
     };
+}
+
+// --- Reshaping curve: the softened potential over the raw potential ---
+// The continuous-case analogue of the segment diagram. The anchored
+// optimum is q* = p · r(φ) for one increasing ratio curve r, so up to
+// normalization it is the exact posterior for the softened potential
+// φ̃(φ) = r(φ)/r(1) ∈ (0, 1]: the identity at beta = 0, flat 1 at
+// beta = ∞, floored at φ̃(0) = ε_β. data:
+//   curve — [{x, y}] samples of φ̃ over x in [0, 1], x increasing
+//   eps   — the floor φ̃(0) (dashed reference, skipped when ≈ 1)
+//   dots  — [{x, y, color}] the configured potential values on the curve
+// Returns {} (nothing draggable here), or null if the area is too small.
+
+export function drawReshapeCurve(ctx, w, h, data) {
+    const left = 34, right = 14, top = 10, bottom = 22;
+    const W = w - left - right, H = h - top - bottom;
+    if (W < 40 || H < 40) return null;
+    const xOf = x => left + x * W;
+    const yOf = y => top + (1 - y) * H;
+
+    // spines: left and bottom
+    ctx.strokeStyle = '#999';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(left, top);
+    ctx.lineTo(left, top + H);
+    ctx.lineTo(left + W, top + H);
+    ctx.stroke();
+
+    // ticks and axis labels: raw potential r along x, softened r-tilde up y
+    ctx.font = '9px ' + SANS;
+    ctx.fillStyle = '#999';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    const ty = top + H + 5;
+    ctx.fillText('0', xOf(0), ty);
+    ctx.fillText('1', xOf(1), ty);
+    ctx.font = 'italic 11px Georgia, serif';
+    ctx.fillText('r', xOf(0.5), ty);
+    ctx.font = '9px ' + SANS;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('1', left - 4, yOf(1));
+    ctx.fillText('0', left - 4, yOf(0));
+    drawLabel(ctx, left - 16, yOf(0.5) + 4, [
+        { text: 'r̃', font: 'italic 11px Georgia, serif', color: '#999' },
+    ]);
+
+    // dashed identity diagonal: the beta -> 0 limit (exact conditioning)
+    ctx.save();
+    ctx.strokeStyle = '#ddd';
+    ctx.setLineDash([3, 4]);
+    ctx.beginPath();
+    ctx.moveTo(xOf(0), yOf(0));
+    ctx.lineTo(xOf(1), yOf(1));
+    ctx.stroke();
+    ctx.restore();
+
+    // dashed floor at eps, labeled in the right margin
+    if (data.eps < 0.995) {
+        ctx.save();
+        ctx.strokeStyle = '#bbb';
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath();
+        ctx.moveTo(left, yOf(data.eps));
+        ctx.lineTo(left + W, yOf(data.eps));
+        ctx.stroke();
+        ctx.restore();
+        ctx.font = 'italic 9px Georgia, serif';
+        ctx.fillStyle = '#999';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('ε', left + W + 4, yOf(data.eps));
+    }
+
+    // the softened-potential curve
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    data.curve.forEach((p, i) => {
+        if (i === 0) ctx.moveTo(xOf(p.x), yOf(p.y));
+        else ctx.lineTo(xOf(p.x), yOf(p.y));
+    });
+    ctx.stroke();
+
+    // the configured potential values, as dots on the curve
+    (data.dots || []).forEach(d => {
+        ctx.fillStyle = d.color || '#444';
+        ctx.beginPath();
+        ctx.arc(xOf(d.x), yOf(d.y), 3, 0, 2 * Math.PI);
+        ctx.fill();
+    });
+
+    return {};
 }
 
 // --- Segment diagram: the posterior–antiposterior chord ---

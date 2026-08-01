@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { MIN_P, DEFAULT_K, defaultPrior, defaultValid } from './config.js';
-import { normalize, withProb, solveAlpha, betaOfAlpha, epsBeta, anchoredOptimum, bernKL, bernKLPrime, fOfAlpha, fPrimeOfAlpha } from './model.js';
+import { MIN_P, DEFAULT_K, defaultPrior, defaultValid, defaultPhi } from './config.js';
+import { normalize, withProb, solveAlpha, betaOfAlpha, epsBeta, anchoredOptimum, bernKL, bernKLPrime, fOfAlpha, fPrimeOfAlpha, contOptimum } from './model.js';
 
 const sum = a => a.reduce((x, y) => x + y, 0);
 const close = (a, b, tol = 1e-9) =>
@@ -203,4 +203,69 @@ test('fPrimeOfAlpha and bernKLPrime are strictly increasing in alpha', () => {
                 `bernKL' not increasing at z=${z}, a=${a}`);
         }
     }
+});
+
+const phiRamp = defaultPhi(DEFAULT_K);
+
+test('defaultPhi is an increasing ramp strictly inside (0, 1)', () => {
+    for (let kk = 2; kk <= 40; kk++) {
+        const f = defaultPhi(kk);
+        assert.equal(f.length, kk);
+        f.forEach(v => assert.ok(v > 0 && v < 1, `phi in (0,1), got ${v}`));
+        for (let i = 1; i < kk; i++) {
+            assert.ok(f[i] > f[i - 1], `ramp increasing at ${i}`);
+        }
+    }
+});
+
+test('contOptimum with binary phi recovers anchoredOptimum', () => {
+    const phi = valid.map(v => (v ? 1 : 0));
+    for (const beta of [0.05, 0.5, 2, 20]) {
+        const bin = anchoredOptimum(prior, valid, beta);
+        const cont = contOptimum(prior, phi, beta);
+        cont.q.forEach((v, i) => close(v, bin.q[i], 1e-6));
+        close(cont.eps, bin.eps, 1e-6);
+        close(cont.Z, bin.Z, 1e-9);
+    }
+});
+
+test('contOptimum endpoints: posterior at beta = 0, prior at beta = infinity', () => {
+    const posterior = normalize(prior.map((p, i) => p * phiRamp[i]));
+    contOptimum(prior, phiRamp, 0).q.forEach((v, i) => close(v, posterior[i], 1e-9));
+    contOptimum(prior, phiRamp, Infinity).q.forEach((v, i) => close(v, prior[i], 1e-9));
+    // the limits are approached continuously
+    contOptimum(prior, phiRamp, 1e-4).q.forEach((v, i) => close(v, posterior[i], 1e-3));
+    contOptimum(prior, phiRamp, 1e5).q.forEach((v, i) => close(v, prior[i], 1e-3));
+});
+
+test('contOptimum is normalized and satisfies stationarity', () => {
+    for (const beta of [0.1, 1, 10]) {
+        const { q, c, Z } = contOptimum(prior, phiRamp, beta);
+        close(sum(q), 1, 1e-9);
+        // phi_i = Z * r_i * (beta*log r_i + c) at the solution
+        q.forEach((v, i) => {
+            const r = v / prior[i];
+            close(phiRamp[i], Z * r * (beta * Math.log(r) + c), 1e-5);
+        });
+    }
+});
+
+test('softened potential is monotone, floored at eps, topped at 1', () => {
+    for (const beta of [0.1, 1, 10]) {
+        const { softened, eps } = contOptimum(prior, phiRamp, beta);
+        close(softened(0), eps, 1e-9);
+        close(softened(1), 1, 1e-9);
+        assert.ok(eps > 0 && eps < 1, `floor in (0,1), got ${eps}`);
+        let prev = -1;
+        for (let i = 0; i <= 50; i++) {
+            const v = softened(i / 50);
+            assert.ok(v >= prev - 1e-12, `softened monotone at ${i / 50}`);
+            prev = v;
+        }
+    }
+});
+
+test('contOptimum degenerate all-zero phi falls back to the prior', () => {
+    const zero = prior.map(() => 0);
+    contOptimum(prior, zero, 0.5).q.forEach((v, i) => close(v, prior[i]));
 });

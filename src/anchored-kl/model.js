@@ -99,3 +99,68 @@ export function anchoredOptimum(prior, valid, beta) {
     const q = normalize(p.map((v, i) => v * (valid[i] ? 1 : eps)));
     return { q, alpha, eps, Z };
 }
+
+// --- Continuous potential ---
+// Stationarity of the anchored objective gives, per element, with
+// r = q*/p and one global constant c fixed by normalization:
+//     phi = Z * r * (beta*log r + c)  =: g(r),
+// on the increasing branch r >= exp(-c/beta) (where g = 0). So the
+// optimum is q* = p * gInverse(phi): elements enter only through their
+// potential value, via one monotone reshaping curve.
+
+// Solve g(r) = phi for r on the increasing branch: bisection with an
+// expanding upper bracket (g is strictly increasing there).
+function rOfPhiAt(phi, Z, beta, c) {
+    const r0 = Math.exp(-c / beta); // g(r0) = 0
+    if (phi <= 0) return r0;
+    const g = r => Z * r * (beta * Math.log(r) + c);
+    let hi = Math.max(r0 * 2, 1);
+    while (g(hi) < phi) hi *= 2;
+    let lo = r0;
+    for (let it = 0; it < 80; it++) {
+        const mid = (lo + hi) / 2;
+        if (g(mid) < phi) lo = mid; else hi = mid;
+    }
+    return (lo + hi) / 2;
+}
+
+// The anchored optimum for a continuous potential phi (values in [0, 1])
+// and beta in [0, Infinity]. Returns { q, rOf, softened, c, eps, Z }:
+// q the normalized optimum, rOf the ratio curve gInverse on [0, 1],
+// softened(x) = rOf(x)/rOf(1) the displayed softened potential (so
+// softened(0) = eps generalizes the binary floor), c the multiplier.
+// Total mass sum p_i * r_i(c) is strictly decreasing in c, so the outer
+// bisection on c is well posed; brackets are found by doubling steps.
+export function contOptimum(prior, phi, beta) {
+    const p = normalize(prior);
+    const Z = p.reduce((s, v, i) => s + v * phi[i], 0);
+    const flat = { rOf: () => 1, softened: () => 1, c: NaN, eps: 1, Z };
+    if (Z <= 0) return { q: p.slice(), ...flat };           // no valid mass
+    if (beta === Infinity) return { q: p.slice(), ...flat }; // the prior
+    if (beta === 0) {
+        // the exact posterior; r is linear in phi
+        return {
+            q: normalize(p.map((v, i) => v * phi[i])),
+            rOf: x => x / Z,
+            softened: x => x,
+            c: NaN, eps: 0, Z,
+        };
+    }
+    const T = c => p.reduce((s, v, i) => s + v * rOfPhiAt(phi[i], Z, beta, c), 0);
+    let cLo = 0, cHi = 0, step = 1;
+    while (T(cLo) < 1) { cLo -= step; step *= 2; }
+    step = 1;
+    while (T(cHi) > 1) { cHi += step; step *= 2; }
+    for (let it = 0; it < 80; it++) {
+        const mid = (cLo + cHi) / 2;
+        if (T(mid) > 1) cLo = mid; else cHi = mid;
+    }
+    const c = (cLo + cHi) / 2;
+    const rOf = x => rOfPhiAt(x, Z, beta, c);
+    const r1 = rOf(1);
+    const softened = x => rOf(x) / r1;
+    return {
+        q: normalize(p.map((v, i) => v * rOf(phi[i]))), // tidy bisection residue
+        rOf, softened, c, eps: softened(0), Z,
+    };
+}

@@ -279,6 +279,8 @@ In the geometry of the mixture, the optimum $\proposal^\star_\beta$ lives on the
 
 # A continuous potential
 
+[Under construction...]
+
 Next, let's explore how this works with a continuous $\potential$ rather than a binary one. It's really the same setting as above, but where above we assumed validity was a deterministic function of $\str$, here we let validity be a binary random variable $V$, with likelihood function $\str\mapsto\Pr(V=\mathtt{true} \mid \str)$ that takes values anywhere in $[0, 1]$, rather than only in $\{0, 1\}$.^[Requiring $\potential \le 1$ costs nothing relative to the intro's general $\potential \ge 0$: scaling the potential by a positive constant changes neither the posterior nor the anchored optimum (the objective depends on $\potential$ only through $\posterior$), so any bounded potential can be rescaled into $[0, 1]$.]
 
 In this more general setting the two-bin structure is gone: Validity no longer sharply partitions the support into valid and invalid regions. Any given $\str$ may be valid with some probability, so there is no valid set to restrict to, and no posterior--antiposterior segment. We'll need a *per-element* description of the optimum instead. 
@@ -385,4 +387,32 @@ $$
 
 </details>
 
-> **TODO:** build the visualization of the continuous-potential setting. (For a general $\potential$, the pointwise optimality condition above still determines the optimum as the exact posterior of a single inference problem with a *reshaped* potential --- floored from below, as in the binary case, but also compressed from above --- while the two-component mixture, and with it the "antiposterior" reading, is special to the binary case.)
+Below is the same kind of interactive setup as in the binary section --- except the potential column is now continuous: drag any potential bar to set $\potential(\str)$ anywhere in $[0, 1]$ (the prior bars are draggable as before). This instance is entirely independent of the one above --- a different problem, so nothing is linked.
+
+<div class="akl-controls akl-sticky">
+<details class="akl-k-dropdown">
+<summary>$K$ = <span class="akl-toolbar-value" id="akl-c-readout-k">10</span></summary>
+<div class="akl-k-panel">
+<span class="akl-controls-label">support size $K$:</span>
+<input type="range" id="akl-c-k" min="2" max="40" value="10">
+</div>
+</details>
+<span class="akl-controls-label">$\beta$:</span>
+<div class="akl-slider-wrap">
+<input type="range" id="akl-c-beta" min="0" max="1000" value="425">
+<div class="akl-slider-ticks"><span>0</span><span>1</span><span>∞</span></div>
+</div>
+<div class="akl-readouts">
+<div><span class="akl-controls-label">$\beta$ =&nbsp;</span><span id="akl-c-readout-beta">0.5</span></div>
+<div><span class="akl-controls-label">$\varepsilon_\beta$ =&nbsp;</span><span id="akl-c-readout-eps">–</span></div>
+<div><span class="akl-controls-label">$\Z$ =&nbsp;</span><span id="akl-c-readout-z">–</span></div>
+</div>
+</div>
+
+::: {.viz #cv-akl-c-main canvas="true" height="340px" width="100%"}
+:::
+
+Everything the anchor does here is carried by a single monotone curve. The pointwise optimality condition determines the optimum as $\proposal^\star_\beta = \prior \cdot r(\potential)$ for one *increasing* function $r$ --- elements enter only through their potential values --- and normalizing $r$ by its value at $\potential = 1$ gives the **softened potential** $\tilde{\potential}$: the anchored optimum is the exact posterior for the potential $\tilde{\potential}(\potential)$. At $\beta = 0$ the curve is the identity (exact conditioning); as $\beta \to \infty$ it flattens toward the constant $1$ (the prior); in between it *floors* low potentials at $\tilde{\potential}(0) = \varepsilon_\beta$ and *compresses* high ones --- the continuous generalization of $\max\{\potential, \varepsilon_\beta\}$. Watch it below as you move $\beta$; the dots mark the potential values configured above.
+
+::: {.viz #cv-akl-c-reshape canvas="true" height="260px" width="100%"}
+:::

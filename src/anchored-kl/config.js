@@ -30,3 +30,11 @@ export function defaultValid(k) {
     if (v.every(Boolean)) v[k - 1] = false; // tiny k: keep the potential nontrivial
     return v;
 }
+
+// Default continuous potential for support size k: a smooth increasing
+// ramp (sigmoid in the element index) spanning ~0.05 to ~0.95, so both
+// the floor and the top compression of the softened potential show.
+export const defaultPhi = k => Array.from({ length: k }, (_, i) => {
+    const t = (i - (k - 1) / 2) / (k / 6);
+    return 0.05 + 0.9 / (1 + Math.exp(-t));
+});
