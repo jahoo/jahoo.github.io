@@ -25,6 +25,19 @@
     const scale = (1 - target) / (1 - probs2[i]);
     return normalize(probs2.map((p, j) => j === i ? target : Math.max(MIN_P, p * scale)));
   }
+  var xlogx = (x, y) => x === 0 ? 0 : x * Math.log(x / y);
+  function bernKL(a, Z) {
+    return xlogx(a, Z) + xlogx(1 - a, 1 - Z);
+  }
+  function bernKLPrime(a, Z) {
+    return Math.log(a * (1 - Z) / (Z * (1 - a)));
+  }
+  function fOfAlpha(Z, beta2, a) {
+    return -Math.log(a) + beta2 * bernKL(a, Z);
+  }
+  function fPrimeOfAlpha(Z, beta2, a) {
+    return -1 / a + beta2 * Math.log(a * (1 - Z) / (Z * (1 - a)));
+  }
   function solveAlpha(Z, beta2) {
     if (Z >= 1) return 1;
     if (Z <= 0) return 0;
@@ -313,6 +326,131 @@
       fOfX: (x) => Math.max(0, Math.min(1, (x - P.x) / P.w))
     };
   }
+  var FP_WINDOW = 3;
+  function drawFPlot(ctx, w, h, data) {
+    const left = 34, right = 10, top = 8, bottom = 20, gap = 16;
+    const W = w - left - right;
+    const H = h - top - bottom - gap;
+    if (W < 40 || H < 60) return null;
+    const fh = Math.round(H * 0.55);
+    const F = { y: top, h: fh };
+    const D = { y: top + fh + gap, h: H - fh };
+    const xOf = (a) => left + Math.max(0, Math.min(1, a)) * W;
+    const ys = data.fCurve.map((p) => p.y).filter(Number.isFinite);
+    if (!ys.length) return null;
+    const fmin = Math.min(...ys);
+    const fmax = Math.max(
+      fmin + 1e-6,
+      Math.min(Math.max(...ys), fmin + FP_WINDOW)
+    );
+    const vis = data.fCurve.filter((p) => p.y <= fmax);
+    const nearest = (curve, a) => curve.reduce((b, p) => Math.abs(p.a - a) < Math.abs(b.a - a) ? p : b);
+    let pLo = nearest(data.fpCurve, vis[0].a).y;
+    let pHi = nearest(data.fpCurve, vis[vis.length - 1].a).y;
+    if (!(pHi - pLo > 1e-6)) {
+      pLo -= 1;
+      pHi += 1;
+    }
+    const yF = (v) => F.y + (fmax - v) / (fmax - fmin) * F.h;
+    const yD = (v) => D.y + (pHi - v) / (pHi - pLo) * D.h;
+    ctx.strokeStyle = "#ccc";
+    ctx.lineWidth = 1;
+    [F, D].forEach((P) => {
+      ctx.beginPath();
+      ctx.moveTo(left, P.y);
+      ctx.lineTo(left, P.y + P.h);
+      ctx.stroke();
+    });
+    ctx.strokeStyle = "#999";
+    ctx.beginPath();
+    ctx.moveTo(left, D.y + D.h);
+    ctx.lineTo(left + W, D.y + D.h);
+    ctx.stroke();
+    ctx.font = "9px " + SANS;
+    ctx.fillStyle = "#999";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    const ty = D.y + D.h + 5;
+    ctx.fillText("0", xOf(0), ty);
+    ctx.fillText("1", xOf(1), ty);
+    ctx.font = "italic 9px Georgia, serif";
+    ctx.fillText("Z", xOf(data.Z), ty);
+    ctx.font = "italic 10px Georgia, serif";
+    ctx.fillText("\u03B1", xOf(0.5), ty);
+    drawLabel(ctx, left - 18, F.y + 12, [{ text: data.fLabel, font: IT }]);
+    drawLabel(ctx, left - 18, D.y + 12, [{ text: data.fpLabel, font: IT }]);
+    ctx.save();
+    ctx.strokeStyle = "#ddd";
+    ctx.setLineDash([3, 4]);
+    ctx.beginPath();
+    ctx.moveTo(xOf(data.Z), F.y);
+    ctx.lineTo(xOf(data.Z), D.y + D.h);
+    ctx.stroke();
+    ctx.restore();
+    if (pLo < 0 && pHi > 0) {
+      ctx.save();
+      ctx.strokeStyle = "#bbb";
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(left, yD(0));
+      ctx.lineTo(left + W, yD(0));
+      ctx.stroke();
+      ctx.restore();
+      ctx.font = "9px " + SANS;
+      ctx.fillStyle = "#999";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      ctx.fillText("0", left - 4, yD(0));
+    }
+    ctx.save();
+    ctx.strokeStyle = "#aaa";
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.moveTo(xOf(data.alpha), F.y);
+    ctx.lineTo(xOf(data.alpha), D.y + D.h);
+    ctx.stroke();
+    ctx.restore();
+    const drawCurve = (pts, yMap, P) => {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(left, P.y - 1, W, P.h + 2);
+      ctx.clip();
+      ctx.strokeStyle = "#444";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      let pen = false;
+      pts.forEach((p) => {
+        if (!Number.isFinite(p.y)) {
+          pen = false;
+          return;
+        }
+        const x = xOf(p.a), y = yMap(p.y);
+        if (!pen) {
+          ctx.moveTo(x, y);
+          pen = true;
+        } else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      ctx.restore();
+    };
+    drawCurve(data.fCurve, yF, F);
+    drawCurve(data.fpCurve, yD, D);
+    const clampY = (y, P) => Math.max(P.y, Math.min(P.y + P.h, y));
+    const dots = [
+      { x: xOf(data.alpha), y: clampY(yF(data.fAtAlpha), F) },
+      { x: xOf(data.alpha), y: clampY(yD(data.fpAtAlpha), D) }
+    ];
+    ctx.fillStyle = data.dotColor || "#444";
+    dots.forEach((d) => {
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, 3.2, 0, 2 * Math.PI);
+      ctx.fill();
+    });
+    return {
+      dots,
+      alphaOfX: (x) => Math.max(0, Math.min(1, (x - left) / W))
+    };
+  }
   function drawSegment(ctx, w, h, data) {
     const left = 40, right = 14;
     const x0 = left, x1 = w - right;
@@ -405,16 +543,19 @@
   var L = null;
   var hitM = null;
   var hitS = null;
+  var hitF = null;
   var cvMain;
   var cvM;
   var cvS;
+  var cvF;
   var slider;
+  var sliderF;
   var kSlider;
   var roBeta;
   var roAlpha;
   var roZ;
   var roK;
-  var ticksWrap;
+  var roBetaF;
   var SLIDER_MAX = 1e3;
   function sliderToBeta(v) {
     if (v <= 0) return 0;
@@ -430,14 +571,15 @@
   var THUMB_W = 14;
   var thumbX = (f) => `calc(${THUMB_W / 2}px + ${f} * (100% - ${THUMB_W}px))`;
   function buildTickLabels() {
-    if (!ticksWrap) return;
     const ticks = [["0", 0], ["1", 0.5], ["\u221E", 1]];
-    ticksWrap.replaceChildren(...ticks.map(([text, f]) => {
-      const s = document.createElement("span");
-      s.textContent = text;
-      s.style.left = thumbX(f);
-      return s;
-    }));
+    document.querySelectorAll(".akl-slider-ticks").forEach((wrap) => {
+      wrap.replaceChildren(...ticks.map(([text, f]) => {
+        const s = document.createElement("span");
+        s.textContent = text;
+        s.style.left = thumbX(f);
+        return s;
+      }));
+    });
   }
   function accentColor() {
     const f = betaToSlider(beta) / SLIDER_MAX;
@@ -510,13 +652,16 @@
       });
     }
     redrawMargin(alpha, Z);
+    redrawF(alpha, Z);
     if (roBeta) roBeta.textContent = fmtBeta(beta);
+    if (roBetaF) roBetaF.textContent = fmtBeta(beta);
     if (roAlpha) roAlpha.textContent = Z >= 1 ? "1" : fmtProb(alpha);
     if (roZ) roZ.textContent = fmtProb(Z);
-    if (slider) {
-      slider.value = String(betaToSlider(beta));
-      slider.style.setProperty("--akl-accent", accentColor());
-    }
+    [slider, sliderF].forEach((s) => {
+      if (!s) return;
+      s.value = String(betaToSlider(beta));
+      s.style.setProperty("--akl-accent", accentColor());
+    });
   }
   function redrawMargin(alpha, Z) {
     if (!cvM) return;
@@ -538,6 +683,49 @@
       approx,
       Z,
       dot: { f: betaToSlider(beta) / SLIDER_MAX, a: alpha },
+      dotColor: accentColor()
+    });
+  }
+  function fShapes(Z, b) {
+    if (b === Infinity) {
+      return {
+        f: (a) => bernKL(a, Z),
+        fp: (a) => bernKLPrime(a, Z),
+        fLabel: "f\u2215\u03B2",
+        fpLabel: "f\u2032\u2215\u03B2"
+      };
+    }
+    return {
+      f: (a) => fOfAlpha(Z, b, a),
+      fp: (a) => fPrimeOfAlpha(Z, b, a),
+      fLabel: "f",
+      fpLabel: "f\u2032"
+    };
+  }
+  function redrawF(alpha, Z) {
+    if (!cvF) return;
+    hitF = null;
+    const { ctx, w, h } = resetCanvas(cvF);
+    if (w < 40) return;
+    if (Z <= 0 || Z >= 1) return;
+    const { f, fp, fLabel, fpLabel } = fShapes(Z, beta);
+    const N = 240, lo = 2e-3, hi = 0.998;
+    const fCurve = [], fpCurve = [];
+    for (let i = 0; i <= N; i++) {
+      const a = lo + i / N * (hi - lo);
+      fCurve.push({ a, y: f(a) });
+      fpCurve.push({ a, y: fp(a) });
+    }
+    const aDot = Math.max(lo, Math.min(hi, alpha));
+    hitF = drawFPlot(ctx, w, h, {
+      fCurve,
+      fpCurve,
+      Z,
+      alpha: aDot,
+      fAtAlpha: f(aDot),
+      fpAtAlpha: fp(aDot),
+      fLabel,
+      fpLabel,
       dotColor: accentColor()
     });
   }
@@ -582,7 +770,9 @@
     }
   }
   function dotHit(hit, pos) {
-    return !!(hit && hit.dot && Math.abs(pos.x - hit.dot.x) < 12 && Math.abs(pos.y - hit.dot.y) < 14);
+    if (!hit) return false;
+    const dots = hit.dots || (hit.dot ? [hit.dot] : []);
+    return dots.some((d) => Math.abs(pos.x - d.x) < 12 && Math.abs(pos.y - d.y) < 14);
   }
   function betaFromMargin(x) {
     return sliderToBeta(Math.round(hitM.fOfX(x) * SLIDER_MAX));
@@ -590,6 +780,13 @@
   function betaFromSegment(x) {
     const Z = probs.reduce((s, p, i) => s + (valid[i] ? p : 0), 0);
     let b = betaOfAlpha(Z, hitS.alphaOfX(x));
+    if (b < BETA_MIN) b = 0;
+    if (b > BETA_MAX) b = Infinity;
+    return b;
+  }
+  function betaFromF(x) {
+    const Z = probs.reduce((s, p, i) => s + (valid[i] ? p : 0), 0);
+    let b = betaOfAlpha(Z, hitF.alphaOfX(x));
     if (b < BETA_MIN) b = 0;
     if (b > BETA_MAX) b = Infinity;
     return b;
@@ -619,6 +816,10 @@
     } else if (dragKind === "dotS") {
       e.preventDefault();
       beta = betaFromSegment(getPos(cvS, e).x);
+      redraw();
+    } else if (dragKind === "dotF") {
+      e.preventDefault();
+      beta = betaFromF(getPos(cvF, e).x);
       redraw();
     } else if (dragKind === "bar") {
       e.preventDefault();
@@ -650,13 +851,15 @@
     cvMain = document.getElementById("cv-akl-main");
     cvM = document.getElementById("cv-akl-alpha");
     cvS = document.getElementById("cv-akl-segment");
+    cvF = document.getElementById("cv-akl-f");
     slider = document.getElementById("akl-beta");
+    sliderF = document.getElementById("akl-beta-f");
     kSlider = document.getElementById("akl-k");
     roBeta = document.getElementById("akl-readout-beta");
     roAlpha = document.getElementById("akl-readout-alpha");
     roZ = document.getElementById("akl-readout-z");
     roK = document.getElementById("akl-readout-k");
-    ticksWrap = document.querySelector(".akl-slider-ticks");
+    roBetaF = document.getElementById("akl-readout-beta-f");
     if (!cvMain) return;
     cvMain.style.height = mainHeight() + "px";
     if (slider) {
@@ -665,6 +868,20 @@
       slider.addEventListener("input", () => {
         beta = sliderToBeta(Number(slider.value));
         redraw();
+      });
+    }
+    if (sliderF) {
+      sliderF.max = String(SLIDER_MAX);
+      sliderF.value = String(betaToSlider(beta));
+      sliderF.addEventListener("input", () => {
+        beta = sliderToBeta(Number(sliderF.value));
+        redraw();
+      });
+    }
+    const kDrop = document.querySelector(".akl-k-dropdown");
+    if (kDrop) {
+      document.addEventListener("pointerdown", (e) => {
+        if (kDrop.open && !kDrop.contains(e.target)) kDrop.open = false;
       });
     }
     if (kSlider) {
@@ -682,10 +899,13 @@
       });
     }
     document.querySelectorAll(".margin-toggle").forEach((t) => t.addEventListener("change", () => setTimeout(redraw, 0)));
+    const fold = cvF && cvF.closest("details");
+    if (fold) fold.addEventListener("toggle", () => redraw());
     cvMain.addEventListener("mousedown", onDown);
     cvMain.addEventListener("touchstart", onDown, { passive: false });
     bindBetaDot(cvM, "dotM", () => hitM, betaFromMargin);
     bindBetaDot(cvS, "dotS", () => hitS, betaFromSegment);
+    bindBetaDot(cvF, "dotF", () => hitF, betaFromF);
     window.addEventListener("mousemove", onMove);
     window.addEventListener("touchmove", onMove, { passive: false });
     window.addEventListener("mouseup", onUp);
