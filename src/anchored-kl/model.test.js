@@ -269,3 +269,15 @@ test('contOptimum degenerate all-zero phi falls back to the prior', () => {
     const zero = prior.map(() => 0);
     contOptimum(prior, zero, 0.5).q.forEach((v, i) => close(v, prior[i]));
 });
+
+test('contOptimum is sane across the whole reachable input space', () => {
+    for (const kk of [2, 40]) {
+        const p = normalize(defaultPrior(kk));
+        const f = defaultPhi(kk);
+        for (const beta of [0, 0.01, 1, 100, Infinity]) {
+            const { q } = contOptimum(p, f, beta);
+            close(sum(q), 1, 1e-9);
+            q.forEach(v => assert.ok(Number.isFinite(v) && v >= 0));
+        }
+    }
+});

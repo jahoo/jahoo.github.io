@@ -243,7 +243,7 @@ Both regimes also fall out of the closed form of the previous aside in a single 
 Sliding $\beta$ from zero toward infinity, scales $\alpha_\beta$ from $1$ down toward $\Z$.
 As $\beta$ increases, essentially softens the condition on validity in the optimum solution. For small $\beta$, the mass on the invalid set is *exponentially* small (so the optimum remains practially identical to the posterior), while at the other extreme, for very large $\beta$ the optimum approaches the prior only slowly.^[More precisely at the small-$\beta$ end $$1 - \alpha_\beta \approx \frac{1-\Z}{\Z}\, e^{-1/\beta}$$ and at the other end, $$\alpha_\beta - \Z \approx (1 - \Z)\frac{1}{\beta}$$$ (both of these approximations are worked out in the asides above; and the small-$\beta$ approximation is the dotted curve in the margin plot below).]
 
-# Interactive visualization
+## Interactive visualization
 
 <div class="akl-toolbar" id="akl-toolbar">
 <details class="akl-k-dropdown">
@@ -387,7 +387,8 @@ $$
 
 </details>
 
-Below is the same kind of interactive setup as in the binary section --- except the potential column is now continuous: drag any potential bar to set $\potential(\str)$ anywhere in $[0, 1]$ (the prior bars are draggable as before). This instance is entirely independent of the one above --- a different problem, so nothing is linked.
+
+## Interactive visualization
 
 <div class="akl-controls akl-sticky">
 <details class="akl-k-dropdown">
@@ -412,7 +413,9 @@ Below is the same kind of interactive setup as in the binary section --- except 
 ::: {.viz #cv-akl-c-main canvas="true" height="340px" width="100%"}
 :::
 
-Everything the anchor does here is carried by a single monotone curve. The pointwise optimality condition determines the optimum as $\proposal^\star_\beta = \prior \cdot r(\potential)$ for one *increasing* function $r$ --- elements enter only through their potential values --- and normalizing $r$ by its value at $\potential = 1$ gives the **softened potential** $\tilde{\potential}$: the anchored optimum is the exact posterior for the potential $\tilde{\potential}(\potential)$. At $\beta = 0$ the curve is the identity (exact conditioning); as $\beta \to \infty$ it flattens toward the constant $1$ (the prior); in between it *floors* low potentials at $\tilde{\potential}(0) = \varepsilon_\beta$ and *compresses* high ones --- the continuous generalization of $\max\{\potential, \varepsilon_\beta\}$. Watch it below as you move $\beta$; the dots mark the potential values configured above.
+Everything the anchor does here is carried by a single monotone curve.
 
 ::: {.viz #cv-akl-c-reshape canvas="true" height="260px" width="100%"}
 :::
+
+> The pointwise optimality condition determines the optimum as $\proposal^\star_\beta = \prior \cdot \rho(\potential)$ for one *increasing* function $\rho$. Elements enter only through their potential values. Normalizing $\rho$ by its value at $\potential = 1$ gives the **softened potential** $\tilde{\potential}$: The anchored optimum is the exact posterior for the potential $\tilde{\potential}(\potential)$. At $\beta = 0$ the curve is the identity (exact conditioning); as $\beta \to \infty$ it flattens toward the constant $1$ (the prior); in between it *floors* low potentials at $\tilde{\potential}(0) = \varepsilon_\beta$ and *compresses* high ones --- the continuous generalization of $\max\{\potential, \varepsilon_\beta\}$. Watch it above as you move $\beta$; the dots mark the potential values configured above.

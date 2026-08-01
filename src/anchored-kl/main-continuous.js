@@ -136,6 +136,8 @@ function onDown(e) {
     if (inCol(pos, L.pot)) {
         dragKind = 'phi';
         dragIdx = i;
+        dragXmax = niceXmax(Math.max(...probs, ...computePosterior(),
+            ...contOptimum(probs, phi, beta).q));
         e.preventDefault();
         phiDragTo(pos);
     } else if (inCol(pos, L.prior)) {
@@ -166,7 +168,7 @@ function onMove(e) {
 }
 
 function onUp() {
-    if (dragKind === 'bar') {
+    if (dragKind !== null) {
         dragKind = null;
         dragXmax = null;
         redraw(); // unfreeze the x-scale

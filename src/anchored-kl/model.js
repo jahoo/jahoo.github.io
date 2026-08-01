@@ -117,7 +117,7 @@ function rOfPhiAt(phi, Z, beta, c) {
     let hi = Math.max(r0 * 2, 1);
     while (g(hi) < phi) hi *= 2;
     let lo = r0;
-    for (let it = 0; it < 80; it++) {
+    for (let it = 0; it < 56; it++) {
         const mid = (lo + hi) / 2;
         if (g(mid) < phi) lo = mid; else hi = mid;
     }
@@ -151,7 +151,7 @@ export function contOptimum(prior, phi, beta) {
     while (T(cLo) < 1) { cLo -= step; step *= 2; }
     step = 1;
     while (T(cHi) > 1) { cHi += step; step *= 2; }
-    for (let it = 0; it < 80; it++) {
+    for (let it = 0; it < 56; it++) {
         const mid = (cLo + cHi) / 2;
         if (T(mid) > 1) cLo = mid; else cHi = mid;
     }

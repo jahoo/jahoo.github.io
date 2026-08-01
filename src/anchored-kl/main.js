@@ -18,7 +18,7 @@ import {
     drawHBarCol, drawPotentialCol, drawAlphaCurve, drawSegment, drawFPlot,
 } from './drawing.js';
 import {
-    SLIDER_MAX, sliderToBeta, betaToSlider, buildTickLabels,
+    SLIDER_MAX, sliderToBeta, betaToSlider,
     accentColor, fmtBeta, fmtProb, dotHit,
 } from './controls.js';
 
@@ -35,7 +35,6 @@ let L = null;                 // main-canvas layout, set on every redraw
 let hitM = null, hitS = null, hitF = null; // dot hit-test info from the beta plots
 let cvMain, cvM, cvS, cvF, slider, sliderF, kSlider; // DOM, bound in init()
 let roBeta, roAlpha, roZ, roK, roBetaF;
-
 
 // ================================================================
 //  REDRAW

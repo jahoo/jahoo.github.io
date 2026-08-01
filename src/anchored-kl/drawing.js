@@ -533,7 +533,7 @@ export function drawReshapeCurve(ctx, w, h, data) {
     ctx.restore();
 
     // dashed floor at eps, labeled in the right margin
-    if (data.eps < 0.995) {
+    if (data.eps > 0.005 && data.eps < 0.995) {
         ctx.save();
         ctx.strokeStyle = '#bbb';
         ctx.setLineDash([4, 3]);
