@@ -467,24 +467,29 @@ class="math inline">\(W\)</span>)
 <p>The fixed point is transcendental — no <em>elementary</em> closed
 form exists — but it does untangle into the <strong>Lambert <span
 class="math inline">\(W\)</span> function</strong>, the inverse of <span
-class="math inline">\(w \mapsto w\,e^{w}\)</span>. Substitute <span
-class="math inline">\(x \defeq 1/\alpha_\beta\)</span> and clear the
-denominator:</p>
+class="math inline">\(w \mapsto w\,e^{w}\)</span>:</p>
 <p><span class="math display">\[
 \begin{aligned}
-(x - 1)\, e^{x/\beta}
+\Bigl(\frac{1}{\alpha_\beta} - 1\Bigr)\, e^{1/(\alpha_\beta \beta)}
 &amp;= \frac{1-\Z}{\Z}
-&amp;&amp; \explain{substitute $x = 1/\alpha_\beta$; rearrange}
+&amp;&amp; \explain{rearrange the fixed point}
+\\[6pt]
+\frac{1/\alpha_\beta - 1}{\beta}\; e^{(1/\alpha_\beta - 1)/\beta}
+&amp;= \frac{1-\Z}{\Z\,\beta}\; e^{-1/\beta}
+&amp;&amp; \explain{divide both sides by $\beta\, e^{1/\beta}$}
 \\[6pt]
 s\, e^{s}
 &amp;= \frac{1-\Z}{\Z\,\beta}\; e^{-1/\beta}
-&amp;&amp; \explain{$s \defeq (x - 1)/\beta$; divide by $\beta\,
-e^{1/\beta}$}
+&amp;&amp; \explain{$s \defeq \bigl(1/\alpha_\beta - 1\bigr)/\beta$}
+\\[6pt]
+s
+&amp;= W_0\!\Bigl(\frac{1-\Z}{\Z\,\beta}\, e^{-1/\beta}\Bigr)
+&amp;&amp; \explain{invert $s \mapsto s\,e^{s}$}
 \\[6pt]
 \alpha_\beta
 &amp;= \frac{1}{1 + \beta\, W_0\!\Bigl(\dfrac{1-\Z}{\Z\,\beta}\,
 e^{-1/\beta}\Bigr)}
-&amp;&amp; \explain{$s = W_0(\cdot)$; invert $x = 1 + \beta s$}
+&amp;&amp; \explain{solve for $\alpha_\beta$}
 \end{aligned}
 \]</span></p>
 <p>The argument of <span class="math inline">\(W\)</span> is positive,
@@ -876,7 +881,7 @@ reading, is special to the binary case.)</p>
 <script src="/assets/js/anchored-kl.bundle.js"></script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-08-01 10:45</span>
+    <span class="last-modified">Last modified: 2026-08-01 12:53</span>
   </div>
 </footer>
 </body>
