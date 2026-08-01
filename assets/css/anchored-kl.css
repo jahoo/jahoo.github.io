@@ -140,9 +140,7 @@
     min-width: 9em;
     line-height: 1.4;
 }
-#akl-readout-beta,
-#akl-readout-alpha,
-#akl-readout-eps {
+.akl-readouts span:not(.akl-controls-label) {
     font-variant-numeric: tabular-nums;
     color: #333;
 }

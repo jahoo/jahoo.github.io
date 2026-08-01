@@ -82,7 +82,7 @@
     let hi = Math.max(r0 * 2, 1);
     while (g(hi) < phi2) hi *= 2;
     let lo = r0;
-    for (let it = 0; it < 80; it++) {
+    for (let it = 0; it < 56; it++) {
       const mid = (lo + hi) / 2;
       if (g(mid) < phi2) lo = mid;
       else hi = mid;
@@ -116,7 +116,7 @@
       cHi += step;
       step *= 2;
     }
-    for (let it = 0; it < 80; it++) {
+    for (let it = 0; it < 56; it++) {
       const mid = (cLo + cHi) / 2;
       if (T(mid) > 1) cLo = mid;
       else cHi = mid;
@@ -552,7 +552,7 @@
     ctx.lineTo(xOf(1), yOf(1));
     ctx.stroke();
     ctx.restore();
-    if (data.eps < 0.995) {
+    if (data.eps > 5e-3 && data.eps < 0.995) {
       ctx.save();
       ctx.strokeStyle = "#bbb";
       ctx.setLineDash([4, 3]);
@@ -1153,6 +1153,11 @@
     if (inCol2(pos, L2.pot)) {
       dragKind2 = "phi";
       dragIdx2 = i;
+      dragXmax2 = niceXmax2(Math.max(
+        ...probs2,
+        ...computePosterior2(),
+        ...contOptimum(probs2, phi, beta2).q
+      ));
       e.preventDefault();
       phiDragTo(pos);
     } else if (inCol2(pos, L2.prior)) {
@@ -1181,7 +1186,7 @@
     }
   }
   function onUp2() {
-    if (dragKind2 === "bar") {
+    if (dragKind2 !== null) {
       dragKind2 = null;
       dragXmax2 = null;
       redraw2();
