@@ -15,8 +15,9 @@
     return v;
   }
   var defaultPhi = (k3) => Array.from({ length: k3 }, (_, i) => {
-    const t = (i - (k3 - 1) / 2) / (k3 / 6);
-    return 0.05 + 0.9 / (1 + Math.exp(-t));
+    const t = k3 > 1 ? i / (k3 - 1) : 0.5;
+    const notch = Math.exp(-((t - 0.58) ** 2) / (2 * 0.22 ** 2));
+    return (1 - 0.5 * t) * (1 - 0.97 * notch);
   });
 
   // src/anchored-kl/model.js
