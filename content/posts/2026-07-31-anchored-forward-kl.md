@@ -1,5 +1,7 @@
 ---
-title: Forward KL minimization with reverse KL-to-prior regularization
+title: Forward KL minimization with regularization
+subtitle: I know, that is not a catchy title.
+abstract: foo
 date: 2026-07-31
 author: Jacob Hoover Vigly
 tags: [exploration]
