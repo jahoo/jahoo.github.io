@@ -207,14 +207,27 @@ test('fPrimeOfAlpha and bernKLPrime are strictly increasing in alpha', () => {
 
 const phiRamp = defaultPhi(DEFAULT_K);
 
-test('defaultPhi is an increasing ramp strictly inside (0, 1)', () => {
+test('defaultPhi is a skewed notch strictly inside (0, 1)', () => {
     for (let kk = 2; kk <= 40; kk++) {
         const f = defaultPhi(kk);
         assert.equal(f.length, kk);
         f.forEach(v => assert.ok(v > 0 && v < 1, `phi in (0,1), got ${v}`));
-        for (let i = 1; i < kk; i++) {
-            assert.ok(f[i] > f[i - 1], `ramp increasing at ${i}`);
+    }
+    // the shape (for k big enough to resolve it): starts high, dips to an
+    // interior minimum past the middle, recovers only partway
+    for (const kk of [8, 10, 25, 40]) {
+        const f = defaultPhi(kk);
+        const iMin = f.indexOf(Math.min(...f));
+        const c = iMin / (kk - 1);
+        assert.ok(c > 0.4 && c < 0.8, `notch skewed past center, got ${c}`);
+        for (let i = 1; i <= iMin; i++) {
+            assert.ok(f[i] < f[i - 1], `decreasing into the notch at ${i}`);
         }
+        for (let i = iMin + 1; i < kk; i++) {
+            assert.ok(f[i] > f[i - 1], `recovering after the notch at ${i}`);
+        }
+        assert.ok(f[0] > 0.9, `top near 1, got ${f[0]}`);
+        assert.ok(f[kk - 1] < f[0] - 0.3, `asymmetric recovery, got ${f[kk - 1]}`);
     }
 });
 

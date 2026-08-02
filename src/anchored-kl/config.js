@@ -31,10 +31,13 @@ export function defaultValid(k) {
     return v;
 }
 
-// Default continuous potential for support size k: a smooth increasing
-// ramp (sigmoid in the element index) spanning ~0.05 to ~0.95, so both
-// the floor and the top compression of the softened potential show.
+// Default continuous potential for support size k: a soft version of the
+// binary default's invalid mid-band — near 1 at the top, dipping to
+// near 0 just past the middle (skewed off-center), recovering only
+// partway at the bottom. A sloped baseline (1 down to 0.5) times a
+// Gaussian notch.
 export const defaultPhi = k => Array.from({ length: k }, (_, i) => {
-    const t = (i - (k - 1) / 2) / (k / 6);
-    return 0.05 + 0.9 / (1 + Math.exp(-t));
+    const t = k > 1 ? i / (k - 1) : 0.5;
+    const notch = Math.exp(-((t - 0.58) ** 2) / (2 * 0.22 ** 2));
+    return (1 - 0.5 * t) * (1 - 0.97 * notch);
 });
