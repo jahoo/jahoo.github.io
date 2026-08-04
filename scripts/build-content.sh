@@ -51,6 +51,13 @@ build_one() {
   # shareable-by-link without the page becoming publicly discoverable.
   head -30 "$src" | grep -q '^unlisted: *true' && \
     extra_flags="$extra_flags --include-in-header templates/noindex.html"
+  # `standalone-page: true` (intended for unlisted posts) drops the site
+  # navbar so the page doesn't visibly link back to the site; the template
+  # gates the include-before block on it.
+  if head -30 "$src" | grep -q '^standalone-page: *true' && \
+     ! head -30 "$src" | grep -q '^unlisted: *true'; then
+    echo "Warning: $src has standalone-page: true without unlisted: true" >&2
+  fi
   echo "Build: $src"
   pandoc "$src" $PANDOC_COMMON $FILTER_FLAGS $extra_flags --metadata last-modified="$lastmod" -o "$dest"
 }

@@ -25,10 +25,12 @@ $endif$
     the site-title `Linux Biolinum Outline` and nav-link `Linux Libertine`.
     `crossorigin` is required on `as=font` preloads even for same-origin.
   -->
+$if(standalone-page)$$else$
   <link rel="preload" as="font" type="font/woff2" crossorigin
         href="/assets/fonts/LinBiolinum/LinBiolinum_aU.woff2" />
   <link rel="preload" as="font" type="font/woff2" crossorigin
         href="/assets/fonts/LinLibertine/LinLibertine_Re-4.1_.8_.woff2" />
+$endif$
   <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/theme.css" />
   <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/skylighting-solarized-theme.css" />
   <link rel="stylesheet" href="/assets/css/overrides.css" />
@@ -77,9 +79,11 @@ $for(header-includes)$
 $endfor$
 </head>
 <body>
+$if(standalone-page)$$else$
 $for(include-before)$
 $include-before$
 $endfor$
+$endif$
 
 <header>
 $if(hide-post-title)$$else$

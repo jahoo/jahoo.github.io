@@ -82,6 +82,19 @@ Compare `published: false`, which is for drafts that shouldn't be reachable at
 all — it also hides the post from the listing, but the page is still built, so
 prefer `unlisted: true` when you actually want to share the link.
 
+For an unlisted post that shouldn't visibly point back to the site — e.g. a
+one-off page you want to share without it looking like part of the blog — add:
+
+```yaml
+standalone-page: true
+```
+
+This drops the site navbar (site name + home/blog links) from the rendered
+page; everything else (the post's own title header, styling, assets) is
+unchanged. It's meant to be combined with `unlisted: true` — the build prints
+a warning if you set it on a listed post, since the listing would then link to
+a page with no navigation back.
+
 ### Tags
 
 Preserve tags for categorization. Use inline list format:
