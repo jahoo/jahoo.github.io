@@ -32,11 +32,13 @@ export function drawRun(canvas, run, M, title, opts = {}) {
     const hCss = parseInt(canvas.dataset.h || '280', 10);
     const ctx = setupCanvas(canvas, wCss, hCss);
     const { steps, events } = run;
-    const T = Math.min(steps.length, T_DRAW_CAP);
+    // opts.T: shared time-axis span so same-seed panels line up column-for-column
+    const Tgeom = Math.min(Math.max(opts.T ?? steps.length, steps.length), T_DRAW_CAP);
+    const T = Math.min(steps.length, Tgeom);
     const padL = 26, padR = opts.padR ?? 10;
     const padT = opts.padT ?? 20, padB = opts.padB ?? 18;
     const laneH = (hCss - padT - padB) / M;
-    const cellW = (wCss - padL - padR) / Math.max(T, 1);
+    const cellW = (wCss - padL - padR) / Math.max(Tgeom, 1);
     const bandW = cellW * BAND_FRAC;
     const X = t => padL + cellW * t;
     const laneY = m => padT + laneH * (m + 0.5);
@@ -206,8 +208,9 @@ export function attachHover(canvas, tooltip) {
 export function renderTrajectories(state, els) {
     const runPT = runOne(state.P, state.s, 'PT', state.M, state.seed);
     const runQT = runOne(state.P, state.s, 'QT', state.M, state.seed);
-    drawRun(els.cvPT, runPT, state.M, 'SMC, prior targets (standard)');
-    drawRun(els.cvQT, runQT, state.M, 'SMC, proposal targets (the fix)');
+    const T = Math.max(runPT.steps.length, runQT.steps.length);
+    drawRun(els.cvPT, runPT, state.M, 'SMC, prior targets (standard)', { T });
+    drawRun(els.cvQT, runQT, state.M, 'SMC, proposal targets (the fix)', { T });
     const fmt = r => `Ẑ = ${r.zhat.toPrecision(3)} (Z = ${r.Z.toPrecision(3)}), ${r.events.length} resampling event${r.events.length === 1 ? '' : 's'}`;
     els.info.textContent = `prior targets: ${fmt(runPT)}  |  proposal targets: ${fmt(runQT)}`;
 }

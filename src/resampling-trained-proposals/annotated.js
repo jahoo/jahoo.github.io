@@ -32,8 +32,9 @@ export function renderAnnotated(els) {
     const anc = [...chosen].sort((a, b) => st.depth[b] - st.depth[a])[0];
     const nClones = e.anc.filter(a => a === anc).length;
 
+    const T = Math.max(pt.steps.length, qt.steps.length);
     drawRun(els.cvA1, pt, M, 'SMC, prior targets — a hand-picked run', {
-        ...PADS,
+        ...PADS, T,
         annotate: ({ ctx, X, laneY, geom }) => {
             const cx = geom.cutX(e.afterT);
             // clone callout: label in the top margin, curved arrow to the ancestor band
@@ -60,7 +61,7 @@ export function renderAnnotated(els) {
     }).filter(Boolean);
     const qe = qt.events[0];
     drawRun(els.cvA2, qt, M, 'SMC, proposal targets — same randomness', {
-        ...PADS,
+        ...PADS, T,
         annotate: ({ ctx, X, laneY, geom }) => {
             const gx = t => X(t) + geom.bandW * 0.5;   // ¤ glyph position
             if (fates.length) {
