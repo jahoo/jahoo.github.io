@@ -1,0 +1,99 @@
+/* Resampling vs trained proposals — page styles */
+
+#viz-annotated, #viz-trajectories, #viz-crossover {
+  min-height: 0;
+  margin: 1.2em 0;
+  position: relative;
+}
+
+/* --- prior cluster (editor + its controls), then the run bar --- */
+
+.rtp-prior-box { font-size: 0.82em; }
+.rtp-prior-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1em;
+  margin-bottom: 0.25em;
+}
+.rtp-prior-head label { display: flex; align-items: center; gap: 0.35em; }
+.rtp-prior-head button { font-size: 1em; padding: 0.1em 0.6em; }
+
+.rtp-prior-row {
+  display: flex;
+  align-items: center;
+  gap: 2em;
+  flex-wrap: wrap;
+}
+.rtp-readout { color: #555; line-height: 1.6; }
+.rtp-num { font-variant-numeric: tabular-nums; }
+
+.rtp-qstar { margin: 0.35em 0 0; }
+.rtp-qstar summary { cursor: pointer; color: #555; }
+.rtp-qstar canvas { display: block; margin-top: 0.3em; }
+
+#rtp-prior { cursor: default; }
+
+.rtp-runbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.3em;
+  font-size: 0.82em;
+  margin: 0.8em 0 0.35em;
+  padding-top: 0.5em;
+  border-top: 1px solid #eee;
+}
+.rtp-runbar label { display: flex; align-items: center; gap: 0.4em; }
+.rtp-runbar input[type="range"] { width: 140px; }
+.rtp-runbar button { font-size: 1em; padding: 0.1em 0.7em; }
+
+/* --- trajectory / crossover panels --- */
+
+.rtp-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  position: relative;
+}
+@media (max-width: 640px) {
+  .rtp-panels { grid-template-columns: 1fr; }
+}
+.rtp-panel { position: relative; }
+.rtp-panel canvas {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+}
+#viz-annotated .rtp-panel { margin-bottom: 6px; }
+
+.rtp-info { font-size: 0.78em; color: #555; margin-top: 0.3em; }
+.rtp-legend { font-size: 0.75em; color: #777; margin-top: 0.15em; }
+
+.rtp-swatch {
+  display: inline-block;
+  width: 11px; height: 11px;
+  border-radius: 2px;
+  margin: 0 1px;
+  vertical-align: -1px;
+}
+
+.rtp-tooltip {
+  display: none;
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid #999;
+  border-radius: 3px;
+  padding: 3px 7px;
+  font-size: 0.75em;
+  color: #222;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.rtp-tooltip span + span {
+  border-left: 1px solid #bbb;
+  margin-left: 7px;
+  padding-left: 7px;
+}

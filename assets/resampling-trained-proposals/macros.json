@@ -1,0 +1,15 @@
+{
+  "str": "{\\boldsymbol{y}}",
+  "prior": "p",
+  "posterior": "\\pi",
+  "proposal": "q",
+  "potential": "\\varphi",
+  "shape": "\\psi",
+  "tshape": "{\\psi^{*}}",
+  "eos": "{\\text{¤}}",
+  "impwt": "w",
+  "Z": "Z",
+  "DKL": "{D_{\\mathrm{KL}}}",
+  "KL": ["\\DKL(#1\\,\\|\\,#2)", 2],
+  "defeq": "\\triangleq"
+}
