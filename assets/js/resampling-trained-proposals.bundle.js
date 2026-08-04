@@ -263,11 +263,12 @@
     const hCss = parseInt(canvas.dataset.h || "280", 10);
     const ctx = setupCanvas(canvas, wCss, hCss);
     const { steps, events } = run;
-    const T = Math.min(steps.length, T_DRAW_CAP);
+    const Tgeom = Math.min(Math.max(opts.T ?? steps.length, steps.length), T_DRAW_CAP);
+    const T = Math.min(steps.length, Tgeom);
     const padL = 26, padR = opts.padR ?? 10;
     const padT = opts.padT ?? 20, padB = opts.padB ?? 18;
     const laneH = (hCss - padT - padB) / M;
-    const cellW = (wCss - padL - padR) / Math.max(T, 1);
+    const cellW = (wCss - padL - padR) / Math.max(Tgeom, 1);
     const bandW = cellW * BAND_FRAC;
     const X = (t) => padL + cellW * t;
     const laneY = (m) => padT + laneH * (m + 0.5);
@@ -468,8 +469,9 @@
   function renderTrajectories(state2, els2) {
     const runPT = runOne(state2.P, state2.s, "PT", state2.M, state2.seed);
     const runQT = runOne(state2.P, state2.s, "QT", state2.M, state2.seed);
-    drawRun(els2.cvPT, runPT, state2.M, "SMC, prior targets (standard)");
-    drawRun(els2.cvQT, runQT, state2.M, "SMC, proposal targets (the fix)");
+    const T = Math.max(runPT.steps.length, runQT.steps.length);
+    drawRun(els2.cvPT, runPT, state2.M, "SMC, prior targets (standard)", { T });
+    drawRun(els2.cvQT, runQT, state2.M, "SMC, proposal targets (the fix)", { T });
     const fmt = (r) => `\u1E90 = ${r.zhat.toPrecision(3)} (Z = ${r.Z.toPrecision(3)}), ${r.events.length} resampling event${r.events.length === 1 ? "" : "s"}`;
     els2.info.textContent = `prior targets: ${fmt(runPT)}  |  proposal targets: ${fmt(runQT)}`;
   }
@@ -492,8 +494,10 @@
     const killed = e.pool.filter((m) => !chosen.has(m) && st.phase[m] <= 1);
     const anc = [...chosen].sort((a, b) => st.depth[b] - st.depth[a])[0];
     const nClones = e.anc.filter((a) => a === anc).length;
+    const T = Math.max(pt.steps.length, qt.steps.length);
     drawRun(els2.cvA1, pt, M, "SMC, prior targets \u2014 a hand-picked run", {
       ...PADS,
+      T,
       annotate: ({ ctx, X, laneY, geom }) => {
         const cx = geom.cutX(e.afterT);
         const t1 = `deep = heavy: cloned \xD7${nClones}`;
@@ -517,6 +521,7 @@
     const qe = qt.events[0];
     drawRun(els2.cvA2, qt, M, "SMC, proposal targets \u2014 same randomness", {
       ...PADS,
+      T,
       annotate: ({ ctx, X, laneY, geom }) => {
         const gx = (t) => X(t) + geom.bandW * 0.5;
         if (fates.length) {
