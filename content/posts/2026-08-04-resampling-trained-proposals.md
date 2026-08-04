@@ -42,7 +42,7 @@ with $\potential/\shape$ replacing the shaping ratio at $\eos$. A live particle 
 
 Variable length buys two failure modes. Emitting `>` at depth 0 dies *mid-string*, where shaping catches it (its genuine pruning role), while emitting `¤` at depth $> 0$ dies only *at the end*, invisible to shaping.^[The empty string is also invalid, so `¤` as the first token is an at-the-end death available from $t=0$.]
 
-Everything is closed form, and for the uniform prior the constants come out golden. The twist depends only on depth, $\tshape(d) = \lambda^{d+1}$, with $\lambda = \tfrac{3-\sqrt5}{2} = 1/\varphi^2 \approx 0.382$ and $\Z = \lambda - \tfrac13 \approx 0.049$.^[$\lambda$ solves $\lambda^2 - 3\lambda + 1 = 0$. The table's nonzero entries are exactly $\lambda/3$ and $\tfrac{1}{3\lambda}$; each row sums to one because $\lambda^2 + 1 = 3\lambda$.] The optimal proposal $\proposal^*(x \mid \text{state}) \propto \prior(x)\,\tshape(\text{state after } x)$ is a three-row table:
+Everything is closed form, and for the uniform prior the constants come out golden. The twist depends only on depth, $\tshape(d) = \lambda^{d+1}$, with $\lambda = \tfrac{3-\sqrt5}{2} \approx 0.382$ (the reciprocal of the squared golden ratio) and $\Z = \lambda - \tfrac13 \approx 0.049$.^[$\lambda$ solves $\lambda^2 - 3\lambda + 1 = 0$. The table's nonzero entries are exactly $\lambda/3$ and $\tfrac{1}{3\lambda}$; each row sums to one because $\lambda^2 + 1 = 3\lambda$.] The optimal proposal $\proposal^*(x \mid \text{state}) \propto \prior(x)\,\tshape(\text{state after } x)$ is a three-row table:
 
 | state | `<` | `>` | `¤` |
 |---|---|---|---|
@@ -53,9 +53,9 @@ Everything is closed form, and for the uniform prior the constants come out gold
 In words, open with probability ${\approx}0.13$; otherwise close, or stop when balanced. The punchline identity is that under the standard intermediate targets a live particle at depth $d$ carries
 
 $$
-\impwt \;=\; \frac{\Z}{\tshape(d)} \;\propto\; \varphi^{2d},
+\impwt \;=\; \frac{\Z}{\tshape(d)} \;\propto\; \lambda^{-d},
 \qquad\text{while its promise is}\qquad
-\tshape(d) \;\propto\; \varphi^{-2d}.
+\tshape(d) \;\propto\; \lambda^{d}.
 $$
 
 **The resampler prices a particle at exactly the reciprocal of its prospects.** A depth-3 particle looks ${\approx}18\times$ more valuable than one about to close out a success, and is ${\approx}18\times$ less likely to deliver.
@@ -65,7 +65,7 @@ $$
 | | intermediate target | live increment | resampling fires |
 |---|---|---|---|
 | **SIS** | none (never resamples) | $\tfrac{\prior}{\proposal}\cdot\tfrac{\shape'}{\shape}$ | never |
-| **SMC, prior targets** | $\prior \times \shape$ | $\tfrac{\prior}{\proposal}\cdot\tfrac{\shape'}{\shape}$ | on deaths *and* on the $\varphi^{2d}$ weight spread |
+| **SMC, prior targets** | $\prior \times \shape$ | $\tfrac{\prior}{\proposal}\cdot\tfrac{\shape'}{\shape}$ | on deaths *and* on the $\lambda^{-d}$ weight spread |
 | **SMC, proposal targets** | $\proposal \times \shape$ | $\tfrac{\shape'}{\shape} \in \{0,1\}$ | only on deaths |
 
 All three realize the same final weights (the deferred $\prior/\proposal$ lump lands at $\eos$ in the third), and all three give unbiased $\hat\Z$.
