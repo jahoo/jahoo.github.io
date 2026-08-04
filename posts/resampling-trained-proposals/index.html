@@ -181,9 +181,10 @@ class="math inline">\(t=0\)</span>.<br />
 <p>Everything is closed form, and for the uniform prior the constants
 come out golden. The twist depends only on depth, <span
 class="math inline">\(\tshape(d) = \lambda^{d+1}\)</span>, with <span
-class="math inline">\(\lambda = \tfrac{3-\sqrt5}{2} = 1/\varphi^2
-\approx 0.382\)</span> and <span class="math inline">\(\Z = \lambda -
-\tfrac13 \approx 0.049\)</span>.<span
+class="math inline">\(\lambda = \tfrac{3-\sqrt5}{2} \approx
+0.382\)</span> (the reciprocal of the squared golden ratio) and <span
+class="math inline">\(\Z = \lambda - \tfrac13 \approx
+0.049\)</span>.<span
 class="sidenote-wrapper"><label for="sn-3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-3" class="margin-toggle"/><span
 class="sidenote"><span class="math inline">\(\lambda\)</span> solves
 <span class="math inline">\(\lambda^2 - 3\lambda + 1 = 0\)</span>. The
@@ -233,9 +234,9 @@ when balanced. The punchline identity is that under the standard
 intermediate targets a live particle at depth <span
 class="math inline">\(d\)</span> carries</p>
 <p><span class="math display">\[
-\impwt \;=\; \frac{\Z}{\tshape(d)} \;\propto\; \varphi^{2d},
+\impwt \;=\; \frac{\Z}{\tshape(d)} \;\propto\; \lambda^{-d},
 \qquad\text{while its promise is}\qquad
-\tshape(d) \;\propto\; \varphi^{-2d}.
+\tshape(d) \;\propto\; \lambda^{d}.
 \]</span></p>
 <p><strong>The resampler prices a particle at exactly the reciprocal of
 its prospects.</strong> A depth-3 particle looks <span
@@ -277,7 +278,7 @@ class="math inline">\(\tfrac{\prior}{\proposal}\cdot\tfrac{\shape&#39;}{\shape}\
 <td><span
 class="math inline">\(\tfrac{\prior}{\proposal}\cdot\tfrac{\shape&#39;}{\shape}\)</span></td>
 <td>on deaths <em>and</em> on the <span
-class="math inline">\(\varphi^{2d}\)</span> weight spread</td>
+class="math inline">\(\lambda^{-d}\)</span> weight spread</td>
 </tr>
 <tr>
 <td><strong>SMC, proposal targets</strong></td>
@@ -479,7 +480,7 @@ stale.</p>
 <script src="/assets/js/resampling-trained-proposals.bundle.js"></script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-08-04 19:31</span>
+    <span class="last-modified">Last modified: 2026-08-04 19:33</span>
   </div>
 </footer>
 </body>
