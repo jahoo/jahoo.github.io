@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc-markdown-css-theme" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Mostly one-shotted by Claude Fable, steered a little by me" />
+  <meta name="dcterms.date" content="2026-08-04" />
+  <meta name="description" content="Scientific Program Coordinator at CHI FRO, LLC. Formerly Postdoc at MIT, Department of Brain and Cognitive Sciences. PhD in Linguistics from McGill University." />
+  <title>Why resampling hurts, with naïve intermediate target</title>
+  <!--
+    Preload the two navbar fonts used above the fold on every page.
+    `font-display: swap` already prevents invisible text, but the fonts
+    aren't discovered until after CSS parses — these hints let the browser
+    start fetching them alongside the CSS, eliminating a visible swap for
+    the site-title `Linux Biolinum Outline` and nav-link `Linux Libertine`.
+    `crossorigin` is required on `as=font` preloads even for same-origin.
+  -->
+
+  <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/theme.css" />
+  <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/skylighting-solarized-theme.css" />
+  <link rel="stylesheet" href="/assets/css/overrides.css" />
+  <link rel="stylesheet" href="/assets/css/site-chrome.css" />
+  <link rel="stylesheet" href="/assets/css/resampling-trained-proposals.css" />
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)'], ['$', '$']],
+    displayMath: [['\\[', '\\]'], ['$$', '$$']],
+    // AMS-style numbering: only {equation}/{align} environments get
+    // numbers, so ordinary $ displays stay untagged.
+    tags: 'ams'
+    , macros: { "str": "{\\boldsymbol{y}}", "prior": "p", "posterior": "\\pi", "proposal": "q", "potential": "\\varphi", "shape": "\\psi", "tshape": "{\\psi^{*}}", "eos": "{\\text{¤}}", "impwt": "w", "Z": "Z", "DKL": "{D_{\\mathrm{KL}}}", "KL": ["\\DKL(#1\\,\\|\\,#2)", 2], "defeq": "\\triangleq" }
+  },
+  options: {
+    // Disable click-to-explore on math. Without these, clicking on a
+    // rendered formula (e.g. math inside a button label) gets intercepted
+    // by MathJax's a11y explorer and highlights subexpressions instead of
+    // triggering the underlying button. The right-click context menu is
+    // still available.
+    //
+    // MathJax v4 has no single `explorer` setting — the feature is split
+    // across enrich (semantic tree), speech, braille, inTabOrder. Turning
+    // off enrich alone is enough to stop the click behavior (no tree for
+    // the explorer to walk), but we also zero the others so they don't
+    // appear enabled in the right-click menu.
+    menuOptions: {
+      settings: {
+        enrich: false,
+        speech: false,
+        braille: false,
+        inTabOrder: false
+      }
+    }
+  }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <!-- Included in <head> for pages with `unlisted: true` in front matter:
+       the page is reachable by its URL but shouldn't be indexed or crawled. -->
+  <meta name="robots" content="noindex, nofollow">
+</head>
+<body>
+
+
+<header>
+
+<h1 class="title">Why resampling hurts, with naïve intermediate
+target</h1>
+
+<p class="subtitle">Illustrating how a trained proposal can make
+resampling focus on precisely the wrong particles, unless the
+intermediate targets move with it</p>
+<p class="post-meta">
+  <time datetime="2026-08-04">2026-08-04</time>
+  · Mostly one-shotted by Claude Fable, steered a little by me
+</p>
+</header>
+
+
+<hr class="post-divider" />
+
+
+
+<main>
+<p><em>Resampling improves on standard importance sampling by allowing
+killing unpromising particles and cloning promising ones. But if you
+train a proposal to focus on promising prefixes, resampling under the
+standard intermediate targets starts doing the opposite: It
+preferentially kills exactly the prefixes the trained proposal steers
+toward! This post builds a small-scale example to illustrate this
+effect, and a fix.</em><span
+class="sidenote-wrapper"><label for="sn-0" class="margin-toggle">&#8853;</label><input type="checkbox" id="sn-0" class="margin-toggle"/><span
+class="marginnote">This relates to some other posts: <a
+href="/posts/smc-resampling/">resampling schemes in SMC</a> for
+exploring mechanics of resampling itself, and <a
+href="/posts/anchored-forward-kl/">forward-KL training with an
+anchor</a> for the proposal-training setting this arises in.<br />
+<br />
+</span></span></p>
+<!-- 
+
+Resampling reads a particle's current incremental weight as a forecast: heavy means "this prefix will matter, make copies," and light means "this prefix is overvalued, kill it." But an incremental weight is just bookkeeping, the weight corrects for how the proposal differs from the intermediate target, in terms of how they score what has already happened. Whether that bookkeeping also works as a forecast (expected future value) depends on how much the intermediate target knows about the future.
+
+Suppose we're using a good (eg successfully-*trained*) proposal that deliberately oversamples actually-promising prefixes. The standard intermediate target, which is prior $\times$ "no error so far," knows nothing about the future so, every promising prefix the proposal favored more than the standard intermediate target looks **oversampled** (small weight) and every risky prefix the proposal avoided looks **undersampled** (large weight). Among live particles, weight $\propto 1/\text{promise}$: the forecast is not noisy — it is *backwards*. Resampling then dutifully rebuilds the **prior's** population, undoing precisely the steering that training paid for. In the extreme where the proposal is perfect, every particle's final weight ends at exactly $\Z$; the mid-flight weight spread is pure bookkeeping guaranteed to cancel at the end — and resampling converts it into irreversible kill/clone decisions, becoming the *only* source of error.
+
+The fix: make the intermediate targets as knowledgeable as the proposal, by putting the proposal *in* them — intermediate target $\propto \proposal(\text{prefix}) \times \shape(\text{prefix})$. The incremental weight collapses to the shaping ratio, so resampling fires only on genuine news (a particle actually erred), and the prior-vs-proposal account is settled in one lump at $\eos$, where it can still correct the estimate but can no longer misdirect the genealogy. Final weights are unchanged and $\hat\Z$ stays unbiased: the fix is free.^[Intermediate targets are ours to choose; only the final target is pinned. This is the standard freedom in SMC, just usually spent elsewhere.] -->
+<section id="setup" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span>
+Setup</h1>
+<p>We want samples from a posterior over strings, <span
+class="math inline">\(\posterior(\str) =
+\prior(\str)\,\potential(\str)/\Z\)</span>: a language-model prior <span
+class="math inline">\(\prior\)</span> reshaped by a potential <span
+class="math inline">\(\potential(\str) \ge 0\)</span> that scores
+complete strings. A proposal <span
+class="math inline">\(\proposal\)</span> generates candidates token by
+token; since <span class="math inline">\(\potential\)</span> only scores
+complete strings, a <strong>shaping function</strong> <span
+class="math inline">\(\shape(\text{prefix}) \ge 0\)</span> supplies
+intermediate feedback. In sequential importance sampling, extending a
+particle by token <span class="math inline">\(x\)</span> updates its
+weight by</p>
+<p><span class="math display">\[
+\impwt \;\gets\; \impwt \cdot \frac{\prior(x \mid
+\text{prefix})}{\proposal(x \mid \text{prefix})} \cdot
+\frac{\shape(\text{prefix}\,x)}{\shape(\text{prefix})},
+\]</span></p>
+<p>with <span class="math inline">\(\potential/\shape\)</span> replacing
+the shaping ratio at <span class="math inline">\(\eos\)</span> — so a
+live particle carries <span class="math inline">\(\impwt =
+\prior\,\shape/\proposal\)</span> (prefix probabilities), and a
+completed one carries the full importance weight regardless of <span
+class="math inline">\(\shape\)</span>: shaping only decides
+<em>when</em> weight is realized. SMC adds resampling when the effective
+sample size drops. The ideal shaping function is the
+<strong>twist</strong> <span
+class="math inline">\(\tshape(\text{prefix}) \defeq
+\mathbb{E}_{\prior}[\potential \mid \text{prefix}]\)</span>, the prior’s
+expected future potential; a trained proposal approximates <span
+class="math inline">\(\proposal \approx \prior \cdot \tshape /
+\Z\)</span> in prefix probabilities.</p>
+<section id="a-toy-setting" class="level2" data-number="1.1">
+<h2 data-number="1.1"><span class="header-section-number">1.1</span> A
+toy setting</h2>
+<ul>
+<li><strong>Vocabulary</strong>: <code>&lt;</code>, <code>&gt;</code>,
+<code>¤</code> (end of string).</li>
+<li><strong>Prior</strong>: uniform — <span
+class="math inline">\(\prior(\mathtt{&lt;}) = \prior(\mathtt{&gt;}) =
+\prior(\eos) = \tfrac13\)</span> in every context: the dumbest possible
+LM, with no free parameters.<span
+class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle"/><span
+class="sidenote">Memorylessness is convenience, not load-bearing: with a
+bigram prior everything below stays closed-form (the twist is still
+geometric in depth, with a last-token-dependent prefactor), and the
+pathology only gets stronger. The interactive panel below lets you set
+all three conditional distributions (after BOS, after <code>&lt;</code>,
+after <code>&gt;</code>), with a unigram/bigram toggle; unigram is the
+memoryless case.<br />
+<br />
+</span></span></li>
+<li><strong>Potential</strong>: <span
+class="math inline">\(\potential(\str) = 1\)</span> iff <span
+class="math inline">\(\str\)</span> is a balanced, nonempty bracket
+string.</li>
+<li><strong>Shaping</strong>: <span
+class="math inline">\(\shape(\text{prefix}) = 1\)</span> iff the running
+depth never went negative — the naive “no error yet” check.</li>
+</ul>
+<p>Two failure modes, which is what variable length buys: emitting
+<code>&gt;</code> at depth 0 dies <em>mid-string</em> (shaping catches
+it — its genuine pruning role), while emitting <code>¤</code> at depth
+<span class="math inline">\(&gt; 0\)</span> dies only <em>at the
+end</em> (invisible to shaping).<span
+class="sidenote-wrapper"><label for="sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-2" class="margin-toggle"/><span
+class="sidenote">The empty string is also invalid, so <code>¤</code> as
+the first token is an at-the-end death available from <span
+class="math inline">\(t=0\)</span>.<br />
+<br />
+</span></span></p>
+<p>Everything is closed form — and for the uniform prior the constants
+come out golden. The twist depends only on depth, <span
+class="math inline">\(\tshape(d) = \lambda^{d+1}\)</span>, where <span
+class="math inline">\(\lambda\)</span> solves <span
+class="math inline">\(\lambda^2 - 3\lambda + 1 = 0\)</span>: that is,
+<span class="math inline">\(\lambda = \tfrac{3-\sqrt5}{2} = 1/\varphi^2
+\approx 0.382\)</span>, with <span
+class="math inline">\(\varphi\)</span> the golden ratio; and <span
+class="math inline">\(\Z = \lambda - \tfrac13 \approx 0.049\)</span>.
+The optimal proposal <span class="math inline">\(\proposal^*(x \mid
+\text{state}) \propto \prior(x)\,\tshape(\text{state after } x)\)</span>
+is a three-row table whose nonzero entries are exactly <span
+class="math inline">\(\lambda/3\)</span> and <span
+class="math inline">\(\tfrac{1}{3\lambda}\)</span> (each row sums to one
+because <span class="math inline">\(\lambda^2 + 1 =
+3\lambda\)</span>):</p>
+<table>
+<thead>
+<tr>
+<th>state</th>
+<th><code>&lt;</code></th>
+<th><code>&gt;</code></th>
+<th><code>¤</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>start</td>
+<td><span class="math inline">\(1\)</span></td>
+<td><span class="math inline">\(0\)</span></td>
+<td><span class="math inline">\(0\)</span></td>
+</tr>
+<tr>
+<td>depth <span class="math inline">\(0\)</span>, started</td>
+<td><span class="math inline">\(\approx 0.13\)</span></td>
+<td><span class="math inline">\(0\)</span></td>
+<td><span class="math inline">\(\approx 0.87\)</span></td>
+</tr>
+<tr>
+<td>depth <span class="math inline">\(d \ge 1\)</span></td>
+<td><span class="math inline">\(\approx 0.13\)</span></td>
+<td><span class="math inline">\(\approx 0.87\)</span></td>
+<td><span class="math inline">\(0\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>— “open with probability <span
+class="math inline">\({\approx}0.13\)</span>; otherwise close, or stop
+when balanced.” And the punchline identity: under the standard
+intermediate targets, a live particle at depth <span
+class="math inline">\(d\)</span> carries</p>
+<p><span class="math display">\[
+\impwt \;=\; \frac{\Z}{\tshape(d)} \;\propto\; \varphi^{2d},
+\qquad\text{while its promise is}\qquad
+\tshape(d) \;\propto\; \varphi^{-2d}.
+\]</span></p>
+<p><strong>The resampler prices a particle at exactly the reciprocal of
+its prospects.</strong> Every unit of depth multiplies the apparent
+value by <span class="math inline">\(\varphi^2 \approx 2.62\)</span> and
+divides the true promise by the same factor: a depth-3 particle looks
+<span class="math inline">\({\approx}18\times\)</span> more valuable
+than one about to close out a success, and is <span
+class="math inline">\({\approx}18\times\)</span> less likely to
+deliver.</p>
+</section>
+</section>
+<section id="three-algorithms" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Three
+algorithms</h1>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th>intermediate target</th>
+<th>live increment</th>
+<th>resampling fires</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SIS</strong></td>
+<td>— (never resamples)</td>
+<td><span
+class="math inline">\(\tfrac{\prior}{\proposal}\cdot\tfrac{\shape&#39;}{\shape}\)</span></td>
+<td>never</td>
+</tr>
+<tr>
+<td><strong>SMC, prior targets</strong></td>
+<td><span class="math inline">\(\prior \times \shape\)</span></td>
+<td><span
+class="math inline">\(\tfrac{\prior}{\proposal}\cdot\tfrac{\shape&#39;}{\shape}\)</span></td>
+<td>on deaths <em>and</em> on the <span
+class="math inline">\(\varphi^{2d}\)</span> weight spread</td>
+</tr>
+<tr>
+<td><strong>SMC, proposal targets</strong></td>
+<td><span class="math inline">\(\proposal \times \shape\)</span></td>
+<td><span class="math inline">\(\tfrac{\shape&#39;}{\shape} \in
+\{0,1\}\)</span></td>
+<td>only on deaths</td>
+</tr>
+</tbody>
+</table>
+<p>All three realize the same final weights (the deferred <span
+class="math inline">\(\prior/\proposal\)</span> lump lands at <span
+class="math inline">\(\eos\)</span> in the third), and all three give
+unbiased <span class="math inline">\(\hat\Z\)</span>.</p>
+</section>
+<section id="when-is-it-worst" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> When is
+it worst?</h1>
+<p>At the trained proposal, the live-particle weight under prior targets
+is exactly <span class="math inline">\(\Z/\tshape(\text{state})\)</span>
+— this is model-independent, since <span
+class="math inline">\(\proposal^*(\text{prefix}) =
+\prior(\text{prefix})\,\tshape(\text{prefix})/\Z\)</span>. So the damage
+a resampling event can do is set by how <strong>unequal the promise can
+be across concurrently live particles</strong>: the dynamic range of the
+twist along trajectories the trained proposal actually visits. In the
+bracket model promise falls by the factor <span
+class="math inline">\(\lambda\)</span> — the probability that the
+<em>prior</em>, left to itself, ever cleanly retires one excess bracket
+— for every unit of depth, so two live particles a depth gap <span
+class="math inline">\(\Delta\)</span> apart are mispriced by <span
+class="math inline">\((1/\lambda)^{\Delta}\)</span>.</p>
+<p>That knob is independent of the problem’s difficulty. Fix <span
+class="math inline">\(\prior(\eos) = 0.2\)</span> and mirror the bracket
+probabilities: <span class="math inline">\(\prior(\mathtt{&lt;}),
+\prior(\mathtt{&gt;}) = (0.25, 0.55)\)</span> and <span
+class="math inline">\((0.55, 0.25)\)</span> give the <em>same</em> <span
+class="math inline">\(\Z = 0.039\)</span> and nearly the same SIS error
+— but <span class="math inline">\(1/\lambda = 1.5\)</span> versus <span
+class="math inline">\(3.3\)</span>. With the close-heavy prior,
+prior-target resampling at the trained proposal is essentially harmless
+(rel. std <span class="math inline">\(0.001\)</span> at <span
+class="math inline">\(s = 1\)</span>, <span class="math inline">\(M =
+16\)</span>); with the open-heavy mirror it reaches <span
+class="math inline">\(0.34\)</span>, against exactly <span
+class="math inline">\(0\)</span> for SIS and proposal targets, and at
+<span class="math inline">\(s = 0.9\)</span> it carries <span
+class="math inline">\(12\times\)</span> the variance of SIS. The general
+statement: <strong>the standard targets hurt most when the work
+remaining to satisfy the potential is exactly the work the prior
+considers improbable</strong> — the mispricing per unit of remaining
+work is the reciprocal of the prior’s probability of doing that unit.
+(The interactive panel’s “weight growth per depth” readout is this
+quantity; drag <span
+class="math inline">\(\prior(\mathtt{&lt;})\)</span> above <span
+class="math inline">\(\prior(\mathtt{&gt;})\)</span> and watch the
+crossover panel’s gap blow up.)</p>
+</section>
+<section id="what-the-visualization-shows" class="level1"
+data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> What
+the visualization shows</h1>
+<div id="viz-annotated" class="viz-mount" style="height:470px"></div>
+<p><strong>The pathology in one (hand-picked) run.</strong> One lane per
+particle; color is depth (darker = deeper), band thickness is the
+particle’s share of the resampling weight, <code>¤</code> marks
+completion. Top, prior-based targets: at the dashed cut, the deepest
+particle — the <em>least</em> promising, but the <em>heaviest</em> — is
+cloned <strong>six</strong> times, while three shallow particles on the
+verge of finishing are killed (×). Bottom, proposal-based targets under
+<strong>identical randomness</strong>: no weight-triggered resampling
+occurs, the three particles the other sampler killed all complete
+validly, and the one resampling event fires only to recycle slots whose
+particles had already died.</p>
+<p><strong>Explore it yourself.</strong> The interactive panel starts
+from the same run as the figure above; re-run draws fresh randomness.
+Hover any lane for a particle’s exact state (depth, weight, share of
+pool). Not every run has a resampling event — at high <span
+class="math inline">\(s\)</span>, prior-target events themselves become
+rare, though when they fire they are reliably perverse; lower <span
+class="math inline">\(s\)</span> or re-run to see more action.</p>
+<div id="viz-trajectories" class="viz-mount" style="height:380px"></div>
+<div id="viz-crossover" class="viz-mount" style="height:320px"></div>
+<p><strong>Panel 2 — the crossover.</strong> Training progress <span
+class="math inline">\(s\)</span> (proposal interpolating from prior to
+optimal) against the relative error of <span
+class="math inline">\(\hat\Z\)</span>, three arms. Verified numbers
+behind it (<span class="math inline">\(M = 8\)</span> particles, <span
+class="math inline">\(20{,}000\)</span> runs; rel. std of <span
+class="math inline">\(\hat\Z\)</span>, resampling events per run in
+parentheses):</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th><span class="math inline">\(s\)</span></th>
+<th>SIS</th>
+<th>SMC, prior targets</th>
+<th>SMC, proposal targets</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="math inline">\(0.0\)</span> (untrained)</td>
+<td><span class="math inline">\(1.56\)</span></td>
+<td><span class="math inline">\(\mathbf{1.36}\)</span> (0.81)</td>
+<td><span class="math inline">\(\mathbf{1.39}\)</span> (0.81)</td>
+</tr>
+<tr>
+<td><span class="math inline">\(0.5\)</span></td>
+<td><span class="math inline">\(0.49\)</span></td>
+<td><span class="math inline">\(0.49\)</span> (0.58)</td>
+<td><span class="math inline">\(0.49\)</span> (0.51)</td>
+</tr>
+<tr>
+<td><span class="math inline">\(0.8\)</span></td>
+<td><span class="math inline">\(0.23\)</span></td>
+<td><span class="math inline">\(0.26\)</span> (0.38)</td>
+<td><span class="math inline">\(0.23\)</span> (0.17)</td>
+</tr>
+<tr>
+<td><span class="math inline">\(0.95\)</span></td>
+<td><span class="math inline">\(0.10\)</span></td>
+<td><span class="math inline">\(\mathbf{0.22}\)</span> (0.70) — hurts,
+<span class="math inline">\({\approx}5\times\)</span> the variance</td>
+<td><span class="math inline">\(0.10\)</span> (0.02)</td>
+</tr>
+<tr>
+<td><span class="math inline">\(1.0\)</span> (optimal)</td>
+<td><span class="math inline">\(0\)</span> (exact)</td>
+<td><span class="math inline">\(\mathbf{0.24}\)</span> (1.28) —
+resampling is the <em>only</em> error</td>
+<td><span class="math inline">\(0\)</span> (exact)</td>
+</tr>
+</tbody>
+</table>
+<p>Resampling helps an untrained proposal (it recycles the <span
+class="math inline">\(95\%\)</span> of prior rollouts that die), is a
+wash mid-training, and actively hurts a trained one — while
+proposal-based targets track the better regime at both ends, firing only
+on genuine deaths in between. At <span class="math inline">\(s =
+0.95\)</span>, the correlation between a live particle’s weight and its
+true success probability at prior-target resampling events is <span
+class="math inline">\(-0.91\)</span>; slots cloned from high-weight
+parents go on to succeed <span class="math inline">\(95\%\)</span> of
+the time, versus <span class="math inline">\(97\%\)</span> for
+low-weight parents.</p>
+<p>The litmus test the toy makes visible: <strong>resampling helps
+exactly when the intermediate targets know at least as much about the
+future as the proposal does.</strong> Untrained proposal: the shaping
+check knows more — resample. Trained proposal: the proposal knows more —
+resampling on the prior’s targets is vandalism. Moving the targets with
+the proposal makes the comparison never go stale.</p>
+</section>
+</main>
+
+<script>
+;(function() {
+  // Non-essential if user has JavaScript off. Just makes checkboxes look nicer.
+  var selector = '.task-list > li > input[type="checkbox"]';
+  var checkboxes = document.querySelectorAll(selector);
+  Array.from(checkboxes).forEach((checkbox) => {
+    var wasChecked = checkbox.checked;
+    checkbox.disabled = false;
+    checkbox.addEventListener('click', (ev) => {ev.target.checked = wasChecked});
+  });
+
+  function hoistAbove() {
+    const toHoist = document.querySelectorAll('main > .sidenote-wrapper + :not(.sidenote-wrapper)');
+    for (let i = toHoist.length - 1; i >= 0; i--) {
+      const source = toHoist[i];
+      let target = source.previousElementSibling;
+      while (target.previousElementSibling?.classList.contains('sidenote-wrapper')) {
+        target = target.previousElementSibling;
+      }
+      source.parentNode.insertBefore(source, target);
+    }
+  }
+
+  function sinkBelow() {
+    const toHoist = document.querySelectorAll('main > :not(.sidenote-wrapper) + .sidenote-wrapper');
+    for (let i = 0; i < toHoist.length; i++) {
+      const source = toHoist[i].previousElementSibling;
+      let target = source.nextElementSibling;
+      while (target.classList.contains('sidenote-wrapper')) {
+        target = target.nextElementSibling;
+      }
+      source.parentNode.insertBefore(source, target);
+    }
+  }
+
+  if (window.matchMedia('screen')) {
+    if (window.innerWidth <= 796) {
+      hoistAbove();
+    }
+    let prevSize = window.innerWidth;
+    // Needs to mirror breakpoints in :root settings in CSS variables
+    // 745px = --main-width-narrow
+    // 26px = --line-height
+    // 169px = side note min width narrow
+    const breakpoint = 26 + 550 + 26 + 169 + 26 - 1;
+    window.addEventListener('resize', function() {
+      const newSize = window.innerWidth;
+      if (prevSize >= breakpoint && newSize < breakpoint) {
+        hoistAbove();
+      } else if (prevSize < breakpoint && newSize >= breakpoint) {
+        sinkBelow();
+      }
+      prevSize = newSize;
+    });
+  }
+})();
+</script>
+<script src="/assets/js/resampling-trained-proposals.bundle.js"></script>
+<footer class="site-footer">
+  <div class="wrapper">
+    <span class="last-modified">Last modified: 2026-08-04 19:08</span>
+  </div>
+</footer>
+</body>
+</html>
