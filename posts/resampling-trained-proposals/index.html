@@ -124,22 +124,27 @@ rule covers every step. In sequential importance sampling, extending a
 particle by token <span class="math inline">\(x\)</span> updates its
 weight by</p>
 <p><span class="math display">\[
-\impwt \;\gets\; \impwt \cdot \frac{\prior(x \mid
+\impwt(\prefix\,x) = \impwt(\prefix) \cdot \frac{\prior(x \mid
 \text{prefix})}{\proposal(x \mid \text{prefix})} \cdot
 \frac{\shape(\text{prefix}\,x)}{\shape(\text{prefix})},
 \]</span></p>
-<p>including at the final step: there <span class="math inline">\(x =
-\eos\)</span> completes the string, so the numerator is <span
-class="math inline">\(\shape(\text{prefix}\,\eos) =
-\potential(\text{string})\)</span>, and the last update swaps the
-shaping estimate for the true potential. A live particle thus carries
-<span class="math inline">\(\impwt = \prior\,\shape/\proposal\)</span>
-(in prefix probabilities). A completed particle carries the full
-importance weight no matter what <span
-class="math inline">\(\shape\)</span> was: shaping only decides
-<em>when</em> weight is realized. SMC adds resampling when the effective
-sample size drops. The ideal shaping function is the
-<strong>twist</strong> <span
+<p>including at the final step, where the shaping function in the
+numerator is the complete potential <span
+class="math inline">\(\potential\)</span>.<span
+class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle"/><span
+class="sidenote">At the final step, we can say <span
+class="math inline">\(x = \texttt{EOS}\)</span>, ‘end of string’. That
+completes the string, so the numerator is <span
+class="math inline">\(\shape(\text{prefix}\,\texttt{EOS}) \defeq
+\potential(\text{string})\)</span><br />
+<br />
+</span></span> A live particle thus carries <span
+class="math inline">\(\impwt = \prior\,\shape/\proposal\)</span> (in
+prefix probabilities). A completed particle carries the full importance
+weight no matter what <span class="math inline">\(\shape\)</span> was:
+shaping only decides <em>when</em> weight is realized. SMC adds
+resampling when the effective sample size drops. The ideal shaping
+function is the <strong>twist</strong> <span
 class="math inline">\(\tshape(\text{prefix}) \defeq
 \mathbb{E}_{\prior}[\potential \mid \text{prefix}]\)</span>: the prior’s
 expected future potential. A trained proposal approximates <span
@@ -148,14 +153,16 @@ class="math inline">\(\proposal \approx \prior \cdot \tshape /
 <section id="a-toy-setting" class="level2" data-number="1.1">
 <h2 data-number="1.1"><span class="header-section-number">1.1</span> A
 toy setting</h2>
+<p>We’ll use an example of the Dyck-1 language as our target (strings of
+brackets).</p>
 <ul>
-<li><strong>Vocabulary</strong>: <code>&lt;</code>, <code>&gt;</code>,
-<code>¤</code> (end of string).</li>
+<li><strong>Vocabulary</strong>: open <code>&lt;</code> and close
+<code>&gt;</code>, plus <code>¤</code> (end of string).</li>
 <li><strong>Prior</strong>: uniform, <span
 class="math inline">\(\prior(\mathtt{&lt;}) = \prior(\mathtt{&gt;}) =
 \prior(\eos) = \tfrac13\)</span> in every context. The dumbest possible
 LM, with no free parameters.<span
-class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-2" class="margin-toggle"/><span
 class="sidenote">Memorylessness is convenience, not load-bearing. With a
 bigram prior everything below stays closed-form (the twist is still
 geometric in depth, with a last-token-dependent prefactor), and the
@@ -178,7 +185,7 @@ depth 0 dies <em>mid-string</em>, where shaping catches it (its genuine
 pruning role), while emitting <code>¤</code> at depth <span
 class="math inline">\(&gt; 0\)</span> dies only <em>at the end</em>,
 invisible to shaping.<span
-class="sidenote-wrapper"><label for="sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-2" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-3" class="margin-toggle"/><span
 class="sidenote">The empty string is also invalid, so <code>¤</code> as
 the first token is an at-the-end death available from <span
 class="math inline">\(t=0\)</span>.<br />
@@ -191,7 +198,7 @@ class="math inline">\(\lambda = \tfrac{3-\sqrt5}{2} \approx
 0.382\)</span> (the reciprocal of the squared golden ratio) and <span
 class="math inline">\(\Z = \lambda - \tfrac13 \approx
 0.049\)</span>.<span
-class="sidenote-wrapper"><label for="sn-3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-3" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-4" class="margin-toggle"/><span
 class="sidenote"><span class="math inline">\(\lambda\)</span> solves
 <span class="math inline">\(\lambda^2 - 3\lambda + 1 = 0\)</span>. The
 table’s nonzero entries are exactly <span
@@ -313,7 +320,7 @@ by how much <span class="math inline">\(\tshape\)</span> varies across
 concurrently live particles, not by how hard the problem is. Mirrored
 priors with identical <span class="math inline">\(\Z\)</span> range from
 harmless to an order of magnitude worse than SIS.<span
-class="sidenote-wrapper"><label for="sn-4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-4" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-5" class="margin-toggle"/><span
 class="sidenote">With <span class="math inline">\(\prior(\eos) =
 0.2\)</span> fixed, <span class="math inline">\(\prior(\mathtt{&lt;}),
 \prior(\mathtt{&gt;}) = (0.25, 0.55)\)</span> and <span
@@ -486,7 +493,7 @@ stale.</p>
 <script src="/assets/js/resampling-trained-proposals.bundle.js"></script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-08-05 10:59</span>
+    <span class="last-modified">Last modified: 2026-08-05 11:09</span>
   </div>
 </footer>
 </body>
