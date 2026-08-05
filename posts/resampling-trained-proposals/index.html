@@ -117,20 +117,26 @@ class="math inline">\(\proposal\)</span> generates candidates token by
 token, so a <strong>shaping function</strong> <span
 class="math inline">\(\shape(\text{prefix}) \ge 0\)</span> supplies the
 intermediate feedback that <span
-class="math inline">\(\potential\)</span> can’t. In sequential
-importance sampling, extending a particle by token <span
-class="math inline">\(x\)</span> updates its weight by</p>
+class="math inline">\(\potential\)</span> can’t. On <em>complete</em>
+strings we set <span class="math inline">\(\shape \defeq
+\potential\)</span> (a choice, but the natural one), so a single update
+rule covers every step. In sequential importance sampling, extending a
+particle by token <span class="math inline">\(x\)</span> updates its
+weight by</p>
 <p><span class="math display">\[
 \impwt \;\gets\; \impwt \cdot \frac{\prior(x \mid
 \text{prefix})}{\proposal(x \mid \text{prefix})} \cdot
 \frac{\shape(\text{prefix}\,x)}{\shape(\text{prefix})},
 \]</span></p>
-<p>with <span class="math inline">\(\potential/\shape\)</span> replacing
-the shaping ratio at <span class="math inline">\(\eos\)</span>. A live
-particle thus carries <span class="math inline">\(\impwt =
-\prior\,\shape/\proposal\)</span> (in prefix probabilities). A completed
-particle carries the full importance weight no matter what <span
-class="math inline">\(\shape\)</span> was — shaping only decides
+<p>including at the final step: there <span class="math inline">\(x =
+\eos\)</span> completes the string, so the numerator is <span
+class="math inline">\(\shape(\text{prefix}\,\eos) =
+\potential(\text{string})\)</span>, and the last update swaps the
+shaping estimate for the true potential. A live particle thus carries
+<span class="math inline">\(\impwt = \prior\,\shape/\proposal\)</span>
+(in prefix probabilities). A completed particle carries the full
+importance weight no matter what <span
+class="math inline">\(\shape\)</span> was: shaping only decides
 <em>when</em> weight is realized. SMC adds resampling when the effective
 sample size drops. The ideal shaping function is the
 <strong>twist</strong> <span
@@ -336,8 +342,8 @@ the visualization shows</h1>
 a particle; color is depth (darker = deeper); band thickness is share of
 resampling weight; <code>¤</code> marks completion. Top panel
 (prior-based targets): at the dashed cut, resampling clones the deepest
-particle — least promising, but heaviest — <strong>six</strong> times,
-and kills three shallow particles that were about to finish (×). Bottom
+particle (least promising, but heaviest) <strong>six</strong> times, and
+kills three shallow particles that were about to finish (×). Bottom
 panel (proposal-based targets, identical randomness): no
 weight-triggered resampling fires, the three killed particles all
 complete validly, and the one event just recycles dead slots.</p>
@@ -480,7 +486,7 @@ stale.</p>
 <script src="/assets/js/resampling-trained-proposals.bundle.js"></script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-08-05 10:49</span>
+    <span class="last-modified">Last modified: 2026-08-05 10:59</span>
   </div>
 </footer>
 </body>
