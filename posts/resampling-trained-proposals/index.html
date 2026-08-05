@@ -109,17 +109,17 @@ The fix: make the intermediate targets as knowledgeable as the proposal, by putt
 Setup</h1>
 <p>We want samples from a posterior over strings, <span
 class="math inline">\(\posterior(\str) =
-\prior(\str)\,\potential(\str)/\Z\)</span>, a language-model prior <span
-class="math inline">\(\prior\)</span> reshaped by a potential <span
-class="math inline">\(\potential(\str) \ge 0\)</span> that scores
-complete strings. A proposal <span
+\prior(\str)\,\potential(\str)/\Z\)</span>: a language-model prior <span
+class="math inline">\(\prior\)</span>, reshaped by a potential <span
+class="math inline">\(\potential(\str) \ge 0\)</span>. The potential
+scores only <em>complete</em> strings. A proposal <span
 class="math inline">\(\proposal\)</span> generates candidates token by
-token; since <span class="math inline">\(\potential\)</span> only scores
-complete strings, a <strong>shaping function</strong> <span
-class="math inline">\(\shape(\text{prefix}) \ge 0\)</span> supplies
-intermediate feedback. In sequential importance sampling, extending a
-particle by token <span class="math inline">\(x\)</span> updates its
-weight by</p>
+token, so a <strong>shaping function</strong> <span
+class="math inline">\(\shape(\text{prefix}) \ge 0\)</span> supplies the
+intermediate feedback that <span
+class="math inline">\(\potential\)</span> can’t. In sequential
+importance sampling, extending a particle by token <span
+class="math inline">\(x\)</span> updates its weight by</p>
 <p><span class="math display">\[
 \impwt \;\gets\; \impwt \cdot \frac{\prior(x \mid
 \text{prefix})}{\proposal(x \mid \text{prefix})} \cdot
@@ -128,15 +128,15 @@ weight by</p>
 <p>with <span class="math inline">\(\potential/\shape\)</span> replacing
 the shaping ratio at <span class="math inline">\(\eos\)</span>. A live
 particle thus carries <span class="math inline">\(\impwt =
-\prior\,\shape/\proposal\)</span> (prefix probabilities), and a
-completed one carries the full importance weight regardless of <span
-class="math inline">\(\shape\)</span>, since shaping only decides
+\prior\,\shape/\proposal\)</span> (in prefix probabilities). A completed
+particle carries the full importance weight no matter what <span
+class="math inline">\(\shape\)</span> was — shaping only decides
 <em>when</em> weight is realized. SMC adds resampling when the effective
 sample size drops. The ideal shaping function is the
 <strong>twist</strong> <span
 class="math inline">\(\tshape(\text{prefix}) \defeq
-\mathbb{E}_{\prior}[\potential \mid \text{prefix}]\)</span>, the prior’s
-expected future potential; a trained proposal approximates <span
+\mathbb{E}_{\prior}[\potential \mid \text{prefix}]\)</span>: the prior’s
+expected future potential. A trained proposal approximates <span
 class="math inline">\(\proposal \approx \prior \cdot \tshape /
 \Z\)</span> in prefix probabilities.</p>
 <section id="a-toy-setting" class="level2" data-number="1.1">
@@ -332,17 +332,17 @@ data-number="4">
 <h1 data-number="4"><span class="header-section-number">4</span> What
 the visualization shows</h1>
 <div id="viz-annotated" class="viz-mount" style="height:470px"></div>
-<p><strong>The pathology in one (hand-picked) run.</strong> Lanes are
-particles; color is depth (darker = deeper); band thickness is share of
-resampling weight; <code>¤</code> marks completion. In the top panel
-(prior-based targets), the dashed cut clones the deepest particle, least
-promising but heaviest, <strong>six</strong> times, and kills three
-shallow particles that were about to finish (×). In the bottom panel
-(proposal-based targets, identical randomness) there is no
-weight-triggered resampling; the three killed particles all complete
-validly; the one event just recycles dead slots.</p>
+<p><strong>The pathology in one (hand-picked) run.</strong> Each lane is
+a particle; color is depth (darker = deeper); band thickness is share of
+resampling weight; <code>¤</code> marks completion. Top panel
+(prior-based targets): at the dashed cut, resampling clones the deepest
+particle — least promising, but heaviest — <strong>six</strong> times,
+and kills three shallow particles that were about to finish (×). Bottom
+panel (proposal-based targets, identical randomness): no
+weight-triggered resampling fires, the three killed particles all
+complete validly, and the one event just recycles dead slots.</p>
 <p><strong>Explore it yourself.</strong> The panel starts from the run
-above; re-run draws fresh randomness; hover for any particle’s exact
+above; re-run draws fresh randomness. Hover for any particle’s exact
 state. At high <span class="math inline">\(s\)</span> prior-target
 events are rare, though reliably perverse when they fire. Lower <span
 class="math inline">\(s\)</span> or re-run for more action.</p>
@@ -480,7 +480,7 @@ stale.</p>
 <script src="/assets/js/resampling-trained-proposals.bundle.js"></script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-08-04 19:33</span>
+    <span class="last-modified">Last modified: 2026-08-05 10:49</span>
   </div>
 </footer>
 </body>
