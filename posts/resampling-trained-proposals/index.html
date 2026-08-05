@@ -30,7 +30,7 @@ MathJax = {
     // AMS-style numbering: only {equation}/{align} environments get
     // numbers, so ordinary $ displays stay untagged.
     tags: 'ams'
-    , macros: { "str": "{\\boldsymbol{y}}", "prior": "p", "posterior": "\\pi", "proposal": "q", "potential": "\\varphi", "shape": "\\psi", "tshape": "{\\psi^{*}}", "eos": "{\\text{¤}}", "impwt": "w", "Z": "Z", "DKL": "{D_{\\mathrm{KL}}}", "KL": ["\\DKL(#1\\,\\|\\,#2)", 2], "defeq": "\\triangleq" }
+    , macros: { "str": "{\\boldsymbol{x}}", "prefix": "{\\boldsymbol{x}_{<t}}", "tok": "{x_t}", "prior": "p", "posterior": "\\pi", "proposal": "q", "potential": "\\varphi", "shape": "\\psi", "tshape": "{\\psi^{*}}", "eos": "{\\text{¤}}", "impwt": "w", "Z": "Z", "DKL": "{D_{\\mathrm{KL}}}", "KL": ["\\DKL(#1\\,\\|\\,#2)", 2], "defeq": "\\triangleq" }
   },
   options: {
     // Disable click-to-explore on math. Without these, clicking on a
@@ -115,28 +115,28 @@ class="math inline">\(\potential(\str) \ge 0\)</span>. The potential
 scores only <em>complete</em> strings. A proposal <span
 class="math inline">\(\proposal\)</span> generates candidates token by
 token, so a <strong>shaping function</strong> <span
-class="math inline">\(\shape(\text{prefix}) \ge 0\)</span> supplies the
+class="math inline">\(\shape(\prefix) \ge 0\)</span> supplies the
 intermediate feedback that <span
 class="math inline">\(\potential\)</span> can’t. On <em>complete</em>
 strings we set <span class="math inline">\(\shape \defeq
 \potential\)</span> (a choice, but the natural one), so a single update
 rule covers every step. In sequential importance sampling, extending a
-particle by token <span class="math inline">\(x\)</span> updates its
+particle by token <span class="math inline">\(\tok\)</span> updates its
 weight by</p>
 <p><span class="math display">\[
-\impwt(\text{prefix}\,x) = \impwt(\text{prefix}) \cdot \frac{\prior(x
-\mid \text{prefix})}{\proposal(x \mid \text{prefix})} \cdot
-\frac{\shape(\text{prefix}\,x)}{\shape(\text{prefix})},
+\impwt(\prefix\,\tok) = \impwt(\prefix) \cdot \frac{\prior(\tok \mid
+\prefix)}{\proposal(\tok \mid \prefix)} \cdot
+\frac{\shape(\prefix\,\tok)}{\shape(\prefix)},
 \]</span></p>
 <p>including at the final step, where the shaping function in the
 numerator is the complete potential <span
 class="math inline">\(\potential\)</span>.<span
 class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle"/><span
 class="sidenote">At the final step, we can say <span
-class="math inline">\(x = \texttt{EOS}\)</span>, ‘end of string’. That
-completes the string, so the numerator is <span
-class="math inline">\(\shape(\text{prefix}\,\texttt{EOS}) \defeq
-\potential(\text{string})\)</span><br />
+class="math inline">\(\tok = \texttt{EOS}\)</span>, ‘end of string’.
+That completes the string, so the numerator is <span
+class="math inline">\(\shape(\str\,\texttt{EOS}) \defeq
+\potential(\str)\)</span><br />
 <br />
 </span></span> A live particle thus carries <span
 class="math inline">\(\impwt = \prior\,\shape/\proposal\)</span> (in
@@ -145,8 +145,8 @@ weight no matter what <span class="math inline">\(\shape\)</span> was:
 shaping only decides <em>when</em> weight is realized. SMC adds
 resampling when the effective sample size drops. The ideal shaping
 function is the <strong>twist</strong> <span
-class="math inline">\(\tshape(\text{prefix}) \defeq
-\mathbb{E}_{\prior}[\potential \mid \text{prefix}]\)</span>: the prior’s
+class="math inline">\(\tshape(\prefix) \defeq
+\mathbb{E}_{\prior}[\potential \mid \prefix]\)</span>: the prior’s
 expected future potential. A trained proposal approximates <span
 class="math inline">\(\proposal \approx \prior \cdot \tshape /
 \Z\)</span> in prefix probabilities.</p>
@@ -177,8 +177,8 @@ class="math inline">\(\potential(\str) = 1\)</span> iff <span
 class="math inline">\(\str\)</span> is a balanced, nonempty bracket
 string.</li>
 <li><strong>Shaping</strong>: <span
-class="math inline">\(\shape(\text{prefix}) = 1\)</span> iff the running
-depth never went negative, the naive “no error yet” check.</li>
+class="math inline">\(\shape(\prefix) = 1\)</span> iff the running depth
+never went negative, the naive “no error yet” check.</li>
 </ul>
 <p>Variable length buys two failure modes. Emitting <code>&gt;</code> at
 depth 0 dies <em>mid-string</em>, where shaping catches it (its genuine
@@ -208,8 +208,8 @@ because <span class="math inline">\(\lambda^2 + 1 =
 3\lambda\)</span>.<br />
 <br />
 </span></span> The optimal proposal <span
-class="math inline">\(\proposal^*(x \mid \text{state}) \propto
-\prior(x)\,\tshape(\text{state after } x)\)</span> is a three-row
+class="math inline">\(\proposal^*(\tok \mid \text{state}) \propto
+\prior(\tok)\,\tshape(\text{state after } \tok)\)</span> is a three-row
 table:</p>
 <table>
 <thead>
@@ -493,7 +493,7 @@ stale.</p>
 <script src="/assets/js/resampling-trained-proposals.bundle.js"></script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-08-05 11:11</span>
+    <span class="last-modified">Last modified: 2026-08-05 11:15</span>
   </div>
 </footer>
 </body>
