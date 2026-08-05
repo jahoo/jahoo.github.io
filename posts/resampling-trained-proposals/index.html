@@ -124,8 +124,8 @@ rule covers every step. In sequential importance sampling, extending a
 particle by token <span class="math inline">\(x\)</span> updates its
 weight by</p>
 <p><span class="math display">\[
-\impwt(\prefix\,x) = \impwt(\prefix) \cdot \frac{\prior(x \mid
-\text{prefix})}{\proposal(x \mid \text{prefix})} \cdot
+\impwt(\text{prefix}\,x) = \impwt(\text{prefix}) \cdot \frac{\prior(x
+\mid \text{prefix})}{\proposal(x \mid \text{prefix})} \cdot
 \frac{\shape(\text{prefix}\,x)}{\shape(\text{prefix})},
 \]</span></p>
 <p>including at the final step, where the shaping function in the
@@ -493,7 +493,7 @@ stale.</p>
 <script src="/assets/js/resampling-trained-proposals.bundle.js"></script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-08-05 11:09</span>
+    <span class="last-modified">Last modified: 2026-08-05 11:11</span>
   </div>
 </footer>
 </body>
