@@ -1,5 +1,7 @@
 {
-  "str": "{\\boldsymbol{y}}",
+  "str": "{\\boldsymbol{x}}",
+  "prefix": "{\\boldsymbol{x}_{<t}}",
+  "tok": "{x_t}",
   "prior": "p",
   "posterior": "\\pi",
   "proposal": "q",

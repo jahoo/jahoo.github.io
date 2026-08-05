@@ -25,13 +25,13 @@ The fix: make the intermediate targets as knowledgeable as the proposal, by putt
 
 # Setup
 
-We want samples from a posterior over strings, $\posterior(\str) = \prior(\str)\,\potential(\str)/\Z$: a language-model prior $\prior$, reshaped by a potential $\potential(\str) \ge 0$. The potential scores only *complete* strings. A proposal $\proposal$ generates candidates token by token, so a **shaping function** $\shape(\text{prefix}) \ge 0$ supplies the intermediate feedback that $\potential$ can't. On *complete* strings we set $\shape \defeq \potential$ (a choice, but the natural one), so a single update rule covers every step. In sequential importance sampling, extending a particle by token $x$ updates its weight by
+We want samples from a posterior over strings, $\posterior(\str) = \prior(\str)\,\potential(\str)/\Z$: a language-model prior $\prior$, reshaped by a potential $\potential(\str) \ge 0$. The potential scores only *complete* strings. A proposal $\proposal$ generates candidates token by token, so a **shaping function** $\shape(\prefix) \ge 0$ supplies the intermediate feedback that $\potential$ can't. On *complete* strings we set $\shape \defeq \potential$ (a choice, but the natural one), so a single update rule covers every step. In sequential importance sampling, extending a particle by token $\tok$ updates its weight by
 
 $$
-\impwt(\text{prefix}\,x) = \impwt(\text{prefix}) \cdot \frac{\prior(x \mid \text{prefix})}{\proposal(x \mid \text{prefix})} \cdot \frac{\shape(\text{prefix}\,x)}{\shape(\text{prefix})},
+\impwt(\prefix\,\tok) = \impwt(\prefix) \cdot \frac{\prior(\tok \mid \prefix)}{\proposal(\tok \mid \prefix)} \cdot \frac{\shape(\prefix\,\tok)}{\shape(\prefix)},
 $$
 
-including at the final step, where the shaping function in the numerator is the complete potential $\potential$.^[At the final step, we can say $x = \texttt{EOS}$, 'end of string'. That completes the string, so the numerator is $\shape(\text{prefix}\,\texttt{EOS}) \defeq \potential(\text{string})$] A live particle thus carries $\impwt = \prior\,\shape/\proposal$ (in prefix probabilities). A completed particle carries the full importance weight no matter what $\shape$ was: shaping only decides *when* weight is realized. SMC adds resampling when the effective sample size drops. The ideal shaping function is the **twist** $\tshape(\text{prefix}) \defeq \mathbb{E}_{\prior}[\potential \mid \text{prefix}]$: the prior's expected future potential. A trained proposal approximates $\proposal \approx \prior \cdot \tshape / \Z$ in prefix probabilities.
+including at the final step, where the shaping function in the numerator is the complete potential $\potential$.^[At the final step, we can say $\tok = \texttt{EOS}$, 'end of string'. That completes the string, so the numerator is $\shape(\str\,\texttt{EOS}) \defeq \potential(\str)$] A live particle thus carries $\impwt = \prior\,\shape/\proposal$ (in prefix probabilities). A completed particle carries the full importance weight no matter what $\shape$ was: shaping only decides *when* weight is realized. SMC adds resampling when the effective sample size drops. The ideal shaping function is the **twist** $\tshape(\prefix) \defeq \mathbb{E}_{\prior}[\potential \mid \prefix]$: the prior's expected future potential. A trained proposal approximates $\proposal \approx \prior \cdot \tshape / \Z$ in prefix probabilities.
 
 ## A toy setting
 
@@ -40,11 +40,11 @@ We'll use an example of the Dyck-1 language as our target (strings of brackets).
 - **Vocabulary**: open `<` and close `>`, plus `¤` (end of string).
 - **Prior**: uniform, $\prior(\mathtt{<}) = \prior(\mathtt{>}) = \prior(\eos) = \tfrac13$ in every context. The dumbest possible LM, with no free parameters.^[Memorylessness is convenience, not load-bearing. With a bigram prior everything below stays closed-form (the twist is still geometric in depth, with a last-token-dependent prefactor), and the pathology only gets stronger. The interactive panel below lets you set all three conditional distributions (after BOS, after `<`, after `>`), with a unigram/bigram toggle; unigram is the memoryless case.]
 - **Potential**: $\potential(\str) = 1$ iff $\str$ is a balanced, nonempty bracket string.
-- **Shaping**: $\shape(\text{prefix}) = 1$ iff the running depth never went negative, the naive "no error yet" check.
+- **Shaping**: $\shape(\prefix) = 1$ iff the running depth never went negative, the naive "no error yet" check.
 
 Variable length buys two failure modes. Emitting `>` at depth 0 dies *mid-string*, where shaping catches it (its genuine pruning role), while emitting `¤` at depth $> 0$ dies only *at the end*, invisible to shaping.^[The empty string is also invalid, so `¤` as the first token is an at-the-end death available from $t=0$.]
 
-Everything is closed form, and for the uniform prior the constants come out golden. The twist depends only on depth, $\tshape(d) = \lambda^{d+1}$, with $\lambda = \tfrac{3-\sqrt5}{2} \approx 0.382$ (the reciprocal of the squared golden ratio) and $\Z = \lambda - \tfrac13 \approx 0.049$.^[$\lambda$ solves $\lambda^2 - 3\lambda + 1 = 0$. The table's nonzero entries are exactly $\lambda/3$ and $\tfrac{1}{3\lambda}$; each row sums to one because $\lambda^2 + 1 = 3\lambda$.] The optimal proposal $\proposal^*(x \mid \text{state}) \propto \prior(x)\,\tshape(\text{state after } x)$ is a three-row table:
+Everything is closed form, and for the uniform prior the constants come out golden. The twist depends only on depth, $\tshape(d) = \lambda^{d+1}$, with $\lambda = \tfrac{3-\sqrt5}{2} \approx 0.382$ (the reciprocal of the squared golden ratio) and $\Z = \lambda - \tfrac13 \approx 0.049$.^[$\lambda$ solves $\lambda^2 - 3\lambda + 1 = 0$. The table's nonzero entries are exactly $\lambda/3$ and $\tfrac{1}{3\lambda}$; each row sums to one because $\lambda^2 + 1 = 3\lambda$.] The optimal proposal $\proposal^*(\tok \mid \text{state}) \propto \prior(\tok)\,\tshape(\text{state after } \tok)$ is a three-row table:
 
 | state | `<` | `>` | `¤` |
 |---|---|---|---|
