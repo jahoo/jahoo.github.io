@@ -25,13 +25,13 @@ The fix: make the intermediate targets as knowledgeable as the proposal, by putt
 
 # Setup
 
-We want samples from a posterior over strings, $\posterior(\str) = \prior(\str)\,\potential(\str)/\Z$: a language-model prior $\prior$, reshaped by a potential $\potential(\str) \ge 0$. The potential scores only *complete* strings. A proposal $\proposal$ generates candidates token by token, so a **shaping function** $\shape(\text{prefix}) \ge 0$ supplies the intermediate feedback that $\potential$ can't. In sequential importance sampling, extending a particle by token $x$ updates its weight by
+We want samples from a posterior over strings, $\posterior(\str) = \prior(\str)\,\potential(\str)/\Z$: a language-model prior $\prior$, reshaped by a potential $\potential(\str) \ge 0$. The potential scores only *complete* strings. A proposal $\proposal$ generates candidates token by token, so a **shaping function** $\shape(\text{prefix}) \ge 0$ supplies the intermediate feedback that $\potential$ can't. On *complete* strings we set $\shape \defeq \potential$ --- a choice, but the natural one, and it lets a single update rule cover every step. In sequential importance sampling, extending a particle by token $x$ updates its weight by
 
 $$
 \impwt \;\gets\; \impwt \cdot \frac{\prior(x \mid \text{prefix})}{\proposal(x \mid \text{prefix})} \cdot \frac{\shape(\text{prefix}\,x)}{\shape(\text{prefix})},
 $$
 
-with $\potential/\shape$ replacing the shaping ratio at $\eos$. A live particle thus carries $\impwt = \prior\,\shape/\proposal$ (in prefix probabilities). A completed particle carries the full importance weight no matter what $\shape$ was --- shaping only decides *when* weight is realized. SMC adds resampling when the effective sample size drops. The ideal shaping function is the **twist** $\tshape(\text{prefix}) \defeq \mathbb{E}_{\prior}[\potential \mid \text{prefix}]$: the prior's expected future potential. A trained proposal approximates $\proposal \approx \prior \cdot \tshape / \Z$ in prefix probabilities.
+including at the final step: there $x = \eos$ completes the string, so the numerator is $\shape(\text{prefix}\,\eos) = \potential(\text{string})$, and the last update swaps the shaping estimate for the true potential. A live particle thus carries $\impwt = \prior\,\shape/\proposal$ (in prefix probabilities). A completed particle carries the full importance weight no matter what $\shape$ was --- shaping only decides *when* weight is realized. SMC adds resampling when the effective sample size drops. The ideal shaping function is the **twist** $\tshape(\text{prefix}) \defeq \mathbb{E}_{\prior}[\potential \mid \text{prefix}]$: the prior's expected future potential. A trained proposal approximates $\proposal \approx \prior \cdot \tshape / \Z$ in prefix probabilities.
 
 ## A toy setting
 
