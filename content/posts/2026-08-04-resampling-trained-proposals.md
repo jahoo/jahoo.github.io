@@ -25,13 +25,13 @@ The fix: make the intermediate targets as knowledgeable as the proposal, by putt
 
 # Setup
 
-We want samples from a posterior over strings, $\posterior(\str) = \prior(\str)\,\potential(\str)/\Z$, a language-model prior $\prior$ reshaped by a potential $\potential(\str) \ge 0$ that scores complete strings. A proposal $\proposal$ generates candidates token by token; since $\potential$ only scores complete strings, a **shaping function** $\shape(\text{prefix}) \ge 0$ supplies intermediate feedback. In sequential importance sampling, extending a particle by token $x$ updates its weight by
+We want samples from a posterior over strings, $\posterior(\str) = \prior(\str)\,\potential(\str)/\Z$: a language-model prior $\prior$, reshaped by a potential $\potential(\str) \ge 0$. The potential scores only *complete* strings. A proposal $\proposal$ generates candidates token by token, so a **shaping function** $\shape(\text{prefix}) \ge 0$ supplies the intermediate feedback that $\potential$ can't. In sequential importance sampling, extending a particle by token $x$ updates its weight by
 
 $$
 \impwt \;\gets\; \impwt \cdot \frac{\prior(x \mid \text{prefix})}{\proposal(x \mid \text{prefix})} \cdot \frac{\shape(\text{prefix}\,x)}{\shape(\text{prefix})},
 $$
 
-with $\potential/\shape$ replacing the shaping ratio at $\eos$. A live particle thus carries $\impwt = \prior\,\shape/\proposal$ (prefix probabilities), and a completed one carries the full importance weight regardless of $\shape$, since shaping only decides *when* weight is realized. SMC adds resampling when the effective sample size drops. The ideal shaping function is the **twist** $\tshape(\text{prefix}) \defeq \mathbb{E}_{\prior}[\potential \mid \text{prefix}]$, the prior's expected future potential; a trained proposal approximates $\proposal \approx \prior \cdot \tshape / \Z$ in prefix probabilities.
+with $\potential/\shape$ replacing the shaping ratio at $\eos$. A live particle thus carries $\impwt = \prior\,\shape/\proposal$ (in prefix probabilities). A completed particle carries the full importance weight no matter what $\shape$ was --- shaping only decides *when* weight is realized. SMC adds resampling when the effective sample size drops. The ideal shaping function is the **twist** $\tshape(\text{prefix}) \defeq \mathbb{E}_{\prior}[\potential \mid \text{prefix}]$: the prior's expected future potential. A trained proposal approximates $\proposal \approx \prior \cdot \tshape / \Z$ in prefix probabilities.
 
 ## A toy setting
 
@@ -79,9 +79,9 @@ The live weight at the trained proposal is $\Z/\tshape(\text{state})$ whatever t
 ::: {.viz #viz-annotated height="470px"}
 :::
 
-**The pathology in one (hand-picked) run.** Lanes are particles; color is depth (darker = deeper); band thickness is share of resampling weight; `¤` marks completion. In the top panel (prior-based targets), the dashed cut clones the deepest particle, least promising but heaviest, **six** times, and kills three shallow particles that were about to finish (×). In the bottom panel (proposal-based targets, identical randomness) there is no weight-triggered resampling; the three killed particles all complete validly; the one event just recycles dead slots.
+**The pathology in one (hand-picked) run.** Each lane is a particle; color is depth (darker = deeper); band thickness is share of resampling weight; `¤` marks completion. Top panel (prior-based targets): at the dashed cut, resampling clones the deepest particle --- least promising, but heaviest --- **six** times, and kills three shallow particles that were about to finish (×). Bottom panel (proposal-based targets, identical randomness): no weight-triggered resampling fires, the three killed particles all complete validly, and the one event just recycles dead slots.
 
-**Explore it yourself.** The panel starts from the run above; re-run draws fresh randomness; hover for any particle's exact state. At high $s$ prior-target events are rare, though reliably perverse when they fire. Lower $s$ or re-run for more action.
+**Explore it yourself.** The panel starts from the run above; re-run draws fresh randomness. Hover for any particle's exact state. At high $s$ prior-target events are rare, though reliably perverse when they fire. Lower $s$ or re-run for more action.
 
 ::: {.viz #viz-trajectories height="380px"}
 :::
