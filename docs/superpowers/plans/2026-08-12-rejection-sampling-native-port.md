@@ -284,7 +284,39 @@ for k in keys:
 # Zotero library and `project` is a personal organisational tag; this .bib is
 # rsynced into _site/ and published, so neither belongs in it. The existing
 # assets/smc-resampling/references.bib carries no `file` fields either.
-out = [re.sub(r'^\s+(?:file|project)\s*=.*\n', '', e, flags=re.M) for e in out]
+#
+# Brace-aware rather than line-based: a line regex silently corrupts an entry
+# whose field value spans lines (it deletes the first line and leaves the rest
+# orphaned), and would miss an unindented field. The word boundary keeps
+# `filename`/`projecttitle` from matching.
+def drop_fields(entry, names):
+    pattern = re.compile(r'\n[ \t]*(?:' + '|'.join(names) + r')[ \t]*=[ \t]*', re.I)
+    while True:
+        m = pattern.search(entry)
+        if not m:
+            # Removing the last field leaves the previous one's comma dangling
+            # before the closing brace. Legal BibTeX, but untidy.
+            return re.sub(r',(\s*)\}\s*$', r'\1}', entry)
+        i = m.end()
+        if i < len(entry) and entry[i] == '{':      # brace-delimited value
+            depth = 0
+            while i < len(entry):
+                if entry[i] == '{':
+                    depth += 1
+                elif entry[i] == '}':
+                    depth -= 1
+                    if depth == 0:
+                        i += 1
+                        break
+                i += 1
+        else:                                        # bare value
+            while i < len(entry) and entry[i] not in ',\n':
+                i += 1
+        if i < len(entry) and entry[i] == ',':
+            i += 1
+        entry = entry[:m.start()] + entry[i:]
+
+out = [drop_fields(e, ['file', 'project']) for e in out]
 
 open('assets/rejection-sampling/references.bib', 'w', encoding='utf-8').write(
     '\n\n'.join(out) + '\n')
