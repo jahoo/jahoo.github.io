@@ -5,17 +5,17 @@
 ---   Some text.
 ---   :::
 ---
----   ::: {.note collapse="true"}
+---   ::: {.note-callout collapse="true"}
 ---   Collapsed by default; click to open.
 ---   :::
 ---
 --- Supported types: callout-note, callout-warning, callout-tip,
---- callout-important, plus the bare aliases note, warning, tip, important.
+--- callout-important, plus the bare aliases note-callout, warning-callout, tip-callout, important-callout.
 ---
 --- The bare aliases exist for .qmd-backed posts. Quarto rewrites any div whose
 --- class it recognises (callout-note and friends) into a blockquote before we
 --- ever see it, but it passes divs with unknown classes through verbatim — so
---- qmd sources use `.note` where hand-written .md posts use `.callout-note`.
+--- qmd sources use `.note-callout` where hand-written .md posts use `.callout-note`.
 ---
 --- Attributes:
 ---   title="…"        overrides the default header text
@@ -27,17 +27,17 @@ local callout_types = {
   ["callout-warning"]   = "Warning",
   ["callout-tip"]       = "Tip",
   ["callout-important"] = "Important",
-  ["note"]              = "Note",
-  ["warning"]           = "Warning",
-  ["tip"]               = "Tip",
-  ["important"]         = "Important",
+  ["note-callout"]      = "Note",
+  ["warning-callout"]   = "Warning",
+  ["tip-callout"]       = "Tip",
+  ["important-callout"] = "Important",
 }
 
 -- Deterministic order so a div carrying several callout classes always
 -- resolves the same way (pairs() over a Lua table has no defined order).
 local lookup_order = {
   "callout-note", "callout-warning", "callout-tip", "callout-important",
-  "note", "warning", "tip", "important",
+  "note-callout", "warning-callout", "tip-callout", "important-callout",
 }
 
 local function escape_html(s)

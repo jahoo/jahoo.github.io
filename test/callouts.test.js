@@ -23,22 +23,22 @@ test('existing .callout-note syntax still renders a header and body', () => {
   assert.doesNotMatch(html, /<details/);
 });
 
-test('bare .note alias renders like callout-note', () => {
-  const html = render('::: {.note}\nAlias body.\n:::\n');
-  assert.match(html, /class="callout note"/);
+test('the .note-callout alias renders like callout-note', () => {
+  const html = render('::: {.note-callout}\nAlias body.\n:::\n');
+  assert.match(html, /class="callout note-callout"/);
   assert.match(html, /class="callout-header"/);
   assert.match(html, /Note/);
   assert.match(html, /Alias body\./);
 });
 
-test('.warning, .tip and .important aliases map to their labels', () => {
-  assert.match(render('::: {.warning}\nx\n:::\n'), /Warning/);
-  assert.match(render('::: {.tip}\nx\n:::\n'), /Tip/);
-  assert.match(render('::: {.important}\nx\n:::\n'), /Important/);
+test('.warning-callout, .tip-callout and .important-callout aliases map to their labels', () => {
+  assert.match(render('::: {.warning-callout}\nx\n:::\n'), /Warning/);
+  assert.match(render('::: {.tip-callout}\nx\n:::\n'), /Tip/);
+  assert.match(render('::: {.important-callout}\nx\n:::\n'), /Important/);
 });
 
 test('collapse="true" produces a closed <details> with the title as summary', () => {
-  const html = render('::: {.note collapse="true"}\nHidden body.\n:::\n');
+  const html = render('::: {.note-callout collapse="true"}\nHidden body.\n:::\n');
   assert.match(html, /<details class="callout-details">/);
   assert.match(html, /<summary>Note<\/summary>/);
   assert.match(html, /Hidden body\./);
@@ -46,18 +46,18 @@ test('collapse="true" produces a closed <details> with the title as summary', ()
 });
 
 test('collapse="false" produces an open <details>', () => {
-  const html = render('::: {.note collapse="false"}\nShown body.\n:::\n');
+  const html = render('::: {.note-callout collapse="false"}\nShown body.\n:::\n');
   assert.match(html, /<details class="callout-details" open>/);
 });
 
 test('title attribute overrides the default label and does not leak as an attribute', () => {
-  const html = render('::: {.note title="Custom heading" collapse="true"}\nx\n:::\n');
+  const html = render('::: {.note-callout title="Custom heading" collapse="true"}\nx\n:::\n');
   assert.match(html, /<summary>Custom heading<\/summary>/);
   assert.doesNotMatch(html, /title="Custom heading"/);
 });
 
 test('collapse attribute does not leak into the emitted div', () => {
-  const html = render('::: {.note collapse="true"}\nx\n:::\n');
+  const html = render('::: {.note-callout collapse="true"}\nx\n:::\n');
   assert.doesNotMatch(html, /collapse="true"/);
 });
 
