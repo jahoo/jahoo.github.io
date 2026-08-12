@@ -16,7 +16,7 @@
 - Generated artifacts (`content/posts/2022-08-29-rejection-sampling.md`, `assets/rejection-sampling/*.svg`) ARE committed to git.
 - Phase 1 only: the new post carries `unlisted: true`. `content/posts/2022-08-29-rejection-sampling-expo.md` and `assets/rejection-sampling-expo/**` MUST NOT be modified. No redirect stub in this plan.
 - Cross-reference labels use pandoc-crossref syntax `#fig:name` / `@fig:name`, never Quarto's `fig-name`.
-- Callouts in `.qmd` sources use the Quarto-safe aliases `.note` / `.warning` / `.tip` / `.important`. The existing `.callout-*` names keep working unchanged for hand-written `.md` posts.
+- Callouts in `.qmd` sources use the Quarto-safe aliases `.note-callout` / `.warning-callout` / `.tip-callout` / `.important-callout`. The existing `.callout-*` names keep working unchanged for hand-written `.md` posts.
 - Figures ship byte-for-byte as Plots.jl produced them. No SVG post-processing. Theming is CSS-only ("figure card": white panel, padding, border, rounded corners, identical in light and dark).
 - Julia `savefig` paths are relative to `content/posts/` (Quarto's working directory), i.e. `../../assets/rejection-sampling/…`.
 - Do not add `Co-Authored-By` lines to commits.
@@ -50,7 +50,7 @@
 
 **Interfaces:**
 - Consumes: nothing from earlier tasks.
-- Produces: markdown authors may write `::: {.note}`, `::: {.warning}`, `::: {.tip}`, `::: {.important}`, each optionally with `collapse="true"` (starts closed) or `collapse="false"` (collapsible, starts open), and optionally `title="…"`. Emitted HTML for a collapsible callout is `<div class="callout note"><details class="callout-details"[ open]><summary>TITLE</summary><div class="callout-body">…</div></details></div>`. Non-collapsible output is unchanged from today: `<div class="callout …"><div class="callout-header">TITLE</div><div class="callout-body">…</div></div>`.
+- Produces: markdown authors may write `::: {.note-callout}`, `::: {.warning-callout}`, `::: {.tip-callout}`, `::: {.important-callout}`, each optionally with `collapse="true"` (starts closed) or `collapse="false"` (collapsible, starts open), and optionally `title="…"`. Emitted HTML for a collapsible callout is `<div class="callout note-callout"><details class="callout-details"[ open]><summary>TITLE</summary><div class="callout-body">…</div></details></div>`. Non-collapsible output is unchanged from today: `<div class="callout …"><div class="callout-header">TITLE</div><div class="callout-body">…</div></div>`.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -82,22 +82,22 @@ test('existing .callout-note syntax still renders a header and body', () => {
   assert.doesNotMatch(html, /<details/);
 });
 
-test('bare .note alias renders like callout-note', () => {
-  const html = render('::: {.note}\nAlias body.\n:::\n');
-  assert.match(html, /class="callout note"/);
+test('the .note-callout alias renders like callout-note', () => {
+  const html = render('::: {.note-callout}\nAlias body.\n:::\n');
+  assert.match(html, /class="callout note-callout"/);
   assert.match(html, /class="callout-header"/);
   assert.match(html, /Note/);
   assert.match(html, /Alias body\./);
 });
 
-test('.warning, .tip and .important aliases map to their labels', () => {
-  assert.match(render('::: {.warning}\nx\n:::\n'), /Warning/);
-  assert.match(render('::: {.tip}\nx\n:::\n'), /Tip/);
-  assert.match(render('::: {.important}\nx\n:::\n'), /Important/);
+test('.warning-callout, .tip-callout and .important-callout aliases map to their labels', () => {
+  assert.match(render('::: {.warning-callout}\nx\n:::\n'), /Warning/);
+  assert.match(render('::: {.tip-callout}\nx\n:::\n'), /Tip/);
+  assert.match(render('::: {.important-callout}\nx\n:::\n'), /Important/);
 });
 
 test('collapse="true" produces a closed <details> with the title as summary', () => {
-  const html = render('::: {.note collapse="true"}\nHidden body.\n:::\n');
+  const html = render('::: {.note-callout collapse="true"}\nHidden body.\n:::\n');
   assert.match(html, /<details class="callout-details">/);
   assert.match(html, /<summary>Note<\/summary>/);
   assert.match(html, /Hidden body\./);
@@ -105,18 +105,18 @@ test('collapse="true" produces a closed <details> with the title as summary', ()
 });
 
 test('collapse="false" produces an open <details>', () => {
-  const html = render('::: {.note collapse="false"}\nShown body.\n:::\n');
+  const html = render('::: {.note-callout collapse="false"}\nShown body.\n:::\n');
   assert.match(html, /<details class="callout-details" open>/);
 });
 
 test('title attribute overrides the default label and does not leak as an attribute', () => {
-  const html = render('::: {.note title="Custom heading" collapse="true"}\nx\n:::\n');
+  const html = render('::: {.note-callout title="Custom heading" collapse="true"}\nx\n:::\n');
   assert.match(html, /<summary>Custom heading<\/summary>/);
   assert.doesNotMatch(html, /title="Custom heading"/);
 });
 
 test('collapse attribute does not leak into the emitted div', () => {
-  const html = render('::: {.note collapse="true"}\nx\n:::\n');
+  const html = render('::: {.note-callout collapse="true"}\nx\n:::\n');
   assert.doesNotMatch(html, /collapse="true"/);
 });
 
@@ -143,17 +143,17 @@ Replace the whole of `filters/callouts.lua` with:
 ---   Some text.
 ---   :::
 ---
----   ::: {.note collapse="true"}
+---   ::: {.note-callout collapse="true"}
 ---   Collapsed by default; click to open.
 ---   :::
 ---
 --- Supported types: callout-note, callout-warning, callout-tip,
---- callout-important, plus the bare aliases note, warning, tip, important.
+--- callout-important, plus the bare aliases note-callout, warning-callout, tip-callout, important-callout.
 ---
 --- The bare aliases exist for .qmd-backed posts. Quarto rewrites any div whose
 --- class it recognises (callout-note and friends) into a blockquote before we
 --- ever see it, but it passes divs with unknown classes through verbatim — so
---- qmd sources use `.note` where hand-written .md posts use `.callout-note`.
+--- qmd sources use `.note-callout` where hand-written .md posts use `.callout-note`.
 ---
 --- Attributes:
 ---   title="…"        overrides the default header text
@@ -165,17 +165,17 @@ local callout_types = {
   ["callout-warning"]   = "Warning",
   ["callout-tip"]       = "Tip",
   ["callout-important"] = "Important",
-  ["note"]              = "Note",
-  ["warning"]           = "Warning",
-  ["tip"]               = "Tip",
-  ["important"]         = "Important",
+  ["note-callout"]      = "Note",
+  ["warning-callout"]   = "Warning",
+  ["tip-callout"]       = "Tip",
+  ["important-callout"] = "Important",
 }
 
 -- Deterministic order so a div carrying several callout classes always
 -- resolves the same way (pairs() over a Lua table has no defined order).
 local lookup_order = {
   "callout-note", "callout-warning", "callout-tip", "callout-important",
-  "note", "warning", "tip", "important",
+  "note-callout", "warning-callout", "tip-callout", "important-callout",
 }
 
 local function escape_html(s)
@@ -676,10 +676,10 @@ Expected: `0`.
 
 - [ ] **Step 7: Rewrite the callouts**
 
-There are seven `.callout-note` divs. Change every `::: {.callout-note}` opener to `::: {.note}`, and for the three that carry `collapse="true"`, keep the attribute: `::: {.note collapse="true"}`. The three collapsible ones are titled *What about a different proposal?*, *What about sampling until success?*, and *Related algorithms*; each currently opens with a `### …` heading as its first line. Move that heading text into a `title` attribute and delete the heading, so the summary line carries it:
+There are seven `.callout-note` divs. Change every `::: {.callout-note}` opener to `::: {.note-callout}`, and for the three that carry `collapse="true"`, keep the attribute: `::: {.note-callout collapse="true"}`. The three collapsible ones are titled *What about a different proposal?*, *What about sampling until success?*, and *Related algorithms*; each currently opens with a `### …` heading as its first line. Move that heading text into a `title` attribute and delete the heading, so the summary line carries it:
 
 ```markdown
-::: {.note collapse="true" title="What about a different proposal?"}
+::: {.note-callout collapse="true" title="What about a different proposal?"}
 The proposal above …
 :::
 ```
@@ -770,7 +770,7 @@ Expected: `# GENERATED FILE` marker, `toc: true`, `unlisted: true`, the `css:` l
 - [ ] **Step 5: Verify site syntax survived the render**
 
 ```bash
-grep -c '::: {\?\.note' content/posts/2022-08-29-rejection-sampling.md
+grep -c '::: {\.note-callout' content/posts/2022-08-29-rejection-sampling.md
 grep -c '{#fig:' content/posts/2022-08-29-rejection-sampling.md
 grep -c '</details>' content/posts/2022-08-29-rejection-sampling.md
 ```
@@ -1014,8 +1014,8 @@ site-flavoured syntax rather than Quarto's:
 
 | Write this in a `.qmd` | Not this | Why |
 |---|---|---|
-| `::: {.note}` | `::: {.callout-note}` | Quarto flattens classes it knows into blockquotes |
-| `::: {.note collapse="true"}` | Quarto's `collapse` | same, and `callouts.lua` renders it as `<details>` |
+| `::: {.note-callout}` | `::: {.callout-note}` | Quarto flattens classes it knows into blockquotes |
+| `::: {.note-callout collapse="true"}` | Quarto's `collapse` | same, and `callouts.lua` renders it as `<details>` |
 | `@fig:name`, `{#fig:name}` | `@fig-name`, `#| label: fig-name` | pandoc-crossref's syntax; Quarto's figure nodes do not survive `--to markdown` |
 | `savefig(p, "../../assets/…")` + a markdown image line | `#| fig-cap:` | Quarto inlines SVGs rather than writing files |
 | `<details>` written by hand | `#| code-fold: true` | keeps folding under our control |
