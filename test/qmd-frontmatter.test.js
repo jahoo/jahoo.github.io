@@ -77,3 +77,39 @@ test('throws when the qmd has no front matter', () => {
   assert.throws(() => swapFrontMatter(GENERATED, 'no yaml here\n'),
     /no YAML front matter/);
 });
+
+test('a bare --- horizontal rule in the body survives, with content on both sides', () => {
+  const generated = `---
+title: Rejection sampling
+---
+
+Para one.
+
+---
+
+Para two.
+`;
+  const out = swapFrontMatter(generated, QMD);
+  const body = out.slice(out.indexOf('Para one.'));
+  assert.equal(body, 'Para one.\n\n---\n\nPara two.\n');
+});
+
+test('CRLF line endings in the generated file are handled', () => {
+  const generated = '---\r\ntitle: Rejection sampling\r\n---\r\n\r\nReal body.\r\n';
+  const out = swapFrontMatter(generated, QMD);
+  assert.equal(out.slice(out.indexOf('Real body')), 'Real body.\r\n');
+});
+
+test('an empty YAML block in the generated file yields just the body', () => {
+  const out = swapFrontMatter('---\n---\n\nBody.\n', QMD);
+  assert.equal(out.slice(out.indexOf('Body.')), 'Body.\n');
+});
+
+test('an unterminated YAML block in the generated file is preserved, not dropped', () => {
+  // No closing `---`, so there is nothing to strip: swapFrontMatter treats the
+  // whole generated text as body rather than silently discarding content.
+  const generated = '---\ntitle: X\n\nBody without closing.\n';
+  const out = swapFrontMatter(generated, QMD);
+  const body = out.slice(out.lastIndexOf('---\ntitle: X'));
+  assert.equal(body, '---\ntitle: X\n\nBody without closing.\n');
+});
