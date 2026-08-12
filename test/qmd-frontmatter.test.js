@@ -1,0 +1,79 @@
+// test/qmd-frontmatter.test.js
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+
+import { swapFrontMatter } from '../scripts/qmd-frontmatter.js';
+
+const QMD = `---
+title: Rejection sampling
+date: 2022-08-29
+tags: [note]
+unlisted: true
+toc: true
+css:
+  - assets/css/rejection-sampling.css
+bibliography: assets/rejection-sampling/references.bib
+---
+
+Prose that should be ignored.
+`;
+
+const GENERATED = `---
+author:
+- Jacob Hoover Vigly
+authors:
+- Jacob Hoover Vigly
+date: 2022-08-29
+tags:
+- note
+title: Rejection sampling
+toc-title: Table of contents
+unlisted: true
+---
+
+Real body.
+`;
+
+test('restores keys Quarto ate', () => {
+  const out = swapFrontMatter(GENERATED, QMD);
+  assert.match(out, /^toc: true$/m);
+  assert.match(out, /assets\/css\/rejection-sampling\.css/);
+  assert.match(out, /^bibliography: assets\/rejection-sampling\/references\.bib$/m);
+});
+
+test('drops the noise Quarto added', () => {
+  const out = swapFrontMatter(GENERATED, QMD);
+  assert.doesNotMatch(out, /^authors:$/m);
+  assert.doesNotMatch(out, /toc-title:/);
+});
+
+test('keeps the generated body, not the qmd body', () => {
+  const out = swapFrontMatter(GENERATED, QMD);
+  assert.match(out, /Real body\./);
+  assert.doesNotMatch(out, /Prose that should be ignored\./);
+});
+
+test('marks the file as generated using a YAML comment', () => {
+  const out = swapFrontMatter(GENERATED, QMD);
+  // A YAML comment never reaches the rendered HTML.
+  assert.match(out, /^# GENERATED FILE/m);
+  const firstDelim = out.indexOf('---');
+  const secondDelim = out.indexOf('\n---', firstDelim + 3);
+  assert.ok(out.indexOf('# GENERATED FILE') < secondDelim,
+    'marker must sit inside the YAML block');
+});
+
+test('output starts with a YAML block so pandoc parses it', () => {
+  assert.ok(swapFrontMatter(GENERATED, QMD).startsWith('---\n'));
+});
+
+test('handles a generated file that has no front matter at all', () => {
+  const out = swapFrontMatter('Just a body.\n', QMD);
+  assert.match(out, /^---\n/);
+  assert.match(out, /Just a body\./);
+});
+
+test('throws when the qmd has no front matter', () => {
+  assert.throws(() => swapFrontMatter(GENERATED, 'no yaml here\n'),
+    /no YAML front matter/);
+});
