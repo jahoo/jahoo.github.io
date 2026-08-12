@@ -24,3 +24,6 @@ source.bib
 
 # Transient git worktree used by `make deploy`
 _deploy
+
+# Subagent-driven-development scratch (ledgers, briefs, review packages)
+.superpowers/
