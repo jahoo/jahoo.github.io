@@ -279,6 +279,13 @@ for k in keys:
             if depth == 0: break
         j += 1
     out.append(src[m.start():j+1])
+
+# Drop Zotero-local metadata. `file` holds absolute paths into the user's
+# Zotero library and `project` is a personal organisational tag; this .bib is
+# rsynced into _site/ and published, so neither belongs in it. The existing
+# assets/smc-resampling/references.bib carries no `file` fields either.
+out = [re.sub(r'^\s+(?:file|project)\s*=.*\n', '', e, flags=re.M) for e in out]
+
 open('assets/rejection-sampling/references.bib', 'w', encoding='utf-8').write(
     '\n\n'.join(out) + '\n')
 print(f'wrote {len(out)} entries')
