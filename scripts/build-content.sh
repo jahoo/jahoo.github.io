@@ -66,6 +66,9 @@ build_one() {
 for src in content/posts/*.md; do
   [ -f "$src" ] || continue
   basename=$(basename "$src" .md)
+  # Quarto writes its pre-pandoc intermediate as <name>.markdown.md next to the
+  # .qmd. A failed render can leave one behind; it must never build as a post.
+  case "$basename" in *.markdown) continue ;; esac
   slug=$(strip_date "$basename")
   dest="$OUTDIR/posts/$slug/index.html"
 
