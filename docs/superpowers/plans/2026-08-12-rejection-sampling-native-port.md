@@ -577,15 +577,24 @@ Add near the content-compilation section of the `Makefile`, after the `content:`
 # Quarto + the julia-1.10 Jupyter kernel; a plain `make` never invokes it.
 NB_QMD := content/posts/2022-08-29-rejection-sampling.qmd
 NB_MD  := content/posts/2022-08-29-rejection-sampling.md
+# Quarto names its default output after the input file's basename, and puts it
+# where --output-dir says. --output-dir resolves relative to the INPUT FILE's
+# directory (verified against Quarto 1.8.26), so ../../_build from
+# content/posts/ lands at the repo-root _build/.
+#
+# Do NOT add `-o <name>` to rename the output. Combining -o with --output-dir
+# is broken in 1.8.26 when quarto is invoked from the repo root, as make does:
+# it resolves to ../../../<name> — three levels up — and writes OUTSIDE the
+# repository. Verified by reproduction. Consume the default-named file instead.
+NB_RAW := _build/$(notdir $(NB_QMD:.qmd=.md))
 
 notebooks: $(NB_MD)
 
 $(NB_MD): $(NB_QMD) scripts/qmd-frontmatter.js
 	@mkdir -p _build assets/rejection-sampling
 	@echo "Render (quarto + julia): $<"
-	@quarto render $< --to markdown --execute \
-	   --output-dir ../../_build -o rejection-sampling.raw.md
-	@node scripts/qmd-frontmatter.js _build/rejection-sampling.raw.md $(NB_QMD) > $@
+	@quarto render $< --to markdown --execute --output-dir ../../_build
+	@node scripts/qmd-frontmatter.js $(NB_RAW) $(NB_QMD) > $@
 	@echo "Generated: $@"
 ```
 
