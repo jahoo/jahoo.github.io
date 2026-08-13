@@ -62,14 +62,23 @@ NB_MD  := content/posts/2022-08-29-rejection-sampling.md
 # (non-project) markdown render is bugged in 1.8.26 — it silently writes one
 # directory too high and drops the --output-dir path entirely. Consuming the
 # default-named file instead sidesteps that.
-NB_RAW := _build/$(notdir $(NB_QMD:.qmd=.md))
+# We don't consume Quarto's own pandoc-rendered markdown: that pass rewrites
+# prose it should pass through untouched (image paths made relative, a
+# References heading injected, fenced divs dropped). Instead we ask Quarto to
+# `keep-md: true` and consume the pre-pandoc intermediate it retains, which is
+# byte-identical to the source prose. --resource-path is still needed so
+# Quarto's own (now-discarded) pandoc pass exits 0 instead of failing to
+# resolve the bibliography path.
+NB_KEEP := $(NB_QMD:.qmd=.markdown.md)
+NB_RAW  := _build/$(notdir $(NB_KEEP))
 
 notebooks: $(NB_MD)
 
 $(NB_MD): $(NB_QMD) scripts/qmd-frontmatter.js
 	@mkdir -p _build assets/rejection-sampling
 	@echo "Render (quarto + julia): $<"
-	@quarto render $< --to markdown --execute --output-dir ../../_build
+	@quarto render $< --to markdown --execute --output-dir ../../_build --resource-path=../..
+	@mv $(NB_KEEP) $(NB_RAW)
 	@node scripts/qmd-frontmatter.js $(NB_RAW) $(NB_QMD) > $@
 	@echo "Generated: $@"
 

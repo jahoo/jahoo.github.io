@@ -1,4 +1,6 @@
 ---
+# GENERATED FILE — DO NOT EDIT.
+# Source of truth is the sibling .qmd; regenerate with `make notebooks`.
 title: Rejection sampling
 date: 2022-08-29
 author: Jacob Louis Hoover
@@ -59,7 +61,8 @@ Let's look at some examples. First I'll load some packages and define a plotting
 <details class="code-fold">
 <summary>Show/hide code</summary>
 
-```{julia}
+::: {.cell execution_count=1}
+``` {.julia .cell-code}
 using Distributions, Plots, StatsPlots, LaTeXStrings
 import IntervalUnionArithmetic: interval, ∪
 import StatsBase: fit, Histogram
@@ -157,13 +160,30 @@ function plot_rejection_sampling_estimate(;
 end;
 ```
 
+::: {.cell-output .cell-output-stderr}
+```
+Precompiling packages...
+Info Given IntervalUnionArithmetic was explicitly requested, output will be shown live 
+WARNING: Method definition union(IntervalArithmetic.Interval{T} where T<:Real, IntervalArithmetic.Interval{T} where T<:Real) in module IntervalArithmetic at /Users/v/.julia/packages/IntervalArithmetic/EquAX/src/intervals/set_operations.jl:137 overwritten in module IntervalUnionArithmetic at /Users/v/.julia/packages/IntervalUnionArithmetic/DhDcd/src/interval_unions.jl:51.
+ERROR: Method overwriting is not permitted during Module precompilation. Use `__precompile__(false)` to opt-out of precompilation.
+    482.6 ms  ? IntervalUnionArithmetic
+[ Info: Precompiling IntervalUnionArithmetic [bbd57523-681a-4e6b-a941-369dddcfdba8]
+WARNING: Method definition union(IntervalArithmetic.Interval{T} where T<:Real, IntervalArithmetic.Interval{T} where T<:Real) in module IntervalArithmetic at /Users/v/.julia/packages/IntervalArithmetic/EquAX/src/intervals/set_operations.jl:137 overwritten in module IntervalUnionArithmetic at /Users/v/.julia/packages/IntervalUnionArithmetic/DhDcd/src/interval_unions.jl:51.
+ERROR: Method overwriting is not permitted during Module precompilation. Use `__precompile__(false)` to opt-out of precompilation.
+[ Info: Skipping precompilation since __precompile__(false). Importing IntervalUnionArithmetic [bbd57523-681a-4e6b-a941-369dddcfdba8].
+```
+:::
+:::
+
+
 </details>
 
 ### Rejection sampling
 
 Let's define a concrete proposal distribution and target density to use as an example,
 
-```{julia}
+::: {.cell execution_count=2}
+``` {.julia .cell-code}
 # Define a proposal distribution Q
 Q = Normal(55, 30) # the proposal density is q(x) = pdf(Q,x)
 
@@ -172,17 +192,21 @@ Q = Normal(55, 30) # the proposal density is q(x) = pdf(Q,x)
 P = MixtureModel([Normal(20, 10), Chisq(60), Normal(92, 4)], [0.3, 0.67, 0.03])
 πstar(x) = pdf(P, x);  # target density
 ```
+:::
+
 
 and look at a plot of these:
 
 <details class="code-fold">
 <summary>Show/hide code</summary>
 
-```{julia}
-#| output: false
+::: {.cell execution_count=3}
+``` {.julia .cell-code}
 p = plot_rejection_sampling_setup(target_density=πstar, proposal_distribution=Q, plot_accept_prob=true)
 savefig(p, "../../assets/rejection-sampling/fig-setup.svg")
 ```
+:::
+
 
 </details>
 
@@ -195,7 +219,8 @@ savefig(p, "../../assets/rejection-sampling/fig-setup.svg")
 
 Here is some code which implements the rejection sampling algorithm.
 
-```{julia}
+::: {.cell execution_count=4}
+``` {.julia .cell-code}
 """
 Run the rejection sampling algorithm to estimate `target_density` by sampling
 `N` times from `proposal_distribution`.
@@ -218,17 +243,21 @@ function rejection_sample_N_times(;
     return samples, (N_attempt=N, N_success=length(samples))
 end;
 ```
+:::
+
 
 To see the estimate resulting from these rejection sampling examples, let's make a histogram of the accepted samples resulting from sampling `N` times from the proposal:
 
 <details class="code-fold">
 <summary>Show/hide code</summary>
 
-```{julia}
-#| output: false
+::: {.cell execution_count=5}
+``` {.julia .cell-code}
 p = plot_rejection_sampling_estimate(target_density=πstar, proposal_distribution=Q)
 savefig(p, "../../assets/rejection-sampling/fig-simulation.svg")
 ```
+:::
+
 
 </details>
 
@@ -238,14 +267,16 @@ savefig(p, "../../assets/rejection-sampling/fig-simulation.svg")
 The proposal above is relatively good (it's similar enough to the target, so
 a healthy proportion of the samples were accepted). What if the proposal were a worse fit to the target?
 
-```{julia}
-#| output: false
+::: {.cell execution_count=6}
+``` {.julia .cell-code}
 # Define a "bad" proposal distribution (badly matched to the target)
 Q_bad = MixtureModel([Normal(60, 50), Normal(37, 4), Normal(90, 3)], [0.4, 0.3, 0.3])
 
 p = plot_rejection_sampling_estimate(target_density=πstar, proposal_distribution=Q_bad)
 savefig(p, "../../assets/rejection-sampling/fig-badproposal.svg")
 ```
+:::
+
 
 ![Simulation of rejection sampling setup with a worse proposal distribution.](/assets/rejection-sampling/fig-badproposal.svg){#fig:rejection-sampling-simulation-badproposal}
 
@@ -260,8 +291,8 @@ Guessing repeatedly (from a prior distribution) and only accepting when some con
 We'll set our target density to simply be equal to the proposal density when the condition is met, and zero otherwise.
 The `condition` I'll use for this example is just whether the sampled real number is in a specified couple of intervals.
 
-```{julia}
-#| output: false
+::: {.cell execution_count=7}
+``` {.julia .cell-code}
 # Make a target density that equals pdf(Q) only on a chosen intervals, and zero elsewhere
 intervals = interval(12, 25) ∪ interval(50, 70) # the intervals to accept on
 condition(x) = x ∈ intervals
@@ -277,6 +308,8 @@ p = plot_rejection_sampling_setup(target_density=special_πstar, proposal_distri
     plot_accept_prob=true)
 savefig(p, "../../assets/rejection-sampling/fig-special.svg")
 ```
+:::
+
 
 ![Special case of rejection sampling where the target is equal to the proposal everywhere in the support of the proposal, and is zero elsewhere.](/assets/rejection-sampling/fig-special.svg){#fig:rejection-sampling-special}
 
@@ -297,11 +330,13 @@ One important difference between these two definitions of rejection sampling is 
 <details class="code-fold">
 <summary>Show/hide code</summary>
 
-```{julia}
-#| output: false
+::: {.cell execution_count=8}
+``` {.julia .cell-code}
 p = plot_rejection_sampling_estimate(target_density=special_πstar, proposal_distribution=Q, Z=Z)
 savefig(p, "../../assets/rejection-sampling/fig-simulation-special.svg")
 ```
+:::
+
 
 </details>
 
@@ -315,7 +350,8 @@ Here is such a modified algorithm, and our examples above run using it.
 
 In this sample-until-success version of the algorithm, it is computationally costly to use a bad proposal.
 
-```{julia}
+::: {.cell execution_count=9}
+``` {.julia .cell-code}
 """
 Run the rejection sampling algorithm to estimate `target_density`
 by sampling from `proposal_distribution` until `N` samples are accepted.
@@ -342,34 +378,42 @@ function rejection_sample_until_N_successes(;
     return samples, (N_attempt=N_attempt, N_success=N)
 end;
 ```
+:::
 
-```{julia}
-#| output: false
+
+::: {.cell execution_count=10}
+``` {.julia .cell-code}
 p = plot_rejection_sampling_estimate(
     target_density=πstar, proposal_distribution=Q,
     rejection_sampler=rejection_sample_until_N_successes)
 savefig(p, "../../assets/rejection-sampling/fig-until-success-good.svg")
 ```
+:::
+
 
 ![Sampling from the good proposal until 1000 samples have been accepted. The title reports how many proposals that took.](/assets/rejection-sampling/fig-until-success-good.svg)
 
-```{julia}
-#| output: false
+::: {.cell execution_count=11}
+``` {.julia .cell-code}
 p = plot_rejection_sampling_estimate(
     target_density=πstar, proposal_distribution=Q_bad,
     rejection_sampler=rejection_sample_until_N_successes)
 savefig(p, "../../assets/rejection-sampling/fig-until-success-bad.svg")
 ```
+:::
+
 
 ![The same, with the badly matched proposal: the same 1000 accepted samples now cost many more proposals.](/assets/rejection-sampling/fig-until-success-bad.svg)
 
-```{julia}
-#| output: false
+::: {.cell execution_count=12}
+``` {.julia .cell-code}
 p = plot_rejection_sampling_estimate(
     target_density=special_πstar, proposal_distribution=Q, Z=Z,
     rejection_sampler=rejection_sample_until_N_successes)
 savefig(p, "../../assets/rejection-sampling/fig-until-success-special.svg")
 ```
+:::
+
 
 ![The same again, for the guess-and-check special case, where a proposal is accepted exactly when it falls in one of the two intervals.](/assets/rejection-sampling/fig-until-success-special.svg)
 
@@ -396,7 +440,8 @@ __Slice sampling__ [@neal.r:2003] is a method for generating 2-D samples $(z,y)$
 <details class="code-fold">
 <summary>Show/hide code</summary>
 
-```{julia}
+::: {.cell execution_count=13}
+``` {.julia .cell-code}
 function find_intervals(p, y; xmin=-10, xmax=110, resolution=1000)
     # Initialize variables for interval finding
     dx = (xmax - xmin) / resolution
@@ -504,20 +549,25 @@ function plot_slice_sampling_estimate(;
     # histogram!(samples, normalize=true, α=0.2, label="estimate", bins=bins, lw=0)
 end;
 ```
+:::
+
 
 </details>
 
 <details class="code-fold">
 <summary>Show/hide code</summary>
 
-```{julia}
-#| output: false
+::: {.cell execution_count=14}
+``` {.julia .cell-code}
 p = plot_slice_sampling_estimate(target_density=πstar)
 savefig(p, "../../assets/rejection-sampling/fig-slice-sampling.svg")
 ```
+:::
+
 
 </details>
 
 ![An example of slice sampling.  Samples are drawn uniformly from the 2-d area under the target.](/assets/rejection-sampling/fig-slice-sampling.svg){#fig:slice-sampling}
 
 :::
+
