@@ -65,3 +65,28 @@ test('a div with no callout class is left alone', () => {
   const html = render('::: {.something-else}\nx\n:::\n');
   assert.doesNotMatch(html, /class="callout/);
 });
+
+test('escaping: special characters in the title are escaped in the summary', () => {
+  const html = render('::: {.note-callout collapse="true" title="Q&A <x> \\"quoted\\""}\nBody.\n:::\n');
+  assert.match(html, /<summary>Q&amp;A &lt;x&gt; &quot;quoted&quot;<\/summary>/);
+  assert.doesNotMatch(html, /<x>/);
+});
+
+test('nested callouts: an inner .note-callout renders inside the outer collapsed <details>', () => {
+  const html = render(
+    '::::: {.note-callout collapse="true" title="Outer"}\nOuter body.\n\n:::: {.note-callout title="Inner"}\nInner body.\n::::\n\n:::::\n'
+  );
+  assert.match(html, /<summary>Outer<\/summary>/);
+  assert.match(html, /class="callout-header">\s*Inner/);
+  assert.match(html, /Outer body\./);
+  assert.match(html, /Inner body\./);
+
+  // The inner callout must be nested inside the outer's <details>...</details>.
+  const detailsOpen = html.indexOf('<details');
+  const innerHeader = html.indexOf('Inner');
+  const detailsClose = html.indexOf('</details>');
+  assert.ok(
+    detailsOpen !== -1 && detailsOpen < innerHeader && innerHeader < detailsClose,
+    'inner callout should appear between the outer <details> and </details>'
+  );
+});
