@@ -1,6 +1,4 @@
 ---
-# GENERATED FILE — DO NOT EDIT.
-# Source of truth is the sibling .qmd; regenerate with `make notebooks`.
 title: Density of transformed random variable
 date: 2022-09-02
 author: Jacob Louis Hoover
@@ -74,8 +72,8 @@ $$g(y) = f(x(y))\frac{\dee x(y)}{\dee y} = \frac2\pi\sqrt{1-\sin^2}\cos y = \fra
 <details class="code-fold">
 <summary>Show/hide code</summary>
 
-::: {.cell execution_count=1}
-``` {.julia .cell-code}
+```{julia}
+#| output: false
 using Plots
 
 function plot_transform_pdf(;
@@ -144,16 +142,15 @@ function plot_transform_pdf(;
     plot(pf, px, pg, layout = l, size = size, fmt=:svg)
 end;
 ```
-:::
-
 
 </details>
 
 <details class="code-fold" open>
 <summary>Show/hide code</summary>
 
-::: {.cell execution_count=2}
-``` {.julia .cell-code}
+```{julia}
+#| label: fig-arcsine
+#| fig-cap: "A semicircle density transformed by $y(x)=\\arcsin x$."
 plot_transform_pdf(
     f = x -> 2/pi * sqrt(1-x^2),
     y = x -> asin(x),
@@ -162,12 +159,8 @@ plot_transform_pdf(
     demo_range = (0.7, 0.9), resolution = 100
 )
 ```
-:::
-
 
 </details>
-
-![A semicircle density transformed by $y(x)=\arcsin x$.](/assets/transform-pdf/fig-arcsine-output-1.svg){#fig:arcsine}
 
 :::{.tip-callout title="Legend" collapse="false"}
 - upper left: ${\color{red}f(x)}$, the pdf of $X$
@@ -191,8 +184,9 @@ Thus $Y\sim\mathrm{Pareto}(1,1)$^[The pdf of a $\mathrm{Pareto}(\kappa,\alpha)$ 
 <details class="code-fold" open>
 <summary>Show/hide code</summary>
 
-::: {.cell execution_count=3}
-``` {.julia .cell-code}
+```{julia}
+#| label: fig-pareto
+#| fig-cap: "A uniform density transformed by $y(x)=x^{-1}$, giving a Pareto distribution."
 plot_transform_pdf(
     f = x -> 1,
     y = x -> 1/x,
@@ -202,12 +196,8 @@ plot_transform_pdf(
     demo_range = (0.5, 1.0), resolution = 100
 )
 ```
-:::
-
 
 </details>
-
-![A uniform density transformed by $y(x)=x^{-1}$, giving a Pareto distribution.](/assets/transform-pdf/fig-pareto-output-1.svg){#fig:pareto}
 
 :::{.note-callout title="More examples" collapse="true"}
 
@@ -225,8 +215,9 @@ The following are some more examples (taken from [here](https://www.cl.cam.ac.uk
 <details class="code-fold" open>
 <summary>Show/hide code</summary>
 
-::: {.cell execution_count=4}
-``` {.julia .cell-code}
+```{julia}
+#| label: fig-cosine
+#| fig-cap: "Example 1: the squaring map $y(x)=x^2$ gives a cosine density."
 plot_transform_pdf(
     f = x -> 2x * cos(x^2),
     y = x -> x^2,
@@ -234,12 +225,8 @@ plot_transform_pdf(
     xlim = (0, √(π/2))
 )
 ```
-:::
-
 
 </details>
-
-![Example 1: the squaring map $y(x)=x^2$ gives a cosine density.](/assets/transform-pdf/fig-cosine-output-1.svg){#fig:cosine}
 
 ----
 
@@ -255,8 +242,9 @@ plot_transform_pdf(
 <details class="code-fold" open>
 <summary>Show/hide code</summary>
 
-::: {.cell execution_count=5}
-``` {.julia .cell-code}
+```{julia}
+#| label: fig-triangular
+#| fig-cap: "Example 2: a linear density transformed into a triangular one. The demo interval here covers a quarter of the total area."
 plot_transform_pdf(
     f = x -> x/2,
     y = x -> 1-√(4-x^2)/2,
@@ -266,12 +254,8 @@ plot_transform_pdf(
     resolution = 200 # let's up the resolution (see denser lines in visualization)
     )
 ```
-:::
-
 
 </details>
-
-![Example 2: a linear density transformed into a triangular one. The demo interval here covers a quarter of the total area.](/assets/transform-pdf/fig-triangular-output-1.svg){#fig:triangular}
 
 ----
 
@@ -289,8 +273,9 @@ plot_transform_pdf(
 <details class="code-fold" open>
 <summary>Show/hide code</summary>
 
-::: {.cell execution_count=6}
-``` {.julia .cell-code}
+```{julia}
+#| label: fig-exponential
+#| fig-cap: "Example 3: a uniform density transformed into an exponential one, with $\\lambda=2$."
 λ = 2 # set the scale parameter to 2, arbitrarily
 plot_transform_pdf(
     f = x -> 1,
@@ -301,12 +286,8 @@ plot_transform_pdf(
     demo_range = (0.1, 0.5), resolution=150
     )
 ```
-:::
-
 
 </details>
-
-![Example 3: a uniform density transformed into an exponential one, with $\lambda=2$.](/assets/transform-pdf/fig-exponential-output-1.svg){#fig:exponential}
 
 ----
 
@@ -324,8 +305,9 @@ plot_transform_pdf(
 <details class="code-fold" open>
 <summary>Show/hide code</summary>
 
-::: {.cell execution_count=7}
-``` {.julia .cell-code}
+```{julia}
+#| label: fig-uniform
+#| fig-cap: "Example 4: a linear density transformed into a uniform one."
 plot_transform_pdf(
     f = x -> 2x,
     y = x -> x^2,
@@ -334,12 +316,8 @@ plot_transform_pdf(
     demo_range = (0.15, 0.3)
 )
 ```
-:::
-
 
 </details>
-
-![Example 4: a linear density transformed into a uniform one.](/assets/transform-pdf/fig-uniform-output-1.svg){#fig:uniform}
 
 ----
 
@@ -359,8 +337,9 @@ plot_transform_pdf(
 <details class="code-fold" open>
 <summary>Show/hide code</summary>
 
-::: {.cell execution_count=8}
-``` {.julia .cell-code}
+```{julia}
+#| label: fig-normal
+#| fig-cap: "Example 5: the inverse normal CDF transforms a uniform density into a standard normal one."
 using Distributions
 plot_transform_pdf(
     f = x -> 1,
@@ -371,20 +350,17 @@ plot_transform_pdf(
     demo_range=(0.5, 0.75)# 1/4 of the total area
 )
 ```
-:::
-
 
 </details>
-
-![Example 5: the inverse normal CDF transforms a uniform density into a standard normal one.](/assets/transform-pdf/fig-normal-output-1.svg){#fig:normal}
 
 We can also revisit example 3 above, and write it the same way (though we need the inverse CDF of 1-x...  it's equivalent.)
 
 <details class="code-fold" open>
 <summary>Show/hide code</summary>
 
-::: {.cell execution_count=9}
-``` {.julia .cell-code}
+```{julia}
+#| label: fig-exponential-quantile
+#| fig-cap: "Example 3 again, written with the inverse CDF of the exponential distribution."
 X = Uniform(0, 1)
 Y = Exponential(1/2)
 plot_transform_pdf(
@@ -396,12 +372,7 @@ plot_transform_pdf(
     demo_range = (0.1, 0.5)
 )
 ```
-:::
-
 
 </details>
 
-![Example 3 again, written with the inverse CDF of the exponential distribution.](/assets/transform-pdf/fig-exponential-quantile-output-1.svg){#fig:exponential-quantile}
-
 :::
-
