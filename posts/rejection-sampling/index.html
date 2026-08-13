@@ -367,12 +367,12 @@ Show/hide code
 </summary>
 <div class="cell" data-execution_count="3">
 <div class="sourceCode" id="cb3"><pre
-class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_rejection_sampling_setup</span>(target_density<span class="op">=</span>πstar, proposal_distribution<span class="op">=</span>Q, plot_accept_prob<span class="op">=</span><span class="cn">true</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-setup.svg&quot;</span>)</span></code></pre></div>
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_rejection_sampling_setup</span>(target_density<span class="op">=</span>πstar, proposal_distribution<span class="op">=</span>Q, plot_accept_prob<span class="op">=</span><span class="cn">true</span>)</span></code></pre></div>
 </div>
 </details>
 <figure id="fig:rejection-sampling">
-<img src="/assets/rejection-sampling/fig-setup.svg"
+<img
+src="/assets/rejection-sampling/fig-rejection-sampling-output-1.svg"
 alt="Figure 1: A setup for rejection sampling. Samples are to be drawn from the proposal distribution, and accepted or rejected according to the ratio of the target density to the scaled proposal density." />
 <figcaption aria-hidden="true">Figure 1: A setup for rejection sampling.
 Samples are to be drawn from the proposal distribution, and accepted or
@@ -432,12 +432,12 @@ Show/hide code
 </summary>
 <div class="cell" data-execution_count="5">
 <div class="sourceCode" id="cb5"><pre
-class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_rejection_sampling_estimate</span>(target_density<span class="op">=</span>πstar, proposal_distribution<span class="op">=</span>Q)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-simulation.svg&quot;</span>)</span></code></pre></div>
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_rejection_sampling_estimate</span>(target_density<span class="op">=</span>πstar, proposal_distribution<span class="op">=</span>Q)</span></code></pre></div>
 </div>
 </details>
 <figure id="fig:rejection-sampling-simulation">
-<img src="/assets/rejection-sampling/fig-simulation.svg"
+<img
+src="/assets/rejection-sampling/fig-rejection-sampling-simulation-output-1.svg"
 alt="Figure 2: Simulation of rejection sampling setup in Figure 1." />
 <figcaption aria-hidden="true">Figure 2: Simulation of rejection
 sampling setup in <a
@@ -458,12 +458,12 @@ Show/hide code
 class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define a &quot;bad&quot; proposal distribution (badly matched to the target)</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>Q_bad <span class="op">=</span> <span class="fu">MixtureModel</span>([<span class="fu">Normal</span>(<span class="fl">60</span>, <span class="fl">50</span>), <span class="fu">Normal</span>(<span class="fl">37</span>, <span class="fl">4</span>), <span class="fu">Normal</span>(<span class="fl">90</span>, <span class="fl">3</span>)], [<span class="fl">0.4</span>, <span class="fl">0.3</span>, <span class="fl">0.3</span>])</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_rejection_sampling_estimate</span>(target_density<span class="op">=</span>πstar, proposal_distribution<span class="op">=</span>Q_bad)</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-badproposal.svg&quot;</span>)</span></code></pre></div>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_rejection_sampling_estimate</span>(target_density<span class="op">=</span>πstar, proposal_distribution<span class="op">=</span>Q_bad)</span></code></pre></div>
 </div>
 </details>
 <figure id="fig:rejection-sampling-simulation-badproposal">
-<img src="/assets/rejection-sampling/fig-badproposal.svg"
+<img
+src="/assets/rejection-sampling/fig-rejection-sampling-simulation-badproposal-output-1.svg"
 alt="Figure 3: Simulation of rejection sampling setup with a worse proposal distribution." />
 <figcaption aria-hidden="true">Figure 3: Simulation of rejection
 sampling setup with a worse proposal distribution.</figcaption>
@@ -506,14 +506,14 @@ class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb7-
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co"># and we could scale the density to make it a pdf, if we wanted</span></span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># special_π_normalized(x) =  special_πstar(x) * 1/Z</span></span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_rejection_sampling_setup</span>(target_density<span class="op">=</span>special_πstar, proposal_distribution<span class="op">=</span>Q,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_rejection_sampling_setup</span>(target_density<span class="op">=</span>special_πstar, proposal_distribution<span class="op">=</span>Q,</span>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">&quot;Rejection sampling setup&quot;</span>, subtitle<span class="op">=</span><span class="st">&quot;case when target = proposal where nonzero&quot;</span>,</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    plot_accept_prob<span class="op">=</span><span class="cn">true</span>)</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-special.svg&quot;</span>)</span></code></pre></div>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    plot_accept_prob<span class="op">=</span><span class="cn">true</span>)</span></code></pre></div>
 </div>
 </details>
 <figure id="fig:rejection-sampling-special">
-<img src="/assets/rejection-sampling/fig-special.svg"
+<img
+src="/assets/rejection-sampling/fig-rejection-sampling-special-output-1.svg"
 alt="Figure 4: Special case of rejection sampling where the target is equal to the proposal everywhere in the support of the proposal, and is zero elsewhere." />
 <figcaption aria-hidden="true">Figure 4: Special case of rejection
 sampling where the target is equal to the proposal everywhere in the
@@ -565,12 +565,12 @@ Show/hide code
 </summary>
 <div class="cell" data-execution_count="8">
 <div class="sourceCode" id="cb8"><pre
-class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_rejection_sampling_estimate</span>(target_density<span class="op">=</span>special_πstar, proposal_distribution<span class="op">=</span>Q, Z<span class="op">=</span>Z)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-simulation-special.svg&quot;</span>)</span></code></pre></div>
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_rejection_sampling_estimate</span>(target_density<span class="op">=</span>special_πstar, proposal_distribution<span class="op">=</span>Q, Z<span class="op">=</span>Z)</span></code></pre></div>
 </div>
 </details>
 <figure id="fig:rejection-sampling-simulation-special">
-<img src="/assets/rejection-sampling/fig-simulation-special.svg"
+<img
+src="/assets/rejection-sampling/fig-rejection-sampling-simulation-special-output-1.svg"
 alt="Figure 5: Simulation of special case of rejection sampling setup in Figure 4. This corresponds to guessing from the normal distribution and rejecting unless the sample falls in the specified couple of intervals." />
 <figcaption aria-hidden="true">Figure 5: Simulation of special case of
 rejection sampling setup in <a
@@ -629,18 +629,18 @@ Show/hide code
 </summary>
 <div class="cell" data-execution_count="10">
 <div class="sourceCode" id="cb10"><pre
-class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_rejection_sampling_estimate</span>(</span>
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_rejection_sampling_estimate</span>(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    target_density<span class="op">=</span>πstar, proposal_distribution<span class="op">=</span>Q,</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    rejection_sampler<span class="op">=</span>rejection_sample_until_N_successes)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-until-success-good.svg&quot;</span>)</span></code></pre></div>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    rejection_sampler<span class="op">=</span>rejection_sample_until_N_successes)</span></code></pre></div>
 </div>
 </details>
-<figure>
-<img src="/assets/rejection-sampling/fig-until-success-good.svg"
-alt="Sampling from the good proposal until 1000 samples have been accepted. The title reports how many proposals that took." />
-<figcaption aria-hidden="true">Sampling from the good proposal until
-1000 samples have been accepted. The title reports how many proposals
-that took.</figcaption>
+<figure id="fig:until-success-good">
+<img
+src="/assets/rejection-sampling/fig-until-success-good-output-1.svg"
+alt="Figure 6: Sampling from the good proposal until 1000 samples have been accepted. The title reports how many proposals that took." />
+<figcaption aria-hidden="true">Figure 6: Sampling from the good proposal
+until 1000 samples have been accepted. The title reports how many
+proposals that took.</figcaption>
 </figure>
 <details class="code-fold" open>
 <summary>
@@ -648,17 +648,16 @@ Show/hide code
 </summary>
 <div class="cell" data-execution_count="11">
 <div class="sourceCode" id="cb11"><pre
-class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_rejection_sampling_estimate</span>(</span>
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_rejection_sampling_estimate</span>(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    target_density<span class="op">=</span>πstar, proposal_distribution<span class="op">=</span>Q_bad,</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    rejection_sampler<span class="op">=</span>rejection_sample_until_N_successes)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-until-success-bad.svg&quot;</span>)</span></code></pre></div>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    rejection_sampler<span class="op">=</span>rejection_sample_until_N_successes)</span></code></pre></div>
 </div>
 </details>
-<figure>
-<img src="/assets/rejection-sampling/fig-until-success-bad.svg"
-alt="The same, with the badly matched proposal: the same 1000 accepted samples now cost many more proposals." />
-<figcaption aria-hidden="true">The same, with the badly matched
-proposal: the same 1000 accepted samples now cost many more
+<figure id="fig:until-success-bad">
+<img src="/assets/rejection-sampling/fig-until-success-bad-output-1.svg"
+alt="Figure 7: The same, with the badly matched proposal: the same 1000 accepted samples now cost many more proposals." />
+<figcaption aria-hidden="true">Figure 7: The same, with the badly
+matched proposal: the same 1000 accepted samples now cost many more
 proposals.</figcaption>
 </figure>
 <details class="code-fold" open>
@@ -667,18 +666,18 @@ Show/hide code
 </summary>
 <div class="cell" data-execution_count="12">
 <div class="sourceCode" id="cb12"><pre
-class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_rejection_sampling_estimate</span>(</span>
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_rejection_sampling_estimate</span>(</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    target_density<span class="op">=</span>special_πstar, proposal_distribution<span class="op">=</span>Q, Z<span class="op">=</span>Z,</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    rejection_sampler<span class="op">=</span>rejection_sample_until_N_successes)</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-until-success-special.svg&quot;</span>)</span></code></pre></div>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    rejection_sampler<span class="op">=</span>rejection_sample_until_N_successes)</span></code></pre></div>
 </div>
 </details>
-<figure>
-<img src="/assets/rejection-sampling/fig-until-success-special.svg"
-alt="The same again, for the guess-and-check special case, where a proposal is accepted exactly when it falls in one of the two intervals." />
-<figcaption aria-hidden="true">The same again, for the guess-and-check
-special case, where a proposal is accepted exactly when it falls in one
-of the two intervals.</figcaption>
+<figure id="fig:until-success-special">
+<img
+src="/assets/rejection-sampling/fig-until-success-special-output-1.svg"
+alt="Figure 8: The same again, for the guess-and-check special case, where a proposal is accepted exactly when it falls in one of the two intervals." />
+<figcaption aria-hidden="true">Figure 8: The same again, for the
+guess-and-check special case, where a proposal is accepted exactly when
+it falls in one of the two intervals.</figcaption>
 </figure>
 </div>
 </details>
@@ -850,14 +849,13 @@ Show/hide code
 </summary>
 <div class="cell" data-execution_count="14">
 <div class="sourceCode" id="cb14"><pre
-class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_slice_sampling_estimate</span>(target_density<span class="op">=</span>πstar)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-slice-sampling.svg&quot;</span>)</span></code></pre></div>
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_slice_sampling_estimate</span>(target_density<span class="op">=</span>πstar)</span></code></pre></div>
 </div>
 </details>
 <figure id="fig:slice-sampling">
-<img src="/assets/rejection-sampling/fig-slice-sampling.svg"
-alt="Figure 6: An example of slice sampling. Samples are drawn uniformly from the 2-d area under the target." />
-<figcaption aria-hidden="true">Figure 6: An example of slice sampling.
+<img src="/assets/rejection-sampling/fig-slice-sampling-output-1.svg"
+alt="Figure 9: An example of slice sampling. Samples are drawn uniformly from the 2-d area under the target." />
+<figcaption aria-hidden="true">Figure 9: An example of slice sampling.
 Samples are drawn uniformly from the 2-d area under the
 target.</figcaption>
 </figure>
@@ -963,7 +961,7 @@ href="https://doi.org/10.1214/aos/1056562461">https://doi.org/10.1214/aos/105656
 </script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-08-12 22:47</span>
+    <span class="last-modified">Last modified: 2026-08-12 23:01</span>
   </div>
 </footer>
 </body>
