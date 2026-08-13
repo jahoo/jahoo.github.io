@@ -1012,13 +1012,13 @@ Expected: `9`. A `0` means `assets/rejection-sampling` is missing from `STATIC_D
 
 ```bash
 git status --short content/posts/2022-08-29-rejection-sampling-expo.md assets/rejection-sampling-expo
-grep -c 'rejection-sampling-expo' _site/posts.html
+grep -c 'rejection-sampling-expo' _site/posts/index.html
 ```
 
 Expected: `git status` reports nothing (the old post is untouched), and the old post is still listed. Also confirm the new post is *not* listed:
 
 ```bash
-grep -c 'posts/rejection-sampling/' _site/posts.html
+grep -c 'posts/rejection-sampling/' _site/posts/index.html
 ```
 
 Expected: `0` — `unlisted: true` keeps it out during Phase 1.
