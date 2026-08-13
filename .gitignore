@@ -28,4 +28,5 @@ _deploy
 # Subagent-driven-development scratch (ledgers, briefs, review packages)
 .superpowers/
 
+# Quarto's render scratch for the notebooks pipeline (`make notebooks`)
 _build/

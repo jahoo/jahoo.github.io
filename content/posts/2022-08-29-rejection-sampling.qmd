@@ -165,6 +165,7 @@ end;
 Let's define a concrete proposal distribution and target density to use as an example,
 
 ```{julia}
+#| output: false
 # Define a proposal distribution Q
 Q = Normal(55, 30) # the proposal density is q(x) = pdf(Q,x)
 
@@ -197,6 +198,7 @@ savefig(p, "../../assets/rejection-sampling/fig-setup.svg")
 Here is some code which implements the rejection sampling algorithm.
 
 ```{julia}
+#| output: false
 """
 Run the rejection sampling algorithm to estimate `target_density` by sampling
 `N` times from `proposal_distribution`.
@@ -317,6 +319,7 @@ Here is such a modified algorithm, and our examples above run using it.
 In this sample-until-success version of the algorithm, it is computationally costly to use a bad proposal.
 
 ```{julia}
+#| output: false
 """
 Run the rejection sampling algorithm to estimate `target_density`
 by sampling from `proposal_distribution` until `N` samples are accepted.
@@ -398,6 +401,7 @@ __Slice sampling__ [@neal.r:2003] is a method for generating 2-D samples $(z,y)$
 <summary>Show/hide code</summary>
 
 ```{julia}
+#| output: false
 function find_intervals(p, y; xmin=-10, xmax=110, resolution=1000)
     # Initialize variables for interval finding
     dx = (xmax - xmin) / resolution

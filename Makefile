@@ -120,6 +120,7 @@ test:
 
 clean:
 	@if [ -d "$(OUTDIR)" ]; then trash "$(OUTDIR)"; fi
+	@if [ -d "_build" ]; then trash "_build"; fi
 
 # ---- Deploy: build on `source`, push _site/ to `static` ----
 # Preconditions (fail loudly):
