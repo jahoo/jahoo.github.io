@@ -52,8 +52,11 @@ content:
 # cells, the cells write their SVGs to assets/ via savefig, and the prose is
 # passed through verbatim for the normal pandoc build to compile. Requires
 # Quarto + the julia-1.10 Jupyter kernel; a plain `make` never invokes it.
-NB_QMD := content/posts/2022-08-29-rejection-sampling.qmd
-NB_MD  := content/posts/2022-08-29-rejection-sampling.md
+# Every content/posts/*.qmd builds to a sibling .md. Adding a notebook-backed
+# post needs no edit here: drop the .qmd in, run `make notebooks`, commit both
+# it and the generated .md alongside whatever figures the code wrote.
+NB_QMDS := $(wildcard content/posts/*.qmd)
+NB_MDS  := $(NB_QMDS:.qmd=.md)
 # Quarto names its default output after the input file's basename; that's
 # where --output-dir puts it (--output-dir is resolved relative to the input
 # file's directory, confirmed against Quarto 1.8.26: from content/posts/,
@@ -69,18 +72,21 @@ NB_MD  := content/posts/2022-08-29-rejection-sampling.md
 # byte-identical to the source prose. --resource-path is still needed so
 # Quarto's own (now-discarded) pandoc pass exits 0 instead of failing to
 # resolve the bibliography path.
-NB_KEEP := $(NB_QMD:.qmd=.markdown.md)
-NB_RAW  := _build/$(notdir $(NB_KEEP))
+notebooks: $(NB_MDS)
 
-notebooks: $(NB_MD)
-
-$(NB_MD): $(NB_QMD) scripts/qmd-frontmatter.js
-	@rm -f $(NB_KEEP)
-	@mkdir -p _build assets/rejection-sampling
+# $* is the stem (e.g. content/posts/2022-08-29-rejection-sampling), so
+# $*.markdown.md is the intermediate Quarto leaves beside the source.
+%.md: %.qmd scripts/qmd-frontmatter.js
+	@rm -f $*.markdown.md
+	@mkdir -p _build
+	@# Figures are written by savefig into assets/<date-stripped slug>/, the same
+	@# slug build-content.sh derives the post's URL from. Create it so a brand-new
+	@# post's first render doesn't fail on a missing directory.
+	@mkdir -p "assets/$$(echo $(notdir $*) | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')"
 	@echo "Render (quarto + julia): $<"
 	@quarto render $< --to markdown --execute --output-dir ../../_build --resource-path=../..
-	@mv $(NB_KEEP) $(NB_RAW)
-	@node scripts/qmd-frontmatter.js $(NB_RAW) $(NB_QMD) > $@
+	@mv $*.markdown.md _build/$(notdir $*).markdown.md
+	@node scripts/qmd-frontmatter.js _build/$(notdir $*).markdown.md $< > $@
 	@echo "Generated: $@"
 
 # ---- JS bundling ----

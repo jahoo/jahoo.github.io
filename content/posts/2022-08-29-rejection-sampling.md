@@ -13,6 +13,7 @@ bibliography: assets/rejection-sampling/references.bib
 css:
   - assets/css/rejection-sampling.css
 jupyter: julia-1.10
+shift-headings: true
 keep-md: true
 ---
 
@@ -168,6 +169,9 @@ end;
 
 Let's define a concrete proposal distribution and target density to use as an example,
 
+<details class="code-fold" open>
+<summary>Show/hide code</summary>
+
 ::: {.cell execution_count=2}
 ``` {.julia .cell-code}
 # Define a proposal distribution Q
@@ -180,6 +184,8 @@ P = MixtureModel([Normal(20, 10), Chisq(60), Normal(92, 4)], [0.3, 0.67, 0.03])
 ```
 :::
 
+
+</details>
 
 and look at a plot of these:
 
@@ -204,6 +210,9 @@ savefig(p, "../../assets/rejection-sampling/fig-setup.svg")
 ### Simulation {.unnumbered}
 
 Here is some code which implements the rejection sampling algorithm.
+
+<details class="code-fold" open>
+<summary>Show/hide code</summary>
 
 ::: {.cell execution_count=4}
 ``` {.julia .cell-code}
@@ -232,6 +241,8 @@ end;
 :::
 
 
+</details>
+
 To see the estimate resulting from these rejection sampling examples, let's make a histogram of the accepted samples resulting from sampling `N` times from the proposal:
 
 <details class="code-fold">
@@ -253,6 +264,9 @@ savefig(p, "../../assets/rejection-sampling/fig-simulation.svg")
 The proposal above is relatively good (it's similar enough to the target, so
 a healthy proportion of the samples were accepted). What if the proposal were a worse fit to the target?
 
+<details class="code-fold" open>
+<summary>Show/hide code</summary>
+
 ::: {.cell execution_count=6}
 ``` {.julia .cell-code}
 # Define a "bad" proposal distribution (badly matched to the target)
@@ -263,6 +277,8 @@ savefig(p, "../../assets/rejection-sampling/fig-badproposal.svg")
 ```
 :::
 
+
+</details>
 
 ![Simulation of rejection sampling setup with a worse proposal distribution.](/assets/rejection-sampling/fig-badproposal.svg){#fig:rejection-sampling-simulation-badproposal}
 
@@ -276,6 +292,9 @@ Guessing repeatedly (from a prior distribution) and only accepting when some con
 
 We'll set our target density to simply be equal to the proposal density when the condition is met, and zero otherwise.
 The `condition` I'll use for this example is just whether the sampled real number is in a specified couple of intervals.
+
+<details class="code-fold" open>
+<summary>Show/hide code</summary>
 
 ::: {.cell execution_count=7}
 ``` {.julia .cell-code}
@@ -296,6 +315,8 @@ savefig(p, "../../assets/rejection-sampling/fig-special.svg")
 ```
 :::
 
+
+</details>
 
 ![Special case of rejection sampling where the target is equal to the proposal everywhere in the support of the proposal, and is zero elsewhere.](/assets/rejection-sampling/fig-special.svg){#fig:rejection-sampling-special}
 
@@ -336,6 +357,9 @@ Here is such a modified algorithm, and our examples above run using it.
 
 In this sample-until-success version of the algorithm, it is computationally costly to use a bad proposal.
 
+<details class="code-fold" open>
+<summary>Show/hide code</summary>
+
 ::: {.cell execution_count=9}
 ``` {.julia .cell-code}
 """
@@ -367,6 +391,11 @@ end;
 :::
 
 
+</details>
+
+<details class="code-fold" open>
+<summary>Show/hide code</summary>
+
 ::: {.cell execution_count=10}
 ``` {.julia .cell-code}
 p = plot_rejection_sampling_estimate(
@@ -377,7 +406,12 @@ savefig(p, "../../assets/rejection-sampling/fig-until-success-good.svg")
 :::
 
 
+</details>
+
 ![Sampling from the good proposal until 1000 samples have been accepted. The title reports how many proposals that took.](/assets/rejection-sampling/fig-until-success-good.svg)
+
+<details class="code-fold" open>
+<summary>Show/hide code</summary>
 
 ::: {.cell execution_count=11}
 ``` {.julia .cell-code}
@@ -389,7 +423,12 @@ savefig(p, "../../assets/rejection-sampling/fig-until-success-bad.svg")
 :::
 
 
+</details>
+
 ![The same, with the badly matched proposal: the same 1000 accepted samples now cost many more proposals.](/assets/rejection-sampling/fig-until-success-bad.svg)
+
+<details class="code-fold" open>
+<summary>Show/hide code</summary>
 
 ::: {.cell execution_count=12}
 ``` {.julia .cell-code}
@@ -400,6 +439,8 @@ savefig(p, "../../assets/rejection-sampling/fig-until-success-special.svg")
 ```
 :::
 
+
+</details>
 
 ![The same again, for the guess-and-check special case, where a proposal is accepted exactly when it falls in one of the two intervals.](/assets/rejection-sampling/fig-until-success-special.svg)
 

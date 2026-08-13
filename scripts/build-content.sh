@@ -46,6 +46,13 @@ build_one() {
   lastmod=$(stat -f '%Sm' -t '%Y-%m-%d %H:%M' "$src" 2>/dev/null || date -r "$src" '+%Y-%m-%d %H:%M' 2>/dev/null || echo "")
   local extra_flags=""
   head -30 "$src" | grep -q '^toc: *true' && extra_flags="$extra_flags --toc"
+  # `shift-headings: true` promotes every heading one level (h2 -> h1).
+  # Quarto documents idiomatically start their sections at `##`, because the
+  # title occupies the `h1`; this site starts them at `#`. Without the shift,
+  # citeproc's own `# References` makes pandoc treat h1 as the document's top
+  # level, so h2 sections number from zero ("0.1 Definitions").
+  head -30 "$src" | grep -q '^shift-headings: *true' && \
+    extra_flags="$extra_flags --shift-heading-level-by=-1"
   # `unlisted: true` keeps a post out of the blog listing (see build-index.lua);
   # the noindex header keeps it out of search results, so the URL is
   # shareable-by-link without the page becoming publicly discoverable.

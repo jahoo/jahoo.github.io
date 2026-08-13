@@ -342,6 +342,48 @@ runs the code cells, and the ordinary pandoc build then does citations,
 cross-references, callouts, and templating. Both the generated `.md` and the
 figures are committed, so a normal `make` never touches Julia or Quarto.
 
+**The `.qmd` is the source of truth.** The sibling `.md` is a build artifact
+that happens to be committed — like a lockfile — so the site builds on a
+machine with neither Julia nor Quarto installed. It carries a
+`# GENERATED FILE — DO NOT EDIT` header; edit the `.qmd` and regenerate.
+
+### Adding a new one
+
+Every `content/posts/*.qmd` builds to its sibling `.md`, so there is nothing
+to register:
+
+1. Write `content/posts/YYYY-MM-DD-slug.qmd` with the front matter below.
+2. `make notebooks` — regenerates any `.qmd` whose `.md` is out of date.
+3. Commit the `.qmd`, the generated `.md`, and whatever figures the code wrote.
+
+Front matter for a notebook-backed post; everything after `tags:` is the
+site's normal post front matter, so `css:`, `toc:`, `bibliography:` and the
+rest behave exactly as for a hand-written post:
+
+```yaml
+---
+title: Your title
+date: 2026-01-01
+tags: [note]
+jupyter: julia-1.10      # name the kernel; don't leave Quarto to infer it
+keep-md: true            # required — the build consumes this intermediate
+shift-headings: true     # Quarto sources start sections at `##`; see below
+css:                     # optional, per-post tweaks
+  - assets/css/your-post.css
+---
+```
+
+`shift-headings: true` promotes every heading one level at build time. Quarto
+documents idiomatically start their sections at `##`, because the title takes
+the `h1`; this site starts them at `#`. Without the shift, citeproc's own
+`# References` makes pandoc treat `h1` as the document's top level and your
+sections number from zero (`0.1 Definitions`). Leave it out only if you are
+already writing `#` for top-level sections.
+
+Figures are written by `savefig` into `assets/<slug>/`, where `<slug>` is the
+filename with the date stripped — the same slug the post's URL uses. The
+`notebooks` rule creates that directory for you on first render.
+
 ```bash
 make notebooks   # re-run the Julia and regenerate the .md; needs Quarto + a julia-1.10 Jupyter kernel
 make             # ordinary build; uses the committed .md and .svg files

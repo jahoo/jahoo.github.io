@@ -194,3 +194,54 @@ nav#TOC a:hover {
     font-size: 16px;
   }
 }
+
+/* ── Callouts ──────────────────────────────────────── */
+/* filters/callouts.lua turns `::: {.callout-note}` (and the Quarto-safe
+   aliases `.note-callout` etc. that .qmd-backed posts use) into
+   <div class="callout <type>"> with either a .callout-header or, when the
+   author passes collapse=, a <details class="callout-details">.
+   Until now the only .callout styling on the site lived in a single post's
+   page CSS, so callouts elsewhere rendered as plain text.
+
+   Deliberately scoped to the *type* classes rather than bare .callout:
+   assets/css/smc-resampling.css defines its own .callout/.insight/.proof
+   look, and this must not disturb it. Colours come from theme tokens, all of
+   which are redefined under prefers-color-scheme: dark. */
+
+.callout-note, .note-callout,
+.callout-tip, .tip-callout,
+.callout-warning, .warning-callout,
+.callout-important, .important-callout {
+  margin: 1.6em 0;
+  padding: 0.7em 1em;
+  border-left: 3px solid var(--color-border-heavy);
+  border-radius: 0 4px 4px 0;
+  background: var(--color-inline-code-bg);
+  font-size: 0.95em;
+}
+
+/* Accent per type, using the theme's highlight palette. */
+.callout-note, .note-callout           { border-left-color: var(--highlight-blue); }
+.callout-tip, .tip-callout             { border-left-color: var(--highlight-green); }
+.callout-warning, .warning-callout     { border-left-color: var(--highlight-yellow); }
+.callout-important, .important-callout { border-left-color: var(--highlight-red); }
+
+/* No wasted vertical space at the panel's edges. */
+.callout-header + .callout-body > :first-child,
+.callout-body > :first-child { margin-top: 0; }
+.callout-body > :last-child { margin-bottom: 0; }
+
+.callout-header {
+  font-weight: 600;
+  margin-bottom: 0.4em;
+  color: var(--color-text-secondary);
+}
+
+/* Collapsible variant: <details> replaces the static header. */
+.callout details.callout-details > summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  user-select: none;
+}
+.callout details.callout-details[open] > summary { margin-bottom: 0.4em; }
