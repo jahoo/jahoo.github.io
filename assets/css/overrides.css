@@ -217,7 +217,7 @@ nav#TOC a:hover {
   border-radius: 0 4px 4px 0;
   /* Tinted per type below. Deliberately not the code-block grey: a callout
      sitting near a listing should read as a different kind of thing. */
-  background: var(--callout-tint, #eaf2fc);
+  background: var(--callout-tint, #f3f8fd);
   font-size: 0.95em;
   /* Padding lives on the header and body separately so the title can carry
      its own band; overflow clips that band to the rounded corner. */
@@ -229,19 +229,19 @@ nav#TOC a:hover {
    a callout at a glance and distinct from the code blocks' neutral grey. */
 .callout-note, .note-callout {
   border-left-color: var(--highlight-blue);
-  --callout-tint: #eaf2fc;
+  --callout-tint: #f3f8fd;
 }
 .callout-tip, .tip-callout {
   border-left-color: var(--highlight-green);
-  --callout-tint: #eaf6ee;
+  --callout-tint: #f3faf6;
 }
 .callout-warning, .warning-callout {
   border-left-color: var(--highlight-yellow);
-  --callout-tint: #fdf5e4;
+  --callout-tint: #fdfaf0;
 }
 .callout-important, .important-callout {
   border-left-color: var(--highlight-red);
-  --callout-tint: #fceaec;
+  --callout-tint: #fdf5f6;
 }
 
 .callout-body { padding: 0.7em 1em; }
