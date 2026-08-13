@@ -159,20 +159,6 @@ function plot_rejection_sampling_estimate(;
     # histogram!(samples, normalize=true, α=0.2, label="estimate", bins=bins, lw=0)
 end;
 ```
-
-::: {.cell-output .cell-output-stderr}
-```
-Precompiling packages...
-Info Given IntervalUnionArithmetic was explicitly requested, output will be shown live 
-WARNING: Method definition union(IntervalArithmetic.Interval{T} where T<:Real, IntervalArithmetic.Interval{T} where T<:Real) in module IntervalArithmetic at /Users/v/.julia/packages/IntervalArithmetic/EquAX/src/intervals/set_operations.jl:137 overwritten in module IntervalUnionArithmetic at /Users/v/.julia/packages/IntervalUnionArithmetic/DhDcd/src/interval_unions.jl:51.
-ERROR: Method overwriting is not permitted during Module precompilation. Use `__precompile__(false)` to opt-out of precompilation.
-    482.6 ms  ? IntervalUnionArithmetic
-[ Info: Precompiling IntervalUnionArithmetic [bbd57523-681a-4e6b-a941-369dddcfdba8]
-WARNING: Method definition union(IntervalArithmetic.Interval{T} where T<:Real, IntervalArithmetic.Interval{T} where T<:Real) in module IntervalArithmetic at /Users/v/.julia/packages/IntervalArithmetic/EquAX/src/intervals/set_operations.jl:137 overwritten in module IntervalUnionArithmetic at /Users/v/.julia/packages/IntervalUnionArithmetic/DhDcd/src/interval_unions.jl:51.
-ERROR: Method overwriting is not permitted during Module precompilation. Use `__precompile__(false)` to opt-out of precompilation.
-[ Info: Skipping precompilation since __precompile__(false). Importing IntervalUnionArithmetic [bbd57523-681a-4e6b-a941-369dddcfdba8].
-```
-:::
 :::
 
 

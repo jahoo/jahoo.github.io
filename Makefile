@@ -75,6 +75,7 @@ NB_RAW  := _build/$(notdir $(NB_KEEP))
 notebooks: $(NB_MD)
 
 $(NB_MD): $(NB_QMD) scripts/qmd-frontmatter.js
+	@rm -f $(NB_KEEP)
 	@mkdir -p _build assets/rejection-sampling
 	@echo "Render (quarto + julia): $<"
 	@quarto render $< --to markdown --execute --output-dir ../../_build --resource-path=../..

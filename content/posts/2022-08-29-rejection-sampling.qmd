@@ -60,6 +60,7 @@ Let's look at some examples. First I'll load some packages and define a plotting
 <summary>Show/hide code</summary>
 
 ```{julia}
+#| output: false
 using Distributions, Plots, StatsPlots, LaTeXStrings
 import IntervalUnionArithmetic: interval, ∪
 import StatsBase: fit, Histogram
