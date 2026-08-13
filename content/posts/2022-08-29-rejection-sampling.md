@@ -192,15 +192,14 @@ and look at a plot of these:
 
 ::: {.cell execution_count=3}
 ``` {.julia .cell-code}
-p = plot_rejection_sampling_setup(target_density=πstar, proposal_distribution=Q, plot_accept_prob=true)
-savefig(p, "../../assets/rejection-sampling/fig-setup.svg")
+plot_rejection_sampling_setup(target_density=πstar, proposal_distribution=Q, plot_accept_prob=true)
 ```
 :::
 
 
 </details>
 
-![A setup for rejection sampling.  Samples are to be drawn from the proposal distribution, and accepted or rejected according to the ratio of the target density to the scaled proposal density.](/assets/rejection-sampling/fig-setup.svg){#fig:rejection-sampling}
+![A setup for rejection sampling. Samples are to be drawn from the proposal distribution, and accepted or rejected according to the ratio of the target density to the scaled proposal density.](/assets/rejection-sampling/fig-rejection-sampling-output-1.svg){#fig:rejection-sampling}
 
 - the proposal distribution `Q` is a normal distribution $\mathcal{N}(\mu=55, \sigma^2=30)$, which we can sample from.
 - the target density `p` is something more complicated (in this example, we can of course sample from the mixture distribution used to define `p`, but the point is we don't need to be able to, in principle this density could not correspond to something we know how to sample from).
@@ -248,15 +247,14 @@ To see the estimate resulting from these rejection sampling examples, let's make
 
 ::: {.cell execution_count=5}
 ``` {.julia .cell-code}
-p = plot_rejection_sampling_estimate(target_density=πstar, proposal_distribution=Q)
-savefig(p, "../../assets/rejection-sampling/fig-simulation.svg")
+plot_rejection_sampling_estimate(target_density=πstar, proposal_distribution=Q)
 ```
 :::
 
 
 </details>
 
-![Simulation of rejection sampling setup in @fig:rejection-sampling.](/assets/rejection-sampling/fig-simulation.svg){#fig:rejection-sampling-simulation}
+![Simulation of rejection sampling setup in @fig:rejection-sampling.](/assets/rejection-sampling/fig-rejection-sampling-simulation-output-1.svg){#fig:rejection-sampling-simulation}
 
 :::{.note-callout collapse="true" title="What about a different proposal?"}
 The proposal above is relatively good (it's similar enough to the target, so
@@ -270,15 +268,14 @@ a healthy proportion of the samples were accepted). What if the proposal were a 
 # Define a "bad" proposal distribution (badly matched to the target)
 Q_bad = MixtureModel([Normal(60, 50), Normal(37, 4), Normal(90, 3)], [0.4, 0.3, 0.3])
 
-p = plot_rejection_sampling_estimate(target_density=πstar, proposal_distribution=Q_bad)
-savefig(p, "../../assets/rejection-sampling/fig-badproposal.svg")
+plot_rejection_sampling_estimate(target_density=πstar, proposal_distribution=Q_bad)
 ```
 :::
 
 
 </details>
 
-![Simulation of rejection sampling setup with a worse proposal distribution.](/assets/rejection-sampling/fig-badproposal.svg){#fig:rejection-sampling-simulation-badproposal}
+![Simulation of rejection sampling setup with a worse proposal distribution.](/assets/rejection-sampling/fig-rejection-sampling-simulation-badproposal-output-1.svg){#fig:rejection-sampling-simulation-badproposal}
 
 with a worse proposal, we can see it will require more samples from the proposal to get a good estimate.
 :::
@@ -306,17 +303,16 @@ Z = sum(cdf(Q, i.hi) - cdf(Q, i.lo) for i in intervals.v)
 # and we could scale the density to make it a pdf, if we wanted
 # special_π_normalized(x) =  special_πstar(x) * 1/Z
 
-p = plot_rejection_sampling_setup(target_density=special_πstar, proposal_distribution=Q,
+plot_rejection_sampling_setup(target_density=special_πstar, proposal_distribution=Q,
     title="Rejection sampling setup", subtitle="case when target = proposal where nonzero",
     plot_accept_prob=true)
-savefig(p, "../../assets/rejection-sampling/fig-special.svg")
 ```
 :::
 
 
 </details>
 
-![Special case of rejection sampling where the target is equal to the proposal everywhere in the support of the proposal, and is zero elsewhere.](/assets/rejection-sampling/fig-special.svg){#fig:rejection-sampling-special}
+![Special case of rejection sampling where the target is equal to the proposal everywhere in the support of the proposal, and is zero elsewhere.](/assets/rejection-sampling/fig-rejection-sampling-special-output-1.svg){#fig:rejection-sampling-special}
 
 To see precisely how the simple guess-and-check rejection sampling scheme is a special case of the rejection sampling algorithm (see @fig:rejection-sampling-special, to compare with @fig:rejection-sampling)
 
@@ -337,15 +333,14 @@ One important difference between these two definitions of rejection sampling is 
 
 ::: {.cell execution_count=8}
 ``` {.julia .cell-code}
-p = plot_rejection_sampling_estimate(target_density=special_πstar, proposal_distribution=Q, Z=Z)
-savefig(p, "../../assets/rejection-sampling/fig-simulation-special.svg")
+plot_rejection_sampling_estimate(target_density=special_πstar, proposal_distribution=Q, Z=Z)
 ```
 :::
 
 
 </details>
 
-![Simulation of special case of rejection sampling setup in @fig:rejection-sampling-special.  This corresponds to guessing from the normal distribution and rejecting unless the sample falls in the specified couple of intervals.](/assets/rejection-sampling/fig-simulation-special.svg){#fig:rejection-sampling-simulation-special}
+![Simulation of special case of rejection sampling setup in @fig:rejection-sampling-special. This corresponds to guessing from the normal distribution and rejecting unless the sample falls in the specified couple of intervals.](/assets/rejection-sampling/fig-rejection-sampling-simulation-special-output-1.svg){#fig:rejection-sampling-simulation-special}
 
 :::{.note-callout collapse="true" title="What about sampling until success?"}
 The version of the algorithm we've been using just samples $N$ times from the proposal, and accepts some proportion of them.
@@ -396,51 +391,48 @@ end;
 
 ::: {.cell execution_count=10}
 ``` {.julia .cell-code}
-p = plot_rejection_sampling_estimate(
+plot_rejection_sampling_estimate(
     target_density=πstar, proposal_distribution=Q,
     rejection_sampler=rejection_sample_until_N_successes)
-savefig(p, "../../assets/rejection-sampling/fig-until-success-good.svg")
 ```
 :::
 
 
 </details>
 
-![Sampling from the good proposal until 1000 samples have been accepted. The title reports how many proposals that took.](/assets/rejection-sampling/fig-until-success-good.svg)
+![Sampling from the good proposal until 1000 samples have been accepted. The title reports how many proposals that took.](/assets/rejection-sampling/fig-until-success-good-output-1.svg){#fig:until-success-good}
 
 <details class="code-fold" open>
 <summary>Show/hide code</summary>
 
 ::: {.cell execution_count=11}
 ``` {.julia .cell-code}
-p = plot_rejection_sampling_estimate(
+plot_rejection_sampling_estimate(
     target_density=πstar, proposal_distribution=Q_bad,
     rejection_sampler=rejection_sample_until_N_successes)
-savefig(p, "../../assets/rejection-sampling/fig-until-success-bad.svg")
 ```
 :::
 
 
 </details>
 
-![The same, with the badly matched proposal: the same 1000 accepted samples now cost many more proposals.](/assets/rejection-sampling/fig-until-success-bad.svg)
+![The same, with the badly matched proposal: the same 1000 accepted samples now cost many more proposals.](/assets/rejection-sampling/fig-until-success-bad-output-1.svg){#fig:until-success-bad}
 
 <details class="code-fold" open>
 <summary>Show/hide code</summary>
 
 ::: {.cell execution_count=12}
 ``` {.julia .cell-code}
-p = plot_rejection_sampling_estimate(
+plot_rejection_sampling_estimate(
     target_density=special_πstar, proposal_distribution=Q, Z=Z,
     rejection_sampler=rejection_sample_until_N_successes)
-savefig(p, "../../assets/rejection-sampling/fig-until-success-special.svg")
 ```
 :::
 
 
 </details>
 
-![The same again, for the guess-and-check special case, where a proposal is accepted exactly when it falls in one of the two intervals.](/assets/rejection-sampling/fig-until-success-special.svg)
+![The same again, for the guess-and-check special case, where a proposal is accepted exactly when it falls in one of the two intervals.](/assets/rejection-sampling/fig-until-success-special-output-1.svg){#fig:until-success-special}
 
 :::
 
@@ -584,15 +576,14 @@ end;
 
 ::: {.cell execution_count=14}
 ``` {.julia .cell-code}
-p = plot_slice_sampling_estimate(target_density=πstar)
-savefig(p, "../../assets/rejection-sampling/fig-slice-sampling.svg")
+plot_slice_sampling_estimate(target_density=πstar)
 ```
 :::
 
 
 </details>
 
-![An example of slice sampling.  Samples are drawn uniformly from the 2-d area under the target.](/assets/rejection-sampling/fig-slice-sampling.svg){#fig:slice-sampling}
+![An example of slice sampling. Samples are drawn uniformly from the 2-d area under the target.](/assets/rejection-sampling/fig-slice-sampling-output-1.svg){#fig:slice-sampling}
 
 :::
 

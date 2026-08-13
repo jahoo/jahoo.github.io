@@ -413,7 +413,7 @@ site-flavoured syntax rather than Quarto's own:
 | `::: {.note-callout}` (also `.warning-callout`, `.tip-callout`, `.important-callout`) | `::: {.callout-note}` | Quarto flattens any class it recognizes into a blockquote; `filters/callouts.lua` matches the bare aliases instead |
 | `::: {.note-callout collapse="true"}` | Quarto's own collapsing | `collapse="true"` starts closed, `collapse="false"` starts open; either renders as `<details class="callout-details">` |
 | `@fig:name`, `{#fig:name}` | `@fig-name`, `#\| label: fig-name` | pandoc-crossref's syntax; Quarto's own figure nodes don't survive `--to markdown` |
-| a `savefig(p, "../../assets/…")` call plus a markdown image line below it | `#\| fig-cap:` | Quarto's figure handling inlines SVGs rather than writing files to `assets/` |
+| `#\| label: fig-name` and `#\| fig-cap:` on the cell | a `savefig` call plus a hand-written image line | idiomatic Quarto; `scripts/qmd-figures.js` moves the figures into `assets/<slug>/`, rewrites their paths, lifts them out of the code fold, and converts `fig-` labels to pandoc-crossref's `fig:` |
 | `<details class="code-fold">` written by hand around the fence | `#\| code-fold: true` | keeps the folding markup, and its CSS hook, under the site's control rather than Quarto's |
 
 A few more details worth knowing before writing the next one:
@@ -426,10 +426,9 @@ A few more details worth knowing before writing the next one:
   so no cell actually needs to emit anything. A setup cell that only loads
   packages will still leak its stderr into the committed `.md` (and from
   there into the published page) if you leave this off.
-- `savefig` paths are relative to `content/posts/` (Quarto's working directory
-  when it renders), while the markdown image line uses the served URL — the
-  same figure is `../../assets/rejection-sampling/fig-setup.svg` in Julia and
-  `/assets/rejection-sampling/fig-setup.svg` in the prose.
+- Write cross-references Quarto's way (`@fig-name`); the build converts them to
+  pandoc-crossref's `@fig:name`. Keeping the source in Quarto's dialect is what
+  lets a reader download the `.qmd` and run it unchanged.
 - Quarto rewrites front matter on render: it consumes `css:`, `toc:`, and
   `bibliography:` as format options (so they vanish from the emitted YAML) and
   adds a spurious `authors:` plus `toc-title:`. `scripts/qmd-frontmatter.js`

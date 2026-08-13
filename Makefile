@@ -75,18 +75,31 @@ NB_MDS  := $(NB_QMDS:.qmd=.md)
 notebooks: $(NB_MDS)
 
 # $* is the stem (e.g. content/posts/2022-08-29-rejection-sampling), so
-# $*.markdown.md is the intermediate Quarto leaves beside the source.
-%.md: %.qmd scripts/qmd-frontmatter.js
+# $*.markdown.md is the intermediate Quarto leaves beside the source, and
+# $*_files/figure-markdown/ is where it writes that source's figures.
+#
+# The .qmd stays idiomatic Quarto — `#| label:`/`#| fig-cap:`, no savefig, no
+# hand-written image lines — so a reader who downloads it can just run it.
+# Everything site-specific happens here: figures are copied into assets/<slug>/
+# and scripts/qmd-figures.js rewrites their paths, lifts them out of the code
+# folds so folding the code doesn't hide the figure, and converts Quarto's
+# `fig-` cross-reference syntax to pandoc-crossref's `fig:`.
+%.md: %.qmd scripts/qmd-frontmatter.js scripts/qmd-figures.js
 	@rm -f $*.markdown.md
 	@mkdir -p _build
-	@# Figures are written by savefig into assets/<date-stripped slug>/, the same
-	@# slug build-content.sh derives the post's URL from. Create it so a brand-new
-	@# post's first render doesn't fail on a missing directory.
-	@mkdir -p "assets/$$(echo $(notdir $*) | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')"
 	@echo "Render (quarto + julia): $<"
 	@quarto render $< --to markdown --execute --output-dir ../../_build --resource-path=../..
-	@mv $*.markdown.md _build/$(notdir $*).markdown.md
-	@node scripts/qmd-frontmatter.js _build/$(notdir $*).markdown.md $< > $@
+	@set -e; \
+	  base=$(notdir $*); \
+	  slug=$$(echo $$base | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//'); \
+	  figs="$*_files/figure-markdown"; \
+	  mkdir -p "assets/$$slug"; \
+	  [ -d "$$figs" ] && cp "$$figs"/* "assets/$$slug/" || true; \
+	  mv $*.markdown.md _build/$$base.markdown.md; \
+	  node scripts/qmd-figures.js _build/$$base.markdown.md "$$slug" "$${base}_files" \
+	    > _build/$$base.reconciled.md; \
+	  node scripts/qmd-frontmatter.js _build/$$base.reconciled.md $< > $@; \
+	  rm -rf "$*_files"
 	@echo "Generated: $@"
 
 # ---- JS bundling ----
