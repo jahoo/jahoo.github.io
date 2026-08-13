@@ -1,0 +1,524 @@
+---
+title: Rejection sampling
+date: 2022-08-29
+author: Jacob Louis Hoover
+tags: [note]
+unlisted: true
+toc: true
+link-citations: true
+reference-section-title: References
+bibliography: assets/rejection-sampling/references.bib
+css:
+  - assets/css/rejection-sampling.css
+jupyter: julia-1.10
+---
+
+_Rejection sampling_ refers to a particular algorithm involving drawing samples from one distribution in order to estimate some other distribution, by rejecting or accepting the samples obtained in a smart way. In this note I'm exploring this algorithm a little with some simulations, and also showing how a different, similar, algorithm can be seen as a special case of the general version (because it wasn't at all obvious to me at first how they were related).
+
+## Definitions
+
+__Rejection sampling__^[As defined in, for example, @mackay.d:2003book [§ 29.3] or @bishop.c:2006book [§ 11.1.2], or @chopin.n:2020book [Algorithm 8.1]] is an algorithm for obtaining samples from some _target_ density (which is hard to sample from directly), using a _proposal_ distribution, which can be sampled from.  The algorithm defines a scheme for uniformly sampling from the area under the target density.
+
+Another algorithm, which I'll call the simple __guess-and-check__ algorithm, is sometimes also referred to as rejection sampling.^[As in e.g., @freer.c:2010, and probably other places] This algorithm is for obtaining samples from a conditional distribution, by sampling from the joint. The algorithm draws samples iteratively from a distribution, and rejects them until one is drawn which satisfies a predefined condition.
+
+These two algorithms have slightly different goals and requirements, and are described explicitly below. The second is in fact a special case of the first. But because the setup is so different, the relationship between them is perhaps not obvious at first glance.
+
+
+:::{.note-callout title="Rejection sampling algorithm"}
+-  _Goal_: to sample from an arbitrary distribution $z\sim \pi(Z)$.
+-  _Requirements_:
+    - you must be able to evaluate $\pi^\ast(z) \propto \pi(z)$, (that is you can score $\pi$ up to a normalizing constant)
+    - you have some proposal distribution $q$ from which you can sample, whose support contains the support of $\pi$.
+-  _Algorithm_:
+    1. choose $k$ such that $\forall z\ kq(z) \ge \pi^*(z)$.
+    2. sample $z_0\sim q$
+    3. sample $u\sim \operatorname{Unif}([0,kq(z_0)])$
+    4. if $u\le \pi^*(z_0)$ then __accept__, else start over from 2.
+    5. return $z_0$
+
+Illustration in @fig:rejection-sampling.
+:::
+
+:::{.note-callout title="Guess-and-check sampling algorithm"}
+-  _Goal_: to sample subject to a condition.
+    That is, to sample $z\sim p(Z\mid f(Z)=\texttt{True})$, where $Z$ is some random variable, and $f(Z)$ is a deterministic predicate of $Z$, which must be true for the sample to be accepted.
+-  _Requirements_:
+    - you must be able to sample from the unconditioned distribution $p(Z)$
+    - you must be able to evaluate $f(z)$ for all $z$, to check the condition is met
+-  _Algorithm_:
+    1. sample $z_0\sim p(Z)$
+    2. if $f(z_0)=\texttt{True}$ then __accept__, else start over from 1.
+    3. return $z_0$
+:::
+
+## Demonstrations
+
+Let's look at some examples. First I'll load some packages and define a plotting function to use below.
+
+<details class="code-fold">
+<summary>Show/hide code</summary>
+
+```{julia}
+using Distributions, Plots, StatsPlots, LaTeXStrings
+import IntervalUnionArithmetic: interval, ∪
+import StatsBase: fit, Histogram
+import LinearAlgebra: normalize
+
+mkpath("../../assets/rejection-sampling")
+
+"""
+Plot the target, proposal, and scaled proposal for the rejection sampling setup.
+Optionally also plot the acceptance probability.
+"""
+function plot_rejection_sampling_setup(;
+    target_density, proposal_distribution::Distribution,
+    title="Rejection sampling setup",
+    subtitle="Target, proposal, and scaled proposal",
+    xmin=-15, xmax=115, size=(650, 325), xresolution=1000, fmt=:svg,
+    plot_accept_prob=false,
+    k = nothing
+)
+    x = xmin:(xmax-xmin)/xresolution:xmax
+    p(x) = target_density(x)
+    q(x) = pdf(proposal_distribution, x)
+    # Define the weight function
+    w = x -> p(x) / q(x)
+    # k is the constant by which to multiply q so it upperbounds p
+    k = (k!=nothing) ? k : maximum(w.(xmin:xmax))
+
+    p1 = plot(x, [p.(x) q.(x) k * q.(x)],
+        xlabel=L"x",
+        label=[L"target: $\pi^{\ast}(x)$" L"proposal: $q(x)$" L"$k\cdot q(x)$"],
+        ls=[:dash :solid :dashdot], color=[:green :purple :purple], linewidth=[4 2 4],
+        alpha=[0.4 0.5 0.5], fmt=fmt)
+    plot!(p1, x, [(0 .* x) p.(x)], fillrange=[p.(x) (k * q.(x))],
+        lw=0, fillalpha=[0.20 0.15], lab=["accept region" "reject region"], c=[:darkgreen :darkred],
+        legend_position=:topleft)
+    if plot_accept_prob
+        plot!(p1, title=subtitle)
+        p2 = plot(x, (x -> p(x) / (k * q(x))).(x),
+            xlabel=L"x", label=nothing,
+            title=L"accept probability: $p(x)/k\cdot q(x)$",
+            ls=:solid, color=:black, linewidth=1,
+            alpha=0.75, fmt=fmt)
+        plot(p1, p2, layout=grid(2, 1, heights=[2 / 3, 1 / 3]),
+            plot_title=title,
+            plot_titlelocation=:left, titlelocation=:left,
+            plot_titlefontsize=11, titlefontsize=9, size=(size[1], (3 / 2) * size[2]))
+    else
+        plot(p1,
+            plot_title=title * ": " * subtitle,
+            plot_titlelocation=:left, titlelocation=:left,
+            plot_titlefontsize=11, titlefontsize=9, size=size)
+    end
+end;
+
+"""
+Run the rejection sampling algorithm, and plot the rejection sampling estimate.
+
+# Arguments
+- `target_density`: Function representing the target density to sample from
+- `proposal_distribution::Distribution`: Distribution to draw proposal samples from
+- `N::Integer`: Number of samples to draw
+- `rejection_sampler`: Function implementing the rejection sampling algorithm
+- `Z::Float64=1.0`: Normalization constant for histogram
+    (optional: to make the histogram same scale as density plot, set Z to normalizing constant of target_density)
+"""
+function plot_rejection_sampling_estimate(;
+    target_density, proposal_distribution::Distribution, N::Integer=1000,
+    rejection_sampler = rejection_sample_N_times,
+    Z=1.0,
+    title="Rejection sampling estimate of target density",
+    bins=100,
+    xmin=-15, xmax=115, size=(650, 325), xresolution=1000, fmt=:svg
+)
+    x = xmin:(xmax-xmin)/xresolution:xmax
+    q(x) = pdf(proposal_distribution, x)
+    # Define the weight function as the ratio of target to proposal densities
+    w(x) = target_density(x) / q(x)
+    # k is the constant by which to multiply q so it upperbounds p
+    k = maximum(w.(xmin:xmax))
+    samples, (N_attempt, N_success) = rejection_sampler(
+        target_density=target_density, proposal_distribution=proposal_distribution, N=N)
+    pct_success = round(N_success / N_attempt, digits=2)
+    plot(x, [target_density.(x) q.(x)],
+        xlabel=L"x", legend=:topleft,
+        label=[L"target: $\pi^{\ast}(x)$" L"proposal: $q(x)$"],
+        ls=[:dash :solid], color=[:green :purple], linewidth=[4 2], alpha=[0.4 0.5],
+        plot_title=title, plot_titlelocation=:left, titlelocation=:left,
+        plot_titlefontsize=11, titlefontsize=9,
+        title="accepted $N_success/$N_attempt" * " = $pct_success%",
+        size=size, fmt=fmt
+    )
+    h = fit(Histogram{Float64}, samples, nbins=bins) |> normalize
+    h.weights .*= Z
+    plot!(h; α=0.20, label="estimate", lw=0, color=:darkgreen)
+    # makes a scaled version of this:
+    # histogram!(samples, normalize=true, α=0.2, label="estimate", bins=bins, lw=0)
+end;
+```
+
+</details>
+
+### Rejection sampling
+
+Let's define a concrete proposal distribution and target density to use as an example,
+
+```{julia}
+# Define a proposal distribution Q
+Q = Normal(55, 30) # the proposal density is q(x) = pdf(Q,x)
+
+# Define a target density
+# note, this example is in fact a pdf (which is normalized and we can sample from), but it needn't be
+P = MixtureModel([Normal(20, 10), Chisq(60), Normal(92, 4)], [0.3, 0.67, 0.03])
+πstar(x) = pdf(P, x);  # target density
+```
+
+and look at a plot of these:
+
+<details class="code-fold">
+<summary>Show/hide code</summary>
+
+```{julia}
+#| output: false
+p = plot_rejection_sampling_setup(target_density=πstar, proposal_distribution=Q, plot_accept_prob=true)
+savefig(p, "../../assets/rejection-sampling/fig-setup.svg")
+```
+
+</details>
+
+![A setup for rejection sampling.  Samples are to be drawn from the proposal distribution, and accepted or rejected according to the ratio of the target density to the scaled proposal density.](/assets/rejection-sampling/fig-setup.svg){#fig:rejection-sampling}
+
+- the proposal distribution `Q` is a normal distribution $\mathcal{N}(\mu=55, \sigma^2=30)$, which we can sample from.
+- the target density `p` is something more complicated (in this example, we can of course sample from the mixture distribution used to define `p`, but the point is we don't need to be able to, in principle this density could not correspond to something we know how to sample from).
+
+### Simulation {.unnumbered}
+
+Here is some code which implements the rejection sampling algorithm.
+
+```{julia}
+"""
+Run the rejection sampling algorithm to estimate `target_density` by sampling
+`N` times from `proposal_distribution`.
+Note, to prevent infinite looping, this version of the algorithm doesn't start
+over if the sample is not accepted, so only n ≤ `N` accepted samples are returned.
+"""
+function rejection_sample_N_times(;
+    target_density, proposal_distribution::Distribution, N::Integer,
+    xmin=-10, xmax=110
+)
+    p(x) = target_density(x)
+    q(x) = pdf(proposal_distribution, x)
+    w(x) = p(x) / q(x)
+    # k is the constant by which to multiply q so it upper-bounds p
+    k = maximum(w.(xmin:xmax))
+    xs = rand(proposal_distribution, N)
+    us = rand(Uniform(0, 1), N)
+    whether_accept(x, u) = target_density(x) / (k * q(x)) > u
+    samples = xs[whether_accept.(xs, us)]
+    return samples, (N_attempt=N, N_success=length(samples))
+end;
+```
+
+To see the estimate resulting from these rejection sampling examples, let's make a histogram of the accepted samples resulting from sampling `N` times from the proposal:
+
+<details class="code-fold">
+<summary>Show/hide code</summary>
+
+```{julia}
+#| output: false
+p = plot_rejection_sampling_estimate(target_density=πstar, proposal_distribution=Q)
+savefig(p, "../../assets/rejection-sampling/fig-simulation.svg")
+```
+
+</details>
+
+![Simulation of rejection sampling setup in @fig:rejection-sampling.](/assets/rejection-sampling/fig-simulation.svg){#fig:rejection-sampling-simulation}
+
+:::{.note-callout collapse="true" title="What about a different proposal?"}
+The proposal above is relatively good (it's similar enough to the target, so
+a healthy proportion of the samples were accepted). What if the proposal were a worse fit to the target?
+
+```{julia}
+#| output: false
+# Define a "bad" proposal distribution (badly matched to the target)
+Q_bad = MixtureModel([Normal(60, 50), Normal(37, 4), Normal(90, 3)], [0.4, 0.3, 0.3])
+
+p = plot_rejection_sampling_estimate(target_density=πstar, proposal_distribution=Q_bad)
+savefig(p, "../../assets/rejection-sampling/fig-badproposal.svg")
+```
+
+![Simulation of rejection sampling setup with a worse proposal distribution.](/assets/rejection-sampling/fig-badproposal.svg){#fig:rejection-sampling-simulation-badproposal}
+
+with a worse proposal, we can see it will require more samples from the proposal to get a good estimate.
+:::
+
+
+### The guess-and-check algorithm, a special case
+
+Guessing repeatedly (from a prior distribution) and only accepting when some condition about the sample is met is a special case of the rejection sampling algorithm, though this isn't immediately obvious the way it is usually described. To see how this is so let's make a target density that is equal to the proposal density wherever a condition is met, and zero elsewhere (we'll be guessing from the proposal distribution `Q`, and accepting iff the condition `condition` is met).
+
+We'll set our target density to simply be equal to the proposal density when the condition is met, and zero otherwise.
+The `condition` I'll use for this example is just whether the sampled real number is in a specified couple of intervals.
+
+```{julia}
+#| output: false
+# Make a target density that equals pdf(Q) only on a chosen intervals, and zero elsewhere
+intervals = interval(12, 25) ∪ interval(50, 70) # the intervals to accept on
+condition(x) = x ∈ intervals
+special_πstar(x) = condition(x) ? pdf(Q, x) : 0
+# Note, this density is _not_ normalized.
+# If we wanted to normalize this, we could calculate the normalizing constant
+Z = sum(cdf(Q, i.hi) - cdf(Q, i.lo) for i in intervals.v)
+# and we could scale the density to make it a pdf, if we wanted
+# special_π_normalized(x) =  special_πstar(x) * 1/Z
+
+p = plot_rejection_sampling_setup(target_density=special_πstar, proposal_distribution=Q,
+    title="Rejection sampling setup", subtitle="case when target = proposal where nonzero",
+    plot_accept_prob=true)
+savefig(p, "../../assets/rejection-sampling/fig-special.svg")
+```
+
+![Special case of rejection sampling where the target is equal to the proposal everywhere in the support of the proposal, and is zero elsewhere.](/assets/rejection-sampling/fig-special.svg){#fig:rejection-sampling-special}
+
+To see precisely how the simple guess-and-check rejection sampling scheme is a special case of the rejection sampling algorithm (see @fig:rejection-sampling-special, to compare with @fig:rejection-sampling)
+
+- let $\pi(z) \coloneqq p(z\mid f(z)=\texttt{True})$
+- let $\pi^\ast(z) \coloneqq \scriptsize\begin{cases}p(z)&\text{if }f(z)=\texttt{True}\\0&\text{else}\end{cases}$
+- let $q(z) \coloneqq p(z)$
+
+Letting $k=1$, it holds that $\forall z,\ kq(z)\ge \pi^\ast(z)$. In fact, we have that $q(z)=\pi^\ast(z)$ for all $z$ in the support of $\pi^\ast$.
+This means that the step 3 of the rejection sampling algorithm (sampling from the uniform distribution) is unnecessary.  We would be guaranteed that $u\le \pi^\ast(z_0)$, whenever $z_0 \in$ support of $\pi^\ast$.  So we just need to check whether $\pi^\ast(z_0) > 0$ (that is, check whether $f(x)=\texttt{True}$).
+
+
+:::{.note-callout}
+One important difference between these two definitions of rejection sampling is that in the special case we actually don't need to know how to evaluate/score the density $\pi^*$. This is important in practice, if we have a proposal process we can obtain samples from (and check whether they satisfy a condition), but we don't have any way of obtaining scores.  In this case guess-and-check is still possible, while the rejection sampling algorithm in general is not.
+:::
+
+<details class="code-fold">
+<summary>Show/hide code</summary>
+
+```{julia}
+#| output: false
+p = plot_rejection_sampling_estimate(target_density=special_πstar, proposal_distribution=Q, Z=Z)
+savefig(p, "../../assets/rejection-sampling/fig-simulation-special.svg")
+```
+
+</details>
+
+![Simulation of special case of rejection sampling setup in @fig:rejection-sampling-special.  This corresponds to guessing from the normal distribution and rejecting unless the sample falls in the specified couple of intervals.](/assets/rejection-sampling/fig-simulation-special.svg){#fig:rejection-sampling-simulation-special}
+
+:::{.note-callout collapse="true" title="What about sampling until success?"}
+The version of the algorithm we've been using just samples $N$ times from the proposal, and accepts some proportion of them.
+
+Another way we might want our algorithm to behave would be sampling from the proposal _however many_ times are needed to get $N$ accepted samples.
+Here is such a modified algorithm, and our examples above run using it.
+
+In this sample-until-success version of the algorithm, it is computationally costly to use a bad proposal.
+
+```{julia}
+"""
+Run the rejection sampling algorithm to estimate `target_density`
+by sampling from `proposal_distribution` until `N` samples are accepted.
+Note, this version of the algorithm may run indefinitely long if the proposal is bad.
+"""
+function rejection_sample_until_N_successes(;
+    target_density, proposal_distribution::Distribution, N::Integer,
+    xmin=-10, xmax=110
+)
+    p(x) = target_density(x)
+    q(x) = pdf(proposal_distribution, x)
+    w(x) = p(x) / q(x)
+    # k is the constant by which to multiply q so it upper-bounds p
+    k = maximum(w.(xmin:xmax))
+
+    samples = Float64[]
+    N_attempt = 0
+    while length(samples) < N
+        N_attempt += 1
+        x = rand(proposal_distribution)
+        target_density(x) / (k * q(x)) > rand() && push!(samples, x)
+    end
+
+    return samples, (N_attempt=N_attempt, N_success=N)
+end;
+```
+
+```{julia}
+#| output: false
+p = plot_rejection_sampling_estimate(
+    target_density=πstar, proposal_distribution=Q,
+    rejection_sampler=rejection_sample_until_N_successes)
+savefig(p, "../../assets/rejection-sampling/fig-until-success-good.svg")
+```
+
+![Sampling from the good proposal until 1000 samples have been accepted. The title reports how many proposals that took.](/assets/rejection-sampling/fig-until-success-good.svg)
+
+```{julia}
+#| output: false
+p = plot_rejection_sampling_estimate(
+    target_density=πstar, proposal_distribution=Q_bad,
+    rejection_sampler=rejection_sample_until_N_successes)
+savefig(p, "../../assets/rejection-sampling/fig-until-success-bad.svg")
+```
+
+![The same, with the badly matched proposal: the same 1000 accepted samples now cost many more proposals.](/assets/rejection-sampling/fig-until-success-bad.svg)
+
+```{julia}
+#| output: false
+p = plot_rejection_sampling_estimate(
+    target_density=special_πstar, proposal_distribution=Q, Z=Z,
+    rejection_sampler=rejection_sample_until_N_successes)
+savefig(p, "../../assets/rejection-sampling/fig-until-success-special.svg")
+```
+
+![The same again, for the guess-and-check special case, where a proposal is accepted exactly when it falls in one of the two intervals.](/assets/rejection-sampling/fig-until-success-special.svg)
+
+:::
+
+:::{.note-callout collapse="true" title="Related algorithms"}
+__Slice sampling__ [@neal.r:2003] is a method for generating 2-D samples $(z,y)$ uniformly over the _area_ under the target density plot, and simply ignoring $y$ component to give samples from the target density over $z$.
+
+
+:::{.note-callout title="Slice sampling algorithm"}
+-  _Goal_: to sample from an arbitrary distribution $z\sim \pi(Z)$.
+-  _Requirements_:
+    - you must be able to evaluate $\pi^\ast(z) \propto \pi(z)$, (that is you can score $\pi$ up to a normalizing constant)
+    - you must know the support of $\pi$, and be able to sample uniformly from horizontal slices like ${z\mid y<\pi^\ast(z)}$ for any $y$.
+-  _Algorithm_:
+    1. sample $z_1\sim\operatorname{Unif}(\operatorname{support}(\pi))$
+    1. for $i \in 1\dots (N-1)$:
+        - sample $y_i\sim\operatorname{Unif}([0,\pi^\ast(z_i)])$
+        - define 'slice' $S=\{z\mid y_i<\pi^\ast(z)\}$
+        - sample $z_{i+1}\sim\operatorname{Unif}(S)$
+    1. return $\{z_1,\dots,z_N\}$
+:::
+
+<details class="code-fold">
+<summary>Show/hide code</summary>
+
+```{julia}
+function find_intervals(p, y; xmin=-10, xmax=110, resolution=1000)
+    # Initialize variables for interval finding
+    dx = (xmax - xmin) / resolution
+    xs = range(xmin, xmax, length=resolution)
+
+    intervals = Vector{Tuple{Float64,Float64}}()
+    in_interval = false
+    start_x = xmin
+
+    # Scan through x values to find intervals
+    for x in xs
+        above_slice = p(x) > y
+        if above_slice && !in_interval
+            start_x = x
+            in_interval = true
+        elseif !above_slice && in_interval
+            push!(intervals, (start_x, x))
+            in_interval = false
+        end
+    end
+
+    # Handle case where last interval extends to xmax
+    if in_interval
+        push!(intervals, (start_x, xmax))
+    end
+
+    return intervals
+end
+
+
+function sample_from_slice(p, y; xmin=-10, xmax=110)
+    intervals = find_intervals(p, y, xmin=xmin, xmax=xmax)
+    total_width = sum(upper - lower for (lower, upper) in intervals)
+    u = rand() * total_width
+
+    # Find which interval this point belongs to
+    cumsum = 0.0
+    for (lower, upper) in intervals
+        interval_width = upper - lower
+        if u <= cumsum + interval_width
+            # Point belongs in this interval
+            return lower + (u - cumsum)
+        end
+        cumsum += interval_width
+    end
+
+    # Should never reach here if intervals are valid
+    error("Failed to sample from slice")
+end;
+
+"""
+Run the rejection sampling algorithm to estimate `target_density` by sampling
+`N` times from `proposal_distribution`.
+Note, to prevent infinite looping, this version of the algorithm doesn't start
+over if the sample is not accepted, so only n ≤ `N` accepted samples are returned.
+"""
+function slice_sample(;
+    target_density, N::Integer,
+    xmin=-10, xmax=110
+)
+    p(x) = target_density(x)
+    xs = [rand(Uniform(xmin, xmax))]
+    ys = []
+    for i in 2:N
+        y = rand(Uniform(0,p(xs[end])))
+        push!(ys, y)
+        x = sample_from_slice(target_density, y, xmin=xmin, xmax=xmax)
+        push!(xs, x)
+    end
+    return xs, ys
+end;
+"""
+Run the slice sampling algorithm, and plot the rejection sampling estimate.
+
+# Arguments
+- `target_density`: Function representing the target density to sample from
+- `N::Integer`: Number of samples to draw
+- `Z::Float64=1.0`: Normalization constant for histogram
+    (optional: to make the histogram same scale as density plot, set Z to normalizing constant of target_density)
+"""
+function plot_slice_sampling_estimate(;
+    target_density, N::Integer=1000,
+    Z=1.0,
+    title="Slice sampling estimate of target density",
+    bins=100,
+    xmin=-15, xmax=115, size=(650, 325), xresolution=1000, fmt=:svg
+)
+    x = xmin:(xmax-xmin)/xresolution:xmax
+    samples, ys = slice_sample(
+        target_density=target_density, N=N)
+    plot(x, [target_density.(x)],
+        xlabel=L"x", legend=:topleft,
+        label=L"target: $\pi^{\ast}(x)$",
+        ls=:dash, color=:green, linewidth=4, alpha=0.4,
+        plot_title=title, plot_titlelocation=:left, titlelocation=:left,
+        plot_titlefontsize=11, titlefontsize=9,
+        title="title",
+        size=size, fmt=fmt
+    )
+    scatter!(samples[1:end-1], ys, α=.75, label="sample", color=:red, msw=0, ms=1)
+    h = fit(Histogram{Float64}, samples, nbins=bins) |> normalize
+    h.weights .*= Z
+    plot!(h; α=0.20, label="estimate", lw=0, color=:darkgreen)
+    # makes a scaled version of this:
+    # histogram!(samples, normalize=true, α=0.2, label="estimate", bins=bins, lw=0)
+end;
+```
+
+</details>
+
+<details class="code-fold">
+<summary>Show/hide code</summary>
+
+```{julia}
+#| output: false
+p = plot_slice_sampling_estimate(target_density=πstar)
+savefig(p, "../../assets/rejection-sampling/fig-slice-sampling.svg")
+```
+
+</details>
+
+![An example of slice sampling.  Samples are drawn uniformly from the 2-d area under the target.](/assets/rejection-sampling/fig-slice-sampling.svg){#fig:slice-sampling}
+
+:::
