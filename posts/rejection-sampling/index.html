@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc-markdown-css-theme" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Jacob Louis Hoover" />
+  <meta name="dcterms.date" content="2022-08-29" />
+  <meta name="description" content="Scientific Program Coordinator at CHI FRO, LLC. Formerly Postdoc at MIT, Department of Brain and Cognitive Sciences. PhD in Linguistics from McGill University." />
+  <title>Rejection sampling</title>
+  <!--
+    Preload the two navbar fonts used above the fold on every page.
+    `font-display: swap` already prevents invisible text, but the fonts
+    aren't discovered until after CSS parses — these hints let the browser
+    start fetching them alongside the CSS, eliminating a visible swap for
+    the site-title `Linux Biolinum Outline` and nav-link `Linux Libertine`.
+    `crossorigin` is required on `as=font` preloads even for same-origin.
+  -->
+
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+        href="/assets/fonts/LinBiolinum/LinBiolinum_aU.woff2" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+        href="/assets/fonts/LinLibertine/LinLibertine_Re-4.1_.8_.woff2" />
+
+  <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/theme.css" />
+  <link rel="stylesheet" href="/assets/css/code.css" />
+  <link rel="stylesheet" href="/assets/css/overrides.css" />
+  <link rel="stylesheet" href="/assets/css/site-chrome.css" />
+  <link rel="stylesheet" href="/assets/css/rejection-sampling.css" />
+<script>
+MathJax = {
+  // tex-chtml ships base + AMS only. mathtools adds the commands LaTeX authors
+  // reach for without thinking — \coloneqq and friends — which otherwise render
+  // as red literal text.
+  loader: { load: ['[tex]/mathtools'] },
+  tex: {
+    packages: { '[+]': ['mathtools'] },
+    inlineMath: [['\\(', '\\)'], ['$', '$']],
+    displayMath: [['\\[', '\\]'], ['$$', '$$']],
+    // AMS-style numbering: only {equation}/{align} environments get
+    // numbers, so ordinary $ displays stay untagged.
+    tags: 'ams'
+  },
+  options: {
+    // Disable click-to-explore on math. Without these, clicking on a
+    // rendered formula (e.g. math inside a button label) gets intercepted
+    // by MathJax's a11y explorer and highlights subexpressions instead of
+    // triggering the underlying button. The right-click context menu is
+    // still available.
+    //
+    // MathJax v4 has no single `explorer` setting — the feature is split
+    // across enrich (semantic tree), speech, braille, inTabOrder. Turning
+    // off enrich alone is enough to stop the click behavior (no tree for
+    // the explorer to walk), but we also zero the others so they don't
+    // appear enabled in the right-click menu.
+    menuOptions: {
+      settings: {
+        enrich: false,
+        speech: false,
+        braille: false,
+        inTabOrder: false
+      }
+    }
+  }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrapper">
+    <a class="site-title" href="/">
+      <span class="site-title-full">jacob hoover vigly</span>
+      <span class="site-title-short">jacob vigly</span>
+      <span class="site-title-xs">jv</span>
+    </a>
+    <nav class="site-nav">
+      <div class="trigger">
+        <a class="page-link" href="/">home</a>
+        <a class="page-link" href="/posts/">blog</a>
+      </div>
+    </nav>
+  </div>
+</header>
+<script src="/assets/js/section-marks.js" defer></script>
+<script src="/assets/js/active-nav.js" defer></script>
+
+
+<header>
+
+<h1 class="title">Rejection sampling</h1>
+
+<p class="post-meta">
+  <time datetime="2022-08-29">2022-08-29</time>
+  · Jacob Louis Hoover
+  · <span class="post-tags">note</span>
+  · <a class="qmd-download" href="2022-08-29-rejection-sampling.qmd" download title="Quarto source for this post, with the code that produced its figures">source .qmd</a>
+</p>
+</header>
+
+
+<hr class="post-divider" />
+
+
+<nav id="TOC" role="doc-toc">
+    <strong>Contents</strong><label for="contents">⊕</label>
+  <input type="checkbox" id="contents">
+  <ul>
+  <li><a href="#definitions" id="toc-definitions"><span
+  class="toc-section-number">1</span> Definitions</a></li>
+  <li><a href="#demonstrations" id="toc-demonstrations"><span
+  class="toc-section-number">2</span> Demonstrations</a>
+  <ul>
+  <li><a href="#rejection-sampling" id="toc-rejection-sampling"><span
+  class="toc-section-number">2.1</span> Rejection sampling</a></li>
+  <li><a href="#simulation" id="toc-simulation">Simulation</a></li>
+  <li><a href="#the-guess-and-check-algorithm-a-special-case"
+  id="toc-the-guess-and-check-algorithm-a-special-case"><span
+  class="toc-section-number">2.2</span> The guess-and-check algorithm, a
+  special case</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references">References</a></li>
+  </ul>
+</nav>
+
+<main>
+<p><em>Rejection sampling</em> refers to a particular algorithm
+involving drawing samples from one distribution in order to estimate
+some other distribution, by rejecting or accepting the samples obtained
+in a smart way. In this note I’m exploring this algorithm a little with
+some simulations, and also showing how a different, similar, algorithm
+can be seen as a special case of the general version (because it wasn’t
+at all obvious to me at first how they were related).</p>
+<section id="definitions" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span>
+Definitions</h1>
+<p><strong>Rejection sampling</strong><span
+class="sidenote-wrapper"><label for="sn-0" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-0" class="margin-toggle"/><span
+class="sidenote">As defined in, for example, <span class="citation"
+data-cites="mackay.d:2003book">MacKay (<a href="#ref-mackay.d:2003book"
+role="doc-biblioref">2003, Section 29.3</a>)</span> or <span
+class="citation" data-cites="bishop.c:2006book">Bishop (<a
+href="#ref-bishop.c:2006book" role="doc-biblioref">2006, Section
+11.1.2</a>)</span>, or <span class="citation"
+data-cites="chopin.n:2020book">Chopin &amp; Papaspiliopoulos (<a
+href="#ref-chopin.n:2020book" role="doc-biblioref">2020</a>, Algorithm
+8.1)</span><br />
+<br />
+</span></span> is an algorithm for obtaining samples from some
+<em>target</em> density (which is hard to sample from directly), using a
+<em>proposal</em> distribution, which can be sampled from. The algorithm
+defines a scheme for uniformly sampling from the area under the target
+density.</p>
+<p>Another algorithm, which I’ll call the simple
+<strong>guess-and-check</strong> algorithm, is sometimes also referred
+to as rejection sampling.<span
+class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle"/><span
+class="sidenote">As in e.g., <span class="citation"
+data-cites="freer.c:2010">Freer et al. (<a href="#ref-freer.c:2010"
+role="doc-biblioref">2010</a>)</span>, and probably other places<br />
+<br />
+</span></span> This algorithm is for obtaining samples from a
+conditional distribution, by sampling from the joint. The algorithm
+draws samples iteratively from a distribution, and rejects them until
+one is drawn which satisfies a predefined condition.</p>
+<p>These two algorithms have slightly different goals and requirements,
+and are described explicitly below. The second is in fact a special case
+of the first. But because the setup is so different, the relationship
+between them is perhaps not obvious at first glance.</p>
+<div class="callout note-callout">
+<div class="callout-header">
+Rejection sampling algorithm
+</div>
+<div class="callout-body">
+<ul>
+<li><em>Goal</em>: to sample from an arbitrary distribution <span
+class="math inline">\(z\sim \pi(Z)\)</span>.</li>
+<li><em>Requirements</em>:
+<ul>
+<li>you must be able to evaluate <span class="math inline">\(\pi^\ast(z)
+\propto \pi(z)\)</span>, (that is you can score <span
+class="math inline">\(\pi\)</span> up to a normalizing constant)</li>
+<li>you have some proposal distribution <span
+class="math inline">\(q\)</span> from which you can sample, whose
+support contains the support of <span
+class="math inline">\(\pi\)</span>.</li>
+</ul></li>
+<li><em>Algorithm</em>:
+<ol type="1">
+<li>choose <span class="math inline">\(k\)</span> such that <span
+class="math inline">\(\forall z\ kq(z) \ge \pi^*(z)\)</span>.</li>
+<li>sample <span class="math inline">\(z_0\sim q\)</span></li>
+<li>sample <span class="math inline">\(u\sim
+\operatorname{Unif}([0,kq(z_0)])\)</span></li>
+<li>if <span class="math inline">\(u\le \pi^*(z_0)\)</span> then
+<strong>accept</strong>, else start over from 2.</li>
+<li>return <span class="math inline">\(z_0\)</span></li>
+</ol></li>
+</ul>
+<p>Illustration in <a href="#fig:rejection-sampling">Figure 1</a>.</p>
+</div>
+</div>
+<div class="callout note-callout">
+<div class="callout-header">
+Guess-and-check sampling algorithm
+</div>
+<div class="callout-body">
+<ul>
+<li><em>Goal</em>: to sample subject to a condition. That is, to sample
+<span class="math inline">\(z\sim p(Z\mid f(Z)=\texttt{True})\)</span>,
+where <span class="math inline">\(Z\)</span> is some random variable,
+and <span class="math inline">\(f(Z)\)</span> is a deterministic
+predicate of <span class="math inline">\(Z\)</span>, which must be true
+for the sample to be accepted.</li>
+<li><em>Requirements</em>:
+<ul>
+<li>you must be able to sample from the unconditioned distribution <span
+class="math inline">\(p(Z)\)</span></li>
+<li>you must be able to evaluate <span
+class="math inline">\(f(z)\)</span> for all <span
+class="math inline">\(z\)</span>, to check the condition is met</li>
+</ul></li>
+<li><em>Algorithm</em>:
+<ol type="1">
+<li>sample <span class="math inline">\(z_0\sim p(Z)\)</span></li>
+<li>if <span class="math inline">\(f(z_0)=\texttt{True}\)</span> then
+<strong>accept</strong>, else start over from 1.</li>
+<li>return <span class="math inline">\(z_0\)</span></li>
+</ol></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="demonstrations" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span>
+Demonstrations</h1>
+<p>Let’s look at some examples. First I’ll load some packages and define
+a plotting function to use below.</p>
+<details class="code-fold">
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Distributions</span>, <span class="bu">Plots</span>, <span class="bu">StatsPlots</span>, <span class="bu">LaTeXStrings</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="bu">IntervalUnionArithmetic</span>: interval, ∪</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="bu">StatsBase</span>: fit, Histogram</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="bu">LinearAlgebra</span>: normalize</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="st">Plot the target, proposal, and scaled proposal for the rejection sampling setup.</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="st">Optionally also plot the acceptance probability.</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">plot_rejection_sampling_setup</span>(;</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    target_density, proposal_distribution<span class="op">::</span><span class="dt">Distribution</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">&quot;Rejection sampling setup&quot;</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    subtitle<span class="op">=</span><span class="st">&quot;Target, proposal, and scaled proposal&quot;</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    xmin<span class="op">=-</span><span class="fl">15</span>, xmax<span class="op">=</span><span class="fl">115</span>, size<span class="op">=</span>(<span class="fl">650</span>, <span class="fl">325</span>), xresolution<span class="op">=</span><span class="fl">1000</span>, fmt<span class="op">=:</span>svg,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    plot_accept_prob<span class="op">=</span><span class="cn">false</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    k <span class="op">=</span> <span class="cn">nothing</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> xmin<span class="op">:</span>(xmax<span class="op">-</span>xmin)<span class="op">/</span>xresolution<span class="op">:</span>xmax</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">p</span>(x) <span class="op">=</span> <span class="fu">target_density</span>(x)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">q</span>(x) <span class="op">=</span> <span class="fu">pdf</span>(proposal_distribution, x)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Define the weight function</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    w <span class="op">=</span> x <span class="op">-&gt;</span> <span class="fu">p</span>(x) <span class="op">/</span> <span class="fu">q</span>(x)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># k is the constant by which to multiply q so it upperbounds p</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    k <span class="op">=</span> (k<span class="op">!=</span><span class="cn">nothing</span>) ? k <span class="op">:</span> <span class="fu">maximum</span>(<span class="fu">w</span>.(xmin<span class="op">:</span>xmax))</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    p1 <span class="op">=</span> <span class="fu">plot</span>(x, [<span class="fu">p</span>.(x) <span class="fu">q</span>.(x) k <span class="op">*</span> <span class="fu">q</span>.(x)],</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        xlabel<span class="op">=</span>L<span class="st">&quot;x&quot;</span>,</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span>[L<span class="st">&quot;target: </span><span class="sc">$</span><span class="st">\</span>pi<span class="st">^{</span><span class="sc">\a</span><span class="st">st}(x)</span><span class="sc">$</span><span class="st">&quot; </span>L<span class="st">&quot;</span>proposal<span class="op">:</span> <span class="op">$</span><span class="fu">q</span>(x)<span class="op">$</span><span class="st">&quot; L&quot;</span><span class="op">$</span>k<span class="op">\</span>cdot <span class="fu">q</span>(x)<span class="op">$</span><span class="st">&quot;],</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        ls<span class="op">=</span>[<span class="op">:</span>dash <span class="op">:</span>solid <span class="op">:</span>dashdot], color<span class="op">=</span>[<span class="op">:</span>green <span class="op">:</span>purple <span class="op">:</span>purple], linewidth<span class="op">=</span>[<span class="fl">4</span> <span class="fl">2</span> <span class="fl">4</span>],</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        alpha<span class="op">=</span>[<span class="fl">0.4</span> <span class="fl">0.5</span> <span class="fl">0.5</span>], fmt<span class="op">=</span>fmt)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot!</span>(p1, x, [(<span class="fl">0</span> <span class="op">.*</span> x) <span class="fu">p</span>.(x)], fillrange<span class="op">=</span>[<span class="fu">p</span>.(x) (k <span class="op">*</span> <span class="fu">q</span>.(x))],</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        lw<span class="op">=</span><span class="fl">0</span>, fillalpha<span class="op">=</span>[<span class="fl">0.20</span> <span class="fl">0.15</span>], lab<span class="op">=</span>[<span class="st">&quot;accept region&quot;</span> <span class="st">&quot;reject region&quot;</span>], c<span class="op">=</span>[<span class="op">:</span>darkgreen <span class="op">:</span>darkred],</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        legend_position<span class="op">=:</span>topleft)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    if plot_accept_prob</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        <span class="fu">plot!</span>(p1, title<span class="op">=</span>subtitle)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>        p2 <span class="op">=</span> <span class="fu">plot</span>(x, (x <span class="op">-&gt;</span> <span class="fu">p</span>(x) <span class="op">/</span> (k <span class="op">*</span> <span class="fu">q</span>(x))).(x),</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>            xlabel<span class="op">=</span>L<span class="st">&quot;x&quot;</span>, label<span class="op">=</span><span class="cn">nothing</span>,</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>            title<span class="op">=</span>L<span class="st">&quot;accept probability: </span><span class="sc">$</span>p<span class="st">(x)/k\cdot q(x)</span><span class="sc">$</span><span class="st">&quot;,</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="st">            </span>ls<span class="st">=:solid, color=:black, linewidth=1,</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>            alpha<span class="op">=</span><span class="fl">0.75</span>, fmt<span class="op">=</span>fmt)</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>        <span class="fu">plot</span>(p1, p2, layout<span class="op">=</span><span class="fu">grid</span>(<span class="fl">2</span>, <span class="fl">1</span>, heights<span class="op">=</span>[<span class="fl">2</span> <span class="op">/</span> <span class="fl">3</span>, <span class="fl">1</span> <span class="op">/</span> <span class="fl">3</span>]),</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>            plot_title<span class="op">=</span>title,</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>            plot_titlelocation<span class="op">=:</span>left, titlelocation<span class="op">=:</span>left,</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>            plot_titlefontsize<span class="op">=</span><span class="fl">11</span>, titlefontsize<span class="op">=</span><span class="fl">9</span>, size<span class="op">=</span>(size[<span class="fl">1</span>], (<span class="fl">3</span> <span class="op">/</span> <span class="fl">2</span>) <span class="op">*</span> size[<span class="fl">2</span>]))</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    else</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>        <span class="fu">plot</span>(p1,</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>            plot_title<span class="op">=</span>title <span class="op">*</span> <span class="st">&quot;: &quot;</span> <span class="op">*</span> subtitle,</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>            plot_titlelocation<span class="op">=:</span>left, titlelocation<span class="op">=:</span>left,</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>            plot_titlefontsize<span class="op">=</span><span class="fl">11</span>, titlefontsize<span class="op">=</span><span class="fl">9</span>, size<span class="op">=</span>size)</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span>;</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="st">Run the rejection sampling algorithm, and plot the rejection sampling estimate.</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="st"># Arguments</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="st">- `target_density`: Function representing the target density to sample from</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="st">- `proposal_distribution::Distribution`: Distribution to draw proposal samples from</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="st">- `N::Integer`: Number of samples to draw</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a><span class="st">- `rejection_sampler`: Function implementing the rejection sampling algorithm</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="st">- `Z::Float64=1.0`: Normalization constant for histogram</span></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="st">    (optional: to make the histogram same scale as density plot, set Z to normalizing constant of target_density)</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>function <span class="fu">plot_rejection_sampling_estimate</span>(;</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>    target_density, proposal_distribution<span class="op">::</span><span class="dt">Distribution</span>, N<span class="op">::</span><span class="dt">Integer</span>=<span class="fl">1000</span>,</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>    rejection_sampler <span class="op">=</span> rejection_sample_N_times,</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>    Z<span class="op">=</span><span class="fl">1.0</span>,</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">&quot;Rejection sampling estimate of target density&quot;</span>,</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>    bins<span class="op">=</span><span class="fl">100</span>,</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>    xmin<span class="op">=-</span><span class="fl">15</span>, xmax<span class="op">=</span><span class="fl">115</span>, size<span class="op">=</span>(<span class="fl">650</span>, <span class="fl">325</span>), xresolution<span class="op">=</span><span class="fl">1000</span>, fmt<span class="op">=:</span>svg</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> xmin<span class="op">:</span>(xmax<span class="op">-</span>xmin)<span class="op">/</span>xresolution<span class="op">:</span>xmax</span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>    <span class="fu">q</span>(x) <span class="op">=</span> <span class="fu">pdf</span>(proposal_distribution, x)</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Define the weight function as the ratio of target to proposal densities</span></span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>    <span class="fu">w</span>(x) <span class="op">=</span> <span class="fu">target_density</span>(x) <span class="op">/</span> <span class="fu">q</span>(x)</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>    <span class="co"># k is the constant by which to multiply q so it upperbounds p</span></span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>    k <span class="op">=</span> <span class="fu">maximum</span>(<span class="fu">w</span>.(xmin<span class="op">:</span>xmax))</span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a>    samples, (N_attempt, N_success) <span class="op">=</span> <span class="fu">rejection_sampler</span>(</span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>        target_density<span class="op">=</span>target_density, proposal_distribution<span class="op">=</span>proposal_distribution, N<span class="op">=</span>N)</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a>    pct_success <span class="op">=</span> <span class="fu">round</span>(N_success <span class="op">/</span> N_attempt, digits<span class="op">=</span><span class="fl">2</span>)</span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(x, [<span class="fu">target_density</span>.(x) <span class="fu">q</span>.(x)],</span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a>        xlabel<span class="op">=</span>L<span class="st">&quot;x&quot;</span>, legend<span class="op">=:</span>topleft,</span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span>[L<span class="st">&quot;target: </span><span class="sc">$</span><span class="st">\</span>pi<span class="st">^{</span><span class="sc">\a</span><span class="st">st}(x)</span><span class="sc">$</span><span class="st">&quot; </span>L<span class="st">&quot;</span>proposal<span class="op">:</span> <span class="op">$</span><span class="fu">q</span>(x)<span class="op">$</span><span class="st">&quot;],</span></span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a>        ls<span class="op">=</span>[<span class="op">:</span>dash <span class="op">:</span>solid], color<span class="op">=</span>[<span class="op">:</span>green <span class="op">:</span>purple], linewidth<span class="op">=</span>[<span class="fl">4</span> <span class="fl">2</span>], alpha<span class="op">=</span>[<span class="fl">0.4</span> <span class="fl">0.5</span>],</span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a>        plot_title<span class="op">=</span>title, plot_titlelocation<span class="op">=:</span>left, titlelocation<span class="op">=:</span>left,</span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a>        plot_titlefontsize<span class="op">=</span><span class="fl">11</span>, titlefontsize<span class="op">=</span><span class="fl">9</span>,</span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">&quot;accepted </span><span class="sc">$</span>N_success<span class="st">/</span><span class="sc">$</span>N_attempt<span class="st">&quot;</span> <span class="op">*</span> <span class="st">&quot; = </span><span class="sc">$</span>pct_success<span class="st">%&quot;</span>,</span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a>        size<span class="op">=</span>size, fmt<span class="op">=</span>fmt</span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> <span class="fu">fit</span>(Histogram{<span class="dt">Float64</span>}, samples, nbins<span class="op">=</span>bins) <span class="op">|&gt;</span> normalize</span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a>    h.weights <span class="op">.*=</span> Z</span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot!</span>(h; α<span class="op">=</span><span class="fl">0.20</span>, label<span class="op">=</span><span class="st">&quot;estimate&quot;</span>, lw<span class="op">=</span><span class="fl">0</span>, color<span class="op">=:</span>darkgreen)</span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a>    <span class="co"># makes a scaled version of this:</span></span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a>    <span class="co"># histogram!(samples, normalize=true, α=0.2, label=&quot;estimate&quot;, bins=bins, lw=0)</span></span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span>;</span></code></pre></div>
+</div>
+</details>
+<section id="rejection-sampling" class="level2" data-number="2.1">
+<h2 data-number="2.1"><span class="header-section-number">2.1</span>
+Rejection sampling</h2>
+<p>Let’s define a concrete proposal distribution and target density to
+use as an example,</p>
+<details class="code-fold" open>
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define a proposal distribution Q</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>Q <span class="op">=</span> <span class="fu">Normal</span>(<span class="fl">55</span>, <span class="fl">30</span>) <span class="co"># the proposal density is q(x) = pdf(Q,x)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define a target density</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># note, this example is in fact a pdf (which is normalized and we can sample from), but it needn&#39;t be</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>P <span class="op">=</span> <span class="fu">MixtureModel</span>([<span class="fu">Normal</span>(<span class="fl">20</span>, <span class="fl">10</span>), <span class="fu">Chisq</span>(<span class="fl">60</span>), <span class="fu">Normal</span>(<span class="fl">92</span>, <span class="fl">4</span>)], [<span class="fl">0.3</span>, <span class="fl">0.67</span>, <span class="fl">0.03</span>])</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">πstar</span>(x) <span class="op">=</span> <span class="fu">pdf</span>(P, x);  <span class="co"># target density</span></span></code></pre></div>
+</div>
+</details>
+<p>and look at a plot of these:</p>
+<details class="code-fold">
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_rejection_sampling_setup</span>(target_density<span class="op">=</span>πstar, proposal_distribution<span class="op">=</span>Q, plot_accept_prob<span class="op">=</span><span class="cn">true</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-setup.svg&quot;</span>)</span></code></pre></div>
+</div>
+</details>
+<figure id="fig:rejection-sampling">
+<img src="/assets/rejection-sampling/fig-setup.svg"
+alt="Figure 1: A setup for rejection sampling. Samples are to be drawn from the proposal distribution, and accepted or rejected according to the ratio of the target density to the scaled proposal density." />
+<figcaption aria-hidden="true">Figure 1: A setup for rejection sampling.
+Samples are to be drawn from the proposal distribution, and accepted or
+rejected according to the ratio of the target density to the scaled
+proposal density.</figcaption>
+</figure>
+<ul>
+<li>the proposal distribution <code>Q</code> is a normal distribution
+<span class="math inline">\(\mathcal{N}(\mu=55, \sigma^2=30)\)</span>,
+which we can sample from.</li>
+<li>the target density <code>p</code> is something more complicated (in
+this example, we can of course sample from the mixture distribution used
+to define <code>p</code>, but the point is we don’t need to be able to,
+in principle this density could not correspond to something we know how
+to sample from).</li>
+</ul>
+</section>
+<section id="simulation" class="level2 unnumbered">
+<h2 class="unnumbered">Simulation</h2>
+<p>Here is some code which implements the rejection sampling
+algorithm.</p>
+<details class="code-fold" open>
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="st">Run the rejection sampling algorithm to estimate `target_density` by sampling</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="st">`N` times from `proposal_distribution`.</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="st">Note, to prevent infinite looping, this version of the algorithm doesn&#39;t start</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="st">over if the sample is not accepted, so only n ≤ `N` accepted samples are returned.</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">rejection_sample_N_times</span>(;</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    target_density, proposal_distribution<span class="op">::</span><span class="dt">Distribution</span>, N<span class="op">::</span><span class="dt">Integer</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    xmin<span class="op">=-</span><span class="fl">10</span>, xmax<span class="op">=</span><span class="fl">110</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">p</span>(x) <span class="op">=</span> <span class="fu">target_density</span>(x)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">q</span>(x) <span class="op">=</span> <span class="fu">pdf</span>(proposal_distribution, x)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">w</span>(x) <span class="op">=</span> <span class="fu">p</span>(x) <span class="op">/</span> <span class="fu">q</span>(x)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># k is the constant by which to multiply q so it upper-bounds p</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    k <span class="op">=</span> <span class="fu">maximum</span>(<span class="fu">w</span>.(xmin<span class="op">:</span>xmax))</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    xs <span class="op">=</span> <span class="fu">rand</span>(proposal_distribution, N)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    us <span class="op">=</span> <span class="fu">rand</span>(<span class="fu">Uniform</span>(<span class="fl">0</span>, <span class="fl">1</span>), N)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">whether_accept</span>(x, u) <span class="op">=</span> <span class="fu">target_density</span>(x) <span class="op">/</span> (k <span class="op">*</span> <span class="fu">q</span>(x)) <span class="op">&gt;</span> u</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    samples <span class="op">=</span> xs[<span class="fu">whether_accept</span>.(xs, us)]</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> samples, (N_attempt<span class="op">=</span>N, N_success<span class="op">=</span><span class="fu">length</span>(samples))</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span>;</span></code></pre></div>
+</div>
+</details>
+<p>To see the estimate resulting from these rejection sampling examples,
+let’s make a histogram of the accepted samples resulting from sampling
+<code>N</code> times from the proposal:</p>
+<details class="code-fold">
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_rejection_sampling_estimate</span>(target_density<span class="op">=</span>πstar, proposal_distribution<span class="op">=</span>Q)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-simulation.svg&quot;</span>)</span></code></pre></div>
+</div>
+</details>
+<figure id="fig:rejection-sampling-simulation">
+<img src="/assets/rejection-sampling/fig-simulation.svg"
+alt="Figure 2: Simulation of rejection sampling setup in Figure 1." />
+<figcaption aria-hidden="true">Figure 2: Simulation of rejection
+sampling setup in <a
+href="#fig:rejection-sampling">Figure 1</a>.</figcaption>
+</figure>
+<div class="callout note-callout">
+<details class="callout-details"><summary>What about a different proposal?</summary>
+<div class="callout-body">
+<p>The proposal above is relatively good (it’s similar enough to the
+target, so a healthy proportion of the samples were accepted). What if
+the proposal were a worse fit to the target?</p>
+<details class="code-fold" open>
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define a &quot;bad&quot; proposal distribution (badly matched to the target)</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>Q_bad <span class="op">=</span> <span class="fu">MixtureModel</span>([<span class="fu">Normal</span>(<span class="fl">60</span>, <span class="fl">50</span>), <span class="fu">Normal</span>(<span class="fl">37</span>, <span class="fl">4</span>), <span class="fu">Normal</span>(<span class="fl">90</span>, <span class="fl">3</span>)], [<span class="fl">0.4</span>, <span class="fl">0.3</span>, <span class="fl">0.3</span>])</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_rejection_sampling_estimate</span>(target_density<span class="op">=</span>πstar, proposal_distribution<span class="op">=</span>Q_bad)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-badproposal.svg&quot;</span>)</span></code></pre></div>
+</div>
+</details>
+<figure id="fig:rejection-sampling-simulation-badproposal">
+<img src="/assets/rejection-sampling/fig-badproposal.svg"
+alt="Figure 3: Simulation of rejection sampling setup with a worse proposal distribution." />
+<figcaption aria-hidden="true">Figure 3: Simulation of rejection
+sampling setup with a worse proposal distribution.</figcaption>
+</figure>
+<p>with a worse proposal, we can see it will require more samples from
+the proposal to get a good estimate.</p>
+</div>
+</details>
+</div>
+</section>
+<section id="the-guess-and-check-algorithm-a-special-case"
+class="level2" data-number="2.2">
+<h2 data-number="2.2"><span class="header-section-number">2.2</span> The
+guess-and-check algorithm, a special case</h2>
+<p>Guessing repeatedly (from a prior distribution) and only accepting
+when some condition about the sample is met is a special case of the
+rejection sampling algorithm, though this isn’t immediately obvious the
+way it is usually described. To see how this is so let’s make a target
+density that is equal to the proposal density wherever a condition is
+met, and zero elsewhere (we’ll be guessing from the proposal
+distribution <code>Q</code>, and accepting iff the condition
+<code>condition</code> is met).</p>
+<p>We’ll set our target density to simply be equal to the proposal
+density when the condition is met, and zero otherwise. The
+<code>condition</code> I’ll use for this example is just whether the
+sampled real number is in a specified couple of intervals.</p>
+<details class="code-fold" open>
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Make a target density that equals pdf(Q) only on a chosen intervals, and zero elsewhere</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>intervals <span class="op">=</span> <span class="fu">interval</span>(<span class="fl">12</span>, <span class="fl">25</span>) <span class="op">∪</span> <span class="fu">interval</span>(<span class="fl">50</span>, <span class="fl">70</span>) <span class="co"># the intervals to accept on</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">condition</span>(x) <span class="op">=</span> x <span class="op">∈</span> intervals</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">special_πstar</span>(x) <span class="op">=</span> <span class="fu">condition</span>(x) ? <span class="fu">pdf</span>(Q, x) <span class="op">:</span> <span class="fl">0</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Note, this density is _not_ normalized.</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co"># If we wanted to normalize this, we could calculate the normalizing constant</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>Z <span class="op">=</span> <span class="fu">sum</span>(<span class="fu">cdf</span>(Q, i.hi) <span class="op">-</span> <span class="fu">cdf</span>(Q, i.lo) <span class="cf">for</span> i <span class="kw">in</span> intervals.v)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co"># and we could scale the density to make it a pdf, if we wanted</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># special_π_normalized(x) =  special_πstar(x) * 1/Z</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_rejection_sampling_setup</span>(target_density<span class="op">=</span>special_πstar, proposal_distribution<span class="op">=</span>Q,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">&quot;Rejection sampling setup&quot;</span>, subtitle<span class="op">=</span><span class="st">&quot;case when target = proposal where nonzero&quot;</span>,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    plot_accept_prob<span class="op">=</span><span class="cn">true</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-special.svg&quot;</span>)</span></code></pre></div>
+</div>
+</details>
+<figure id="fig:rejection-sampling-special">
+<img src="/assets/rejection-sampling/fig-special.svg"
+alt="Figure 4: Special case of rejection sampling where the target is equal to the proposal everywhere in the support of the proposal, and is zero elsewhere." />
+<figcaption aria-hidden="true">Figure 4: Special case of rejection
+sampling where the target is equal to the proposal everywhere in the
+support of the proposal, and is zero elsewhere.</figcaption>
+</figure>
+<p>To see precisely how the simple guess-and-check rejection sampling
+scheme is a special case of the rejection sampling algorithm (see <a
+href="#fig:rejection-sampling-special">Figure 4</a>, to compare with <a
+href="#fig:rejection-sampling">Figure 1</a>)</p>
+<ul>
+<li>let <span class="math inline">\(\pi(z) \coloneqq p(z\mid
+f(z)=\texttt{True})\)</span></li>
+<li>let <span class="math inline">\(\pi^\ast(z) \coloneqq
+\scriptsize\begin{cases}p(z)&amp;\text{if
+}f(z)=\texttt{True}\\0&amp;\text{else}\end{cases}\)</span></li>
+<li>let <span class="math inline">\(q(z) \coloneqq p(z)\)</span></li>
+</ul>
+<p>Letting <span class="math inline">\(k=1\)</span>, it holds that <span
+class="math inline">\(\forall z,\ kq(z)\ge \pi^\ast(z)\)</span>. In
+fact, we have that <span class="math inline">\(q(z)=\pi^\ast(z)\)</span>
+for all <span class="math inline">\(z\)</span> in the support of <span
+class="math inline">\(\pi^\ast\)</span>. This means that the step 3 of
+the rejection sampling algorithm (sampling from the uniform
+distribution) is unnecessary. We would be guaranteed that <span
+class="math inline">\(u\le \pi^\ast(z_0)\)</span>, whenever <span
+class="math inline">\(z_0 \in\)</span> support of <span
+class="math inline">\(\pi^\ast\)</span>. So we just need to check
+whether <span class="math inline">\(\pi^\ast(z_0) &gt; 0\)</span> (that
+is, check whether <span
+class="math inline">\(f(x)=\texttt{True}\)</span>).</p>
+<div class="callout note-callout">
+<div class="callout-header">
+Note
+</div>
+<div class="callout-body">
+<p>One important difference between these two definitions of rejection
+sampling is that in the special case we actually don’t need to know how
+to evaluate/score the density <span
+class="math inline">\(\pi^*\)</span>. This is important in practice, if
+we have a proposal process we can obtain samples from (and check whether
+they satisfy a condition), but we don’t have any way of obtaining
+scores. In this case guess-and-check is still possible, while the
+rejection sampling algorithm in general is not.</p>
+</div>
+</div>
+<details class="code-fold">
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_rejection_sampling_estimate</span>(target_density<span class="op">=</span>special_πstar, proposal_distribution<span class="op">=</span>Q, Z<span class="op">=</span>Z)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-simulation-special.svg&quot;</span>)</span></code></pre></div>
+</div>
+</details>
+<figure id="fig:rejection-sampling-simulation-special">
+<img src="/assets/rejection-sampling/fig-simulation-special.svg"
+alt="Figure 5: Simulation of special case of rejection sampling setup in Figure 4. This corresponds to guessing from the normal distribution and rejecting unless the sample falls in the specified couple of intervals." />
+<figcaption aria-hidden="true">Figure 5: Simulation of special case of
+rejection sampling setup in <a
+href="#fig:rejection-sampling-special">Figure 4</a>. This corresponds to
+guessing from the normal distribution and rejecting unless the sample
+falls in the specified couple of intervals.</figcaption>
+</figure>
+<div class="callout note-callout">
+<details class="callout-details"><summary>What about sampling until success?</summary>
+<div class="callout-body">
+<p>The version of the algorithm we’ve been using just samples <span
+class="math inline">\(N\)</span> times from the proposal, and accepts
+some proportion of them.</p>
+<p>Another way we might want our algorithm to behave would be sampling
+from the proposal <em>however many</em> times are needed to get <span
+class="math inline">\(N\)</span> accepted samples. Here is such a
+modified algorithm, and our examples above run using it.</p>
+<p>In this sample-until-success version of the algorithm, it is
+computationally costly to use a bad proposal.</p>
+<details class="code-fold" open>
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="st">Run the rejection sampling algorithm to estimate `target_density`</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="st">by sampling from `proposal_distribution` until `N` samples are accepted.</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="st">Note, this version of the algorithm may run indefinitely long if the proposal is bad.</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">rejection_sample_until_N_successes</span>(;</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    target_density, proposal_distribution<span class="op">::</span><span class="dt">Distribution</span>, N<span class="op">::</span><span class="dt">Integer</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    xmin<span class="op">=-</span><span class="fl">10</span>, xmax<span class="op">=</span><span class="fl">110</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">p</span>(x) <span class="op">=</span> <span class="fu">target_density</span>(x)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">q</span>(x) <span class="op">=</span> <span class="fu">pdf</span>(proposal_distribution, x)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">w</span>(x) <span class="op">=</span> <span class="fu">p</span>(x) <span class="op">/</span> <span class="fu">q</span>(x)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># k is the constant by which to multiply q so it upper-bounds p</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    k <span class="op">=</span> <span class="fu">maximum</span>(<span class="fu">w</span>.(xmin<span class="op">:</span>xmax))</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    samples <span class="op">=</span> <span class="dt">Float64</span>[]</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    N_attempt <span class="op">=</span> <span class="fl">0</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="fu">length</span>(samples) <span class="op">&lt;</span> N</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>        N_attempt <span class="op">+=</span> <span class="fl">1</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="fu">rand</span>(proposal_distribution)</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">target_density</span>(x) <span class="op">/</span> (k <span class="op">*</span> <span class="fu">q</span>(x)) <span class="op">&gt;</span> <span class="fu">rand</span>() <span class="op">&amp;&amp;</span> <span class="fu">push!</span>(samples, x)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> samples, (N_attempt<span class="op">=</span>N_attempt, N_success<span class="op">=</span>N)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span>;</span></code></pre></div>
+</div>
+</details>
+<details class="code-fold" open>
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="10">
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_rejection_sampling_estimate</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    target_density<span class="op">=</span>πstar, proposal_distribution<span class="op">=</span>Q,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    rejection_sampler<span class="op">=</span>rejection_sample_until_N_successes)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-until-success-good.svg&quot;</span>)</span></code></pre></div>
+</div>
+</details>
+<figure>
+<img src="/assets/rejection-sampling/fig-until-success-good.svg"
+alt="Sampling from the good proposal until 1000 samples have been accepted. The title reports how many proposals that took." />
+<figcaption aria-hidden="true">Sampling from the good proposal until
+1000 samples have been accepted. The title reports how many proposals
+that took.</figcaption>
+</figure>
+<details class="code-fold" open>
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="11">
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_rejection_sampling_estimate</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    target_density<span class="op">=</span>πstar, proposal_distribution<span class="op">=</span>Q_bad,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    rejection_sampler<span class="op">=</span>rejection_sample_until_N_successes)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-until-success-bad.svg&quot;</span>)</span></code></pre></div>
+</div>
+</details>
+<figure>
+<img src="/assets/rejection-sampling/fig-until-success-bad.svg"
+alt="The same, with the badly matched proposal: the same 1000 accepted samples now cost many more proposals." />
+<figcaption aria-hidden="true">The same, with the badly matched
+proposal: the same 1000 accepted samples now cost many more
+proposals.</figcaption>
+</figure>
+<details class="code-fold" open>
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="12">
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_rejection_sampling_estimate</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    target_density<span class="op">=</span>special_πstar, proposal_distribution<span class="op">=</span>Q, Z<span class="op">=</span>Z,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    rejection_sampler<span class="op">=</span>rejection_sample_until_N_successes)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-until-success-special.svg&quot;</span>)</span></code></pre></div>
+</div>
+</details>
+<figure>
+<img src="/assets/rejection-sampling/fig-until-success-special.svg"
+alt="The same again, for the guess-and-check special case, where a proposal is accepted exactly when it falls in one of the two intervals." />
+<figcaption aria-hidden="true">The same again, for the guess-and-check
+special case, where a proposal is accepted exactly when it falls in one
+of the two intervals.</figcaption>
+</figure>
+</div>
+</details>
+</div>
+<div class="callout note-callout">
+<details class="callout-details"><summary>Related algorithms</summary>
+<div class="callout-body">
+<p><strong>Slice sampling</strong> <span class="citation"
+data-cites="neal.r:2003">(<a href="#ref-neal.r:2003"
+role="doc-biblioref">Neal, 2003</a>)</span> is a method for generating
+2-D samples <span class="math inline">\((z,y)\)</span> uniformly over
+the <em>area</em> under the target density plot, and simply ignoring
+<span class="math inline">\(y\)</span> component to give samples from
+the target density over <span class="math inline">\(z\)</span>.</p>
+<div class="callout note-callout">
+<div class="callout-header">
+Slice sampling algorithm
+</div>
+<div class="callout-body">
+<ul>
+<li><em>Goal</em>: to sample from an arbitrary distribution <span
+class="math inline">\(z\sim \pi(Z)\)</span>.</li>
+<li><em>Requirements</em>:
+<ul>
+<li>you must be able to evaluate <span class="math inline">\(\pi^\ast(z)
+\propto \pi(z)\)</span>, (that is you can score <span
+class="math inline">\(\pi\)</span> up to a normalizing constant)</li>
+<li>you must know the support of <span
+class="math inline">\(\pi\)</span>, and be able to sample uniformly from
+horizontal slices like <span class="math inline">\({z\mid
+y&lt;\pi^\ast(z)}\)</span> for any <span
+class="math inline">\(y\)</span>.</li>
+</ul></li>
+<li><em>Algorithm</em>:
+<ol type="1">
+<li>sample <span
+class="math inline">\(z_1\sim\operatorname{Unif}(\operatorname{support}(\pi))\)</span></li>
+<li>for <span class="math inline">\(i \in 1\dots (N-1)\)</span>:
+<ul>
+<li>sample <span
+class="math inline">\(y_i\sim\operatorname{Unif}([0,\pi^\ast(z_i)])\)</span></li>
+<li>define ‘slice’ <span class="math inline">\(S=\{z\mid
+y_i&lt;\pi^\ast(z)\}\)</span></li>
+<li>sample <span
+class="math inline">\(z_{i+1}\sim\operatorname{Unif}(S)\)</span></li>
+</ul></li>
+<li>return <span class="math inline">\(\{z_1,\dots,z_N\}\)</span></li>
+</ol></li>
+</ul>
+</div>
+</div>
+<details class="code-fold">
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="13">
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">find_intervals</span>(p, y; xmin<span class="op">=-</span><span class="fl">10</span>, xmax<span class="op">=</span><span class="fl">110</span>, resolution<span class="op">=</span><span class="fl">1000</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Initialize variables for interval finding</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    dx <span class="op">=</span> (xmax <span class="op">-</span> xmin) <span class="op">/</span> resolution</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    xs <span class="op">=</span> <span class="fu">range</span>(xmin, xmax, length<span class="op">=</span>resolution)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    intervals <span class="op">=</span> <span class="fu">Vector</span><span class="dt">{Tuple{Float64,Float64}}</span>()</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    in_interval <span class="op">=</span> <span class="cn">false</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    start_x <span class="op">=</span> xmin</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Scan through x values to find intervals</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x <span class="kw">in</span> xs</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>        above_slice <span class="op">=</span> <span class="fu">p</span>(x) <span class="op">&gt;</span> y</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> above_slice <span class="op">&amp;&amp;</span> !in_interval</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>            start_x <span class="op">=</span> x</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>            in_interval <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elseif</span> !above_slice <span class="op">&amp;&amp;</span> in_interval</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>            <span class="fu">push!</span>(intervals, (start_x, x))</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>            in_interval <span class="op">=</span> <span class="cn">false</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">end</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Handle case where last interval extends to xmax</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> in_interval</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>        <span class="fu">push!</span>(intervals, (start_x, xmax))</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> intervals</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">sample_from_slice</span>(p, y; xmin<span class="op">=-</span><span class="fl">10</span>, xmax<span class="op">=</span><span class="fl">110</span>)</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>    intervals <span class="op">=</span> <span class="fu">find_intervals</span>(p, y, xmin<span class="op">=</span>xmin, xmax<span class="op">=</span>xmax)</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>    total_width <span class="op">=</span> <span class="fu">sum</span>(upper <span class="op">-</span> lower <span class="cf">for</span> (lower, upper) <span class="kw">in</span> intervals)</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>    u <span class="op">=</span> <span class="fu">rand</span>() <span class="op">*</span> total_width</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Find which interval this point belongs to</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>    cumsum <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (lower, upper) <span class="kw">in</span> intervals</span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>        interval_width <span class="op">=</span> upper <span class="op">-</span> lower</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> u <span class="op">&lt;=</span> cumsum <span class="op">+</span> interval_width</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Point belongs in this interval</span></span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> lower <span class="op">+</span> (u <span class="op">-</span> cumsum)</span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">end</span></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>        cumsum <span class="op">+=</span> interval_width</span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Should never reach here if intervals are valid</span></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">error</span>(<span class="st">&quot;Failed to sample from slice&quot;</span>)</span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span>;</span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a><span class="st">Run the rejection sampling algorithm to estimate `target_density` by sampling</span></span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a><span class="st">`N` times from `proposal_distribution`.</span></span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a><span class="st">Note, to prevent infinite looping, this version of the algorithm doesn&#39;t start</span></span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a><span class="st">over if the sample is not accepted, so only n ≤ `N` accepted samples are returned.</span></span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">slice_sample</span>(;</span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>    target_density, N<span class="op">::</span><span class="dt">Integer</span>,</span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>    xmin<span class="op">=-</span><span class="fl">10</span>, xmax<span class="op">=</span><span class="fl">110</span></span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a>    <span class="fu">p</span>(x) <span class="op">=</span> <span class="fu">target_density</span>(x)</span>
+<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a>    xs <span class="op">=</span> [<span class="fu">rand</span>(<span class="fu">Uniform</span>(xmin, xmax))]</span>
+<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a>    ys <span class="op">=</span> []</span>
+<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="fl">2</span><span class="op">:</span>N</span>
+<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> <span class="fu">rand</span>(<span class="fu">Uniform</span>(<span class="fl">0</span>,<span class="fu">p</span>(xs[<span class="kw">end</span>])))</span>
+<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a>        <span class="fu">push!</span>(ys, y)</span>
+<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="fu">sample_from_slice</span>(target_density, y, xmin<span class="op">=</span>xmin, xmax<span class="op">=</span>xmax)</span>
+<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a>        <span class="fu">push!</span>(xs, x)</span>
+<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> xs, ys</span>
+<span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span>;</span>
+<span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a><span class="st">Run the slice sampling algorithm, and plot the rejection sampling estimate.</span></span>
+<span id="cb13-74"><a href="#cb13-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-75"><a href="#cb13-75" aria-hidden="true" tabindex="-1"></a><span class="st"># Arguments</span></span>
+<span id="cb13-76"><a href="#cb13-76" aria-hidden="true" tabindex="-1"></a><span class="st">- `target_density`: Function representing the target density to sample from</span></span>
+<span id="cb13-77"><a href="#cb13-77" aria-hidden="true" tabindex="-1"></a><span class="st">- `N::Integer`: Number of samples to draw</span></span>
+<span id="cb13-78"><a href="#cb13-78" aria-hidden="true" tabindex="-1"></a><span class="st">- `Z::Float64=1.0`: Normalization constant for histogram</span></span>
+<span id="cb13-79"><a href="#cb13-79" aria-hidden="true" tabindex="-1"></a><span class="st">    (optional: to make the histogram same scale as density plot, set Z to normalizing constant of target_density)</span></span>
+<span id="cb13-80"><a href="#cb13-80" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb13-81"><a href="#cb13-81" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">plot_slice_sampling_estimate</span>(;</span>
+<span id="cb13-82"><a href="#cb13-82" aria-hidden="true" tabindex="-1"></a>    target_density, N<span class="op">::</span><span class="dt">Integer</span>=<span class="fl">1000</span>,</span>
+<span id="cb13-83"><a href="#cb13-83" aria-hidden="true" tabindex="-1"></a>    Z<span class="op">=</span><span class="fl">1.0</span>,</span>
+<span id="cb13-84"><a href="#cb13-84" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">&quot;Slice sampling estimate of target density&quot;</span>,</span>
+<span id="cb13-85"><a href="#cb13-85" aria-hidden="true" tabindex="-1"></a>    bins<span class="op">=</span><span class="fl">100</span>,</span>
+<span id="cb13-86"><a href="#cb13-86" aria-hidden="true" tabindex="-1"></a>    xmin<span class="op">=-</span><span class="fl">15</span>, xmax<span class="op">=</span><span class="fl">115</span>, size<span class="op">=</span>(<span class="fl">650</span>, <span class="fl">325</span>), xresolution<span class="op">=</span><span class="fl">1000</span>, fmt<span class="op">=:</span>svg</span>
+<span id="cb13-87"><a href="#cb13-87" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-88"><a href="#cb13-88" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> xmin<span class="op">:</span>(xmax<span class="op">-</span>xmin)<span class="op">/</span>xresolution<span class="op">:</span>xmax</span>
+<span id="cb13-89"><a href="#cb13-89" aria-hidden="true" tabindex="-1"></a>    samples, ys <span class="op">=</span> <span class="fu">slice_sample</span>(</span>
+<span id="cb13-90"><a href="#cb13-90" aria-hidden="true" tabindex="-1"></a>        target_density<span class="op">=</span>target_density, N<span class="op">=</span>N)</span>
+<span id="cb13-91"><a href="#cb13-91" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(x, [<span class="fu">target_density</span>.(x)],</span>
+<span id="cb13-92"><a href="#cb13-92" aria-hidden="true" tabindex="-1"></a>        xlabel<span class="op">=</span>L<span class="st">&quot;x&quot;</span>, legend<span class="op">=:</span>topleft,</span>
+<span id="cb13-93"><a href="#cb13-93" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span>L<span class="st">&quot;target: </span><span class="sc">$</span><span class="st">\</span>pi<span class="st">^{</span><span class="sc">\a</span><span class="st">st}(x)</span><span class="sc">$</span><span class="st">&quot;,</span></span>
+<span id="cb13-94"><a href="#cb13-94" aria-hidden="true" tabindex="-1"></a><span class="st">        </span>ls<span class="st">=:dash, color=:green, linewidth=4, alpha=0.4,</span></span>
+<span id="cb13-95"><a href="#cb13-95" aria-hidden="true" tabindex="-1"></a>        plot_title<span class="op">=</span>title, plot_titlelocation<span class="op">=:</span>left, titlelocation<span class="op">=:</span>left,</span>
+<span id="cb13-96"><a href="#cb13-96" aria-hidden="true" tabindex="-1"></a>        plot_titlefontsize<span class="op">=</span><span class="fl">11</span>, titlefontsize<span class="op">=</span><span class="fl">9</span>,</span>
+<span id="cb13-97"><a href="#cb13-97" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">&quot;title&quot;</span>,</span>
+<span id="cb13-98"><a href="#cb13-98" aria-hidden="true" tabindex="-1"></a>        size<span class="op">=</span>size, fmt<span class="op">=</span>fmt</span>
+<span id="cb13-99"><a href="#cb13-99" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb13-100"><a href="#cb13-100" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scatter!</span>(samples[<span class="fl">1</span><span class="op">:</span><span class="kw">end</span><span class="op">-</span><span class="fl">1</span>], ys, α<span class="op">=</span><span class="fl">.75</span>, label<span class="op">=</span><span class="st">&quot;sample&quot;</span>, color<span class="op">=:</span>red, msw<span class="op">=</span><span class="fl">0</span>, ms<span class="op">=</span><span class="fl">1</span>)</span>
+<span id="cb13-101"><a href="#cb13-101" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> <span class="fu">fit</span>(Histogram{<span class="dt">Float64</span>}, samples, nbins<span class="op">=</span>bins) <span class="op">|&gt;</span> normalize</span>
+<span id="cb13-102"><a href="#cb13-102" aria-hidden="true" tabindex="-1"></a>    h.weights <span class="op">.*=</span> Z</span>
+<span id="cb13-103"><a href="#cb13-103" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot!</span>(h; α<span class="op">=</span><span class="fl">0.20</span>, label<span class="op">=</span><span class="st">&quot;estimate&quot;</span>, lw<span class="op">=</span><span class="fl">0</span>, color<span class="op">=:</span>darkgreen)</span>
+<span id="cb13-104"><a href="#cb13-104" aria-hidden="true" tabindex="-1"></a>    <span class="co"># makes a scaled version of this:</span></span>
+<span id="cb13-105"><a href="#cb13-105" aria-hidden="true" tabindex="-1"></a>    <span class="co"># histogram!(samples, normalize=true, α=0.2, label=&quot;estimate&quot;, bins=bins, lw=0)</span></span>
+<span id="cb13-106"><a href="#cb13-106" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span>;</span></code></pre></div>
+</div>
+</details>
+<details class="code-fold">
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">plot_slice_sampling_estimate</span>(target_density<span class="op">=</span>πstar)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">savefig</span>(p, <span class="st">&quot;../../assets/rejection-sampling/fig-slice-sampling.svg&quot;</span>)</span></code></pre></div>
+</div>
+</details>
+<figure id="fig:slice-sampling">
+<img src="/assets/rejection-sampling/fig-slice-sampling.svg"
+alt="Figure 6: An example of slice sampling. Samples are drawn uniformly from the 2-d area under the target." />
+<figcaption aria-hidden="true">Figure 6: An example of slice sampling.
+Samples are drawn uniformly from the 2-d area under the
+target.</figcaption>
+</figure>
+</div>
+</details>
+</div>
+</section>
+</section>
+<section id="references" class="level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent"
+data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-bishop.c:2006book" class="csl-entry" role="listitem">
+Bishop, C. M. (2006). <em>Pattern <span>Recognition</span> and
+<span>Machine Learning</span></em> (1st ed.). Springer. <a
+href="https://link.springer.com/book/9780387310732">https://link.springer.com/book/9780387310732</a>
+</div>
+<div id="ref-chopin.n:2020book" class="csl-entry" role="listitem">
+Chopin, N., &amp; Papaspiliopoulos, O. (2020). <em>An introduction to
+sequential <span>Monte Carlo</span></em> (1st ed.). Springer. <a
+href="https://doi.org/10.1007/978-3-030-47845-2">https://doi.org/10.1007/978-3-030-47845-2</a>
+</div>
+<div id="ref-freer.c:2010" class="csl-entry" role="listitem">
+Freer, C., Mansinghka, V. K., &amp; Roy, D. (2010, December 10). When
+are probabilistic programs probably computationally tractable?
+<em><span>NIPS</span> Workshop on <span>Monte Carlo</span> Methods for
+Modern Applications</em>. Monte <span>Carlo Methods</span> for
+<span>Modern Applications</span>: <span>Workshop</span> at 2010
+<span>Neural Information Processing Systems</span> (<span>NIPS</span>).
+<a
+href="http://montecarlo.wdfiles.com/local--files/contributed-abstracts/nipsmc2010_freer_etal.pdf">http://montecarlo.wdfiles.com/local--files/contributed-abstracts/nipsmc2010_freer_etal.pdf</a>
+</div>
+<div id="ref-mackay.d:2003book" class="csl-entry" role="listitem">
+MacKay, D. J. C. (2003). <em>Information theory, inference and learning
+algorithms</em>. Cambridge university press. <a
+href="https://www.inference.org.uk/itila/">https://www.inference.org.uk/itila/</a>
+</div>
+<div id="ref-neal.r:2003" class="csl-entry" role="listitem">
+Neal, R. M. (2003). Slice sampling. <em>The Annals of Statistics</em>,
+<em>31</em>(3), 705–767. <a
+href="https://doi.org/10.1214/aos/1056562461">https://doi.org/10.1214/aos/1056562461</a>
+</div>
+</div>
+</section>
+</main>
+
+<script>
+;(function() {
+  // Non-essential if user has JavaScript off. Just makes checkboxes look nicer.
+  var selector = '.task-list > li > input[type="checkbox"]';
+  var checkboxes = document.querySelectorAll(selector);
+  Array.from(checkboxes).forEach((checkbox) => {
+    var wasChecked = checkbox.checked;
+    checkbox.disabled = false;
+    checkbox.addEventListener('click', (ev) => {ev.target.checked = wasChecked});
+  });
+
+  function hoistAbove() {
+    const toHoist = document.querySelectorAll('main > .sidenote-wrapper + :not(.sidenote-wrapper)');
+    for (let i = toHoist.length - 1; i >= 0; i--) {
+      const source = toHoist[i];
+      let target = source.previousElementSibling;
+      while (target.previousElementSibling?.classList.contains('sidenote-wrapper')) {
+        target = target.previousElementSibling;
+      }
+      source.parentNode.insertBefore(source, target);
+    }
+  }
+
+  function sinkBelow() {
+    const toHoist = document.querySelectorAll('main > :not(.sidenote-wrapper) + .sidenote-wrapper');
+    for (let i = 0; i < toHoist.length; i++) {
+      const source = toHoist[i].previousElementSibling;
+      let target = source.nextElementSibling;
+      while (target.classList.contains('sidenote-wrapper')) {
+        target = target.nextElementSibling;
+      }
+      source.parentNode.insertBefore(source, target);
+    }
+  }
+
+  if (window.matchMedia('screen')) {
+    if (window.innerWidth <= 796) {
+      hoistAbove();
+    }
+    let prevSize = window.innerWidth;
+    // Needs to mirror breakpoints in :root settings in CSS variables
+    // 745px = --main-width-narrow
+    // 26px = --line-height
+    // 169px = side note min width narrow
+    const breakpoint = 26 + 550 + 26 + 169 + 26 - 1;
+    window.addEventListener('resize', function() {
+      const newSize = window.innerWidth;
+      if (prevSize >= breakpoint && newSize < breakpoint) {
+        hoistAbove();
+      } else if (prevSize < breakpoint && newSize >= breakpoint) {
+        sinkBelow();
+      }
+      prevSize = newSize;
+    });
+  }
+})();
+</script>
+<footer class="site-footer">
+  <div class="wrapper">
+    <span class="last-modified">Last modified: 2026-08-12 22:47</span>
+  </div>
+</footer>
+</body>
+</html>

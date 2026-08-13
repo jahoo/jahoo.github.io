@@ -22,13 +22,18 @@
         href="/assets/fonts/LinLibertine/LinLibertine_Re-4.1_.8_.woff2" />
 
   <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/theme.css" />
-  <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/skylighting-solarized-theme.css" />
+  <link rel="stylesheet" href="/assets/css/code.css" />
   <link rel="stylesheet" href="/assets/css/overrides.css" />
   <link rel="stylesheet" href="/assets/css/site-chrome.css" />
   <link rel="stylesheet" href="/assets/css/posts-list.css" />
 <script>
 MathJax = {
+  // tex-chtml ships base + AMS only. mathtools adds the commands LaTeX authors
+  // reach for without thinking — \coloneqq and friends — which otherwise render
+  // as red literal text.
+  loader: { load: ['[tex]/mathtools'] },
   tex: {
+    packages: { '[+]': ['mathtools'] },
     inlineMath: [['\\(', '\\)'], ['$', '$']],
     displayMath: [['\\[', '\\]'], ['$$', '$$']],
     // AMS-style numbering: only {equation}/{align} environments get
@@ -131,7 +136,7 @@ MathJax = {
     <span class="post-meta">2022-09-02 · <span class="post-tags">note</span></span>
   </li>
   <li>
-    <h3><a class="post-link" href="/posts/rejection-sampling-expo/">Rejection sampling</a></h3>
+    <h3><a class="post-link" href="/posts/rejection-sampling/">Rejection sampling</a></h3>
     <span class="post-meta">2022-08-29 · <span class="post-tags">note</span></span>
   </li>
   <li>
@@ -232,7 +237,7 @@ MathJax = {
 </script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-08-07 14:12</span>
+    <span class="last-modified">Last modified: 2026-08-12 22:55</span>
   </div>
 </footer>
 </body>

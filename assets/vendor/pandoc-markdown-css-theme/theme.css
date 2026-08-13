@@ -1,3 +1,7 @@
+/* Dark mode removed deliberately (site-wide). The upstream vendored theme
+   shipped `@media (prefers-color-scheme: dark)` blocks here; they were only
+   half-wired across the site and rendered badly, so the site is light-only
+   for now. Re-adding it is a considered piece of work, not a revert. */
 
 /* ----- Global settings ----------------------------------------------- {{{ */
 
@@ -109,31 +113,6 @@
 
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background-color: #161313;
-
-    --color-text: #f7f5f2;
-    --color-text-secondary: #9d9b99;
-    --color-link: #2994ff;
-    --color-sidenote: #b4b2af;
-
-    --highlight-red: #660000;
-    --highlight-yellow: #7f6000;
-    --highlight-green: #274e13;
-    --highlight-blue: #1c4587;
-    --highlight-purple: #351c75;
-
-    --color-inline-code: #f7f5f2;
-    --color-inline-code-bg: #242121;
-
-    --color-border: #393635;
-    --color-border-heavy: #524f4d;
-
-    --color-table-heading: #242121;
-  }
-}
-
 *, *:after, *:before {
   box-sizing: border-box;
   margin: 0;
@@ -182,14 +161,6 @@ body {
   display: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  .only-light-mode {
-    display: none;
-  }
-  .only-dark-mode {
-    display: inherit;
-  }
-}
 /* }}} */
 /* ----- Side notes and margin notes ----------------------------------- {{{ */
 /* --- Side note text and numbering --- {{{ */

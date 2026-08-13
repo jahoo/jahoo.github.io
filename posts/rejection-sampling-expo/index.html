@@ -23,12 +23,17 @@
         href="/assets/fonts/LinLibertine/LinLibertine_Re-4.1_.8_.woff2" />
 
   <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/theme.css" />
-  <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/skylighting-solarized-theme.css" />
+  <link rel="stylesheet" href="/assets/css/code.css" />
   <link rel="stylesheet" href="/assets/css/overrides.css" />
   <link rel="stylesheet" href="/assets/css/site-chrome.css" />
 <script>
 MathJax = {
+  // tex-chtml ships base + AMS only. mathtools adds the commands LaTeX authors
+  // reach for without thinking — \coloneqq and friends — which otherwise render
+  // as red literal text.
+  loader: { load: ['[tex]/mathtools'] },
   tex: {
+    packages: { '[+]': ['mathtools'] },
     inlineMath: [['\\(', '\\)'], ['$', '$']],
     displayMath: [['\\[', '\\]'], ['$$', '$$']],
     // AMS-style numbering: only {equation}/{align} environments get
@@ -59,6 +64,11 @@ MathJax = {
 };
 </script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <!-- Included in <head> for pages with `unlisted: true` in front matter:
+       the page is reachable by its URL but shouldn't be indexed or crawled. -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta http-equiv="refresh" content="0; url=/posts/rejection-sampling/">
+  <link rel="canonical" href="/posts/rejection-sampling/">
 </head>
 <body>
 
@@ -98,17 +108,14 @@ MathJax = {
 
 
 <main>
-<p><em>Rejection sampling</em> refers to a particular algorithm
-involving drawing samples from one distribution in order to estimate
-some other distribution, by rejecting or accepting the samples obtained
-in a smart way. In this note I’m exploring this algorithm a little with
-some simulations, and also showing how a different, similar, algorithm
-can be seen as a special case of the general version (because it wasn’t
-at all obvious to me at first how they were related).</p>
-<div class="wide full-width">
-<iframe src="/assets/rejection-sampling-expo/q/notebooks/rejection-sampling-expo.html" width="100%" height="8150" frameborder="none">
-</iframe>
-</div>
+<p>This post has moved to <a href="/posts/rejection-sampling/">Rejection
+sampling</a>.</p>
+<p>You should be redirected automatically. If not, follow the link
+above.</p>
+<p>The original version of this page, which embedded a pre-rendered
+Quarto notebook in an iframe, is archived at <a
+href="/posts/rejection-sampling-old_iframe/">Rejection sampling (iframe
+version)</a>.</p>
 </main>
 
 <script>
@@ -170,7 +177,7 @@ at all obvious to me at first how they were related).</p>
 </script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-04-19 12:06</span>
+    <span class="last-modified">Last modified: 2026-08-12 22:49</span>
   </div>
 </footer>
 </body>

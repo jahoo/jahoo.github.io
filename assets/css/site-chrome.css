@@ -172,3 +172,14 @@ hr.post-divider {
 @media (max-width: 500px) {
   .site-footer { padding: 1rem; }
 }
+
+/* ── .qmd source download (notebook-backed posts) ──── */
+/* Rendered into post-meta by the template when build-content.sh finds a
+   sibling .qmd for the post. Sits quietly beside the date and tags; the
+   arrow marks it as a download rather than a page link. */
+
+.post-meta .qmd-download::after {
+  content: "\2193";          /* downwards arrow */
+  margin-left: 0.3em;
+  font-size: 0.9em;
+}

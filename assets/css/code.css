@@ -1,0 +1,97 @@
+/* Code blocks: presentation + syntax highlighting.
+ *
+ * Replaces the vendored skylighting solarized theme, which the template used
+ * to load. Two problems with it, both visible at a glance next to a Quarto
+ * rendering of the same source:
+ *
+ *   - Ordinary code blocks inherited the *prose* line-height (26-28px on 13px
+ *     text), so listings read as double-spaced. The vendored theme only ever
+ *     tightened leading behind an opt-in `.tight-code` utility class.
+ *   - Solarized-light's cream ground and olive/teal tokens are low-contrast;
+ *     keywords in particular were indistinguishable from identifiers.
+ *
+ * The palette below is the one Quarto's default light theme uses: a neutral
+ * ground, navy bold keywords, red types and literals, green strings, grey
+ * comments, violet function names. High contrast, and each token class is
+ * distinguishable from its neighbours at body size.
+ *
+ * Class names are pandoc/skylighting's: see
+ * https://docs.pandoc.org/MANUAL.html#syntax-highlighting
+ */
+
+:root {
+  --code-bg: #f7f7f9;
+  --code-fg: #1b2733;
+  --code-line-height: 1.5;
+
+  --code-keyword: #003b4f;   /* keyword, control flow */
+  --code-type: #ad0000;      /* data types, literals, preprocessor */
+  --code-string: #20794d;    /* strings in all their forms */
+  --code-comment: #5e5e5e;   /* comments, docs, operators */
+  --code-function: #4758ab;  /* function and builtin names */
+  --code-constant: #8f5902;  /* constants */
+  --code-import: #00769e;    /* imports */
+  --code-attribute: #657422; /* attributes */
+}
+
+/* ── Block presentation ────────────────────────────── */
+
+pre, pre.numberSource {
+  background: var(--code-bg);
+  --color-code-highlight-bg: #ececf1;
+  border-radius: 4px;
+}
+
+pre code {
+  color: var(--code-fg);
+}
+
+/* Leading. Pandoc wraps each line in a span, so both the code element and the
+   spans need it — matching how the theme's own .tight-code utility does it. */
+pre code,
+pre > code.sourceCode > span {
+  line-height: var(--code-line-height);
+}
+
+/* Line numbers, when a block asks for them. */
+pre.numberSource > code.sourceCode > span > a:first-child::before {
+  color: #9a9a9a;
+}
+
+/* ── Tokens ────────────────────────────────────────── */
+
+code span.kw { color: var(--code-keyword); font-weight: 600; } /* Keyword */
+code span.cf { color: var(--code-keyword); font-weight: 600; } /* ControlFlow */
+code span.ot { color: var(--code-keyword); }                   /* Other */
+
+code span.dt { color: var(--code-type); }                      /* DataType */
+code span.dv { color: var(--code-type); }                      /* DecVal */
+code span.bn { color: var(--code-type); }                      /* BaseN */
+code span.fl { color: var(--code-type); }                      /* Float */
+code span.ch { color: var(--code-type); }                      /* Char */
+code span.pp { color: var(--code-type); }                      /* Preprocessor */
+
+code span.st { color: var(--code-string); }                    /* String */
+code span.vs { color: var(--code-string); }                    /* VerbatimString */
+code span.ss { color: var(--code-string); }                    /* SpecialString */
+code span.sc { color: var(--code-string); }                    /* SpecialChar */
+
+code span.co { color: var(--code-comment); }                   /* Comment */
+code span.do { color: var(--code-comment); }                   /* Documentation */
+code span.cv { color: var(--code-comment); }                   /* CommentVar */
+code span.an { color: var(--code-comment); }                   /* Annotation */
+code span.in { color: var(--code-comment); }                   /* Information */
+code span.op { color: var(--code-comment); }                   /* Operator */
+
+code span.fu { color: var(--code-function); }                  /* Function */
+code span.bu { color: var(--code-function); }                  /* BuiltIn */
+code span.ex { color: var(--code-function); }                  /* Extension */
+
+code span.cn { color: var(--code-constant); }                  /* Constant */
+code span.im { color: var(--code-import); }                    /* Import */
+code span.at { color: var(--code-attribute); }                 /* Attribute */
+code span.va { color: var(--code-fg); }                        /* Variable */
+
+code span.al { color: var(--code-type); font-weight: 600; }    /* Alert */
+code span.er { color: var(--code-type); font-weight: 600; }    /* Error */
+code span.wa { color: var(--code-constant); font-weight: 600; }/* Warning */

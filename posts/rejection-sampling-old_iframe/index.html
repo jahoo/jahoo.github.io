@@ -1,22 +1,13 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="$lang$" xml:lang="$lang$"$if(dir)$ dir="$dir$"$endif$>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc-markdown-css-theme" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-$for(author-meta)$
-  <meta name="author" content="$author-meta$" />
-$endfor$
-$if(date-meta)$
-  <meta name="dcterms.date" content="$date-meta$" />
-$endif$
-$if(keywords)$
-  <meta name="keywords" content="$for(keywords)$$keywords$$sep$, $endfor$" />
-$endif$
-$if(description-meta)$
-  <meta name="description" content="$description-meta$" />
-$endif$
-  <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+  <meta name="author" content="Jacob Louis Hoover" />
+  <meta name="dcterms.date" content="2022-08-29" />
+  <meta name="description" content="Scientific Program Coordinator at CHI FRO, LLC. Formerly Postdoc at MIT, Department of Brain and Cognitive Sciences. PhD in Linguistics from McGill University." />
+  <title>Rejection sampling</title>
   <!--
     Preload the two navbar fonts used above the fold on every page.
     `font-display: swap` already prevents invisible text, but the fonts
@@ -25,19 +16,16 @@ $endif$
     the site-title `Linux Biolinum Outline` and nav-link `Linux Libertine`.
     `crossorigin` is required on `as=font` preloads even for same-origin.
   -->
-$if(standalone-page)$$else$
+
   <link rel="preload" as="font" type="font/woff2" crossorigin
         href="/assets/fonts/LinBiolinum/LinBiolinum_aU.woff2" />
   <link rel="preload" as="font" type="font/woff2" crossorigin
         href="/assets/fonts/LinLibertine/LinLibertine_Re-4.1_.8_.woff2" />
-$endif$
+
   <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/theme.css" />
   <link rel="stylesheet" href="/assets/css/code.css" />
   <link rel="stylesheet" href="/assets/css/overrides.css" />
   <link rel="stylesheet" href="/assets/css/site-chrome.css" />
-$for(css)$
-  <link rel="stylesheet" href="$css$" />
-$endfor$
 <script>
 MathJax = {
   // tex-chtml ships base + AMS only. mathtools adds the commands LaTeX authors
@@ -46,14 +34,11 @@ MathJax = {
   loader: { load: ['[tex]/mathtools'] },
   tex: {
     packages: { '[+]': ['mathtools'] },
-    inlineMath: [['\\(', '\\)'], ['$$', '$$']],
-    displayMath: [['\\[', '\\]'], ['$$$$', '$$$$']],
+    inlineMath: [['\\(', '\\)'], ['$', '$']],
+    displayMath: [['\\[', '\\]'], ['$$', '$$']],
     // AMS-style numbering: only {equation}/{align} environments get
-    // numbers, so ordinary $$ displays stay untagged.
+    // numbers, so ordinary $ displays stay untagged.
     tags: 'ams'
-$if(mathjax-macros-json)$
-    , macros: $mathjax-macros-json$
-$endif$
   },
   options: {
     // Disable click-to-explore on math. Without these, clicking on a
@@ -79,66 +64,72 @@ $endif$
 };
 </script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
-$for(header-includes)$
-  $header-includes$
-$endfor$
+  <!-- Included in <head> for pages with `unlisted: true` in front matter:
+       the page is reachable by its URL but shouldn't be indexed or crawled. -->
+  <meta name="robots" content="noindex, nofollow">
 </head>
 <body>
-$if(standalone-page)$$else$
-$for(include-before)$
-$include-before$
-$endfor$
-$endif$
+
+<header class="site-header">
+  <div class="wrapper">
+    <a class="site-title" href="/">
+      <span class="site-title-full">jacob hoover vigly</span>
+      <span class="site-title-short">jacob vigly</span>
+      <span class="site-title-xs">jv</span>
+    </a>
+    <nav class="site-nav">
+      <div class="trigger">
+        <a class="page-link" href="/">home</a>
+        <a class="page-link" href="/posts/">blog</a>
+      </div>
+    </nav>
+  </div>
+</header>
+<script src="/assets/js/section-marks.js" defer></script>
+<script src="/assets/js/active-nav.js" defer></script>
+
 
 <header>
-$if(hide-post-title)$$else$
-<h1 class="title">$title$</h1>
-$endif$
-$if(subtitle)$
-<p class="subtitle">$subtitle$</p>
-$endif$
-$if(date)$
+
+<h1 class="title">Rejection sampling</h1>
+
 <p class="post-meta">
-  <time datetime="$date$">$date$</time>
-$if(author)$
-  · $if(author-url)$<a href="$author-url$">$author$</a>$else$$author$$endif$
-$endif$
-$if(tags)$
-  · <span class="post-tags">$for(tags)$$tags$$sep$, $endfor$</span>
-$endif$
-$if(qmd-source)$
-  · <a class="qmd-download" href="$qmd-source$" download title="Quarto source for this post, with the code that produced its figures">source .qmd</a>
-$endif$
+  <time datetime="2022-08-29">2022-08-29</time>
+  · Jacob Louis Hoover
+  · <span class="post-tags">note</span>
 </p>
-$endif$
 </header>
 
-$if(hide-post-title)$$else$
-<hr class="post-divider" />
-$endif$
 
-$if(toc)$
-<nav id="$idprefix$TOC" role="doc-toc">
-  $if(return-url)$
-  <a href="$return-url$">$if(return-text)$$return-text$$else$← Return$endif$</a><br>
-  $endif$
-  <strong>Contents</strong><label for="contents">⊕</label>
-  <input type="checkbox" id="contents">
-  $table-of-contents$
-</nav>
-$endif$
+<hr class="post-divider" />
+
+
 
 <main>
-$body$
+<div class="callout note-callout">
+<div class="callout-header">
+Archived
+</div>
+<div class="callout-body">
+<p>This is the original version of this post, which embedded a
+pre-rendered Quarto notebook in an iframe. It is kept for reference. The
+current version, rendered natively, is at <a
+href="/posts/rejection-sampling/">Rejection sampling</a>.</p>
+</div>
+</div>
+<p><em>Rejection sampling</em> refers to a particular algorithm
+involving drawing samples from one distribution in order to estimate
+some other distribution, by rejecting or accepting the samples obtained
+in a smart way. In this note I’m exploring this algorithm a little with
+some simulations, and also showing how a different, similar, algorithm
+can be seen as a special case of the general version (because it wasn’t
+at all obvious to me at first how they were related).</p>
+<div class="wide full-width">
+<iframe src="/assets/rejection-sampling-expo/q/notebooks/rejection-sampling-expo.html" width="100%" height="8150" frameborder="none">
+</iframe>
+</div>
 </main>
 
-$if(return-url)$
-<footer>
-<p class="signoff">
-  <a href="$return-url$">$if(return-text)$$return-text$$else$← Return$endif$</a>
-</p>
-</footer>
-$endif$
 <script>
 ;(function() {
   // Non-essential if user has JavaScript off. Just makes checkboxes look nicer.
@@ -196,17 +187,9 @@ $endif$
   }
 })();
 </script>
-$for(include-after)$
-$include-after$
-$endfor$
-$for(js)$
-<script src="$js$"></script>
-$endfor$
 <footer class="site-footer">
   <div class="wrapper">
-$if(last-modified)$
-    <span class="last-modified">Last modified: $last-modified$</span>
-$endif$
+    <span class="last-modified">Last modified: 2026-08-12 22:46</span>
   </div>
 </footer>
 </body>

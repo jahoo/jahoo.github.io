@@ -194,3 +194,138 @@ nav#TOC a:hover {
     font-size: 16px;
   }
 }
+
+/* ── Callouts ──────────────────────────────────────── */
+/* filters/callouts.lua turns `::: {.callout-note}` (and the Quarto-safe
+   aliases `.note-callout` etc. that .qmd-backed posts use) into
+   <div class="callout <type>"> with either a .callout-header or, when the
+   author passes collapse=, a <details class="callout-details">.
+   Until now the only .callout styling on the site lived in a single post's
+   page CSS, so callouts elsewhere rendered as plain text.
+
+   Deliberately scoped to the *type* classes rather than bare .callout:
+   assets/css/smc-resampling.css defines its own .callout/.insight/.proof
+   look, and this must not disturb it. Colours come from the theme's tokens
+   so they stay in step with the rest of the page. */
+
+.callout-note, .note-callout,
+.callout-tip, .tip-callout,
+.callout-warning, .warning-callout,
+.callout-important, .important-callout {
+  margin: 1.6em 0;
+  border-left: 3px solid var(--color-border-heavy);
+  border-radius: 0 4px 4px 0;
+  background: var(--color-inline-code-bg);
+  font-size: 0.95em;
+  /* Padding lives on the header and body separately so the title can carry
+     its own band; overflow clips that band to the rounded corner. */
+  overflow: hidden;
+}
+
+/* Accent per type, using the theme's highlight palette. */
+.callout-note, .note-callout           { border-left-color: var(--highlight-blue); }
+.callout-tip, .tip-callout             { border-left-color: var(--highlight-green); }
+.callout-warning, .warning-callout     { border-left-color: var(--highlight-yellow); }
+.callout-important, .important-callout { border-left-color: var(--highlight-red); }
+
+.callout-body { padding: 0.7em 1em; }
+.callout-body > :first-child { margin-top: 0; }
+.callout-body > :last-child { margin-bottom: 0; }
+
+/* The title sits on its own slightly darker band. A translucent black is used
+   rather than a fixed colour so it darkens whatever the panel's background is,
+   including the per-type tints. */
+.callout-header,
+.callout details.callout-details > summary {
+  padding: 0.4em 1em;
+  background: rgba(0, 0, 0, 0.045);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  font-weight: 600;
+  font-size: 0.92em;
+  color: var(--color-text-secondary);
+}
+
+/* Collapsible variant: the <summary> is the title band. */
+.callout details.callout-details > summary {
+  cursor: pointer;
+  user-select: none;
+}
+/* Closed, the band is the whole panel — drop the divider so it doesn't read
+   as a border hanging under nothing. */
+.callout details.callout-details:not([open]) > summary { border-bottom: none; }
+
+/* ── Foldable code blocks ──────────────────────────── */
+/* `<details class="code-fold"><summary>Show/hide code</summary>` wrapping a
+   highlighted block. Used by .qmd-backed posts and available to any post that
+   wants to tuck a long listing away. Styled globally so every post gets the
+   same affordance rather than each one restyling raw <details>.
+
+   The goals: small and quiet enough to read as chrome rather than prose, and
+   tight against the block it controls so the two read as one unit. */
+
+details.code-fold {
+  margin: 1.1em 0;
+}
+
+details.code-fold > summary {
+  cursor: pointer;
+  user-select: none;
+  display: block;                      /* so the default marker box is ours */
+  padding: 0.1em 0;
+  font-family: var(--font-family-code);
+  font-size: 0.76em;
+  letter-spacing: 0.01em;
+  color: var(--color-text-secondary);
+  transition: color 120ms ease;
+}
+
+details.code-fold > summary:hover {
+  color: var(--color-text);
+}
+
+/* Replace the UA disclosure triangle with a caret we control, drawn with
+   borders so it matches at any font. */
+details.code-fold > summary { list-style: none; }
+details.code-fold > summary::-webkit-details-marker { display: none; }
+details.code-fold > summary::before {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-right: 0.5em;
+  vertical-align: 0.08em;
+  border-left: 4px solid currentColor;
+  border-top: 3.5px solid transparent;
+  border-bottom: 3.5px solid transparent;
+  transition: transform 120ms ease;
+}
+details.code-fold[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+/* Sit the block right under its summary. */
+details.code-fold[open] > summary { margin-bottom: 0.25em; }
+details.code-fold > div.sourceCode,
+details.code-fold > pre {
+  margin-top: 0;
+}
+details.code-fold > :last-child {
+  margin-bottom: 0;
+}
+
+/* ── Bibliography ──────────────────────────────────── */
+/* citeproc marks the container `hanging-indent` when the CSL style asks for it
+   (APA does), but ships no CSS to implement it — so entries rendered as flat
+   wrapped paragraphs. Hanging indent is what makes an alphabetical reference
+   list scannable: the author surname stays flush while continuations step in.
+
+   Site-wide: any post with a `bibliography:` gets it. */
+
+.csl-bib-body.hanging-indent .csl-entry {
+  padding-left: 1.6em;
+  text-indent: -1.6em;
+}
+
+.csl-entry + .csl-entry {
+  margin-top: 0.5em;
+}
