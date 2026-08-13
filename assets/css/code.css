@@ -120,4 +120,34 @@ pre {
   pre {
     overflow-x: visible;
   }
+
+  /* Wrapping on paper makes a continued line indistinguishable from a new one,
+     so number the lines when printing. The theme already has this machinery,
+     gated behind pandoc's `numberLines` attribute (pre.numberSource); pandoc
+     emits the empty per-line anchor it hangs off regardless, so print just
+     applies the same rules unconditionally. Geometry copied from
+     theme.css:590-614 so numbered and unnumbered blocks align identically. */
+  pre > code.sourceCode {
+    counter-reset: source-line 0;
+  }
+  pre > code.sourceCode > span {
+    counter-increment: source-line;
+    padding-left: var(--line-numbers-width);
+    text-indent: var(--line-numbers-negative-width);
+    margin-left: var(--line-numbers-negative-width);
+  }
+  pre > code.sourceCode > span > a:first-child::before {
+    content: counter(source-line);
+    font-size: var(--line-numbers-font-size);
+    text-decoration: none;
+    user-select: none;
+
+    position: relative;
+    text-align: right;
+    display: inline-block;
+
+    padding: 0 calc(2 * var(--code-block-side-padding));
+    width: var(--line-numbers-width);
+    color: #999;
+  }
 }
