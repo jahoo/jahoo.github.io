@@ -312,3 +312,20 @@ details.code-fold > pre {
 details.code-fold > :last-child {
   margin-bottom: 0;
 }
+
+/* ── Bibliography ──────────────────────────────────── */
+/* citeproc marks the container `hanging-indent` when the CSL style asks for it
+   (APA does), but ships no CSS to implement it — so entries rendered as flat
+   wrapped paragraphs. Hanging indent is what makes an alphabetical reference
+   list scannable: the author surname stays flush while continuations step in.
+
+   Site-wide: any post with a `bibliography:` gets it. */
+
+.csl-bib-body.hanging-indent .csl-entry {
+  padding-left: 1.6em;
+  text-indent: -1.6em;
+}
+
+.csl-entry + .csl-entry {
+  margin-top: 0.5em;
+}

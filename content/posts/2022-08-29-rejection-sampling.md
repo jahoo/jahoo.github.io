@@ -8,7 +8,6 @@ tags: [note]
 unlisted: true
 toc: true
 link-citations: true
-reference-section-title: References
 bibliography: assets/rejection-sampling/references.bib
 css:
   - assets/css/rejection-sampling.css
@@ -596,5 +595,10 @@ savefig(p, "../../assets/rejection-sampling/fig-slice-sampling.svg")
 
 ![An example of slice sampling.  Samples are drawn uniformly from the 2-d area under the target.](/assets/rejection-sampling/fig-slice-sampling.svg){#fig:slice-sampling}
 
+:::
+
+## References {.unnumbered}
+
+::: {#refs}
 :::
 
