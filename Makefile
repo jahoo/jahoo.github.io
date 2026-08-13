@@ -1,3 +1,10 @@
+# Delete a recipe's target if the recipe fails partway through. Without this,
+# a target built via shell redirection (`... > $@`) that fails after the shell
+# has already created/truncated $@ leaves a stale (empty or partial) file
+# behind — and since it's newer than its prerequisites, `make` then considers
+# it up to date and won't try rebuilding it on the next run.
+.DELETE_ON_ERROR:
+
 PANDOC     := pandoc
 ESBUILD    := npx esbuild
 OUTDIR     := _site
