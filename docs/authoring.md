@@ -380,9 +380,11 @@ the `h1`; this site starts them at `#`. Without the shift, citeproc's own
 sections number from zero (`0.1 Definitions`). Leave it out only if you are
 already writing `#` for top-level sections.
 
-Figures are written by `savefig` into `assets/<slug>/`, where `<slug>` is the
-filename with the date stripped — the same slug the post's URL uses. The
-`notebooks` rule creates that directory for you on first render.
+Figures come from `#| label: fig-…` and `#| fig-cap:` on the cell — no
+`savefig`, no hand-written image line. Quarto writes them beside the source
+and the `notebooks` rule copies them into `assets/<slug>/`, where `<slug>` is
+the filename with the date stripped — the same slug the post's URL uses. The
+rule creates that directory for you on first render.
 
 The build publishes the `.qmd` beside the page it generated and adds a
 **source .qmd** download link to the post's metadata line, so a reader can
@@ -395,6 +397,13 @@ of the post about not committing anything machine-specific.
 make notebooks   # re-run the Julia and regenerate the .md; needs Quarto + a julia-1.10 Jupyter kernel
 make             # ordinary build; uses the committed .md and .svg files
 ```
+
+Quarto finds that kernel through a Python with `jupyter` installed, not
+through Julia directly. Where the default `python3` has no jupyter, Quarto
+reports no kernels at all — `Jupyter kernel 'julia-1.10' not found` — which
+looks like a missing kernelspec but isn't. The `notebooks` rule points Quarto
+at the repo's `.venv` when one exists; override with
+`make notebooks QUARTO_PYTHON=/path/to/python`.
 
 The `notebooks` rule in the `Makefile` actually consumes Quarto's pre-pandoc
 intermediate (`keep-md: true` in the qmd's front matter), not Quarto's own

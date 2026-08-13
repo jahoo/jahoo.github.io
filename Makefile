@@ -49,14 +49,23 @@ content:
 
 # ---- Notebook-backed posts (on demand; NOT part of `all`) ----
 # Quarto is used purely as a Julia execution engine here: it runs the code
-# cells, the cells write their SVGs to assets/ via savefig, and the prose is
-# passed through verbatim for the normal pandoc build to compile. Requires
-# Quarto + the julia-1.10 Jupyter kernel; a plain `make` never invokes it.
+# cells, Quarto writes their SVGs beside the source, and the prose is passed
+# through verbatim for the normal pandoc build to compile. Requires Quarto +
+# the julia-1.10 Jupyter kernel; a plain `make` never invokes it.
 # Every content/posts/*.qmd builds to a sibling .md. Adding a notebook-backed
 # post needs no edit here: drop the .qmd in, run `make notebooks`, commit both
 # it and the generated .md alongside whatever figures the code wrote.
 NB_QMDS := $(wildcard content/posts/*.qmd)
 NB_MDS  := $(NB_QMDS:.qmd=.md)
+# Quarto enumerates Jupyter kernels through whichever python3 it finds, and a
+# python without jupyter installed sees no kernels at all — the render then
+# fails with "Jupyter kernel 'julia-1.10' not found. Known kernels: python3",
+# which reads like a missing kernelspec rather than a missing jupyter. The
+# repo's .venv has jupyter, so point Quarto at it when it exists. Override
+# with `make notebooks QUARTO_PYTHON=/path/to/python`, or leave it unset on a
+# machine whose default python3 already has jupyter.
+QUARTO_PYTHON ?= $(wildcard $(CURDIR)/.venv/bin/python)
+NB_ENV        := $(if $(QUARTO_PYTHON),QUARTO_PYTHON=$(QUARTO_PYTHON))
 # Quarto names its default output after the input file's basename; that's
 # where --output-dir puts it (--output-dir is resolved relative to the input
 # file's directory, confirmed against Quarto 1.8.26: from content/posts/,
@@ -88,7 +97,7 @@ notebooks: $(NB_MDS)
 	@rm -f $*.markdown.md
 	@mkdir -p _build
 	@echo "Render (quarto + julia): $<"
-	@quarto render $< --to markdown --execute --output-dir ../../_build --resource-path=../..
+	@$(NB_ENV) quarto render $< --to markdown --execute --output-dir ../../_build --resource-path=../..
 	@set -e; \
 	  base=$(notdir $*); \
 	  slug=$$(echo $$base | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//'); \
