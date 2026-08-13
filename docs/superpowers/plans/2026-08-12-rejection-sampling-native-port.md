@@ -586,14 +586,26 @@ NB_MD  := content/posts/2022-08-29-rejection-sampling.md
 # is broken in 1.8.26 when quarto is invoked from the repo root, as make does:
 # it resolves to ../../../<name> — three levels up — and writes OUTSIDE the
 # repository. Verified by reproduction. Consume the default-named file instead.
-NB_RAW := _build/$(notdir $(NB_QMD:.qmd=.md))
+# We consume Quarto's PRE-pandoc intermediate (`keep-md: true` in the .qmd),
+# not its final output. Quarto's pandoc pass rewrites prose it was supposed to
+# pass through: it turns `/assets/x.svg` into `./assets/x.svg` (breaking every
+# figure URL), injects its own `# References` heading that the site's citeproc
+# then duplicates, and drops a fenced div. The intermediate has the Julia
+# executed and the prose byte-identical. Verified by comparing both artifacts.
+#
+# --resource-path=../.. is needed only so Quarto's own (discarded) pandoc pass
+# exits 0: Quarto resolves `bibliography:` relative to the .qmd's directory,
+# while the site build needs it repo-root-relative.
+NB_KEEP := $(NB_QMD:.qmd=.markdown.md)
+NB_RAW  := _build/$(notdir $(NB_KEEP))
 
 notebooks: $(NB_MD)
 
 $(NB_MD): $(NB_QMD) scripts/qmd-frontmatter.js
 	@mkdir -p _build assets/rejection-sampling
 	@echo "Render (quarto + julia): $<"
-	@quarto render $< --to markdown --execute --output-dir ../../_build
+	@quarto render $< --to markdown --execute --output-dir ../../_build --resource-path=../..
+	@mv $(NB_KEEP) $(NB_RAW)
 	@node scripts/qmd-frontmatter.js $(NB_RAW) $(NB_QMD) > $@
 	@echo "Generated: $@"
 ```
@@ -659,8 +671,15 @@ reference-section-title: References
 bibliography: assets/rejection-sampling/references.bib
 css:
   - assets/css/rejection-sampling.css
+jupyter: julia-1.10
+keep-md: true
 ---
 ```
+
+`jupyter:` names the kernel explicitly rather than leaving Quarto to infer it
+from the code fences. `keep-md: true` makes Quarto retain its pre-pandoc
+intermediate, which is the artifact the build actually consumes — see the
+`notebooks` rule in Task 4 for why.
 
 Notes: `author` keeps the original 2022 byline. `unlisted: true` is Phase 1 and keeps the post out of the blog listing while giving it a shareable URL. The `format:` block from the notebook is dropped entirely — Quarto's HTML options are irrelevant now.
 
@@ -672,15 +691,12 @@ Immediately after the front matter, insert the lede from the current post so the
 _Rejection sampling_ refers to a particular algorithm involving drawing samples from one distribution in order to estimate some other distribution, by rejecting or accepting the samples obtained in a smart way. In this note I'm exploring this algorithm a little with some simulations, and also showing how a different, similar, algorithm can be seen as a special case of the general version (because it wasn't at all obvious to me at first how they were related).
 ```
 
-- [ ] **Step 4: Make the setup cell create the output directory**
+- [ ] **Step 4: (removed)**
 
-In the first Julia cell (the one beginning `using Distributions, Plots, StatsPlots, LaTeXStrings`), add after the `import` lines:
-
-```julia
-mkpath("../../assets/rejection-sampling")
-```
-
-`savefig` will not create missing directories, and Quarto's working directory is `content/posts/`.
+An earlier revision added `mkpath("../../assets/rejection-sampling")` to the
+setup cell. It is redundant — the `notebooks` rule already runs
+`mkdir -p assets/rejection-sampling` before invoking Quarto — so the Julia
+stays as the 2022 original wrote it.
 
 - [ ] **Step 5: Convert the nine figure-producing cells**
 
