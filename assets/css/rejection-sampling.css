@@ -35,34 +35,6 @@ figure figcaption {
   opacity: 0.8;
 }
 
-/* --- Folded code --------------------------------------------------------
-   `<details class="code-fold">` wraps the setup and plotting cells, which are
-   noise for most readers but worth keeping available. */
-
-details.code-fold {
-  margin: 1.25rem 0;
-}
-
-details.code-fold > summary {
-  cursor: pointer;
-  font-size: 0.9em;
-  opacity: 0.75;
-  user-select: none;
-}
-
-details.code-fold > summary:hover {
-  opacity: 1;
-}
-
-details.code-fold[open] > summary {
-  margin-bottom: 0.5rem;
-}
-
-/* --- Collapsible callouts ----------------------------------------------
-   Emitted by filters/callouts.lua when a callout carries `collapse`. */
-
-.callout details.callout-details > summary {
-  cursor: pointer;
-  font-weight: 600;
-  user-select: none;
-}
+/* Folded code (`<details class="code-fold">`) and collapsible callouts are
+   styled site-wide in assets/css/overrides.css — they are general affordances,
+   not features of this post. Nothing page-specific is needed for either. */
