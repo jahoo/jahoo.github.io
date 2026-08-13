@@ -60,12 +60,33 @@ NB_MDS  := $(NB_QMDS:.qmd=.md)
 # Quarto enumerates Jupyter kernels through whichever python3 it finds, and a
 # python without jupyter installed sees no kernels at all — the render then
 # fails with "Jupyter kernel 'julia-1.10' not found. Known kernels: python3",
-# which reads like a missing kernelspec rather than a missing jupyter. The
-# repo's .venv has jupyter, so point Quarto at it when it exists. Override
-# with `make notebooks QUARTO_PYTHON=/path/to/python`, or leave it unset on a
-# machine whose default python3 already has jupyter.
-QUARTO_PYTHON ?= $(wildcard $(CURDIR)/.venv/bin/python)
-NB_ENV        := $(if $(QUARTO_PYTHON),QUARTO_PYTHON=$(QUARTO_PYTHON))
+# which reads like a missing kernelspec rather than a missing jupyter. So we
+# point Quarto at .venv, whose only job is to carry jupyter: pyproject.toml
+# declares it, uv.lock pins it, and `uv sync` builds it (bootstrapped below).
+# Override with `make notebooks QUARTO_PYTHON=/path/to/python` to use some
+# other interpreter that has jupyter; that also skips the uv bootstrap.
+NB_VENV_PYTHON := $(CURDIR)/.venv/bin/python
+NB_VENV_STAMP  := .venv/.uv-synced
+QUARTO_PYTHON  ?= $(NB_VENV_PYTHON)
+NB_ENV         := QUARTO_PYTHON=$(QUARTO_PYTHON)
+# Only bootstrap the environment we own. An overridden QUARTO_PYTHON is the
+# user's to manage.
+ifeq ($(QUARTO_PYTHON),$(NB_VENV_PYTHON))
+NB_BOOTSTRAP := $(NB_VENV_STAMP)
+endif
+
+# uv builds .venv from the lockfile, so this is reproducible and fast enough
+# to sit in front of every render. The stamp file is what make tracks: `uv
+# sync` is a no-op when the venv already matches, and so leaves no timestamp
+# of its own to key on. It lives inside .venv, which uv self-ignores.
+$(NB_VENV_STAMP): pyproject.toml uv.lock
+	@command -v uv >/dev/null 2>&1 || { \
+	  echo "make notebooks needs uv to build .venv (https://docs.astral.sh/uv/)."; \
+	  echo "Or point it at your own jupyter: make notebooks QUARTO_PYTHON=/path/to/python"; \
+	  exit 1; }
+	@echo "Sync (uv): notebook render environment"
+	@uv sync --quiet
+	@touch $@
 # Quarto names its default output after the input file's basename; that's
 # where --output-dir puts it (--output-dir is resolved relative to the input
 # file's directory, confirmed against Quarto 1.8.26: from content/posts/,
@@ -93,7 +114,7 @@ notebooks: $(NB_MDS)
 # and scripts/qmd-figures.js rewrites their paths, lifts them out of the code
 # folds so folding the code doesn't hide the figure, and converts Quarto's
 # `fig-` cross-reference syntax to pandoc-crossref's `fig:`.
-%.md: %.qmd scripts/qmd-frontmatter.js scripts/qmd-figures.js
+%.md: %.qmd scripts/qmd-frontmatter.js scripts/qmd-figures.js | $(NB_BOOTSTRAP)
 	@rm -f $*.markdown.md
 	@mkdir -p _build
 	@echo "Render (quarto + julia): $<"

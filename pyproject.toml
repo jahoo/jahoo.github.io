@@ -1,0 +1,15 @@
+# The site build is pandoc + Make + esbuild; this file exists only for the
+# notebook-backed posts. `make notebooks` runs their Julia code through
+# Quarto, and Quarto discovers and launches the julia-1.10 Jupyter kernel
+# through a Python that has jupyter installed. That Python is the only thing
+# declared here.
+#
+# Bootstrap with `uv sync`, which builds .venv from the committed uv.lock.
+# Nothing else in the repo needs Python, and a plain `make` never touches it.
+
+[project]
+name = "jahoo-site-notebooks"
+version = "0"
+description = "Jupyter, for running the Julia kernel behind `make notebooks`"
+requires-python = ">=3.13"
+dependencies = ["jupyter>=1.1"]

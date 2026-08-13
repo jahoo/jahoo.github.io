@@ -12,7 +12,11 @@ Docs:
 - `make -j4` — parallel build to `_site/`.
 - `make test` — JS tests via `node --test`.
 
-Requires Node 20+ and Pandoc.
+Requires Node 20+ and Pandoc. Re-running the code behind the notebook-backed
+posts (`make notebooks`) additionally needs Quarto, a `julia-1.10` Jupyter
+kernel, and [uv](https://docs.astral.sh/uv/), which the rule uses to build the
+jupyter environment Quarto launches that kernel through. See
+[docs/authoring.md](docs/authoring.md#notebook-backed-posts-quarto--julia).
 
 #### Deploy
 

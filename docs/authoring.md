@@ -401,9 +401,23 @@ make             # ordinary build; uses the committed .md and .svg files
 Quarto finds that kernel through a Python with `jupyter` installed, not
 through Julia directly. Where the default `python3` has no jupyter, Quarto
 reports no kernels at all — `Jupyter kernel 'julia-1.10' not found` — which
-looks like a missing kernelspec but isn't. The `notebooks` rule points Quarto
-at the repo's `.venv` when one exists; override with
-`make notebooks QUARTO_PYTHON=/path/to/python`.
+looks like a missing kernelspec but isn't.
+
+So the repo carries a `.venv` whose only job is to hold jupyter, declared in
+`pyproject.toml` and pinned by `uv.lock`. The `notebooks` rule builds it with
+[uv](https://docs.astral.sh/uv/) before rendering and points Quarto at it, so
+on a new machine there is nothing to set up by hand:
+
+```bash
+brew install uv     # or: curl -LsSf https://astral.sh/uv/install.sh | sh
+make notebooks      # runs `uv sync` for you, then renders
+```
+
+`uv sync` is a no-op once the venv matches the lockfile, so the check costs
+nothing on later runs. To use a jupyter you already have instead, set
+`make notebooks QUARTO_PYTHON=/path/to/python` — that skips the uv step
+entirely. To add a Python dependency, edit `pyproject.toml` and run
+`uv sync` (which updates `uv.lock`); commit both.
 
 The `notebooks` rule in the `Makefile` actually consumes Quarto's pre-pandoc
 intermediate (`keep-md: true` in the qmd's front matter), not Quarto's own
