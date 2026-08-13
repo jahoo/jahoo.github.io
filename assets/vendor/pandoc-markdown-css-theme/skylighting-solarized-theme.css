@@ -17,19 +17,6 @@
   --solarized-green:   #859900;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --solarized-base03: #fdf6e3;
-    --solarized-base02: #eee8d5;
-    --solarized-base01: #93a1a1;
-    --solarized-base00: #839496;
-    --solarized-base0:  #657b83;
-    --solarized-base1:  #586e75;
-    --solarized-base2:  #073642;
-    --solarized-base3:  #002b36;
-  }
-}
-
 pre, pre.numberSource {
   background: var(--solarized-base3);
   /* border: 1px solid var(--solarized-base2); */

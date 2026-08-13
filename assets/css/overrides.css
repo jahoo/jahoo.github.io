@@ -205,8 +205,8 @@ nav#TOC a:hover {
 
    Deliberately scoped to the *type* classes rather than bare .callout:
    assets/css/smc-resampling.css defines its own .callout/.insight/.proof
-   look, and this must not disturb it. Colours come from theme tokens, all of
-   which are redefined under prefers-color-scheme: dark. */
+   look, and this must not disturb it. Colours come from the theme's tokens
+   so they stay in step with the rest of the page. */
 
 .callout-note, .note-callout,
 .callout-tip, .tip-callout,

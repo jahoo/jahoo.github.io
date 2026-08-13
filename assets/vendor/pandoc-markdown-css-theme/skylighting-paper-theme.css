@@ -47,21 +47,3 @@ code span.cv { color: var(--paper-code-gray);    font-weight: normal; font-style
 code span.in { color: var(--paper-code-gray);    font-weight: normal; font-style: italic; } /* Information */
 a.sourceLine::before { text-decoration: none; }
 
-@media (prefers-color-scheme: dark) {
-  pre, pre.numberSource {
-    background-color: #242121;
-    --color-code-highlight-bg: #322f2f;
-  }
-  pre.numberSource > code.sourceCode > span > a:first-child::before {
-    color: #524f4d;
-  }
-  code {
-    --paper-code-red: #9b0032;
-    --paper-code-orange: #fa551e;
-    --paper-code-green: #b4dc19;
-    --paper-code-blue: #14c8eb;
-    --paper-code-cyan: #14c8eb;
-    --paper-code-magenta: #78286e;
-    --paper-code-gray: #9d9b99;
-  }
-}
