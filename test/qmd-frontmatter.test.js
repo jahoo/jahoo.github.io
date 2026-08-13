@@ -113,3 +113,12 @@ test('an unterminated YAML block in the generated file is preserved, not dropped
   const body = out.slice(out.lastIndexOf('---\ntitle: X'));
   assert.equal(body, '---\ntitle: X\n\nBody without closing.\n');
 });
+
+test('a fully-CRLF qmd yields a YAML block with no stray carriage returns', () => {
+  const qmdCRLF = '---\r\ntitle: x\r\ndate: 2022-08-29\r\ntoc: true\r\n---\r\n\r\nqmd body\r\n';
+  const out = swapFrontMatter(GENERATED, qmdCRLF);
+  const firstDelim = out.indexOf('---');
+  const secondDelim = out.indexOf('\n---', firstDelim + 3);
+  const yamlBlock = out.slice(firstDelim, secondDelim);
+  assert.doesNotMatch(yamlBlock, /\r/);
+});

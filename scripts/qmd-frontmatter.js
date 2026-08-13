@@ -13,23 +13,39 @@ import { readFileSync } from 'node:fs';
 
 const DELIM = /^---\r?\n/;
 
-/** Return the YAML block's inner text, or null when there is no block. */
-function extractFrontMatter(text) {
+/**
+ * Locate a leading YAML front-matter block's raw YAML text and raw body
+ * text. Returns null when there is no opening delimiter, or the block is
+ * unterminated — the two cases where extractFrontMatter must yield null
+ * and stripFrontMatter must return the input unchanged.
+ */
+function findFrontMatterBounds(text) {
   if (!DELIM.test(text)) return null;
   const rest = text.slice(text.indexOf('\n') + 1);
   const end = rest.search(/^---\r?$/m);
   if (end === -1) return null;
-  return rest.slice(0, end).replace(/\s+$/, '');
+  const afterDelim = rest.indexOf('\n', end);
+  return {
+    yaml: rest.slice(0, end),
+    body: afterDelim === -1 ? '' : rest.slice(afterDelim + 1),
+  };
+}
+
+/** Return the YAML block's inner text, or null when there is no block. */
+function extractFrontMatter(text) {
+  const bounds = findFrontMatterBounds(text);
+  if (bounds === null) return null;
+  // Normalise line endings within the YAML block itself, so the restored
+  // front matter is internally consistent even when the source .qmd is
+  // CRLF. The body (below) is left exactly as Quarto produced it.
+  return bounds.yaml.replace(/\r\n?/g, '\n').replace(/\s+$/, '');
 }
 
 /** Return the document body with any leading YAML block removed. */
 function stripFrontMatter(text) {
-  if (!DELIM.test(text)) return text;
-  const rest = text.slice(text.indexOf('\n') + 1);
-  const end = rest.search(/^---\r?$/m);
-  if (end === -1) return text;
-  const afterDelim = rest.indexOf('\n', end);
-  return afterDelim === -1 ? '' : rest.slice(afterDelim + 1).replace(/^\s+/, '');
+  const bounds = findFrontMatterBounds(text);
+  if (bounds === null) return text;
+  return bounds.body.replace(/^\s+/, '');
 }
 
 export function swapFrontMatter(generatedMd, qmdSource) {
