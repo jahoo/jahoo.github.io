@@ -129,3 +129,35 @@ test('an indented code block at the start of the body keeps its indentation', ()
   const body = out.slice(out.indexOf('    indented_code_line()'));
   assert.equal(body, '    indented_code_line()\n    second_line()\n\nProse after.\n');
 });
+
+test('a qmd whose closing delimiter has trailing spaces is parsed normally, not thrown', () => {
+  const qmdTrailing = '---\ntitle: T\ndate: 2022-08-29\n---   \n\nqmd body\n';
+  const out = swapFrontMatter(GENERATED, qmdTrailing);
+  assert.match(out, /^title: T$/m);
+  assert.match(out, /^date: 2022-08-29$/m);
+});
+
+test('a generated file whose closing delimiter has trailing spaces yields only one front-matter block', () => {
+  const genTrailing = '---\ntitle: G\n---  \n\nGenerated body.\n';
+  const out = swapFrontMatter(genTrailing, QMD);
+  const delimOnlyLines = out.match(/^---[ \t]*$/gm) ?? [];
+  assert.equal(delimOnlyLines.length, 2, 'exactly one opening and one closing delimiter, not a duplicated block');
+  assert.doesNotMatch(out, /title: G/);
+  assert.equal(out.slice(out.indexOf('Generated body.')), 'Generated body.\n');
+});
+
+test('a generated file whose opening delimiter has trailing spaces is still recognised', () => {
+  const genOpeningTrailing = '---   \ntitle: G\n---\n\nGenerated body.\n';
+  const out = swapFrontMatter(genOpeningTrailing, QMD);
+  const delimOnlyLines = out.match(/^---[ \t]*$/gm) ?? [];
+  assert.equal(delimOnlyLines.length, 2, 'exactly one opening and one closing delimiter, not a duplicated block');
+  assert.doesNotMatch(out, /title: G/);
+  assert.equal(out.slice(out.indexOf('Generated body.')), 'Generated body.\n');
+});
+
+test('a --- with trailing spaces in the body is still treated as body, not a delimiter', () => {
+  const generated = '---\ntitle: Rejection sampling\n---\n\nPara one.\n\n---   \n\nPara two.\n';
+  const out = swapFrontMatter(generated, QMD);
+  const body = out.slice(out.indexOf('Para one.'));
+  assert.equal(body, 'Para one.\n\n---   \n\nPara two.\n');
+});

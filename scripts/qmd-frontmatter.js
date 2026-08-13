@@ -11,7 +11,11 @@
 
 import { readFileSync } from 'node:fs';
 
-const DELIM = /^---\r?\n/;
+// Pandoc tolerates trailing horizontal whitespace after the `---` delimiter
+// (e.g. a straggling space or tab left by an editor); both patterns below
+// must too, or we'd be stricter than the tool we feed and risk throwing —
+// or worse, silently leaving an unterminated block's YAML in the body.
+const DELIM = /^---[ \t]*\r?\n/;
 
 /**
  * Locate a leading YAML front-matter block's raw YAML text and raw body
@@ -22,7 +26,7 @@ const DELIM = /^---\r?\n/;
 function findFrontMatterBounds(text) {
   if (!DELIM.test(text)) return null;
   const rest = text.slice(text.indexOf('\n') + 1);
-  const end = rest.search(/^---\r?$/m);
+  const end = rest.search(/^---[ \t]*\r?$/m);
   if (end === -1) return null;
   const afterDelim = rest.indexOf('\n', end);
   return {
