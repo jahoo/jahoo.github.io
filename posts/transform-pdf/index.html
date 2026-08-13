@@ -26,6 +26,7 @@
   <link rel="stylesheet" href="/assets/css/code.css" />
   <link rel="stylesheet" href="/assets/css/overrides.css" />
   <link rel="stylesheet" href="/assets/css/site-chrome.css" />
+  <link rel="stylesheet" href="/assets/css/transform-pdf.css" />
 <script>
 MathJax = {
   // tex-chtml ships base + AMS only. mathtools adds the commands LaTeX authors
@@ -39,6 +40,7 @@ MathJax = {
     // AMS-style numbering: only {equation}/{align} environments get
     // numbers, so ordinary $ displays stay untagged.
     tags: 'ams'
+    , macros: { "dee": "\\mathop{\\mathrm{d}\\!}" }
   },
   options: {
     // Disable click-to-explore on math. Without these, clicking on a
@@ -94,6 +96,7 @@ MathJax = {
   <time datetime="2022-09-02">2022-09-02</time>
   · Jacob Louis Hoover
   · <span class="post-tags">note</span>
+  · <a class="qmd-download" href="2022-09-02-transform-pdf.qmd" download title="Quarto source for this post, with the code that produced its figures">source .qmd</a>
 </p>
 </header>
 
@@ -101,12 +104,533 @@ MathJax = {
 <hr class="post-divider" />
 
 
+<nav id="TOC" role="doc-toc">
+    <strong>Contents</strong><label for="contents">⊕</label>
+  <input type="checkbox" id="contents">
+  <ul>
+  <li><a href="#transforming-a-density"
+  id="toc-transforming-a-density"><span
+  class="toc-section-number">1</span> Transforming a density</a></li>
+  <li><a href="#examples" id="toc-examples"><span
+  class="toc-section-number">2</span> Examples</a></li>
+  </ul>
+</nav>
 
 <main>
-<div class="wide full-width">
-<iframe src="/assets/transform-pdf/q/notebooks/transform-pdf.html" width="100%" height="10150" frameborder="none">
-</iframe>
+<section id="transforming-a-density" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span>
+Transforming a density</h1>
+<p>Suppose we have</p>
+<ul>
+<li>a real-valued random variable <span class="math inline">\(X\)</span>
+with density <span class="math inline">\(f\)</span> (with respect to the
+standard measure on the real line), and</li>
+<li>another random variable <span class="math inline">\(Y\)</span> which
+is defined as a deterministic function <span
+class="math inline">\(X\)</span>, denoted <span
+class="math inline">\(y(x)\)</span>.</li>
+</ul>
+<p>Assume that <span class="math inline">\(y\)</span> is a monotonic
+invertible function, so the inverse function <span
+class="math inline">\(x(y)\)</span> is also well-defined.<span
+class="sidenote-wrapper"><label for="sn-0" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-0" class="margin-toggle"/><span
+class="sidenote">Let’s also assume it is monotonically
+<em>increasing</em> for now. We’ll see we can drop that assumption
+later, and allow monotonically <em>decreasing</em> functions too.<br />
+<br />
+</span></span></p>
+<p><strong>Question</strong>: what is the pdf of <span
+class="math inline">\(Y\)</span>?</p>
+<p>First note: by definition, <span class="math inline">\(\Pr(a\le X\le
+b) = \int_a^b f(x)\dee{x}\)</span>.</p>
+<p>Given our assumptions about the function <span
+class="math inline">\(y\)</span>, we have that <span
+class="math inline">\(a\le X\le b\implies y(a)\le Y\le
+y(b)\)</span>.</p>
+<p>So, using differentiation by substitution<span
+class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle"/><span
+class="sidenote">Recall, this follows simply from the chain rule, where
+the CDF <span class="math inline">\(F\)</span> is the antiderivative of
+<span class="math inline">\(f\)</span>: <span class="math display">\[
+\begin{aligned}
+&amp;\phantom{=}\int_{y(a)}^{y(b)}f(x(y))\frac{\dee}{\dee{y}}x(y)\dee{y}\\
+&amp;=\int_{y(a)}^{y(b)}\frac{\dee}{\dee{y}}F(x(y))\dee{y}\\
+&amp;=F(x(y(b)))-F(x(y(a)))\\
+&amp;=F(b)-F(a)\\
+&amp;=\int_{a}^{b}f(x)\dee{x}
+\end{aligned}
+\]</span><br />
+<br />
+</span></span></p>
+<p><span class="math display">\[
+\begin{aligned}
+\Pr(y(a)\le Y\le y(b))
+&amp;= \Pr(a\le X\le b) \\
+&amp;= \int_a^b f(x) \dee{x}\\
+&amp;= \int_{y(a)}^{y(b)} f(x(y)) \frac{\dee{x(y)}}{\dee{y}}\dee{y}
+\end{aligned}
+\]</span></p>
+<p>So the pdf of <span class="math inline">\(Y\)</span> is <span
+class="math inline">\(f(x(y)) \frac{\dee{x}(y)}{\dee{y}}\)</span>.</p>
+<p>If <span class="math inline">\(y\)</span> is monotonically
+decreasing, then we have to switch the limits on the integral, but we
+also get a negative sign in the derivative (see <a
+href="https://math.stackexchange.com/a/3569119/28641">this math.SE
+answer</a>). Thus, we can say in general</p>
+<p><span class="math display">\[\text{The pdf of $Y$ is }g(y) \coloneqq
+f(x(y)) \left|\frac{\dee{x}(y)}{\dee{y}}\right|\]</span></p>
+<p>The above explanation can be found in multiple sources, but for me to
+get a better understanding, it helped to look at some examples, and plot
+them. A key insight here can be gotten by thinking about what happens to
+some interval in the domain of <span class="math inline">\(f\)</span>.
+Integrating the density <span class="math inline">\(f\)</span> over this
+interval will give the same result as integrating the transformed
+density <span class="math inline">\(g\)</span> over whatever the
+<em>image</em> of the interval is, under the transformation.</p>
+<p>This intuition is helpful to play with when relating this perspective
+on random variables to a measure theoretic one that uses the concept of
+pushforwards.</p>
+</section>
+<section id="examples" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span>
+Examples</h1>
+<p>Some examples with pictures helped me understand what this means.
+Here’s a first example:</p>
+<ul>
+<li>let <span class="math inline">\(X\)</span> be a random variable with
+density <span class="math inline">\(f(x) =
+\frac2\pi\sqrt{1-x^2}\)</span> (restricted to <span
+class="math inline">\(-1 \le x \le 1\)</span>).</li>
+<li>and let <span class="math inline">\(Y\)</span> be the random
+variable defined by <span class="math inline">\(y(x) = \arcsin
+x\)</span>, which is monotonically increasing.</li>
+</ul>
+<p>Then <span class="math inline">\(x = \sin y\)</span> and <span
+class="math inline">\(\frac{\dee x(y)}{\dee y} = \cos y\)</span>, so the
+density of <span class="math inline">\(Y\)</span> is</p>
+<p><span class="math display">\[g(y) = f(x(y))\frac{\dee x(y)}{\dee y} =
+\frac2\pi\sqrt{1-\sin^2}\cos y = \frac2\pi\cos^2y\]</span></p>
+<details class="code-fold">
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Plots</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">plot_transform_pdf</span>(;</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        f, y, g,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        xlim,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        demo_range <span class="op">=</span> (<span class="fl">0.4</span>, <span class="fl">0.7</span>),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        resolution <span class="op">=</span> <span class="fl">100</span>, size <span class="op">=</span> (<span class="fl">500</span>,<span class="fl">500</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        plotlims<span class="op">=</span><span class="cn">nothing</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    (xmin, xmax) <span class="op">=</span> xlim</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    dx <span class="op">=</span> (xmax<span class="op">-</span>xmin)<span class="op">/</span>resolution</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    xs <span class="op">=</span> xmin<span class="op">:</span>dx<span class="op">:</span>xmax</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    xmin_ <span class="op">=</span> xmin<span class="op">+</span>demo_range[<span class="fl">1</span>]<span class="op">*</span>resolution<span class="op">*</span>dx</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    xmax_ <span class="op">=</span> xmin<span class="op">+</span>demo_range[<span class="fl">2</span>]<span class="op">*</span>resolution<span class="op">*</span>dx</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    xs_ <span class="op">=</span> xmin_<span class="op">:</span>dx<span class="op">:</span>xmax_</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> plotlims<span class="op">!==</span><span class="cn">nothing</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        xlim<span class="op">=</span>plotlims</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        xlim<span class="op">=</span>(<span class="fu">min</span>(<span class="fu">minimum</span>(xs),</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">minimum</span>(<span class="fu">y</span>.(xs)),</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">minimum</span>(<span class="fu">f</span>.(xs)),</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">minimum</span>(<span class="fu">g</span>.(<span class="fu">y</span>.(xs)))),</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>              <span class="fu">max</span>(<span class="fu">maximum</span>(xs),</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">maximum</span>(<span class="fu">y</span>.(xs)),</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">maximum</span>(<span class="fu">f</span>.(xs)),</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">maximum</span>(<span class="fu">g</span>.(<span class="fu">y</span>.(xs)))),)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="fu">any</span>(<span class="fu">isinf</span>.(xlim))</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>            <span class="pp">@warn</span> <span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="st">            plotlims=</span><span class="sc">$</span>(xlim)<span class="st"> contains nonfinite value(s).</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="st">            Plot may not display correctly.</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="st">            To set manually, use `plot_transform_pdf(... , plotlims=(min, max))`.</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="st">            &quot;&quot;&quot;</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">end</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    ylim<span class="op">=</span>xlim</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    ys <span class="op">=</span> <span class="fu">y</span>.(xs)</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    ys_ <span class="op">=</span> <span class="fu">y</span>.(xs_)</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    l <span class="op">=</span> <span class="pp">@layout</span> [[f _]; [y g]]</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    pf <span class="op">=</span> <span class="fu">plot</span>(xs, <span class="fu">f</span>.(xs), xaxis<span class="op">=</span><span class="cn">false</span>, xticks <span class="op">=</span> <span class="cn">false</span>,</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>        label <span class="op">=</span> <span class="st">&quot;f(x)&quot;</span>, color <span class="op">=</span> <span class="op">:</span>red,</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>        ylabel<span class="op">=</span><span class="st">&quot;f(x)&quot;</span>,</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>        xlim<span class="op">=</span>xlim, ylim<span class="op">=</span>ylim)</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    pg <span class="op">=</span> <span class="fu">plot</span>(<span class="fu">g</span>.(ys), ys, xlabel<span class="op">=</span><span class="st">&quot;g(y)&quot;</span>,</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>        label <span class="op">=</span> <span class="st">&quot;g(y)&quot;</span>, color <span class="op">=</span> <span class="op">:</span>blue,</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        yaxis <span class="op">=</span> <span class="cn">false</span>, yticks <span class="op">=</span> <span class="cn">false</span>,</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>        xlim<span class="op">=</span>ylim, ylim<span class="op">=</span>xlim) <span class="co">#note swapped axes</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    px <span class="op">=</span> <span class="fu">plot</span>(xs, <span class="fu">y</span>.(xs), xlabel<span class="op">=</span><span class="st">&quot;x&quot;</span>, ylabel<span class="op">=</span><span class="st">&quot;y&quot;</span>, color <span class="op">=</span> <span class="op">:</span>gray,</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>        label <span class="op">=</span> <span class="cn">nothing</span>,</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>        xlim<span class="op">=</span>xlim, ylim<span class="op">=</span>ylim)</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot!</span>(pf,</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>        [xs_<span class="op">&#39;</span>; xs_<span class="op">&#39;</span>], [<span class="fu">fill</span>(<span class="fl">0.0</span>, <span class="fu">length</span>(xs_))<span class="ch">&#39; ; (f.(xs_))&#39;</span>],</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>        lc<span class="op">=:</span>green, label<span class="op">=</span><span class="cn">false</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>)</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot!</span>(pg,</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>        [<span class="fu">fill</span>(<span class="fl">0.0</span>, <span class="fu">length</span>(ys_))<span class="ch">&#39; ; (g.(ys_))&#39;</span>], [ys_<span class="op">&#39;</span>; ys_<span class="op">&#39;</span>],</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>        lc<span class="op">=:</span>green, label<span class="op">=</span><span class="cn">false</span>, alpha <span class="op">=</span> <span class="fl">0.25</span>)</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scatter!</span>(px, xs_, <span class="fu">y</span>.(xs_),</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=:</span>green, label <span class="op">=</span> <span class="cn">false</span>, markersize<span class="op">=</span><span class="fl">2</span>, msw<span class="op">=</span><span class="fl">0</span>, alpha <span class="op">=</span> <span class="fl">0.25</span>)</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot!</span>(px,</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>        [xs_<span class="op">&#39;</span> ; <span class="fu">fill</span>(xlim[<span class="fl">2</span>], <span class="fu">length</span>(xs_))<span class="ch">&#39;], [ys_&#39;</span>; ys_<span class="op">&#39;</span>],</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>        lc<span class="op">=:</span>gray, label<span class="op">=</span><span class="cn">false</span>, alpha <span class="op">=</span> <span class="fl">0.1</span>)</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot!</span>(px,</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>        [xs_<span class="op">&#39;</span> ; xs_<span class="op">&#39;</span>], [ys_<span class="op">&#39;</span>; <span class="fu">fill</span>(xlim[<span class="fl">2</span>], <span class="fu">length</span>(ys_))<span class="ch">&#39;],</span></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>        lc<span class="op">=:</span>gray, label<span class="op">=</span><span class="cn">false</span>, alpha <span class="op">=</span> <span class="fl">0.1</span>)</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(pf, px, pg, layout <span class="op">=</span> l, size <span class="op">=</span> size, fmt<span class="op">=:</span>svg)</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span>;</span></code></pre></div>
 </div>
+</details>
+<details class="code-fold" open>
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_transform_pdf</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    f <span class="op">=</span> x <span class="op">-&gt;</span> <span class="fl">2</span><span class="op">/</span><span class="cn">pi</span> <span class="op">*</span> <span class="fu">sqrt</span>(<span class="fl">1</span><span class="op">-</span>x<span class="op">^</span><span class="fl">2</span>),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> x <span class="op">-&gt;</span> <span class="fu">asin</span>(x),</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    g <span class="op">=</span> y <span class="op">-&gt;</span> <span class="fl">2</span><span class="op">/</span><span class="cn">pi</span> <span class="op">*</span> <span class="fu">cos</span>(y)<span class="op">^</span><span class="fl">2</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    xlim <span class="op">=</span> (<span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span>),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    demo_range <span class="op">=</span> (<span class="fl">0.7</span>, <span class="fl">0.9</span>), resolution <span class="op">=</span> <span class="fl">100</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+</details>
+<figure id="fig:arcsine">
+<img src="/assets/transform-pdf/fig-arcsine-output-1.svg"
+alt="Figure 1: A semicircle density transformed by y(x)=\arcsin x." />
+<figcaption aria-hidden="true">Figure 1: A semicircle density
+transformed by <span class="math inline">\(y(x)=\arcsin
+x\)</span>.</figcaption>
+</figure>
+<div class="callout tip-callout">
+<details class="callout-details" open><summary>Legend</summary>
+<div class="callout-body">
+<ul>
+<li>upper left: <span class="math inline">\({\color{red}f(x)}\)</span>,
+the pdf of <span class="math inline">\(X\)</span></li>
+<li>lower left: the invertible mapping between <span
+class="math inline">\(x\)</span> and <span
+class="math inline">\(y\)</span></li>
+<li>lower right: <span
+class="math inline">\({\color{blue}g(y)}\)</span>, the pdf of <span
+class="math inline">\(Y\)</span> (plotted with <span
+class="math inline">\(y\)</span> on the vertical axis and density <span
+class="math inline">\(g(y)\)</span> on the horizontal axis, so the axes
+line up).</li>
+</ul>
+<p>The green lines shade an example area under the curve to show how
+<strong>probability of an event is preserved</strong> (area is preserved
+under this transform), and how this region is transformed between <span
+class="math inline">\(x\)</span> and <span
+class="math inline">\(y\)</span>.</p>
+</div>
+</details>
+</div>
+<p>Here is another example, transforming uniform to Pareto
+distribution:</p>
+<ul>
+<li>let <span class="math inline">\(X\sim\mathrm{Uniform}(0,1)\)</span>,
+so pdf <span class="math inline">\(f(x)=1\)</span></li>
+<li>let <span class="math inline">\(Y\)</span> be defined as <span
+class="math inline">\(y(x) = x^{-1}\)</span>, which is monotonically
+decreasing over the range <span
+class="math inline">\(y&gt;0\)</span>.</li>
+</ul>
+<p>Then <span class="math inline">\(x = y^{-1}\)</span> and <span
+class="math inline">\(\frac{\dee x(y)}{\dee y} = -{y^{-2}}\)</span>, so
+the density of <span class="math inline">\(Y\)</span> is</p>
+<p><span class="math display">\[g(y) = f(x(y))\left|\frac{\dee
+x(y)}{\dee y}\right| = {y^{-2}}\]</span></p>
+<p>Thus <span
+class="math inline">\(Y\sim\mathrm{Pareto}(1,1)\)</span><span
+class="sidenote-wrapper"><label for="sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-2" class="margin-toggle"/><span
+class="sidenote">The pdf of a <span
+class="math inline">\(\mathrm{Pareto}(\kappa,\alpha)\)</span> is <span
+class="math display">\[\mathrm{pdf}(z)=\alpha\kappa^\alpha
+z^{-(\alpha+1)}\]</span> over range <span
+class="math inline">\(z\ge\kappa\)</span><br />
+<br />
+</span></span></p>
+<details class="code-fold" open>
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_transform_pdf</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    f <span class="op">=</span> x <span class="op">-&gt;</span> <span class="fl">1</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> x <span class="op">-&gt;</span> <span class="fl">1</span><span class="op">/</span>x,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    g <span class="op">=</span> y <span class="op">-&gt;</span> <span class="fl">1</span><span class="op">/</span>y<span class="op">^</span><span class="fl">2</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    xlim <span class="op">=</span> (<span class="fl">0</span>, <span class="fl">1</span>),</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    plotlims <span class="op">=</span> (<span class="fl">0</span>, <span class="fl">3.1</span>), <span class="co"># set manually, since goes to infinity</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    demo_range <span class="op">=</span> (<span class="fl">0.5</span>, <span class="fl">1.0</span>), resolution <span class="op">=</span> <span class="fl">100</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+</details>
+<figure id="fig:pareto">
+<img src="/assets/transform-pdf/fig-pareto-output-1.svg"
+alt="Figure 2: A uniform density transformed by y(x)=x^{-1}, giving a Pareto distribution." />
+<figcaption aria-hidden="true">Figure 2: A uniform density transformed
+by <span class="math inline">\(y(x)=x^{-1}\)</span>, giving a Pareto
+distribution.</figcaption>
+</figure>
+<div class="callout note-callout">
+<details class="callout-details"><summary>More examples</summary>
+<div class="callout-body">
+<p>The following are some more examples (taken from <a
+href="https://www.cl.cam.ac.uk/teaching/2003/Probability/prob11.pdf">here</a>).</p>
+<ol type="1">
+<li><ul>
+<li>let <span class="math inline">\(X\)</span> have pdf <span
+class="math inline">\(f(x) = 2 x \cos{x^2}\)</span> for <span
+class="math inline">\(0\le x \le \sqrt{\pi/2}\)</span> (and <span
+class="math inline">\(0\)</span> elsewhere)</li>
+<li>let <span class="math inline">\(Y\)</span> be defined as <span
+class="math inline">\(y(x) = x^2\)</span>, which is monotonically
+increasing in the range.</li>
+</ul>
+<p>Then <span class="math inline">\(x=\sqrt{y}\)</span>, and <span
+class="math inline">\(\frac{\dee x(y)}{\dee y} =
+\frac1{2\sqrt{y}}\)</span>, so the density of <span
+class="math inline">\(Y\)</span> is</p>
+<p><span class="math display">\[g(y) = f(x(y))\frac{\dee x(y)}{\dee y} =
+2 \sqrt y \cos y\frac1{2\sqrt y} = \cos y\]</span></p></li>
+</ol>
+<details class="code-fold" open>
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_transform_pdf</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    f <span class="op">=</span> x <span class="op">-&gt;</span> <span class="fl">2</span>x <span class="op">*</span> <span class="fu">cos</span>(x<span class="op">^</span><span class="fl">2</span>),</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> x <span class="op">-&gt;</span> x<span class="op">^</span><span class="fl">2</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    g <span class="op">=</span> y <span class="op">-&gt;</span> <span class="fu">cos</span>(y),</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    xlim <span class="op">=</span> (<span class="fl">0</span>, <span class="fu">√</span>(<span class="cn">π</span><span class="op">/</span><span class="fl">2</span>))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+</details>
+<figure id="fig:cosine">
+<img src="/assets/transform-pdf/fig-cosine-output-1.svg"
+alt="Figure 3: Example 1: the squaring map y(x)=x^2 gives a cosine density." />
+<figcaption aria-hidden="true">Figure 3: Example 1: the squaring map
+<span class="math inline">\(y(x)=x^2\)</span> gives a cosine
+density.</figcaption>
+</figure>
+<hr />
+<ol start="2" type="1">
+<li><ul>
+<li>let <span class="math inline">\(X\)</span> have pdf <span
+class="math inline">\(f(x) = x/2\)</span> for <span
+class="math inline">\(0\le x \le 2\)</span> (and <span
+class="math inline">\(0\)</span> elsewhere)</li>
+<li>let <span class="math inline">\(Y\)</span> be defined as <span
+class="math inline">\(y(x) = 1-\sqrt{4-x^2}/2\)</span> (again,
+monotonically increasing).</li>
+</ul>
+<p>Then <span class="math inline">\(x=2\sqrt{y(2-y)}\)</span>, and <span
+class="math inline">\(\frac{\dee x(y)}{\dee y} =
+\frac{2(1-y)}{\sqrt{y(2-y)}}\)</span>, so the density of <span
+class="math inline">\(Y\)</span> is</p>
+<p><span class="math display">\[g(y) = f(x(y))\frac{\dee x(y)}{\dee y} =
+\frac{2\sqrt{y(2-y)}}{2}\frac{2(1-y)}{\sqrt{y(2-y)}}=2(1-y)\]</span></p></li>
+</ol>
+<details class="code-fold" open>
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_transform_pdf</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    f <span class="op">=</span> x <span class="op">-&gt;</span> x<span class="op">/</span><span class="fl">2</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> x <span class="op">-&gt;</span> <span class="fl">1</span><span class="fu">-√</span>(<span class="fl">4</span><span class="op">-</span>x<span class="op">^</span><span class="fl">2</span>)<span class="op">/</span><span class="fl">2</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    g <span class="op">=</span> y <span class="op">-&gt;</span> <span class="fl">2</span>(<span class="fl">1</span><span class="op">-</span>y),</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    xlim <span class="op">=</span> (<span class="fl">0</span>, <span class="fl">2</span>),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    demo_range <span class="op">=</span> (√<span class="fl">3</span><span class="op">/</span><span class="fl">2</span>, <span class="fl">1</span>), <span class="co"># a range that gives 1/4 of total area</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    resolution <span class="op">=</span> <span class="fl">200</span> <span class="co"># let&#39;s up the resolution (see denser lines in visualization)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div>
+</div>
+</details>
+<figure id="fig:triangular">
+<img src="/assets/transform-pdf/fig-triangular-output-1.svg"
+alt="Figure 4: Example 2: a linear density transformed into a triangular one. The demo interval here covers a quarter of the total area." />
+<figcaption aria-hidden="true">Figure 4: Example 2: a linear density
+transformed into a triangular one. The demo interval here covers a
+quarter of the total area.</figcaption>
+</figure>
+<hr />
+<ol start="3" type="1">
+<li>Transforming a <strong>Uniform</strong> distribution to an
+<strong>Exponential</strong> distribution</li>
+</ol>
+<ul>
+<li>let <span class="math inline">\(X\sim
+\operatorname{Uniform}(0,1)\)</span></li>
+<li>let <span class="math inline">\(Y\)</span> be defined as <span
+class="math inline">\(y(x) = -\frac1\lambda\log(x)\)</span>, for some
+<span class="math inline">\(\lambda &gt; 0\)</span>. This is
+monotonically <em>decreasing</em>.</li>
+</ul>
+<p>Then <span class="math inline">\(x=e^{-\lambda y}\)</span>, and <span
+class="math inline">\(\frac{\dee x(y)}{\dee y} = -\lambda e^{-\lambda
+y}\)</span>, so the density of <span class="math inline">\(Y\)</span>
+is</p>
+<p><span class="math display">\[g(y) = f(x(y))\left|\frac{\dee
+x(y)}{\dee y}\right|= \lambda e^{-\lambda y}\]</span></p>
+<p>So, <span
+class="math inline">\(Y\sim\operatorname{Exponential}(\lambda)\)</span>.</p>
+<details class="code-fold" open>
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>λ <span class="op">=</span> <span class="fl">2</span> <span class="co"># set the scale parameter to 2, arbitrarily</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_transform_pdf</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    f <span class="op">=</span> x <span class="op">-&gt;</span> <span class="fl">1</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> x <span class="op">-&gt;</span> <span class="fu">-log</span>(x)<span class="op">/</span>λ,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    g <span class="op">=</span> y <span class="op">-&gt;</span> <span class="fu">λ*exp</span>(<span class="op">-</span>λ<span class="op">*</span>y),</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    xlim <span class="op">=</span> (<span class="fl">0</span>, <span class="fl">1</span>),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    plotlims <span class="op">=</span> (<span class="fl">0</span>, <span class="fl">2.1</span>), <span class="co"># set manually, since goes to infinity</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    demo_range <span class="op">=</span> (<span class="fl">0.1</span>, <span class="fl">0.5</span>), resolution<span class="op">=</span><span class="fl">150</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div>
+</div>
+</details>
+<figure id="fig:exponential">
+<img src="/assets/transform-pdf/fig-exponential-output-1.svg"
+alt="Figure 5: Example 3: a uniform density transformed into an exponential one, with \lambda=2." />
+<figcaption aria-hidden="true">Figure 5: Example 3: a uniform density
+transformed into an exponential one, with <span
+class="math inline">\(\lambda=2\)</span>.</figcaption>
+</figure>
+<hr />
+<ol start="4" type="1">
+<li>Transforming <em>into</em> a Uniform distribution</li>
+</ol>
+<ul>
+<li>let <span class="math inline">\(X\)</span> be a random variable with
+pdf <span class="math inline">\(f(x) = 2x\)</span> for <span
+class="math inline">\(0\le x \le 1\)</span>, and <span
+class="math inline">\(0\)</span> otherwise.</li>
+<li>let <span class="math inline">\(Y\)</span> be defined as <span
+class="math inline">\(y(x) = x^2\)</span>, as in example 1 above, so
+<span class="math inline">\(x=\sqrt{y}\)</span>, and <span
+class="math inline">\(\frac{\dee x(y)}{\dee y} =
+\frac1{2\sqrt{y}}\)</span>.</li>
+</ul>
+<p>Then the density of <span class="math inline">\(Y\)</span> is</p>
+<p><span class="math display">\[g(y) = f(x(y)) \frac{\dee x(y)}{\dee y}
+= 1\]</span></p>
+<p>So, <span
+class="math inline">\(Y\sim\operatorname{Uniform}(0,1)\)</span>. [Verify
+that the range of <span class="math inline">\(y\)</span> is <span
+class="math inline">\([y(0),y(1)]= [0,1]\)</span>).]</p>
+<details class="code-fold" open>
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_transform_pdf</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    f <span class="op">=</span> x <span class="op">-&gt;</span> <span class="fl">2</span>x,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> x <span class="op">-&gt;</span> x<span class="op">^</span><span class="fl">2</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    g <span class="op">=</span> y <span class="op">-&gt;</span> <span class="fl">1</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    xlim <span class="op">=</span> (<span class="fl">0</span>, <span class="fl">1</span>),</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    demo_range <span class="op">=</span> (<span class="fl">0.15</span>, <span class="fl">0.3</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+</details>
+<figure id="fig:uniform">
+<img src="/assets/transform-pdf/fig-uniform-output-1.svg"
+alt="Figure 6: Example 4: a linear density transformed into a uniform one." />
+<figcaption aria-hidden="true">Figure 6: Example 4: a linear density
+transformed into a uniform one.</figcaption>
+</figure>
+<hr />
+<ol start="5" type="1">
+<li>Transforming a Uniform distribution into a Normal distribution</li>
+</ol>
+<ul>
+<li>let <span class="math inline">\(X\sim
+\operatorname{Uniform}(0,1)\)</span>, which has pdf <span
+class="math inline">\(f(x)=1\)</span> for <span
+class="math inline">\(0\le x \le 1\)</span> and <span
+class="math inline">\(0\)</span> elsewhere.</li>
+<li>let <span class="math inline">\(Y\sim
+\operatorname{Normal}(0,1)\)</span>, which has pdf <span
+class="math inline">\(g(y) =
+\frac{1}{\sqrt{2\pi}}e^{-\frac12y^2}\)</span></li>
+</ul>
+<p>In this case, we know <span class="math inline">\(g(y)\)</span>, but
+we want to find a function <span class="math inline">\(y(x)\)</span>
+that will transform <span class="math inline">\(X\)</span> into <span
+class="math inline">\(Y\)</span>. This means we need to solve the
+differential equation (since <span class="math inline">\(f(x(y)) =
+1\)</span>):</p>
+<p><span class="math display">\[\frac{\dee x}{\dee y} =
+\frac{1}{\sqrt{2\pi}}e^{-\frac12y^2}\]</span></p>
+<p>This is intractable analytically, but what we need is Y’s inverse
+CDF. We can use <code>y(x) = quantile(Normal(0,1), x)</code> from <a
+href="https://juliastats.org/Distributions.jl/stable/univariate/#Statistics.quantile-Tuple%7BUnivariateDistribution,%20Real%7D">Distributions.jl</a>.</p>
+<details class="code-fold" open>
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Distributions</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_transform_pdf</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    f <span class="op">=</span> x <span class="op">-&gt;</span> <span class="fl">1</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> x <span class="op">-&gt;</span> <span class="fu">quantile</span>(<span class="fu">Normal</span>(<span class="fl">0</span>,<span class="fl">1</span>), x),</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    g <span class="op">=</span> y <span class="op">-&gt;</span> <span class="fu">exp</span>(<span class="op">-</span>y<span class="op">^</span><span class="fl">2</span><span class="op">/</span><span class="fl">2</span>)<span class="op">/</span><span class="fu">sqrt</span>(<span class="fl">2</span>π),<span class="co"># = pdf(Normal(0,1),y),</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    xlim <span class="op">=</span> (<span class="fl">0</span>, <span class="fl">1</span>),</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    plotlims<span class="op">=</span>(<span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span>),</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    demo_range<span class="op">=</span>(<span class="fl">0.5</span>, <span class="fl">0.75</span>)<span class="co"># 1/4 of the total area</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+</details>
+<figure id="fig:normal">
+<img src="/assets/transform-pdf/fig-normal-output-1.svg"
+alt="Figure 7: Example 5: the inverse normal CDF transforms a uniform density into a standard normal one." />
+<figcaption aria-hidden="true">Figure 7: Example 5: the inverse normal
+CDF transforms a uniform density into a standard normal
+one.</figcaption>
+</figure>
+<p>We can also revisit example 3 above, and write it the same way
+(though we need the inverse CDF of 1-x… it’s equivalent.)</p>
+<details class="code-fold" open>
+<summary>
+Show/hide code
+</summary>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode julia cell-code"><code class="sourceCode julia"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> <span class="fu">Uniform</span>(<span class="fl">0</span>, <span class="fl">1</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> <span class="fu">Exponential</span>(<span class="fl">1</span><span class="op">/</span><span class="fl">2</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_transform_pdf</span>(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    f <span class="op">=</span> x <span class="op">-&gt;</span> <span class="fu">pdf</span>(X, x),</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> x <span class="op">-&gt;</span> <span class="fu">quantile</span>(Y, <span class="fl">1</span><span class="op">-</span>x),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    g <span class="op">=</span> y <span class="op">-&gt;</span> <span class="fu">pdf</span>(Y, y),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    xlim <span class="op">=</span> (<span class="fl">0</span>, <span class="fl">1</span>),</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    plotlims <span class="op">=</span> (<span class="fl">0</span>,<span class="fl">2.1</span>), <span class="co"># set manually, since goes to infinity</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    demo_range <span class="op">=</span> (<span class="fl">0.1</span>, <span class="fl">0.5</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+</details>
+<figure id="fig:exponential-quantile">
+<img src="/assets/transform-pdf/fig-exponential-quantile-output-1.svg"
+alt="Figure 8: Example 3 again, written with the inverse CDF of the exponential distribution." />
+<figcaption aria-hidden="true">Figure 8: Example 3 again, written with
+the inverse CDF of the exponential distribution.</figcaption>
+</figure>
+</div>
+</details>
+</div>
+</section>
 </main>
 
 <script>
@@ -168,7 +692,7 @@ MathJax = {
 </script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-04-19 12:06</span>
+    <span class="last-modified">Last modified: 2026-08-12 23:28</span>
   </div>
 </footer>
 </body>
