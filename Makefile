@@ -9,14 +9,15 @@ JS_BUNDLES := $(patsubst src/%/index.js,$(OUTDIR)/assets/js/%.bundle.js,$(JS_ENT
 # ---- Static assets ----
 STATIC_DIRS := assets/css assets/js assets/fonts assets/images assets/bibliography \
                assets/CV assets/frozen assets/pdfs assets/rejection-sampling-expo \
-               assets/simplest_linear_regression_example assets/smc-resampling \
+               assets/rejection-sampling assets/simplest_linear_regression_example \
+               assets/smc-resampling \
                assets/transform-pdf assets/2022-01-25-MCQLL-talk \
                assets/vendor
 
 ROOT_HTML   := interactive-divergence-fitting.html interactive-kl-fitting.html
 PRESENTATION_DIRS := $(wildcard 20[0-9][0-9]-*/)
 
-.PHONY: all clean content js assets static-html serve test generate pubs homepage posts-index deploy
+.PHONY: all clean content js assets static-html serve test generate pubs homepage posts-index deploy notebooks
 
 all: generate content js assets static-html
 
@@ -38,6 +39,32 @@ posts-index:
 # ---- Content compilation (delegates to script for date-stripping + external files) ----
 content:
 	@bash scripts/build-content.sh
+
+# ---- Notebook-backed posts (on demand; NOT part of `all`) ----
+# Quarto is used purely as a Julia execution engine here: it runs the code
+# cells, the cells write their SVGs to assets/ via savefig, and the prose is
+# passed through verbatim for the normal pandoc build to compile. Requires
+# Quarto + the julia-1.10 Jupyter kernel; a plain `make` never invokes it.
+NB_QMD := content/posts/2022-08-29-rejection-sampling.qmd
+NB_MD  := content/posts/2022-08-29-rejection-sampling.md
+# Quarto names its default output after the input file's basename; that's
+# where --output-dir puts it (--output-dir is resolved relative to the input
+# file's directory, confirmed against Quarto 1.8.26: from content/posts/,
+# ../../_build lands at the repo-root _build/). We deliberately don't pass
+# `-o <name>` to rename it: combining -o with --output-dir on a freestanding
+# (non-project) markdown render is bugged in 1.8.26 — it silently writes one
+# directory too high and drops the --output-dir path entirely. Consuming the
+# default-named file instead sidesteps that.
+NB_RAW := _build/$(notdir $(NB_QMD:.qmd=.md))
+
+notebooks: $(NB_MD)
+
+$(NB_MD): $(NB_QMD) scripts/qmd-frontmatter.js
+	@mkdir -p _build assets/rejection-sampling
+	@echo "Render (quarto + julia): $<"
+	@quarto render $< --to markdown --execute --output-dir ../../_build
+	@node scripts/qmd-frontmatter.js $(NB_RAW) $(NB_QMD) > $@
+	@echo "Generated: $@"
 
 # ---- JS bundling ----
 js: $(JS_BUNDLES)
