@@ -331,6 +331,63 @@ export function init() {
 }
 ```
 
+## Notebook-backed posts (Quarto + Julia)
+
+Some posts are generated from a Quarto `.qmd` so the code producing their
+figures stays editable. `content/posts/2022-08-29-rejection-sampling.qmd` is
+the worked example.
+
+Quarto is used purely as a Julia execution engine, never as a renderer: it
+runs the code cells, and the ordinary pandoc build then does citations,
+cross-references, callouts, and templating. Both the generated `.md` and the
+figures are committed, so a normal `make` never touches Julia or Quarto.
+
+```bash
+make notebooks   # re-run the Julia and regenerate the .md; needs Quarto + a julia-1.10 Jupyter kernel
+make             # ordinary build; uses the committed .md and .svg files
+```
+
+The `notebooks` rule in the `Makefile` actually consumes Quarto's pre-pandoc
+intermediate (`keep-md: true` in the qmd's front matter), not Quarto's own
+rendered markdown. Quarto's pandoc pass rewrites prose it was supposed to pass
+through untouched — it turns absolute `/assets/…` image paths into
+`./assets/…` (breaking every figure URL), injects its own `# References`
+heading (which the site's citeproc then duplicates), and silently drops a
+fenced div. The intermediate has the Julia executed but the prose otherwise
+byte-identical to the source, so that's what gets kept.
+
+Because Quarto rewrites anything it recognizes, `.qmd` sources use
+site-flavoured syntax rather than Quarto's own:
+
+| Write this in a `.qmd` | Not this | Why |
+|---|---|---|
+| `::: {.note-callout}` (also `.warning-callout`, `.tip-callout`, `.important-callout`) | `::: {.callout-note}` | Quarto flattens any class it recognizes into a blockquote; `filters/callouts.lua` matches the bare aliases instead |
+| `::: {.note-callout collapse="true"}` | Quarto's own collapsing | `collapse="true"` starts closed, `collapse="false"` starts open; either renders as `<details class="callout-details">` |
+| `@fig:name`, `{#fig:name}` | `@fig-name`, `#\| label: fig-name` | pandoc-crossref's syntax; Quarto's own figure nodes don't survive `--to markdown` |
+| a `savefig(p, "../../assets/…")` call plus a markdown image line below it | `#\| fig-cap:` | Quarto's figure handling inlines SVGs rather than writing files to `assets/` |
+| `<details class="code-fold">` written by hand around the fence | `#\| code-fold: true` | keeps the folding markup, and its CSS hook, under the site's control rather than Quarto's |
+
+A few more details worth knowing before writing the next one:
+
+- `savefig` paths are relative to `content/posts/` (Quarto's working directory
+  when it renders), while the markdown image line uses the served URL — the
+  same figure is `../../assets/rejection-sampling/fig-setup.svg` in Julia and
+  `/assets/rejection-sampling/fig-setup.svg` in the prose.
+- Quarto rewrites front matter on render: it consumes `css:`, `toc:`, and
+  `bibliography:` as format options (so they vanish from the emitted YAML) and
+  adds a spurious `authors:` plus `toc-title:`. `scripts/qmd-frontmatter.js`
+  puts the source `.qmd`'s YAML back verbatim over Quarto's rendered body;
+  `make notebooks` runs it automatically.
+- `--output-dir` resolves relative to the **input file's** directory, not the
+  invocation directory — so the `notebooks` rule's `--output-dir ../../_build`,
+  run from `content/posts/`, lands at the repo root's `_build/`. Don't add
+  `-o <name>` alongside it: in Quarto 1.8.26, invoked from the repo root the
+  way `make` does, that combination resolves one directory too high and writes
+  outside the repository. Consume Quarto's default-named output instead.
+- `--resource-path=../..` is needed only so Quarto's own (discarded) pandoc
+  pass exits 0: Quarto resolves `bibliography:` relative to the `.qmd`'s own
+  directory, while the site build needs it resolved repo-root-relative.
+
 ## Collapsible sections
 
 Pandoc's `--section-divs` wraps each heading and its content in a `<section>` element. The `collapse.js` script adds click-to-collapse behavior automatically. No special markup needed — just use headings.
