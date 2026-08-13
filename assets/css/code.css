@@ -95,3 +95,29 @@ code span.va { color: var(--code-fg); }                        /* Variable */
 code span.al { color: var(--code-type); font-weight: 600; }    /* Alert */
 code span.er { color: var(--code-type); font-weight: 600; }    /* Error */
 code span.wa { color: var(--code-constant); font-weight: 600; }/* Warning */
+
+/* ── Long lines scroll, they don't wrap ────────────── */
+/* The vendored theme wraps code by default (`pre > code { white-space:
+   pre-wrap }`) and only lets `.wide` blocks scroll. Wrapping is the wrong
+   default for code: a wrapped line reads as two statements, and in
+   indentation-significant languages it actively misleads. Scroll instead.
+
+   Printing is the exception — there is no scrolling on paper, so wrapping is
+   restored there rather than silently cropping the right-hand side. */
+
+pre > code {
+  white-space: pre;
+}
+
+pre {
+  overflow-x: auto;
+}
+
+@media print {
+  pre > code {
+    white-space: pre-wrap;
+  }
+  pre {
+    overflow-x: visible;
+  }
+}
