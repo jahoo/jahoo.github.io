@@ -66,6 +66,21 @@ build_one() {
   # shareable-by-link without the page becoming publicly discoverable.
   head -30 "$src" | grep -q '^unlisted: *true' && \
     extra_flags="$extra_flags --include-in-header templates/noindex.html"
+  # `redirect-to: /some/url/` turns the page into a redirect stub. Written as a
+  # generated --include-in-header rather than a `header-includes:` field in the
+  # document, because --include-in-header *sets* the header-includes template
+  # variable and so silently displaces any front-matter value — which is easy to
+  # hit here, since `unlisted: true` already adds one for the noindex header.
+  # Repeated --include-in-header flags accumulate, so both survive.
+  local redirect_to
+  redirect_to=$(head -30 "$src" | sed -nE 's/^redirect-to: *//p' | tr -d '"'"'")
+  if [ -n "$redirect_to" ]; then
+    mkdir -p _build
+    local rfile="_build/redirect-$(basename "$src" .md).html"
+    printf '<meta http-equiv="refresh" content="0; url=%s">\n<link rel="canonical" href="%s">\n' \
+      "$redirect_to" "$redirect_to" > "$rfile"
+    extra_flags="$extra_flags --include-in-header $rfile"
+  fi
   # `standalone-page: true` (intended for unlisted posts) drops the site
   # navbar so the page doesn't visibly link back to the site; the template
   # gates the include-before block on it.

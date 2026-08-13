@@ -3,7 +3,6 @@ title: Rejection sampling
 date: 2022-08-29
 author: Jacob Louis Hoover
 tags: [note]
-unlisted: true
 toc: true
 link-citations: true
 bibliography: assets/rejection-sampling/references.bib
