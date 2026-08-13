@@ -8,7 +8,11 @@
    light panels that look the same in light and dark mode. */
 
 figure {
-  margin: 2rem 0;
+  margin: 2rem auto;
+  /* The Plots.jl figures are authored 650px wide; the content column is 745px.
+     Cap the card at 650px *plus* the img's own padding and border so the plot
+     area renders at its native size rather than being upscaled ~15%. */
+  max-width: calc(650px + 1.5rem + 2px);
 }
 
 figure img {
