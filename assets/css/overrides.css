@@ -215,18 +215,34 @@ nav#TOC a:hover {
   margin: 1.6em 0;
   border-left: 3px solid var(--color-border-heavy);
   border-radius: 0 4px 4px 0;
-  background: var(--color-inline-code-bg);
+  /* Tinted per type below. Deliberately not the code-block grey: a callout
+     sitting near a listing should read as a different kind of thing. */
+  background: var(--callout-tint, #eaf2fc);
   font-size: 0.95em;
   /* Padding lives on the header and body separately so the title can carry
      its own band; overflow clips that band to the rounded corner. */
   overflow: hidden;
 }
 
-/* Accent per type, using the theme's highlight palette. */
-.callout-note, .note-callout           { border-left-color: var(--highlight-blue); }
-.callout-tip, .tip-callout             { border-left-color: var(--highlight-green); }
-.callout-warning, .warning-callout     { border-left-color: var(--highlight-yellow); }
-.callout-important, .important-callout { border-left-color: var(--highlight-red); }
+/* Accent and ground per type. The border uses the theme's highlight palette;
+   the ground is a much paler tint of the same hue, so the panel is legible as
+   a callout at a glance and distinct from the code blocks' neutral grey. */
+.callout-note, .note-callout {
+  border-left-color: var(--highlight-blue);
+  --callout-tint: #eaf2fc;
+}
+.callout-tip, .tip-callout {
+  border-left-color: var(--highlight-green);
+  --callout-tint: #eaf6ee;
+}
+.callout-warning, .warning-callout {
+  border-left-color: var(--highlight-yellow);
+  --callout-tint: #fdf5e4;
+}
+.callout-important, .important-callout {
+  border-left-color: var(--highlight-red);
+  --callout-tint: #fceaec;
+}
 
 .callout-body { padding: 0.7em 1em; }
 .callout-body > :first-child { margin-top: 0; }
