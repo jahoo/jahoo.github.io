@@ -384,6 +384,13 @@ Figures are written by `savefig` into `assets/<slug>/`, where `<slug>` is the
 filename with the date stripped — the same slug the post's URL uses. The
 `notebooks` rule creates that directory for you on first render.
 
+The build publishes the `.qmd` beside the page it generated and adds a
+**source .qmd** download link to the post's metadata line, so a reader can
+take the source and re-run the code. This happens automatically whenever a
+post has a sibling `.qmd`; there is no front-matter switch. Since the file
+is published, treat it as public: it is subject to the same rule as the rest
+of the post about not committing anything machine-specific.
+
 ```bash
 make notebooks   # re-run the Julia and regenerate the .md; needs Quarto + a julia-1.10 Jupyter kernel
 make             # ordinary build; uses the committed .md and .svg files

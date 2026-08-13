@@ -101,6 +101,9 @@ $endif$
 $if(tags)$
   · <span class="post-tags">$for(tags)$$tags$$sep$, $endfor$</span>
 $endif$
+$if(qmd-source)$
+  · <a class="qmd-download" href="$qmd-source$" download title="Quarto source for this post, with the code that produced its figures">source .qmd</a>
+$endif$
 </p>
 $endif$
 </header>

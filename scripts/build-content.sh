@@ -46,6 +46,14 @@ build_one() {
   lastmod=$(stat -f '%Sm' -t '%Y-%m-%d %H:%M' "$src" 2>/dev/null || date -r "$src" '+%Y-%m-%d %H:%M' 2>/dev/null || echo "")
   local extra_flags=""
   head -30 "$src" | grep -q '^toc: *true' && extra_flags="$extra_flags --toc"
+  # A post generated from a sibling .qmd offers that source for download, so a
+  # reader can re-run the code. Detected from the file system rather than from
+  # front matter, so it needs no marker in the document and works for any
+  # notebook-backed post automatically. The .qmd itself is copied beside the
+  # page further down.
+  local qmd_src="${src%.md}.qmd"
+  [ -f "$qmd_src" ] && \
+    extra_flags="$extra_flags --metadata qmd-source=$(basename "$qmd_src")"
   # `shift-headings: true` promotes every heading one level (h2 -> h1).
   # Quarto documents idiomatically start their sections at `##`, because the
   # title occupies the `h1`; this site starts them at `#`. Without the shift,
@@ -82,6 +90,14 @@ for src in content/posts/*.md; do
   # Check if source (or a per-page dependency) is newer than destination
   if [ "$src" -nt "$dest" ] || [ assets/vendor/pandoc-markdown-css-theme/template.html5 -nt "$dest" ] || [ templates/navbar.html -nt "$dest" ] || [ site.yaml -nt "$dest" ] || deps_newer "$src" "$dest"; then
     build_one "$src" "$dest"
+  fi
+
+  # Publish the .qmd source beside the page it generated, for the download link
+  # added in build_one. Done outside the staleness check so a `make clean`
+  # rebuild restores it even when the page itself is up to date.
+  if [ -f "${src%.md}.qmd" ]; then
+    mkdir -p "$(dirname "$dest")"
+    cp "${src%.md}.qmd" "$(dirname "$dest")/"
   fi
 
   # Check for external field — if present, copy the external file over index.html
