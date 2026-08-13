@@ -122,3 +122,10 @@ test('a fully-CRLF qmd yields a YAML block with no stray carriage returns', () =
   const yamlBlock = out.slice(firstDelim, secondDelim);
   assert.doesNotMatch(yamlBlock, /\r/);
 });
+
+test('an indented code block at the start of the body keeps its indentation', () => {
+  const generated = '---\ntitle: Rejection sampling\n---\n\n    indented_code_line()\n    second_line()\n\nProse after.\n';
+  const out = swapFrontMatter(generated, QMD);
+  const body = out.slice(out.indexOf('    indented_code_line()'));
+  assert.equal(body, '    indented_code_line()\n    second_line()\n\nProse after.\n');
+});

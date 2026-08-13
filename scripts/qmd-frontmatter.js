@@ -45,7 +45,10 @@ function extractFrontMatter(text) {
 function stripFrontMatter(text) {
   const bounds = findFrontMatterBounds(text);
   if (bounds === null) return text;
-  return bounds.body.replace(/^\s+/, '');
+  // Drop only the blank line(s) separating the YAML block from the body —
+  // not all leading whitespace. A body that opens with an indented code
+  // block must keep that indentation on its first line.
+  return bounds.body.replace(/^(?:[ \t]*\r?\n)+/, '');
 }
 
 export function swapFrontMatter(generatedMd, qmdSource) {
