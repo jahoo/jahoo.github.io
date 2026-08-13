@@ -369,6 +369,14 @@ site-flavoured syntax rather than Quarto's own:
 
 A few more details worth knowing before writing the next one:
 
+- **Put `#| output: false` on every Julia cell, not just the ones that draw
+  figures.** Whatever a cell prints reaches the generated markdown verbatim,
+  and that includes stderr — package precompilation warnings, deprecation
+  notices, absolute paths into the render machine's Julia depot. Figures get
+  onto the page through `savefig` and a markdown image line below the cell,
+  so no cell actually needs to emit anything. A setup cell that only loads
+  packages will still leak its stderr into the committed `.md` (and from
+  there into the published page) if you leave this off.
 - `savefig` paths are relative to `content/posts/` (Quarto's working directory
   when it renders), while the markdown image line uses the served URL — the
   same figure is `../../assets/rejection-sampling/fig-setup.svg` in Julia and
