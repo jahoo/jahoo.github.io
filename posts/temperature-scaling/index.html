@@ -7,7 +7,7 @@
   <meta name="author" content="Jacob Hoover Vigly" />
   <meta name="dcterms.date" content="2026-06-02" />
   <meta name="description" content="Scientific Program Coordinator at CHI FRO, LLC. Formerly Postdoc at MIT, Department of Brain and Cognitive Sciences. PhD in Linguistics from McGill University." />
-  <title>Temperature scaling</title>
+  <title>Temperature scaling and truncation</title>
   <!--
     Preload the two navbar fonts used above the fold on every page.
     `font-display: swap` already prevents invisible text, but the fonts
@@ -89,12 +89,14 @@ MathJax = {
 
 <header>
 
-<h1 class="title">Temperature scaling</h1>
+<h1 class="title">Temperature scaling and truncation</h1>
 
+<p class="subtitle">A simple exploration of what modifying temperature
+and applying truncation does to a distribution.</p>
 <p class="post-meta">
   <time datetime="2026-06-02">2026-06-02</time>
   · Jacob Hoover Vigly
-  · <span class="post-tags">exploration</span>
+  · <span class="post-tags">exploration, note</span>
 </p>
 </header>
 
@@ -104,36 +106,40 @@ MathJax = {
 
 
 <main>
-<p><em>What modifying temperature does to a distribution.</em></p>
-<p>Given a distribution <span class="math inline">\(p\)</span> over a
-finite set of elements, writing <span class="math inline">\(p_i\)</span>
-for the probability of element <span class="math inline">\(i\)</span>,
-for some temperature <span
-class="math inline">\(T\in\mathbb{R}\)</span>, define the
+<p>Let <span class="math inline">\(p\)</span> be a discrete probability
+distribution over a finite set of elements, writing <span
+class="math inline">\(p_i\)</span> for the probability of element <span
+class="math inline">\(i\)</span>. If we raise each element’s probability
+to some power, and then normalize, we get what is called the
 <strong>temperature-scaled</strong> distribution <span
-class="math inline">\(p^{(T)}\)</span> as</p>
+class="math inline">\(p^{\beta}\)</span>, defined by the following,
+where the the exponent <span class="math inline">\(\beta \triangleq
+1/T\)</span> represents the inverse of ‘temperature’ <span
+class="math inline">\(T\in\mathbb{R}_{\geq 0}\)</span>.</p>
 <p><span class="math display">\[
-p^{(T)}_i \;\triangleq\; \frac{p_i^{1/T}}{Z_T},
-\qquad Z_T = \sum_j p_j^{1/T}.
+p^{\beta}_i \;\triangleq\; \frac{p_i^{\beta}}{Z(p^{\beta})},
+\qquad\text{where}\ Z(p^{\beta}) = \sum_j p_j^{\beta}
 \]</span></p>
-<p>Equivalently, <span class="math inline">\(p^{(T)}\)</span> is
-proportional to a linear scaling of the log-probabilities,</p>
-<p><span class="math display">\[
-p^{(T)} = \operatorname{softmax}\!\big(\tfrac{1}{T} \log p\big),
-\qquad \text{where}\quad
-\operatorname{softmax}(x)_i \;\triangleq\; \frac{e^{x_i}}{\sum_j
-e^{x_j}}.
-\]</span></p>
-<p>It’s convenient to parametrize with the inverse temperature parameter
-<span class="math inline">\(\beta \triangleq 1/T\)</span>.</p>
+<p>Equivalently, in log space, the temperature-scaled distribution is
+proportional to a pointwise linear scaling of the log-probabilities:
+<span class="math inline">\(\log p^{\beta}_i = \beta \log p_i - \log
+Z(p^{\beta})\)</span>.</p>
 <p>At <span class="math inline">\(T = \beta = 1\)</span>, <span
-class="math inline">\(p^{(T)} = p\)</span>. As <span
+class="math inline">\(p^{\beta} = p\)</span>. As <span
 class="math inline">\(T \to 0\)</span> (<span
 class="math inline">\(\beta \to \infty\)</span>), mass concentrates on
-the argmax; as <span class="math inline">\(T \to \infty\)</span> (<span
+the argmax (a ‘frozen’, annealed state); as <span
+class="math inline">\(T \to \infty\)</span> (<span
 class="math inline">\(\beta \to 0\)</span>), <span
-class="math inline">\(p^{(T)}\)</span> flattens toward uniform over the
-support of <span class="math inline">\(p\)</span>.</p>
+class="math inline">\(p^{\beta}\)</span> flattens toward uniform over
+the support of <span class="math inline">\(p\)</span> (a maximal entropy
+state).</p>
+<p>Below is an interactive visualization of the temperature-scaled
+distribution, with controls for the temperature, and the base
+distribution, and also a slider to truncate the distribution to its
+nucleus (the smallest set of highest-probability elements whose mass
+reaches a threshold) ‘top-<span class="math inline">\(p\)</span>’ and
+renormalized.</p>
 <canvas id="cv-temp" class="viz-mount" style="height:430px;width:100%"></canvas>
 <div class="temp-controls">
 <div class="temp-readouts">
@@ -185,12 +191,12 @@ allow <span class="math inline">\(T&lt;0\)</span></label></p>
 </div>
 <p><strong>Top row:</strong> the base distribution <span
 class="math inline">\(p\)</span> (drag bars to edit) and the tempered
-<span class="math inline">\(p^{(T)}\)</span>. <strong>Bottom
+<span class="math inline">\(p^{\beta}\)</span>. <strong>Bottom
 row:</strong> the same two distributions in log space, where temperature
 scaling is linear: bars are scaled by <span
 class="math inline">\(\beta\)</span>, then shifted by the common offset
-<span class="math inline">\(-\log Z_T\)</span> (in the right panel,
-ticks mark the pre-normalization values <span
+<span class="math inline">\(-\log Z(p^{\beta})\)</span> (in the right
+panel, ticks mark the pre-normalization values <span
 class="math inline">\(\beta \log p_i\)</span>; the dotted segments are
 the shift). Dashed line: the uniform distribution, i.e. the <span
 class="math inline">\(\beta\to 0\)</span> limit. The top-<span
@@ -260,7 +266,7 @@ and renormalizes.</p>
 <script src="/assets/js/temperature.bundle.js"></script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-06-03 16:55</span>
+    <span class="last-modified">Last modified: 2026-09-15 16:33</span>
   </div>
 </footer>
 </body>
