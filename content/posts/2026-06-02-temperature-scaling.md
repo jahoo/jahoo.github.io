@@ -1,36 +1,29 @@
 ---
-title: Temperature scaling
+title: Temperature scaling and truncation
+subtitle: A simple exploration of what modifying temperature and applying truncation does to a distribution.
 date: 2026-06-02
 author: Jacob Hoover Vigly
-tags: [exploration]
+tags: [exploration, note]
 js:
   - src/temperature
 css:
   - assets/css/temperature.css
 ---
 
-*What modifying temperature does to a distribution.*
-
-Given a distribution $p$ over a finite set of elements, writing $p_i$ for the probability of element $i$, for some temperature $T\in\mathbb{R}$, define the **temperature-scaled** distribution $p^{(T)}$ as
+Let $p$ be a discrete probability distribution over a finite set of elements, writing $p_i$ for the probability of element $i$. If we raise each element's probability to some power, and then normalize, we get what is called the **temperature-scaled** distribution $p^{\beta}$, defined by the following, where the the exponent $\beta \triangleq 1/T$ represents the inverse of 'temperature' $T\in\mathbb{R}_{\geq 0}$.
 
 $$
-p^{(T)}_i \;\triangleq\; \frac{p_i^{1/T}}{Z_T},
-\qquad Z_T = \sum_j p_j^{1/T}.
+p^{\beta}_i \;\triangleq\; \frac{p_i^{\beta}}{Z(p^{\beta})},
+\qquad\text{where}\ Z(p^{\beta}) = \sum_j p_j^{\beta}
 $$
 
-Equivalently, $p^{(T)}$ is proportional to a linear scaling of the log-probabilities,
+Equivalently, in log space, the temperature-scaled distribution is proportional to a pointwise linear scaling of the log-probabilities: $\log p^{\beta}_i = \beta \log p_i - \log Z(p^{\beta})$.
 
-$$
-p^{(T)} = \operatorname{softmax}\!\big(\tfrac{1}{T} \log p\big),
-\qquad \text{where}\quad
-\operatorname{softmax}(x)_i \;\triangleq\; \frac{e^{x_i}}{\sum_j e^{x_j}}.
-$$
+At $T = \beta = 1$, $p^{\beta} = p$. 
+As $T \to 0$ ($\beta \to \infty$), mass concentrates on the argmax (a 'frozen', annealed state); 
+as $T \to \infty$ ($\beta \to 0$), $p^{\beta}$ flattens toward uniform over the support of $p$ (a maximal entropy state).
 
-It's convenient to parametrize with the inverse temperature parameter $\beta \triangleq 1/T$.
-
-At $T = \beta = 1$, $p^{(T)} = p$. 
-As $T \to 0$ ($\beta \to \infty$), mass concentrates on the argmax; 
-as $T \to \infty$ ($\beta \to 0$), $p^{(T)}$ flattens toward uniform over the support of $p$.
+Below is an interactive visualization of the temperature-scaled distribution, with controls for the temperature, and the base distribution, and also a slider to truncate the distribution to its nucleus (the smallest set of highest-probability elements whose mass reaches a threshold) 'top-$p$' and renormalized.
 
 ::: {.viz #cv-temp canvas="true" height="430px" width="100%"}
 :::
@@ -68,4 +61,4 @@ Mathematically, nothing stops us from taking $T<0$, it just reverses things...
 <label class="temp-neg-toggle"><input type="checkbox" id="temp-negative"> allow $T<0$</label>
 </div>
 
-**Top row:** the base distribution $p$ (drag bars to edit) and the tempered $p^{(T)}$. **Bottom row:** the same two distributions in log space, where temperature scaling is linear: bars are scaled by $\beta$, then shifted by the common offset $-\log Z_T$ (in the right panel, ticks mark the pre-normalization values $\beta \log p_i$; the dotted segments are the shift). Dashed line: the uniform distribution, i.e.\ the $\beta\to 0$ limit. The top-$p$ slider truncates the tempered distribution to its nucleus (the smallest set of highest-probability elements whose mass reaches the threshold, with ties broken by index) and renormalizes.
+**Top row:** the base distribution $p$ (drag bars to edit) and the tempered $p^{\beta}$. **Bottom row:** the same two distributions in log space, where temperature scaling is linear: bars are scaled by $\beta$, then shifted by the common offset $-\log Z(p^{\beta})$ (in the right panel, ticks mark the pre-normalization values $\beta \log p_i$; the dotted segments are the shift). Dashed line: the uniform distribution, i.e.\ the $\beta\to 0$ limit. The top-$p$ slider truncates the tempered distribution to its nucleus (the smallest set of highest-probability elements whose mass reaches the threshold, with ties broken by index) and renormalizes.

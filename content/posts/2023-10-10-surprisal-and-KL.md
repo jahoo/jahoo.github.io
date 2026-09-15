@@ -2,7 +2,7 @@
 title: surprisal and KL
 date: 2023-10-10
 author: Jacob Louis Hoover
-tags: [note]
+tags: [exploration]
 ---
 
 <div style="display:none;">
