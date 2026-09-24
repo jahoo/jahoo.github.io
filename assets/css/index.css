@@ -191,9 +191,18 @@ details.pub-bibtex code.sourceCode {
   font-family: ui-monospace, 'SF Mono', 'Menlo', 'Consolas', monospace;
 }
 
-/* Footnote-ish small-text paragraphs below the pub list. */
-.pub-footnote {
+/* Footnote area below the page's rule: the author-mark legend (lines
+   stacked tight) and the unmarked name note, in one small-text style. A
+   short gap, not a full paragraph margin, separates the two. */
+.pub-footnote,
+.name-note p {
   font-size: 0.85rem;
+  line-height: 1.5;
   color: #777;
-  margin-top: 0.5rem;
+}
+.pub-footnote {
+  margin-bottom: 0;
+}
+.name-note p {
+  margin-top: 0.75rem;
 }

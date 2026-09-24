@@ -19,4 +19,8 @@ css: [assets/css/index.css]
 
 ---
 
+<!-- @paste pub-legend -->
+
+::: name-note
 *Note on my name:* My surname is Vigly. Prior to September 2024, my surname was Hoover, which is now a middle name.
+:::

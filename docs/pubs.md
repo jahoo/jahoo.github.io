@@ -89,8 +89,8 @@ It warns (does not fail) when `pdf` / `slides` / `poster` / `handout` name a fil
 
 ## Build targets
 
-- `make pubs` regenerates `_generated/_pub-list.md` (the pub-list partial) from `pubs.yaml` + `source.bib`.
-- `make homepage` splices that into `content/_index.md` via [scripts/expand-includes.js](../scripts/expand-includes.js) → `_generated/index.md`.
+- `make pubs` regenerates `_generated/_pub-list.md` (the pub-list partial) and `_generated/_pub-legend.md` (the author-mark legend, placed below the homepage's rule) from `pubs.yaml` + `source.bib`.
+- `make homepage` splices those into `content/_index.md` via [scripts/expand-includes.js](../scripts/expand-includes.js) → `_generated/index.md`.
 - `make serve` re-runs both automatically whenever `pubs.yaml` or `source.bib` change.
 
 Each publication's raw bib entry is embedded on the page in a `[bib]` expand-box — click it to see the source. Private Zotero fields (`file`, `abstract`, `keywords`, `urldate`, `langid`, `pubstate`, `eprintclass`) are stripped before rendering.

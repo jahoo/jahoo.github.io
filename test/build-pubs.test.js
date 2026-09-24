@@ -18,6 +18,7 @@ import {
   validateEntry,
   generateHtmlEntry,
   generatePubList,
+  generatePubLegend,
   expandHome, loadBibSource,
   parseBib, indexByKey, extractArxivEprints, extractEntriesByKey,
   mapCslType,
@@ -88,8 +89,8 @@ test('formatAuthorsHtml: co_last marks last M authors with superscript ‡', () 
 
 test('formatAuthorsHtml: mark <sup>s carry a title tooltip', () => {
   const html = formatAuthorsHtml(['A', 'B'], 1, 1);
-  assert.match(html, /<sup[^>]*title="∗ Co-first author"[^>]*>∗<\/sup>/);
-  assert.match(html, /<sup[^>]*title="‡ Co-senior author"[^>]*>‡<\/sup>/);
+  assert.match(html, /<sup[^>]*title="∗ Co-first authorship"[^>]*>∗<\/sup>/);
+  assert.match(html, /<sup[^>]*title="‡ Co-senior authorship"[^>]*>‡<\/sup>/);
 });
 
 test('formatAuthorsHtml: co_first and co_last can overlap (both marks)', () => {
@@ -599,20 +600,37 @@ test('generatePubList: wraps items in a pandoc raw-html pub-list block', () => {
   assert.match(md, /<\/ul>\n```/);
 });
 
-test('generatePubList: co-first footnote only when co_first > 0 on some entry', () => {
+test('generatePubList: carries no legend', () => {
   const md = generatePubList(docEntries);
+  assert.doesNotMatch(md, /pub-footnote/);
+});
+
+test('generatePubLegend: co-first line only when co_first > 0 on some entry', () => {
+  const md = generatePubLegend(docEntries);
   assert.match(md, /<sup[^>]*>∗<\/sup> Co-first authorship/);
-  const mdNoCF = generatePubList([docEntries[0]]);
+  const mdNoCF = generatePubLegend([docEntries[0]]);
   assert.doesNotMatch(mdNoCF, /Co-first authorship/);
 });
 
-test('generatePubList: co-senior footnote only when co_last > 0 on some entry', () => {
-  const noCL = generatePubList(docEntries);
+test('generatePubLegend: co-senior line only when co_last > 0 on some entry', () => {
+  const noCL = generatePubLegend(docEntries);
   assert.doesNotMatch(noCL, /Co-senior authorship/);
-  const withCL = generatePubList([
+  const withCL = generatePubLegend([
     { ...docEntries[0], authors: ['A', 'B', 'C'], co_last: 2 },
   ]);
   assert.match(withCL, /<sup[^>]*>‡<\/sup> Co-senior authorship/);
+});
+
+test('generatePubLegend: both marks share one block', () => {
+  const md = generatePubLegend([
+    { ...docEntries[0], authors: ['A', 'B', 'C'], co_first: 2, co_last: 2 },
+  ]);
+  assert.equal(md.match(/<p class="pub-footnote">/g).length, 1);
+  assert.match(md, /Co-first authorship<br>\n<sup[^>]*>‡/);
+});
+
+test('generatePubLegend: empty when no entry carries a mark', () => {
+  assert.equal(generatePubLegend([docEntries[0]]), '');
 });
 
 // ------------------------------------------------------------

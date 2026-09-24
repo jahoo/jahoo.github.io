@@ -13,6 +13,8 @@
 //                                    into the homepage template by
 //                                    scripts/expand-includes.js via the
 //                                    <!-- @paste pub-list --> marker)
+//   - _generated/_pub-legend.md     (author-mark legend, partial; spliced
+//                                    in via <!-- @paste pub-legend -->)
 //
 // All pure helpers are exported for unit testing.
 
@@ -41,16 +43,25 @@ export function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => HTML_ESCAPES[c]);
 }
 
+// Single source of truth for each mark's symbol and meaning: the hover
+// title on every in-list mark and the legend line (generatePubLegend) both
+// read from here, so they can't drift apart.
+export const AUTHOR_MARKS = {
+  coFirst: { symbol: '∗', label: 'Co-first authorship' },
+  coLast: { symbol: '‡', label: 'Co-senior authorship' },
+};
+const markText = (m) => `${m.symbol} ${m.label}`;
+const markHtml = (m) =>
+  `<sup class="pub-mark" title="${escapeHtml(markText(m))}">${m.symbol}</sup>`;
+const CO_FIRST_MARK = markHtml(AUTHOR_MARKS.coFirst);
+const CO_LAST_MARK = markHtml(AUTHOR_MARKS.coLast);
+
 // coFirst: N → first N authors get a superscript ∗ (co-first authorship).
 // coLast:  M → last M  authors get a superscript ‡ (co-senior authorship).
 // The two regions may overlap (e.g. a two-author paper with coFirst=2 and
 // coLast=2 marks both authors with ∗‡); overlap is legal, not validated out.
 // Returns HTML — author names are escaped internally, so callers should not
 // wrap the result in escapeHtml().
-const CO_FIRST_MARK =
-  '<sup class="pub-mark" title="∗ Co-first author">∗</sup>';
-const CO_LAST_MARK =
-  '<sup class="pub-mark" title="‡ Co-senior author">‡</sup>';
 export function formatAuthorsHtml(authors, coFirst = 0, coLast = 0) {
   const n = authors.length;
   return authors
@@ -310,30 +321,32 @@ export function generateHtmlEntry(paper) {
   ].join('\n');
 }
 
-// Pub-list partial: raw-HTML block of pub items plus optional legend
-// footnotes for the co-first (∗) and co-senior (‡) author marks. Output is
-// spliced into the homepage template (content/_index.md) at <!-- @paste
-// pub-list -->.
+// Pub-list partial: raw-HTML block of pub items. Output is spliced into
+// the homepage template (content/_index.md) at <!-- @paste pub-list -->.
 export function generatePubList(entries) {
-  const hasCoFirst = entries.some((e) => e.co_first > 0);
-  const hasCoLast = entries.some((e) => e.co_last > 0);
   const items = entries.map((e) => generateHtmlEntry(e)).join('\n');
-
-  const parts = [
+  return [
     '```{=html}',
     '<ul class="pub-list">',
     items,
     '</ul>',
     '```',
     '',
-  ];
-  if (hasCoFirst) {
-    parts.push('<p class="pub-footnote"><sup class="pub-mark">∗</sup> Co-first authorship</p>', '');
-  }
-  if (hasCoLast) {
-    parts.push('<p class="pub-footnote"><sup class="pub-mark">‡</sup> Co-senior authorship</p>', '');
-  }
-  return parts.join('\n');
+  ].join('\n');
+}
+
+// Pub-legend partial: one footnote block explaining the co-first (∗) and
+// co-senior (‡) author marks, one line per mark actually used. Empty when
+// no entry carries a mark. Spliced into the homepage template at
+// <!-- @paste pub-legend -->, in the footnote area below the page's rule.
+export function generatePubLegend(entries) {
+  const legendLine = (m) =>
+    `<sup class="pub-mark">${m.symbol}</sup> ${escapeHtml(m.label)}`;
+  const notes = [];
+  if (entries.some((e) => e.co_first > 0)) notes.push(legendLine(AUTHOR_MARKS.coFirst));
+  if (entries.some((e) => e.co_last > 0)) notes.push(legendLine(AUTHOR_MARKS.coLast));
+  if (notes.length === 0) return '';
+  return `<p class="pub-footnote">${notes.join('<br>\n')}</p>\n`;
 }
 
 // ------------------------------------------------------------
@@ -733,11 +746,12 @@ function main() {
     e.bibHtml = highlighted[i];
   });
 
-  // 7. Write the pub-list partial. The homepage template
-  // (content/_index.md) splices this in via <!-- @paste pub-list -->
-  // when scripts/expand-includes.js runs.
+  // 7. Write the pub-list and pub-legend partials. The homepage template
+  // (content/_index.md) splices these in via <!-- @paste pub-list --> and
+  // <!-- @paste pub-legend --> when scripts/expand-includes.js runs.
   ensureDir('_generated');
   writeFileSync('_generated/_pub-list.md', generatePubList(sorted));
+  writeFileSync('_generated/_pub-legend.md', generatePubLegend(sorted));
   console.log(`Generated: _generated/_pub-list.md (${sorted.length} entries)`);
 }
 
