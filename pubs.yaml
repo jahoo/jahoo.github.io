@@ -1,6 +1,6 @@
 # Publications listed in the homepage's publications section.
-# Bibliographic data comes from source.bib (symlink to the user's BibLaTeX
-# file); this file holds only website-specific extras.
+# !!!! This file holds only website-specific extras. !!!!
+# Bibliographic data comes from source.bib (symlink to local BibLaTeX file)
 #
 # Schema: see docs/pubs.md
 
@@ -28,7 +28,7 @@
   co_last: 3
   venue: CoLM 2025
   venue_url: https://colmweb.org/2025/
-  note: "Outstanding Paper Award"
+  note: Outstanding Paper Award
   links:
     openreview: https://openreview.net/forum?id=3BmPSFAdq3
 
@@ -50,7 +50,7 @@
         url: /assets/pdfs/dissertation_precis.pdf
 
 - key: rahimi.h:2024
-  venue: "EACL 2024"
+  venue: EACL 2024
   venue_url: https://2024.eacl.org/
 
 - key: hoover.j:2023
