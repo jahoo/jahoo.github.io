@@ -252,9 +252,7 @@ $$ I(X;Y) = h(X) - h(X\mid Y) = \lim_{\bw\to0} I(\Xq; Y_{\bw}). $$
 
 It needs no renormalization, it is always $\ge 0$, and it is unchanged by any invertible transformation of $X$ or $Y$ separately. The same goes for KL divergence, $\KL{\pdf}{g} = \int \pdf\log(\pdf/g)\dee x \ge 0$: in the ratio $\pdf/g$ the Jacobians cancel, so it does not depend on coordinates.
 
-This also says what $h$ is. Writing $h(X) = -\int \pdf(x)\log\frac{\pdf(x)}{1}\dee x$ shows it as a negative divergence of $\pdf$ from the flat reference "density" 1, which is Lebesgue measure with a chosen unit length. The reference is where the dependence on units lives. Jaynes' *limiting density of discrete points* replaces that 1 with an explicit reference density $m(x)$ and gets a coordinate-free quantity $-\int \pdf\log(\pdf/m)\dee x$.
-
-<!-- TODO: cite Jaynes on the limiting density of discrete points (1963 Brandeis lectures / 1968 "Prior probabilities"); neither is in source.bib yet. -->
+This also says what $h$ is. Writing $h(X) = -\int \pdf(x)\log\frac{\pdf(x)}{1}\dee x$ shows it as a negative divergence of $\pdf$ from the flat reference "density" 1, which is Lebesgue measure with a chosen unit length. The reference is where the dependence on units lives. Jaynes' *limiting density of discrete points* replaces that 1 with an explicit reference density $m(x)$ and gets a coordinate-free quantity $-\int \pdf\log(\pdf/m)\dee x$ [@jaynes.e:1968, sec. VI].^[{-} There, $m(x)$ is proportional to the density of the discrete points in the limit, and since $\pdf$ and $m$ transform the same way under a change of variables, the ratio $\pdf/m$ and so the whole quantity are invariant. Jaynes credits the derivation to his 1963 Brandeis lectures.]
 
 ::: {.wide .extra-wide}
 ```{=html}
