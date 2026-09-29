@@ -88,22 +88,10 @@
 .de-readouts .v { font-weight: 600; }
 .de-fig .neg { color: var(--de-neg); }
 
-/* opening figure's big readout */
-.de-big {
-  font-family: var(--font-family-prose);
-  font-size: 2rem;
-  line-height: 1.1;
-  font-variant-numeric: tabular-nums;
-  color: var(--de-mass);
-}
-.de-bigk { color: var(--de-ink-soft); margin: 0 0 .2rem; }
-.de-note { color: var(--de-ink-soft); margin: .9rem 0 0; }
-#de-uni-svg { touch-action: pan-y; cursor: ew-resize; }
-
 
 /* ---- SVG marks ---- */
 
-svg.de-plot { width: 100%; height: auto; display: block; overflow: visible; }
+svg.de-plot { width: 100%; height: auto; display: block; overflow: visible; user-select: none; -webkit-user-select: none; }
 svg.de-plot .gl { stroke: var(--de-grid); stroke-width: 1; }
 svg.de-plot .ax { stroke: var(--de-ink-soft); stroke-width: 1; }
 svg.de-plot .ax.zero { stroke: var(--de-ink); stroke-width: 1.3; }
@@ -154,7 +142,6 @@ svg.de-plot .hbar.mi { fill: var(--de-atom-soft); stroke: var(--de-atom); stroke
 
 /* ---- page-level bits ---- */
 
-.de-controls.de-uni-row { margin: .6rem 0 0; justify-content: space-between; align-items: center; }
 
 .de-caption p {
   font-size: 0.9em;

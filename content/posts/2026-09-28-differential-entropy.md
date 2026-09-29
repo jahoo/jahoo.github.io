@@ -1,5 +1,5 @@
 ---
-title: Differential entropy, taken apart
+title: Differential entropy
 subtitle: Entropy, once the outcomes stop being countable
 date: 2026-09-28
 author: Jacob Hoover Vigly
@@ -15,26 +15,7 @@ link-citations: true
 mathjax-macros: assets/differential-entropy/macros.json
 ---
 
-Shannon's entropy is the expected value of $-\log \pmf(X)$ under a probability mass function $\pmf$. Replace the sum with an integral and the mass function with a density, and you get a formula that looks the same but is not the same kind of object. It can be negative, it changes when you change units, and it is not the limit of any Shannon entropy. Below, the substitution is taken apart one picture at a time.^[{-} All logarithms here are base 2, so every quantity is in bits. Natural logs rescale every value by $\ln 2$ and change nothing else. Related notes: [the density of a transformed random variable](/posts/transform-pdf/), and [surprisal and KL](/posts/surprisal-and-KL/).]
-
-```{=html}
-<div class="de-fig">
-<div class="de-ptitle">Uniform density on \([0, w]\) (drag the right edge)</div>
-<svg id="de-uni-svg" role="img" aria-label="A uniform density whose width you can drag"></svg>
-<div class="de-controls de-uni-row">
-<div class="de-ctl">
-<label for="de-uni-w">width \(w\) = <b id="de-uni-wv">0.50</b></label>
-<input type="range" id="de-uni-w" min="0.2" max="4" step="0.01" value="0.5">
-</div>
-<div>
-<div class="de-bigk">differential entropy</div>
-<div class="de-big" id="de-uni-h">h = −1.00 bits</div>
-</div>
-</div>
-</div>
-```
-
-Probability is area, so the box has height $1/w$. The formula gives $h = \log w$, which is below zero whenever the box is narrower than one unit. A discrete variable with $n$ equally likely outcomes never does this: its entropy is $\log n \ge 0$.
+Shannon's entropy is the expected value of $-\log \pmf(X)$ under a probability mass function $\pmf$. Replace the sum with an integral and the mass function with a density, and you get a formula that looks the same but is not the same kind of object. It can be negative, it changes when you change units, and it is not the limit of any Shannon entropy. Below, the substitution is taken apart one picture at a time.
 
 # Discrete entropy is an average of surprisals
 
@@ -109,6 +90,8 @@ $$ -\sum_x \pmf(x)\log \pmf(x) \quad\longrightarrow\quad h(X) \defeq -\int \pdf(
 This is the *differential entropy*. The area picture still works: lay the probability mass out along $[0,1]$ using the cumulative distribution $u = F(x)$, and above each slice of mass draw the height $-\log \pdf(x)$. The net area is $h(X)$.
 
 What breaks is the first fact. A density is not a probability; it is probability *per unit length*, $P(x \le X \le x+\dee x) \approx \pdf(x)\dee x$. Only its integral is constrained to equal 1, so $\pdf$ can be as tall as it likes as long as it is correspondingly narrow. Wherever $\pdf(x) > 1$, the height $-\log \pdf(x)$ is negative. If enough mass sits in such places, the net area is negative.
+
+The simplest case is the uniform density on $[0, w]$. It has height $1/w$, so $h = \log w$, which is negative whenever $w < 1$. A discrete variable with $n$ equally likely outcomes has entropy $\log n \ge 0$ for every $n$. (Choose **Uniform** below and drag its edges.)
 
 ::: {.wide .extra-wide}
 ```{=html}
