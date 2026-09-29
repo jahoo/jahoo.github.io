@@ -59,6 +59,21 @@ export function numEntropy(pdf, lo, hi, N = 6000) {
 // [lo, hi] holds essentially all the mass, minScale is the narrowest
 // feature (used to decide when Δ is "small"), h is differential entropy.
 
+// Evaluation points for a mixture over [x0, x1]: an even grid plus a
+// dense patch around each component, so narrow bumps are resolved even
+// when the components are far apart. Sorted, ascending.
+export function sampleXs(comps, x0, x1, n = 500) {
+    const xs = [];
+    for (let i = 0; i <= n; i++) xs.push(x0 + (x1 - x0) * i / n);
+    for (const c of comps) {
+        for (let i = 0; i <= 240; i++) {
+            const x = c.m + c.s * (-7 + 14 * i / 240);
+            if (x > x0 && x < x1) xs.push(x);
+        }
+    }
+    return xs.sort((a, b) => a - b);
+}
+
 // Gaussian mixture; comps = [{ w, m, s }].
 export function mixDist(comps) {
     const pdf = x => { let v = 0; for (const c of comps) v += c.w * gPdf(x, c.m, c.s); return v; };
@@ -67,12 +82,14 @@ export function mixDist(comps) {
     const lo = Math.min(...comps.map(c => c.m - 9 * c.s));
     const hi = Math.max(...comps.map(c => c.m + 9 * c.s));
     const minScale = Math.min(...comps.map(c => c.s));
+    // Simpson needs a step well below the narrowest component
+    const N = 2 * Math.ceil(Math.min(100000, Math.max(3000, 20 * (hi - lo) / minScale)));
     const h = comps.length === 1
         ? 0.5 * log2(2 * Math.PI * Math.E * comps[0].s * comps[0].s)
-        : numEntropy(pdf, lo, hi);
+        : numEntropy(pdf, lo, hi, N);
     let peak = 0;
-    for (let i = 0; i <= 2000; i++) peak = Math.max(peak, pdf(lo + (hi - lo) * i / 2000));
-    return { kind: 'smooth', pdf, cdf, mass, lo, hi, minScale, h, peak };
+    for (const x of sampleXs(comps, lo, hi, 1000)) peak = Math.max(peak, pdf(x));
+    return { kind: 'smooth', comps, pdf, cdf, mass, lo, hi, minScale, h, peak };
 }
 
 // Uniform on [a, b].
@@ -118,12 +135,7 @@ export function densityPts(d, x0, x1, N = 500) {
         pts.push([x1, 0]);
         return pts;
     }
-    const pts = [];
-    for (let i = 0; i <= N; i++) {
-        const x = x0 + (x1 - x0) * i / N;
-        pts.push([x, d.pdf(x)]);
-    }
-    return pts;
+    return sampleXs(d.comps, x0, x1, N).map(x => [x, d.pdf(x)]);
 }
 
 // Bin k covers [(k - 1/2)Δ, (k + 1/2)Δ]; the range of k that meets [lo, hi].
@@ -164,4 +176,76 @@ export function quantile(d, q) {
         if (d.cdf(m) < q) lo = m; else hi = m;
     }
     return (lo + hi) / 2;
+}
+
+// ---- tempering and editing a pmf ----
+
+// p^β, renormalized. β = 0 gives the uniform distribution on the support.
+export function temper(p, beta) {
+    const q = p.map(v => (v > 0 ? Math.pow(v, beta) : 0));
+    const Z = q.reduce((a, b) => a + b, 0);
+    return q.map(v => v / Z);
+}
+
+// Set p_i to target, rescaling the others to keep the sum at 1 and every
+// entry at least minP (the temperature post's drag rule).
+export function withProb(p, i, target, minP) {
+    target = clamp(target, minP, 1 - (p.length - 1) * minP);
+    const scale = (1 - target) / (1 - p[i]);
+    const q = p.map((v, j) => (j === i ? target : Math.max(minP, v * scale)));
+    const Z = q.reduce((a, b) => a + b, 0);
+    return q.map(v => v / Z);
+}
+
+// ---- editable densities ----
+// A shape is { kind: 'unif', a, b } or { kind: 'mix', comps: [{ w, m, s }] }.
+
+export const S_MIN = 2 ** -7, S_MAX = 16;
+
+// The standardized family, scaled to standard deviation sd (see family()).
+export function familyShape(name, sd) {
+    if (name === 'unif') {
+        const w = sd * Math.sqrt(12);
+        return { kind: 'unif', a: -w / 2, b: w / 2 };
+    }
+    const comps = name === 'gauss' ? [{ w: 1, m: 0, s: 1 }] : BIMODAL;
+    return { kind: 'mix', comps: comps.map(k => ({ w: k.w, m: k.m * sd, s: k.s * sd })) };
+}
+
+export function shapeDist(shape) {
+    return shape.kind === 'unif' ? unifDist(shape.a, shape.b) : mixDist(shape.comps);
+}
+
+export function shapeMoments(shape) {
+    if (shape.kind === 'unif') {
+        return { mean: (shape.a + shape.b) / 2, sd: (shape.b - shape.a) / Math.sqrt(12) };
+    }
+    const c = shape.comps;
+    const mean = c.reduce((t, k) => t + k.w * k.m, 0);
+    const v = c.reduce((t, k) => t + k.w * (k.s * k.s + k.m * k.m), 0) - mean * mean;
+    return { mean, sd: Math.sqrt(Math.max(v, 0)) };
+}
+
+// Stretch the shape about its mean so its standard deviation is sd.
+export function rescaleShape(shape, sd) {
+    const { mean, sd: sd0 } = shapeMoments(shape);
+    const k = sd / sd0;
+    if (shape.kind === 'unif') {
+        return { kind: 'unif', a: mean + (shape.a - mean) * k, b: mean + (shape.b - mean) * k };
+    }
+    return {
+        kind: 'mix',
+        comps: shape.comps.map(c => ({ w: c.w, m: mean + (c.m - mean) * k, s: clamp(c.s * k, S_MIN, S_MAX) })),
+    };
+}
+
+// Move component i so the mixture density at its mean is y: the mean goes
+// to x, and s solves w_i / (s √2π) = y − (the other components' density at x).
+export function setPeak(comps, i, x, y) {
+    const c = comps[i];
+    let other = 0;
+    comps.forEach((k, j) => { if (j !== i) other += k.w * gPdf(x, k.m, k.s); });
+    const own = y - other;
+    const s = own > 0 ? clamp(c.w / (own * SQ2PI), S_MIN, S_MAX) : S_MAX;
+    return comps.map((k, j) => (j === i ? { w: k.w, m: x, s } : k));
 }

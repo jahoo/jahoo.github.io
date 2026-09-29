@@ -50,19 +50,36 @@ Two facts do most of the work in what follows.
 
 The right-hand panel below draws entropy as an area. Give each outcome a column whose width is its probability and whose height is its surprisal. The widths add to 1, so the total area equals the average height, which is $H$.
 
+Drag the bars to set the pmf $\pmf$. The slider tempers it: the figure shows $\pmf^{\beta}(x) \propto \pmf(x)^{\beta}$, which sharpens $\pmf$ for $\beta > 1$ and flattens it toward uniform for $\beta < 1$.^[{-} This is temperature scaling with $\beta = 1/T$; see [temperature scaling and truncation](/posts/temperature-scaling/).]
+
 ::: {.wide .extra-wide}
 ```{=html}
 <div class="de-fig">
 <div class="de-controls">
 <div class="de-ctl">
-<label for="de-a-beta">sharpness \(\beta\) = <b id="de-a-betav">1.00</b></label>
+<label for="de-a-beta">inverse temperature \(\beta\) = <b id="de-a-betav">1.00</b></label>
 <input type="range" id="de-a-beta" min="0" max="5" step="0.05" value="1">
 </div>
+<div class="de-ctl de-ctl-narrow">
+<label for="de-a-preset">base \(p\)</label>
+<select id="de-a-preset">
+<option value="default" selected>default</option>
+<option value="unimodal">unimodal</option>
+<option value="uniform">uniform</option>
+<option value="peaked">peaked</option>
+<option value="bimodal">bimodal</option>
+<option value="zipf">zipf</option>
+<option value="custom" hidden>custom</option>
+</select>
+</div>
+<div class="de-btns">
 <button class="de-btn" id="de-a-shuffle" type="button">Shuffle labels</button>
+<button class="de-btn" id="de-a-unshuffle" type="button" disabled>Reset order</button>
+</div>
 </div>
 <div class="de-panels">
 <div>
-<div class="de-ptitle">pmf over eight outcomes</div>
+<div class="de-ptitle">pmf over eight outcomes (drag the bars)</div>
 <svg id="de-a-pmf" role="img" aria-label="Bar chart of the pmf"></svg>
 </div>
 <div>
@@ -71,7 +88,8 @@ The right-hand panel below draws entropy as an area. Give each outcome a column 
 </div>
 </div>
 <div class="de-readouts">
-<span><span class="k">\(H(X)\) = </span><span class="v" id="de-a-H">–</span> bits</span>
+<span><span class="k">\(H(p^{\beta})\) = </span><span class="v" id="de-a-H">–</span> bits</span>
+<span><span class="k">\(H(p)\) = </span><span class="v" id="de-a-Hbase">–</span> bits</span>
 <span><span class="k">range: </span><span class="v">\(0 \le H \le \log 8 = 3\)</span></span>
 </div>
 </div>
@@ -79,7 +97,7 @@ The right-hand panel below draws entropy as an area. Give each outcome a column 
 :::
 
 ::: {.de-caption}
-The pmf is a softmax of fixed logits with inverse temperature $\beta$. At $\beta = 0$ it is uniform and every column has height 3 bits. Raising $\beta$ piles mass onto one outcome: its column gets wide and short, the others get narrow and tall, and the area shrinks toward 0 but never goes below the axis. **Shuffle labels** reorders the outcomes; the set of column shapes is unchanged, and so is $H$.
+Outlined bars with a dark top edge are the base $\pmf$ you edit; filled bars are the tempered $\pmf^{\beta}$, which the right panel and $H$ describe. The two coincide at $\beta = 1$. At $\beta = 0$ the tempered pmf is uniform and every column has height 3 bits. Raising $\beta$ piles mass onto the most probable outcome: its column gets wide and short, the others get narrow and tall, and the area shrinks toward 0 but never goes below the axis. **Shuffle labels** reorders the outcomes; the set of column shapes is unchanged, and so is $H$. **Reset order** puts them back in alphabetical order.
 :::
 
 # The same recipe with a density
@@ -108,7 +126,7 @@ What breaks is the first fact. A density is not a probability; it is probability
 </div>
 <div class="de-panels">
 <div>
-<div class="de-ptitle">Density \(f(x)\); mass where \(f &gt; 1\) in magenta</div>
+<div class="de-ptitle">Density \(f(x)\) (drag the handles); mass where \(f &gt; 1\) in magenta</div>
 <svg id="de-b-pdf" role="img" aria-label="Density plot"></svg>
 </div>
 <div>
@@ -127,7 +145,7 @@ What breaks is the first fact. A density is not a probability; it is probability
 :::
 
 ::: {.de-caption}
-The magenta slice of mass on the left is exactly the magenta stretch of the horizontal axis on the right: the part of the distribution whose log-density term is negative. Shrink $\sigma$ and more of the mass moves above the $\pdf = 1$ line. The dashed box on the left is the uniform density with the same $h$; its width, $2^h$, is one reading of what $h$ measures. At a fixed $\sigma$, switch families: the Gaussian always has the largest $h$, $\tfrac12\log(2\pi e\sigma^2)$.
+The magenta slice of mass on the left is exactly the magenta stretch of the horizontal axis on the right: the part of the distribution whose log-density term is negative. Drag a handle sideways to move that component, and up or down to make it taller and narrower or shorter and wider. The $\sigma$ slider rescales the current shape about its mean, and the family buttons reset it. Shrink $\sigma$, or raise a peak, and more of the mass moves above the $\pdf = 1$ line. The dashed box on the left is the uniform density with the same $h$; its width, $2^h$, is one reading of what $h$ measures. At a fixed $\sigma$, switch families: the Gaussian always has the largest $h$, $\tfrac12\log(2\pi e\sigma^2)$.
 :::
 
 ::: {.callout-note title="On the word surprisal"}
@@ -179,7 +197,7 @@ The discrete entropy goes to infinity: pinning down a real number exactly takes 
 <svg id="de-c-curve" role="img" aria-label="H of the quantized variable against log of one over delta"></svg>
 </div>
 <div>
-<div class="de-ptitle">Density and its histogram at bin width \(\Delta\) (bar height \(p_i/\Delta\))</div>
+<div class="de-ptitle">Density and histogram at bin width \(\Delta\) (drag the handles)</div>
 <svg id="de-c-pdf" role="img" aria-label="Density with histogram bars"></svg>
 </div>
 </div>
@@ -194,7 +212,7 @@ The discrete entropy goes to infinity: pinning down a real number exactly takes 
 :::
 
 ::: {.de-caption}
-The **ochre curve** is the true discrete entropy $H(\Xq)$. It never enters the shaded region below zero. Once the bins are small compared with the density's features, it rises one bit per halving of $\bw$ and runs along the **dashed teal line** $h(X) + \log(1/\bw)$. The teal dot is where that line crosses $\bw = 1$: that height is $h(X)$. With the defaults (a Gaussian with $\sigma = 1/8$), the whole distribution fits inside one unit-width bin, so the true entropy at $\bw = 1$ is almost 0, while the extrapolated line is at $-0.95$. **That gap is the negativity of $h$**: it comes from extending a small-$\bw$ approximation to a resolution where it no longer holds. Widen $\sigma$ past about 0.24 and the intercept rises above zero.
+The **ochre curve** is the true discrete entropy $H(\Xq)$. It never enters the shaded region below zero. Once the bins are small compared with the density's features, it rises one bit per halving of $\bw$ and runs along the **dashed teal line** $h(X) + \log(1/\bw)$. The histogram bars have height $\pmf_i/\bw$, which puts them on the density's scale. The teal dot is where that line crosses $\bw = 1$: that height is $h(X)$. With the defaults (a Gaussian with $\sigma = 1/8$), the whole distribution fits inside one unit-width bin, so the true entropy at $\bw = 1$ is almost 0, while the extrapolated line is at $-0.95$. **That gap is the negativity of $h$**: it comes from extending a small-$\bw$ approximation to a resolution where it no longer holds. Widen $\sigma$ past about 0.24 and the intercept rises above zero. The density is editable as in the previous figure. Put a narrow bump beside a wide one and the curve rises more slowly than one bit per halving until the bins resolve both: its slope is the fraction of the mass whose shape the bins resolve.
 :::
 
 This picture also explains the limit of a distribution concentrating to a point. For a discrete variable, piling all the mass on one outcome drives $H$ down to 0. For a Gaussian with $\sigma \to 0$, the whole ochre curve slides right, and $h = \tfrac12\log(2\pi e\sigma^2) \to -\infty$. At any fixed resolution $\bw$, though, $H(\Xq)$ still bottoms out at 0 as soon as the mass fits in one bin. Nothing about Shannon entropy went wrong; the intercept moved.

@@ -1,11 +1,15 @@
 // ================================================================
 //  The same recipe with a density: f(x) with the f > 1 mass marked,
 //  and -log2 f(x) drawn against u = F(x), so h is the net area.
+//  The density is editable: drag its handles, rescale it with σ, or
+//  reset it to a family preset.
 // ================================================================
 
-import { log2, family, densityPts } from './dist.js';
+import { log2, densityPts, sampleXs, familyShape, shapeDist, shapeMoments } from './dist.js';
 import { Plot, txt } from './svgplot.js';
-import { fmt, setSigned, setText, powLabel, segButtons } from './ui.js';
+import { fmt, setSigned, setText } from './ui.js';
+import { createDensityEditor } from './density-edit.js';
+import { bindShapeControls, shapeWindow, growWindow } from './shape-controls.js';
 
 export function initDensity() {
     const svgPdf = document.getElementById('de-b-pdf');
@@ -14,17 +18,29 @@ export function initDensity() {
     if (!svgPdf || !svgArea || !slider) return;
     const P1 = new Plot(svgPdf, { w: 520, h: 320 });
     const P2 = new Plot(svgArea, { w: 520, h: 320 });
-    let fam = 'gauss';
+    let shape = familyShape('gauss', 2 ** (+slider.value));
+    let win = null; // data window of the density panel, held fixed during a drag
+
+    const controls = bindShapeControls({
+        slider, label: document.getElementById('de-b-sdv'), famGroup: document.getElementById('de-b-fam'),
+        get: () => shape, set: s => { shape = s; draw(); },
+    });
+    const editor = createDensityEditor(P1, {
+        getShape: () => shape,
+        setShape: s => { shape = s; draw(); },
+        onEnd: () => draw(),
+    });
 
     function draw() {
-        const sd = 2 ** (+slider.value);
-        setText(document.getElementById('de-b-sdv'), powLabel(sd));
-        const d = family(fam, sd);
+        const d = shapeDist(shape);
+        const { mean } = shapeMoments(shape);
+        if (!editor.dragging || !win) win = shapeWindow(shape, d, 1.35);
+        else growWindow(win, shape, d);
+        controls.sync();
 
-        const xr = 4.2 * sd, ymax = Math.max(1.35, d.peak * 1.12);
-        P1.domain(-xr, xr, 0, ymax);
+        P1.domain(win.x0, win.x1, 0, win.y1);
         P1.axes({ nx: 6, ny: 5, xlabel: 'x', ylabel: 'f(x)' });
-        const pts = densityPts(d, -xr, xr, 600);
+        const pts = densityPts(d, win.x0, win.x1, 600);
         P1.area(pts, 'fm');
         // shade (and total) the mass where f > 1
         let pneg = 0;
@@ -40,13 +56,14 @@ export function initDensity() {
                 if (pt[1] > 1) { if (start === null) start = pt[0]; seg.push(pt); }
                 else if (start !== null) flush(pt[0]);
             }
-            if (start !== null) flush(xr);
+            if (start !== null) flush(win.x1);
         }
         P1.path(pts, 'curve');
         P1.hline(1, 'ref');
         txt(P1.front, P1.pr - 4, P1.Y(1) - 6, 'f = 1', 'lbl soft', { 'text-anchor': 'end' });
         const eff = 2 ** d.h;
-        P1.rect(-eff / 2, 0, eff / 2, 1 / eff, 'eqbox');
+        P1.rect(mean - eff / 2, 0, mean + eff / 2, 1 / eff, 'eqbox');
+        editor.draw(d);
 
         P2.domain(0, 1, -5, 9);
         P2.axes({
@@ -57,8 +74,8 @@ export function initDensity() {
         if (d.kind === 'unif') mp = [[0, d.h], [1, d.h]];
         else {
             mp = [];
-            for (let i = 0; i <= 1200; i++) {
-                const x = d.lo + (d.hi - d.lo) * i / 1200, f = d.pdf(x);
+            for (const x of sampleXs(d.comps, d.lo, d.hi, 1200)) {
+                const f = d.pdf(x);
                 if (f > 1e-300) mp.push([d.cdf(x), -log2(f)]);
             }
         }
@@ -75,7 +92,5 @@ export function initDensity() {
         setText(document.getElementById('de-b-eff'), String(+eff.toPrecision(3)));
     }
 
-    segButtons(document.getElementById('de-b-fam'), v => { fam = v; draw(); });
-    slider.addEventListener('input', draw);
     draw();
 }

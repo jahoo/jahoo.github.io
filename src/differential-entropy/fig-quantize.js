@@ -3,9 +3,11 @@
 //  asymptote h + log2(1/Δ), and the histogram at the current Δ.
 // ================================================================
 
-import { family, densityPts, binRange, quantH } from './dist.js';
+import { densityPts, binRange, quantH, familyShape, shapeDist, shapeMoments } from './dist.js';
 import { Plot, el, txt } from './svgplot.js';
-import { fmt, setSigned, setText, powLabel, segButtons } from './ui.js';
+import { fmt, setSigned, setText } from './ui.js';
+import { createDensityEditor } from './density-edit.js';
+import { bindShapeControls, shapeWindow, growWindow } from './shape-controls.js';
 
 const T_MIN = -3, T_MAX = 12; // range of log2(1/Δ)
 
@@ -27,19 +29,32 @@ export function initQuantize() {
     if (!svgCurve || !svgPdf || !sS || !sD) return;
     const P1 = new Plot(svgCurve, { w: 600, h: 380, m: { l: 48, r: 16, t: 14, b: 42 } });
     const P2 = new Plot(svgPdf, { w: 440, h: 380, m: { l: 44, r: 12, t: 14, b: 42 } });
-    let fam = 'gauss';
+    let shape = familyShape('gauss', 2 ** (+sS.value));
+    let win = null; // data window of the density panel, held fixed during a drag
     let cacheKey = '', curve = null; // H(X_Δ) over the whole Δ range depends only on the distribution
 
+    const controls = bindShapeControls({
+        slider: sS, label: document.getElementById('de-c-sdv'), famGroup: document.getElementById('de-c-fam'),
+        get: () => shape, set: s => { shape = s; draw(); },
+    });
+    const editor = createDensityEditor(P2, {
+        getShape: () => shape,
+        setShape: s => { shape = s; draw(); },
+        onEnd: () => draw(),
+    });
+
     function draw() {
-        const sd = 2 ** (+sS.value), t = +sD.value, D = 2 ** (-t);
-        setText(document.getElementById('de-c-sdv'), powLabel(sd));
+        const t = +sD.value, D = 2 ** (-t);
         setText(document.getElementById('de-c-dv'), deltaLabel(t));
-        const d = family(fam, sd);
-        const key = fam + '|' + sS.value;
+        const d = shapeDist(shape);
+        controls.sync();
+        // coarser curve while dragging, full resolution once released
+        const key = JSON.stringify(shape) + (editor.dragging ? '|drag' : '');
         if (key !== cacheKey) {
             cacheKey = key;
             curve = [];
-            for (let tt = T_MIN; tt <= T_MAX + 1e-4; tt += 0.0625) {
+            const step = editor.dragging ? 0.25 : 0.0625;
+            for (let tt = T_MIN; tt <= T_MAX + 1e-4; tt += step) {
                 const DD = 2 ** (-tt);
                 curve.push([tt, DD < d.minScale / 64 ? d.h + tt : quantH(d, DD)]);
             }
@@ -72,9 +87,13 @@ export function initQuantize() {
         txt(P1.front, P1.X(11.9), P1.Y(Math.min(15.2, yEnd)) + (yEnd > 15.2 ? 14 : -8), 'h(X) + log₂(1/Δ)', 'lbl mass', { 'text-anchor': 'end' });
 
         // right: density and histogram (bar height p_i / Δ)
-        const xr = Math.max(4.2 * sd, 0.75 * D);
+        if (!editor.dragging || !win) {
+            win = shapeWindow(shape, d, 1.2);
+            const { mean } = shapeMoments(shape), half = Math.max((win.x1 - win.x0) / 2, 0.75 * D);
+            win.x0 = Math.min(win.x0, mean - half); win.x1 = Math.max(win.x1, mean + half);
+        } else growWindow(win, shape, d);
         const [k0, k1] = binRange(d, D);
-        const kv0 = Math.max(k0, Math.floor(-xr / D - 1)), kv1 = Math.min(k1, Math.ceil(xr / D + 1));
+        const kv0 = Math.max(k0, Math.floor(win.x0 / D - 1)), kv1 = Math.min(k1, Math.ceil(win.x1 / D + 1));
         const drawBars = (kv1 - kv0) <= 360;
         let barMax = 0;
         const bars = [];
@@ -83,13 +102,15 @@ export function initQuantize() {
             bars.push([k, hgt]);
             barMax = Math.max(barMax, hgt);
         }
-        P2.domain(-xr, xr, 0, Math.max(1.2, d.peak * 1.1, barMax * 1.05));
+        if (!editor.dragging) win.y1 = Math.max(win.y1, barMax * 1.05);
+        P2.domain(win.x0, win.x1, 0, win.y1);
         P2.axes({ nx: 5, ny: 5, xlabel: 'x', ylabel: 'density' });
         for (const [k, hgt] of bars) if (hgt > 0) P2.rect((k - .5) * D, 0, (k + .5) * D, hgt, 'bar');
-        const pts = densityPts(d, -xr, xr, 500);
+        const pts = densityPts(d, win.x0, win.x1, 500);
         P2.area(pts, 'fm');
         P2.path(pts, 'curve');
         P2.hline(1, 'ref');
+        editor.draw(d);
         if (!drawBars) txt(P2.front, P2.pl + 8, P2.pt + 16, 'bins are finer than the plot can show', 'lbl soft', {});
 
         setText(document.getElementById('de-c-H'), Hq.toFixed(3));
@@ -98,8 +119,6 @@ export function initQuantize() {
         setSigned(document.getElementById('de-c-h'), d.h, 3);
     }
 
-    segButtons(document.getElementById('de-c-fam'), v => { fam = v; draw(); });
-    sS.addEventListener('input', draw);
     sD.addEventListener('input', draw);
     draw();
 }

@@ -92,6 +92,15 @@ export class Plot {
 
     invX(px) { return this.x0 + (px - this.pl) / (this.pr - this.pl) * (this.x1 - this.x0); }
 
+    invY(py) { return this.y0 + (this.pb - py) / (this.pb - this.pt) * (this.y1 - this.y0); }
+
+    // Pointer event -> SVG user coordinates (the viewBox frame).
+    svgPoint(e) {
+        const pt = this.svg.createSVGPoint();
+        pt.x = e.clientX; pt.y = e.clientY;
+        return pt.matrixTransform(this.svg.getScreenCTM().inverse());
+    }
+
     // o: { xticks, yticks, nx, ny, xfmt, yfmt, grid, xlabel, ylabel }
     axes(o = {}) {
         const g = this.back;

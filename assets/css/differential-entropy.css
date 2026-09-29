@@ -100,6 +100,7 @@
 .de-note { color: var(--de-ink-soft); margin: .9rem 0 0; }
 #de-uni-svg { touch-action: pan-y; cursor: ew-resize; }
 
+
 /* ---- SVG marks ---- */
 
 svg.de-plot { width: 100%; height: auto; display: block; overflow: visible; }
@@ -163,3 +164,20 @@ svg.de-plot .hbar.mi { fill: var(--de-atom-soft); stroke: var(--de-atom); stroke
 .de-caption strong { color: var(--de-ink); }
 
 .de-flag { color: var(--de-neg); font-weight: 600; }
+
+/* ---- editing affordances ---- */
+
+.de-ctl.de-ctl-narrow { min-width: 0; flex: 0 1 auto; }
+.de-fig select { font: inherit; padding: .25rem .4rem; }
+
+svg.de-plot .bar-base { fill: none; stroke: var(--de-ink-soft); stroke-width: 1; stroke-dasharray: 3 2; }
+svg.de-plot .grip { stroke: var(--de-ink); stroke-width: 2.5; stroke-linecap: round; }
+svg.de-plot .grip.active { stroke: var(--de-focus); }
+svg.de-plot .handle.grab { cursor: grab; }
+svg.de-plot .handle.active { stroke: var(--de-focus); }
+/* Let a touch on a handle or bar drag it instead of scrolling the page. */
+svg.de-plot .handle, #de-a-pmf { touch-action: none; }
+
+.de-btns { display: flex; gap: .5rem; }
+.de-btn:disabled { color: var(--de-ink-soft); opacity: .55; cursor: default; }
+.de-btn:disabled:hover { border-color: var(--de-rule); }

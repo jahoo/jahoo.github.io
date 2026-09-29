@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
     log2, erfc, gMass, numEntropy, gPdf, mixDist, unifDist, BIMODAL,
     family, quantH, softmax, shannonH, quantile,
+    temper, withProb, familyShape, shapeDist, shapeMoments, rescaleShape, setPeak,
 } from './dist.js';
 
 const close = (a, b, tol, msg) =>
@@ -85,5 +86,64 @@ describe('discrete helpers', () => {
         const d = family('gauss', 1);
         close(quantile(d, 0.5), 0, 1e-6);
         close(d.cdf(quantile(d, 0.25)), 0.25, 1e-6);
+    });
+});
+
+const sum = a => a.reduce((x, y) => x + y, 0);
+
+describe('temper', () => {
+    it('is the identity at beta = 1 and uniform at beta = 0', () => {
+        const p = [0.5, 0.3, 0.2];
+        temper(p, 1).forEach((v, i) => close(v, p[i], 1e-12));
+        temper(p, 0).forEach(v => close(v, 1 / 3, 1e-12));
+    });
+    it('tempering a softmax scales its logits', () => {
+        const L = [1.9, 0.2, 1.1, -0.6];
+        const a = temper(softmax(L, 1), 2.5), b = softmax(L, 2.5);
+        a.forEach((v, i) => close(v, b[i], 1e-12));
+    });
+});
+
+describe('withProb', () => {
+    it('hits the target, sums to 1, keeps the others in proportion', () => {
+        const p = [0.1, 0.2, 0.3, 0.4];
+        const q = withProb(p, 1, 0.5, 0.01);
+        close(q[1], 0.5, 1e-12);
+        close(sum(q), 1, 1e-12);
+        close(q[3] / q[2], 4 / 3, 1e-12);
+    });
+    it('respects the floor', () => {
+        const q = withProb([0.25, 0.25, 0.25, 0.25], 0, 1, 0.02);
+        q.forEach(v => assert.ok(v >= 0.02 - 1e-12));
+        close(sum(q), 1, 1e-12);
+    });
+});
+
+describe('editable shapes', () => {
+    it('familyShape matches family()', () => {
+        for (const fam of ['gauss', 'unif', 'bimodal']) {
+            close(shapeDist(familyShape(fam, 0.3)).h, family(fam, 0.3).h, 1e-9, fam);
+            close(shapeMoments(familyShape(fam, 0.3)).sd, 0.3, 1e-12, fam);
+        }
+    });
+    it('rescaleShape sets the sd, keeps the mean, and shifts h by log2 of the factor', () => {
+        const s0 = { kind: 'mix', comps: [{ w: .3, m: -1, s: .2 }, { w: .7, m: 2, s: .5 }] };
+        const s1 = rescaleShape(s0, 3 * shapeMoments(s0).sd);
+        close(shapeMoments(s1).sd, 3 * shapeMoments(s0).sd, 1e-12);
+        close(shapeMoments(s1).mean, shapeMoments(s0).mean, 1e-12);
+        close(shapeDist(s1).h - shapeDist(s0).h, log2(3), 1e-4);
+    });
+    it('setPeak puts the mixture density at the new mean equal to y', () => {
+        const comps = [{ w: .6, m: 0, s: .3 }, { w: .4, m: 1, s: .4 }];
+        const c = setPeak(comps, 0, 0.2, 1.7);
+        close(c[0].m, 0.2, 1e-12);
+        close(mixDist(c).pdf(0.2), 1.7, 1e-9);
+        assert.deepEqual(c[1], comps[1]);
+    });
+    it('h stays accurate for a narrow component far from a wide one', () => {
+        // two well-separated components: h = sum w_i h_i + H(w)
+        const comps = [{ w: .5, m: -20, s: .01 }, { w: .5, m: 20, s: 2 }];
+        const hi = s => 0.5 * log2(2 * Math.PI * Math.E * s * s);
+        close(mixDist(comps).h, .5 * hi(.01) + .5 * hi(2) + 1, 1e-3);
     });
 });
