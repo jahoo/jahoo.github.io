@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc-markdown-css-theme" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Jacob Hoover Vigly" />
+  <meta name="dcterms.date" content="2026-09-30" />
+  <meta name="description" content="Scientific Program Coordinator at CHI FRO, LLC. Formerly Postdoc at MIT, Department of Brain and Cognitive Sciences. PhD in Linguistics from McGill University." />
+  <title>Visualizing expected value</title>
+  <!--
+    Preload the two navbar fonts used above the fold on every page.
+    `font-display: swap` already prevents invisible text, but the fonts
+    aren't discovered until after CSS parses — these hints let the browser
+    start fetching them alongside the CSS, eliminating a visible swap for
+    the site-title `Linux Biolinum Outline` and nav-link `Linux Libertine`.
+    `crossorigin` is required on `as=font` preloads even for same-origin.
+  -->
+
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+        href="/assets/fonts/LinBiolinum/LinBiolinum_aU.woff2" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+        href="/assets/fonts/LinLibertine/LinLibertine_Re-4.1_.8_.woff2" />
+
+  <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/theme.css" />
+  <link rel="stylesheet" href="/assets/css/code.css" />
+  <link rel="stylesheet" href="/assets/css/overrides.css" />
+  <link rel="stylesheet" href="/assets/css/site-chrome.css" />
+  <link rel="stylesheet" href="/assets/css/expectation.css" />
+<script>
+MathJax = {
+  // tex-chtml ships base + AMS only. mathtools adds the commands LaTeX authors
+  // reach for without thinking — \coloneqq and friends — which otherwise render
+  // as red literal text.
+  loader: { load: ['[tex]/mathtools'] },
+  tex: {
+    packages: { '[+]': ['mathtools'] },
+    inlineMath: [['\\(', '\\)'], ['$', '$']],
+    displayMath: [['\\[', '\\]'], ['$$', '$$']],
+    // AMS-style numbering: only {equation}/{align} environments get
+    // numbers, so ordinary $ displays stay untagged.
+    tags: 'ams'
+    , macros: { "dee": "\\mathop{\\mathrm{d}\\!}", "defeq": "\\triangleq", "pmf": ["\\mathrm{pmf}_{#1}", 1], "pdf": ["\\mathrm{pdf}_{#1}", 1] }
+  },
+  options: {
+    // Disable click-to-explore on math. Without these, clicking on a
+    // rendered formula (e.g. math inside a button label) gets intercepted
+    // by MathJax's a11y explorer and highlights subexpressions instead of
+    // triggering the underlying button. The right-click context menu is
+    // still available.
+    //
+    // MathJax v4 has no single `explorer` setting — the feature is split
+    // across enrich (semantic tree), speech, braille, inTabOrder. Turning
+    // off enrich alone is enough to stop the click behavior (no tree for
+    // the explorer to walk), but we also zero the others so they don't
+    // appear enabled in the right-click menu.
+    menuOptions: {
+      settings: {
+        enrich: false,
+        speech: false,
+        braille: false,
+        inTabOrder: false
+      }
+    }
+  }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrapper">
+    <a class="site-title" href="/">
+      <span class="site-title-full">jacob hoover vigly</span>
+      <span class="site-title-short">jacob vigly</span>
+      <span class="site-title-xs">jv</span>
+    </a>
+    <nav class="site-nav">
+      <div class="trigger">
+        <a class="page-link" href="/">home</a>
+        <a class="page-link" href="/posts/">blog</a>
+      </div>
+    </nav>
+  </div>
+</header>
+<script src="/assets/js/section-marks.js" defer></script>
+<script src="/assets/js/active-nav.js" defer></script>
+
+
+<header>
+
+<h1 class="title">Visualizing expected value</h1>
+
+<p class="subtitle">A visual interpretation of the expectation of a
+function of a random variable (discrete or continuous) as the area over
+the unit interval</p>
+<p class="post-meta">
+  <time datetime="2026-09-30">2026-09-30</time>
+  · Jacob Hoover Vigly
+  · <span class="post-tags">exploration</span>
+</p>
+</header>
+
+
+<hr class="post-divider" />
+
+
+
+<main>
+<p>Let <span class="math inline">\(X\)</span> be a real random variable,
+specified by its cumulative distribution function <span
+class="math inline">\(F_X(x) = P(X \le x)\)</span>.<span
+class="sidenote-wrapper"><label for="sn-0" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-0" class="margin-toggle"/><span
+class="sidenote">Formally, <span class="math inline">\(X : \Omega \to
+\mathbb{R}\)</span> is a measurable map on a probability space <span
+class="math inline">\((\Omega, \mathcal{F}, P)\)</span>, and its law is
+the pushforward <span class="math inline">\(P_X \defeq X_* P\)</span>,
+so that <span class="math inline">\(P_X(A) = P(X \in A)\)</span> for
+every Borel set <span class="math inline">\(A\)</span>. The law is
+determined by <span class="math inline">\(F_X(x) = P_X\big((-\infty,
+x]\big)\)</span>.<br />
+<br />
+</span></span> The expectation of a function <span
+class="math inline">\(g\)</span> of <span
+class="math inline">\(X\)</span> is the sum or integral of <span
+class="math inline">\(g\)</span> weighted by the probability mass
+function <span class="math inline">\(\pmf{X}\)</span> or the probability
+density function <span class="math inline">\(\pdf{X}\)</span>:</p>
+<p><span class="math display">\[ \mathbb{E}[g(X)] \;\defeq\;
+\begin{cases} \displaystyle\sum_x g(x)\,\pmf{X}(x) &amp; \text{if } X
+\text{ is discrete,} \\[1.2ex] \displaystyle\int g(x)\,\pdf{X}(x)
+\dee{x} &amp; \text{if } X \text{ is continuous.} \end{cases}
+\]</span></p>
+<p>In what follows, we write <span class="math inline">\(p_X\)</span>
+for either pdf or pmf.<span
+class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle"/><span
+class="sidenote">This isn’t sloppy. Both are densities of the law, <span
+class="math inline">\(p_X = \dee{P_X} / \dee{\mu}\)</span>, with respect
+to a reference measure <span class="math inline">\(\mu\)</span> on <span
+class="math inline">\(\mathbb{R}\)</span>. We simply swap out which
+reference measure we are using: in the discrete case, it isthe counting
+measure, in the continuous case it is the Lebesgue measure. Both cases
+of the definition are then one: <span class="math display">\[
+\begin{aligned}
+\mathbb{E}[g(X)]
+&amp;\defeq \int_\Omega g \circ X \dee{P} \\
+&amp;= \int_{\mathbb{R}} g \dee{P_X} \\
+&amp;= \int_{\mathbb{R}} g \, p_X \dee{\mu}
+\end{aligned}
+\]</span><br />
+<br />
+</span></span></p>
+<p>We can equivalently write the expectation as an integral over the
+unit interval, using a substitution by <span
+class="math inline">\(F_X^{-1}(u) = \inf\{x : F_X(x) \ge u\}\)</span>,
+the inverse CDF (aka quantile function).<span
+class="sidenote-wrapper"><label for="sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-2" class="margin-toggle"/><span
+class="sidenote">If <span class="math inline">\(X\)</span> is discrete,
+<span class="math inline">\(F_X\)</span> is a staircase that jumps by
+<span class="math inline">\(p_X(x)\)</span> at each outcome <span
+class="math inline">\(x\)</span>. The infimum simply picks the first
+<span class="math inline">\(x\)</span> at which the staircase reaches
+<span class="math inline">\(u\)</span>, so <span
+class="math inline">\(F_X^{-1}(u) = x\)</span> for every <span
+class="math inline">\(u\)</span> in the interval <span
+class="math inline">\(\big(P(X &lt; x),\, P(X \le x)\big]\)</span>.
+These intervals partition <span class="math inline">\([0, 1]\)</span>
+into blocks, one per outcome, each as wide as its probability, in order
+of <span class="math inline">\(x\)</span>; <span
+class="math inline">\(F_X^{-1}\)</span> is the staircase that takes the
+value <span class="math inline">\(x\)</span> on the block for <span
+class="math inline">\(x\)</span>.<br />
+<br />
+</span></span></p>
+<p><span class="math display">\[
+\mathbb{E}[g(X)] = \int_0^1 g\big(F_X^{-1}(u)\big) \dee{u}
+\]</span></p>
+<div class="callout callout-note">
+<details class="callout-details"><summary>More on that substitution...</summary>
+<div class="callout-body">
+<p>This is the substitution <span class="math inline">\(x =
+F_X^{-1}(u)\)</span>: where <span class="math inline">\(X\)</span> has a
+density, <span class="math inline">\(\dee{u} = p_X(x) \dee{x}\)</span>,
+so the weight <span class="math inline">\(p_X(x) \dee{x}\)</span>
+becomes the width <span class="math inline">\(\dee{u}\)</span>. In
+general, for <span class="math inline">\(U \sim \mathrm{Uniform}[0,
+1]\)</span>,</p>
+<p><span class="math display">\[
+F_X^{-1}(u) \le x \iff u \le F_X(x) \\\Longrightarrow\quad
+P\big(F_X^{-1}(U) \le x\big) = P\big(U \le F_X(x)\big) = F_X(x),
+\]</span></p>
+<p>so <span class="math inline">\(F_X^{-1}(U)\)</span> has the law of
+<span class="math inline">\(X\)</span> (this is the identity behind
+“inverse-transform sampling”), and <span
+class="math inline">\(\mathbb{E}[g(X)] =
+\mathbb{E}\big[g\big(F_X^{-1}(U)\big)\big]\)</span>.</p>
+<p>I wrote up a note about this kind of density transformation <a
+href="/posts/transform-pdf/">in a previous post</a> (see examples 3, 4,
+and 5).</p>
+</div>
+</details>
+</div>
+<p>The fact that we’ve expressed the expectation as an integral over the
+unit interval of the function <span class="math inline">\(g\)</span>,
+suggests a nice visual interpretation of the expectation as an area. We
+use the map <span class="math inline">\(x \mapsto u = F_X(x)\)</span> to
+rescale the real line into <span class="math inline">\([0, 1]\)</span>
+so that each outcome takes up as much room as its probability. Then
+evaluate <span class="math inline">\(g\)</span> over the rescaled axis,
+and the area under <span class="math inline">\(g \circ F_X^{-1}\)</span>
+is <span class="math inline">\(\mathbb{E}[g(X)]\)</span>.</p>
+<ul>
+<li>If <span class="math inline">\(X\)</span> is discrete, <span
+class="math inline">\(g \circ F_X^{-1}\)</span> is a step function: one
+block of height <span class="math inline">\(g(x)\)</span> and width
+<span class="math inline">\(p_X(x)\)</span> for each outcome <span
+class="math inline">\(x\)</span>, side by side in order of <span
+class="math inline">\(x\)</span>, so the area is the sum.</li>
+<li>If <span class="math inline">\(X\)</span> is continuous, the block
+widths shrink to infinitesimal <span class="math inline">\(p_X(x)
+\dee{x}\)</span>, and the area is the integral.</li>
+</ul>
+<p>Below, play around with visualizing the expectation as an area under
+a curve. Set the density or mass function <span
+class="math inline">\(p_X\)</span>, and the function <span
+class="math inline">\(g\)</span> to integrate, and scrub the <span
+class="math inline">\(x\)</span> or <span
+class="math inline">\(u\)</span> axis to see the area build up.</p>
+<p>In this illustration, <span class="math inline">\(X\)</span> is <span
+class="ex-seg ex-case" role="group"
+aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></span>.</p>
+<div class="ex-bar wide extra-wide" id="ex-bar">
+<div class="ex-case-slot"><div class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></div></div>
+<div class="ex-grp"><label class="ex-lab" for="ex-preset">p<sub>X</sub></label><select id="ex-preset"></select></div>
+<div class="ex-grp"><label class="ex-lab" for="ex-gsel">g(x) =</label>
+<select id="ex-gsel">
+<option value="neglog" selected>−log₂ p_X(x) (entropy)</option>
+<option value="x">x (mean)</option>
+<option value="x2">x² (second moment)</option>
+<option value="var">(x − 𝔼X)² (variance)</option>
+<option value="skew">((x − 𝔼X)/σ)³ (skewness)</option>
+<option value="custom">custom</option>
+</select>
+</div>
+<div class="ex-grp"><button type="button" id="ex-playx">▶ sweep x</button><button type="button" id="ex-playu">▶ sweep u</button></div>
+<div class="ex-grp ex-disc"><button type="button" id="ex-back" aria-label="Previous atom">◀︎ atom</button><button type="button" id="ex-fwd" aria-label="Next atom">atom ▶︎</button></div>
+</div>
+<div class="wide extra-wide ex-wrap">
+<figure class="ex-fig"><div class="ex-canvas"><svg class="ex-plot" id="ex-area" role="img" aria-label="The area under g of the inverse CDF over the unit interval, with the plot of g to its left, the map from x to u above it, and the running integral below it"></svg></div></figure>
+</div>
+<section
+id="why-not-just-visualize-the-expectation-as-area-over-the-whole-line"
+class="level2 unnumbered">
+<h2 class="unnumbered">Why not just visualize the expectation as area
+over the whole line?</h2>
+<p>Directly from the definition of expectation, it’s also visualizable
+as an area over the whole support of <span
+class="math inline">\(X\)</span>, of the function <span
+class="math inline">\(g(x)\,p_X(x)\)</span>. Its part up to <span
+class="math inline">\(x\)</span>, shaded below, is the area up to <span
+class="math inline">\(u = F_X(x)\)</span> above.</p>
+<div class="wide extra-wide ex-wrap">
+<figure class="ex-fig"><div class="ex-canvas"><svg class="ex-plot" id="ex-product" role="img" aria-label="The product of g and the density or mass function of X over x, shaded up to the current x, with its sum or integral so far"></svg></div></figure>
+</div>
+<p>But, compared with the unit interval visualization above, I think
+this simple visualization isn’t as useful for some of the following
+reasons:</p>
+<ul>
+<li><span class="math inline">\(g\)</span> and <span
+class="math inline">\(p_X\)</span> are merged into one curve, so neither
+is visible on its own, and the product is hard to read.</li>
+<li>In the discrete case there is no area to see: <span
+class="math inline">\(g\,p_X\)</span> is a sum of point masses and the
+expectation is the sum of their heights, which isn’t very interesting or
+instructive.</li>
+<li>The discrete and continuous cases are pretty different pictures;
+over the unit interval they are unified.</li>
+<li>The domain is in general the whole real line; the unit interval has
+length 1, so the area there is also the average height over a bounded
+area you can fully plot.</li>
+</ul>
+</section>
+</main>
+
+<script>
+;(function() {
+  // Non-essential if user has JavaScript off. Just makes checkboxes look nicer.
+  var selector = '.task-list > li > input[type="checkbox"]';
+  var checkboxes = document.querySelectorAll(selector);
+  Array.from(checkboxes).forEach((checkbox) => {
+    var wasChecked = checkbox.checked;
+    checkbox.disabled = false;
+    checkbox.addEventListener('click', (ev) => {ev.target.checked = wasChecked});
+  });
+
+  function hoistAbove() {
+    const toHoist = document.querySelectorAll('main > .sidenote-wrapper + :not(.sidenote-wrapper)');
+    for (let i = toHoist.length - 1; i >= 0; i--) {
+      const source = toHoist[i];
+      let target = source.previousElementSibling;
+      while (target.previousElementSibling?.classList.contains('sidenote-wrapper')) {
+        target = target.previousElementSibling;
+      }
+      source.parentNode.insertBefore(source, target);
+    }
+  }
+
+  function sinkBelow() {
+    const toHoist = document.querySelectorAll('main > :not(.sidenote-wrapper) + .sidenote-wrapper');
+    for (let i = 0; i < toHoist.length; i++) {
+      const source = toHoist[i].previousElementSibling;
+      let target = source.nextElementSibling;
+      while (target.classList.contains('sidenote-wrapper')) {
+        target = target.nextElementSibling;
+      }
+      source.parentNode.insertBefore(source, target);
+    }
+  }
+
+  if (window.matchMedia('screen')) {
+    if (window.innerWidth <= 796) {
+      hoistAbove();
+    }
+    let prevSize = window.innerWidth;
+    // Needs to mirror breakpoints in :root settings in CSS variables
+    // 745px = --main-width-narrow
+    // 26px = --line-height
+    // 169px = side note min width narrow
+    const breakpoint = 26 + 550 + 26 + 169 + 26 - 1;
+    window.addEventListener('resize', function() {
+      const newSize = window.innerWidth;
+      if (prevSize >= breakpoint && newSize < breakpoint) {
+        hoistAbove();
+      } else if (prevSize < breakpoint && newSize >= breakpoint) {
+        sinkBelow();
+      }
+      prevSize = newSize;
+    });
+  }
+})();
+</script>
+<script src="/assets/js/expectation.bundle.js"></script>
+<footer class="site-footer">
+  <div class="wrapper">
+    <span class="last-modified">Last modified: 2026-09-30 11:34</span>
+  </div>
+</footer>
+</body>
+</html>
