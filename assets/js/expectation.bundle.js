@@ -174,12 +174,15 @@
     }
     return { x0, x1, y1: Math.max(1.1, peak * 1.12) };
   }
-  function growWindow(win, shape, peak) {
+  function growWindow(win, shape, peak, S) {
     if (peak > 0.92 * win.y1) win.y1 = peak * 1.15;
     const span = win.x1 - win.x0, edge = 0.04 * span;
     const xs = shape.kind === "steps" ? shape.ts : shape.comps.map((c) => c.m);
     if (Math.min(...xs) < win.x0 + edge) win.x0 -= 0.1 * span;
     if (Math.max(...xs) > win.x1 - edge) win.x1 += 0.1 * span;
+    const lo = lerp(S.xs, atU(S, 1e-3)), hi = lerp(S.xs, atU(S, 0.999));
+    if (lo < win.x0) win.x0 = lo - 0.05 * span;
+    if (hi > win.x1) win.x1 = hi + 0.05 * span;
   }
   function createModel() {
     const subs = [];
@@ -193,13 +196,21 @@
     };
     const resample = () => {
       S = sampleShape(m.shape);
-      if (held && win) growWindow(win, m.shape, S.peak);
+      if (held && win) growWindow(win, m.shape, S.peak, S);
       else win = fitWindow(m.shape, S.peak);
     };
     const changed = () => subs.forEach((f) => f());
     resample();
     m.subscribe = (fn) => {
       subs.push(fn);
+    };
+    m.reset = () => {
+      Object.assign(m, { kase: "disc", discKey: "zipf", contKey: "gauss", p: DISC_PRESETS.zipf.p.slice(), shape: structuredClone(CONT_PRESETS.gauss.shape) });
+      customP = null;
+      held = false;
+      win = null;
+      resample();
+      changed();
     };
     m.setCase = (k) => {
       m.kase = k;
@@ -247,8 +258,10 @@
         return;
       }
       const xs = v.S.xs;
-      if (pos.x >= Math.min(b, xs[xs.length - 1]) - 1e-12) pos.u = 1;
-      else if (pos.x <= Math.max(a, xs[0]) + 1e-12) pos.u = 0;
+      if (pos.x >= Math.min(b, xs[xs.length - 1]) - 1e-12) {
+        pos.u = 1;
+        if (v.shape.kind === "mix") pos.x = Infinity;
+      } else if (pos.x <= Math.max(a, xs[0]) + 1e-12) pos.u = 0;
       else pos.u = lerp(v.S.Fs, atX(v.S, pos.x));
     };
     const fromU = () => {
@@ -257,7 +270,8 @@
       if (v.disc) {
         const k = discQuantile(v.F, pos.u);
         pos.x = k === 0 ? 0.5 : k;
-      } else pos.x = clamp(lerp(v.S.xs, atU(v.S, pos.u)), v.xRange[0], v.xRange[1]);
+      } else if (pos.u >= 1 && v.shape.kind === "mix") pos.x = Infinity;
+      else pos.x = clamp(lerp(v.S.xs, atU(v.S, pos.u)), v.xRange[0], v.xRange[1]);
     };
     pos.setX = (x) => {
       pos.driver = "x";
@@ -270,7 +284,8 @@
       fromU();
     };
     pos.refresh = () => pos.driver === "x" ? fromX() : fromU();
-    pos.setX(4.1);
+    pos.reset = () => pos.setX(4.1);
+    pos.reset();
     return pos;
   }
 
@@ -362,6 +377,94 @@
     return { ys, upto: lerp(fr.I, atX(S, fr.x)) };
   }
 
+  // src/expectation/menu.js
+  function createMenu(root) {
+    const btn = root.querySelector(".ex-menu-btn"), cur = root.querySelector(".ex-menu-cur");
+    const list = root.querySelector(".ex-menu-list"), items = [...list.querySelectorAll("[role=option]")];
+    const listeners = [];
+    let value = (items.find((li) => li.getAttribute("aria-selected") === "true") || items[0]).dataset.v;
+    items.forEach((li) => {
+      li.tabIndex = -1;
+    });
+    const shown = () => items.filter((li) => !li.hidden);
+    function render() {
+      for (const li2 of items) li2.setAttribute("aria-selected", li2.dataset.v === value ? "true" : "false");
+      const li = items.find((x) => x.dataset.v === value);
+      if (li) cur.replaceChildren(...[...li.childNodes].map((n) => n.cloneNode(true)));
+    }
+    function open() {
+      const r = btn.getBoundingClientRect();
+      Object.assign(list.style, { left: r.left + "px", top: r.bottom + 4 + "px", minWidth: r.width + "px" });
+      list.hidden = false;
+      btn.setAttribute("aria-expanded", "true");
+      (items.find((x) => x.dataset.v === value && !x.hidden) || shown()[0])?.focus();
+    }
+    function close(refocus) {
+      if (list.hidden) return;
+      list.hidden = true;
+      btn.setAttribute("aria-expanded", "false");
+      if (refocus) btn.focus();
+    }
+    function choose(v) {
+      close(true);
+      if (v === value) return;
+      value = v;
+      render();
+      listeners.forEach((f) => f());
+    }
+    btn.addEventListener("click", () => list.hidden ? open() : close(false));
+    btn.addEventListener("keydown", (e) => {
+      if (["ArrowDown", "ArrowUp", "Enter", " "].includes(e.key)) {
+        e.preventDefault();
+        open();
+      }
+    });
+    list.addEventListener("click", (e) => {
+      const li = e.target.closest("[role=option]");
+      if (li && !li.hidden) choose(li.dataset.v);
+    });
+    list.addEventListener("keydown", (e) => {
+      const vis = shown(), i = vis.indexOf(document.activeElement);
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        vis[Math.min(vis.length - 1, i + 1)]?.focus();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        vis[Math.max(0, i - 1)]?.focus();
+      } else if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        if (vis[i]) choose(vis[i].dataset.v);
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        close(true);
+      } else if (e.key === "Tab") close(false);
+    });
+    document.addEventListener("pointerdown", (e) => {
+      if (!root.contains(e.target)) close(false);
+    });
+    addEventListener("scroll", () => close(false), { passive: true });
+    addEventListener("resize", () => close(false));
+    return {
+      get value() {
+        return value;
+      },
+      set value(v) {
+        if (v !== value) {
+          value = v;
+          render();
+        }
+      },
+      // show or hide one option (a hidden option can still be the value, set by the page)
+      hide(v, hidden) {
+        const li = items.find((x) => x.dataset.v === v);
+        if (li) li.hidden = hidden;
+      },
+      addEventListener(type, f) {
+        if (type === "change") listeners.push(f);
+      }
+    };
+  }
+
   // src/expectation/controls.js
   var $ = (id) => document.getElementById(id);
   function seg(box, onChange) {
@@ -374,15 +477,11 @@
   }
   function bindControls({ model, pos, ui, redraw, customG }) {
     let raf = 0, t0 = 0, which = null;
-    const playLabel = { x: "\u25B6 sweep x", u: "\u25B6 sweep u" };
     function stopPlay() {
       if (raf) cancelAnimationFrame(raf);
       raf = 0;
       which = null;
-      for (const w of ["x", "u"]) {
-        const b = $("ex-play" + w);
-        if (b) b.textContent = playLabel[w];
-      }
+      for (const w of ["x", "u"]) $("ex-play" + w)?.classList.remove("playing");
     }
     function tick(t) {
       if (!t0) t0 = t;
@@ -402,22 +501,15 @@
       which = w;
       t0 = 0;
       raf = requestAnimationFrame(tick);
-      const b = $("ex-play" + w);
-      if (b) b.textContent = "\u275A\u275A pause";
+      $("ex-play" + w)?.classList.add("playing");
     }
     $("ex-playx")?.addEventListener("click", () => play("x"));
     $("ex-playu")?.addEventListener("click", () => play("u"));
-    function step(dir) {
+    $("ex-whole")?.addEventListener("click", () => {
       stopPlay();
-      const n = model.view().n;
-      const p = model.view().p;
-      let next = dir > 0 ? Math.floor(pos.x + 1e-9) + 1 : Math.ceil(pos.x - 1e-9) - 1;
-      while (next >= 1 && next <= n && p[next - 1] <= 0) next += dir;
-      pos.setX(clamp(next, 0.5, n + 0.5));
+      pos.setU(1);
       redraw();
-    }
-    $("ex-fwd")?.addEventListener("click", () => step(1));
-    $("ex-back")?.addEventListener("click", () => step(-1));
+    });
     const preset = $("ex-preset");
     function fillPresets() {
       if (!preset) return;
@@ -449,39 +541,28 @@
       stopPlay();
       model.setPreset(preset.value);
     });
-    const gsel = $("ex-gsel");
+    const gsel = $("ex-gsel") && createMenu($("ex-gsel"));
     gsel?.addEventListener("change", () => {
       if (gsel.value === "custom") customG(false);
       else ui.g = ui.gBase = gsel.value;
       redraw();
     });
     fillPresets();
-    const bar = $("ex-bar"), inText = cases.find((box) => !bar?.contains(box));
-    if (bar && inText) {
-      let queued = false;
-      const place = () => {
-        queued = false;
-        const b = bar.getBoundingClientRect();
-        bar.classList.toggle("ex-with-case", b.top <= 1 && inText.getBoundingClientRect().bottom < b.bottom);
-      };
-      const queue = () => {
-        if (!queued) {
-          queued = true;
-          requestAnimationFrame(place);
-        }
-      };
-      addEventListener("scroll", queue, { passive: true });
-      addEventListener("resize", queue);
-      place();
-    }
+    $("ex-reset")?.addEventListener("click", () => {
+      stopPlay();
+      Object.assign(ui, { g: "neglog", gBase: "neglog", gc: null });
+      model.reset();
+      pos.reset();
+      fillPresets();
+      redraw();
+    });
     function update() {
       document.body.dataset.exCase = model.kase;
       for (const b of cases.flatMap((box) => [...box.querySelectorAll("button")])) b.setAttribute("aria-pressed", b.dataset.v === model.kase ? "true" : "false");
       const key = model.kase === "disc" ? model.discKey : model.contKey;
       if (preset && preset.value !== key) preset.value = key;
       if (gsel) {
-        const opt = gsel.querySelector('option[value="custom"]');
-        if (opt) opt.hidden = model.kase !== "disc";
+        gsel.hide("custom", model.kase !== "disc");
         if (gsel.value !== ui.g) gsel.value = ui.g;
       }
     }
@@ -602,7 +683,8 @@
     // o: { xticks, yticks, xfmt, xnow, noyl, noZero }; axis labels are math, set by the figure's math layer
     axes(o = {}) {
       const g = this.back;
-      const xt = o.xticks || niceTicks(this.x0, this.x1, 6), yt = o.yticks || niceTicks(this.y0, this.y1, 4);
+      const nx = Math.max(2, Math.min(6, Math.round(Math.abs(this.pr - this.pl) / 70)));
+      const xt = o.xticks || niceTicks(this.x0, this.x1, nx), yt = o.yticks || niceTicks(this.y0, this.y1, 4);
       for (const v of xt) {
         const x = this.X(v);
         if (x < Math.min(this.pl, this.pr) - 0.5 || x > Math.max(this.pl, this.pr) + 0.5) continue;
@@ -649,10 +731,13 @@
         class: cls
       }, g || this.data);
     }
+    // (nothing for an x or y off at infinity, such as x = F_X⁻¹(1) for an unbounded support)
     vline(x, cls, g) {
+      if (!Number.isFinite(x)) return null;
       return el("line", { x1: this.X(x), x2: this.X(x), y1: this.pt, y2: this.pb, class: cls }, g || this.data);
     }
     hline(y, cls, g) {
+      if (!Number.isFinite(y)) return null;
       return el("line", { x1: this.pl, x2: this.pr, y1: this.Y(y), y2: this.Y(y), class: cls }, g || this.data);
     }
     // Anchor points for axis labels (placed by the math layer).
@@ -712,6 +797,7 @@
       let L = labels.get(key);
       if (!L) {
         const el2 = document.createElement("div");
+        el2.dataset.key = key;
         layer.appendChild(el2);
         L = { el: el2, want: null, shown: null, busy: false };
         labels.set(key, L);
@@ -896,6 +982,7 @@
   var GAP = 28;
   var WL0 = 400;
   var WL_FORMULA = 340;
+  var N_MAP = 64;
   var HT = 200;
   var HB = 150;
   var HA = 250;
@@ -932,6 +1019,7 @@
     const bridge = el("g", null, ctx.root), handles = el("g", null, ctx.root), over = el("g", null, ctx.root);
     const math = createMathLayer(svg.parentElement, 1e3, H0);
     let noRI = false;
+    let wideBottom = false;
     let colL = WL0, layoutW = 1e3;
     function layout(W) {
       const WL = Math.round((W - GAP) * WL0 / (1e3 - GAP)), WR = W - WL - GAP;
@@ -960,7 +1048,7 @@
     function draw(fr) {
       lastFr = fr;
       const defined = Number.isFinite(fr.total);
-      const v = model.view(), done1 = fr.u >= 1 - 1e-9, yr = gDrag ? gDrag.yr : gRange(fr, ui.g), delta = 2 ** -ui.dk;
+      const v = model.view(), done1 = fr.u >= 1 - 1e-9, yr = gDrag ? gDrag.yr : gRange(fr, ui.g);
       lastK = fr.disc ? fr.k : -1;
       math.begin();
       const [x0, x1] = v.xRange;
@@ -985,7 +1073,7 @@
         const s = v.shape, edges = s.kind === "steps" ? [[s.ts[0], 0], ...pts, [s.ts[s.ts.length - 1], 0]] : pts;
         if (ui.ghost) RT.area(edges, "fm").setAttribute("opacity", ".35");
         const done = edges.filter((q) => q[0] <= fr.x);
-        if (done.length) RT.area([...done, [fr.x, fr.fNow]], "fm");
+        if (done.length) RT.area(Number.isFinite(fr.x) ? [...done, [fr.x, fr.fNow]] : done, "fm");
         RT.path(edges, "curve");
         RT.hline(1, "hline").setAttribute("opacity", ".5");
         RT.vline(fr.x, "cursor");
@@ -1017,7 +1105,7 @@
         });
         RG.area(pts, "fn", RG.gBelow());
         RG.path(pts.filter((q) => q[0] > fr.x), "curve later");
-        RG.path(pts.filter((q) => q[0] <= fr.x).concat([[fr.x, fr.gNow]]), "curve");
+        RG.path(pts.filter((q) => q[0] <= fr.x).concat(Number.isFinite(fr.x) ? [[fr.x, fr.gNow]] : []), "curve");
         RG.vline(fr.x, "cursor");
       }
       yLabel("rg-y", RG, gtex);
@@ -1040,9 +1128,14 @@
         RA.path(done, "curve");
       }
       if (fr.u > 0) RA.vline(fr.u, "cursor");
+      if (done1 && defined && RA.inY(fr.total)) {
+        RA.hline(fr.total, "hline avg");
+        math.set("avg", RA.pl + 8, RA.Y(fr.total) - 13, "\\mathbb{E}[g(X)]", { anchor: "start", cls: "ex-ml-avg" });
+      }
       const fin = done1 && defined, fl = RA.o.ox + 2;
       RA.back.prepend(el("rect", { x: fl, y: RA.pt - 10, width: RA.pr + 10 - fl, height: RA.pb - RA.pt + 36, rx: 4, class: "result-box" + (fin ? " final" : "") }));
-      if (noRI) RI.clear();
+      wideBottom = noRI || done1;
+      if (wideBottom) RI.clear();
       else {
         const run = (fr.disc ? fr.cum : fr.I).filter(Number.isFinite);
         let ilo = 0, ihi = 0;
@@ -1068,15 +1161,18 @@
       const yTop = RT.pb + 20, yAx = RA.pt - 34, U = (u) => RA.X(u);
       zones.yTop = yTop;
       zones.yAx = yAx;
-      math.set("map", RT.pl - 10, (yTop + yAx) / 2, "u = F_X(x)", { anchor: "end" });
+      math.set(
+        "map",
+        RT.o.ox + 12,
+        (yTop + yAx) / 2,
+        "u \\;\\substack{\\xrightarrow{\\;\\textstyle F_X^{-1}\\;} \\\\ \\xleftarrow[\\;\\textstyle F_X\\;]{}}\\; x",
+        { rotate: -90 }
+      );
       if (fr.disc) {
         const tri = (top, a, b, cls) => el("path", { d: `M${top} ${yTop}L${a} ${yAx}L${b} ${yAx}Z`, class: cls }, bridge);
         fr.p.forEach((q, i) => {
           const a = U(fr.F[i]), b = U(fr.F[i + 1]), top = RT.X(i + 1), end2 = i === fr.k ? U(fr.u) : b;
-          if (q <= 0) {
-            el("line", { x1: top, y1: yTop, x2: b, y2: yAx, class: "br-null" }, bridge);
-            return;
-          }
+          if (q <= 0) return;
           if (i >= fr.k && ui.ghost) tri(top, a, b, "tri-todo");
           if (i <= fr.k) tri(top, a, end2, "tri-done");
         });
@@ -1084,18 +1180,16 @@
         el("line", { x1: U(0), x2: U(fr.u), y1: yAx, y2: yAx, class: "wax done" }, bridge);
         if (fr.k >= 0) el("line", { x1: RT.X(fr.k + 1), y1: yTop, x2: U(fr.u), y2: yAx, class: "br-cur" }, bridge);
       } else {
-        const Fx = (x) => lerp(fr.S.Fs, atX(fr.S, x));
         el("line", { x1: U(0), x2: U(1), y1: yAx, y2: yAx, class: "wax" }, bridge);
         el("line", { x1: U(0), x2: U(fr.u), y1: yAx, y2: yAx, class: "wax done" }, bridge);
-        const j0 = Math.ceil(x0 / delta - 1e-9), j1 = Math.floor(x1 / delta + 1e-9);
-        for (let j = j0; j <= j1; j++) {
-          const x = j * delta, Fv = Fx(x), done = x <= fr.x;
-          if (done || ui.ghost) el("line", { x1: RT.X(x), y1: yTop, x2: U(Fv), y2: yAx, class: done ? "br-done" : "br-todo" }, bridge);
+        for (let j = 0; j < N_MAP; j++) {
+          const uj = (j + 0.5) / N_MAP, xj = lerp(fr.S.xs, atU(fr.S, uj)), done = uj <= fr.u;
+          if (done || ui.ghost) el("line", { x1: RT.X(xj), y1: yTop, x2: U(uj), y2: yAx, class: done ? "br-done" : "br-todo" }, bridge);
         }
-        el("line", { x1: RT.X(fr.x), y1: yTop, x2: U(fr.u), y2: yAx, class: "br-cur" }, bridge);
+        if (Number.isFinite(fr.x)) el("line", { x1: RT.X(fr.x), y1: yTop, x2: U(fr.u), y2: yAx, class: "br-cur" }, bridge);
       }
       over.replaceChildren();
-      const hasPoint = fr.disc ? fr.k >= 0 : true;
+      const hasPoint = !done1 && (fr.disc ? fr.k >= 0 : true);
       if (hasPoint && isFinite(fr.gNow) && RA.inY(fr.gNow)) {
         const px = U(fr.u), py = RA.Y(fr.gNow);
         const gx = fr.disc ? RG.X(fr.k + 1) : RG.X(fr.x);
@@ -1116,22 +1210,22 @@
       note("n-dist", colL / 2, (RT.pt + RT.pb) / 2, "The distribution of \\(X\\): what the expectation averages over.", colL - 10);
       note("n-map", colL / 2, (zones.yTop + zones.yAx) / 2 - (noRI ? 30 : 0), "\\(F_X\\) rescales the real line into \\([0, 1]\\), so that each outcome takes up as much room as its probability. This gives us our horizontal axis.", nw);
       note("n-g", colL / 2, RG.pt - 12, "The function \\(g\\) gives the height to integrate.", nw, true);
-      const riTop = RI.o.oy + RI.o.m.t, fx = noRI ? layoutW / 2 : colL / 2, fy1 = riTop + 60, fy2 = riTop + 130;
-      const noteW = noRI ? layoutW - 32 : nw;
+      const riTop = RI.o.oy + RI.o.m.t, fx = wideBottom ? layoutW / 2 : colL / 2, fy1 = riTop + 60, fy2 = riTop + 130;
+      const noteW = wideBottom ? layoutW - 32 : nw;
       const areaNote = done1 ? "The expectation is the whole area:" : `The area up to \\(u = \\class{ex-now}{${texNum(fr.u)}}\\) is:`;
       math.set("n-area", fx, riTop + 2, areaNote, { text: true, width: noteW, cls: "ex-ml-note" });
       if (!done1) math.set("n-rest", fx, fy2, "The expectation is the whole area (slide \\(u\\) to 1).", { text: true, width: noteW, cls: "ex-ml-note" });
       math.set("integral", fx, fy1, `\\displaystyle\\int_0^{${upper}} g\\big(F_X^{-1}(v)\\big) \\dee{v} \\;=\\; ${val(fr.area)}`, { cls: "ex-ml-formula" });
       if (done1) {
         const mn = meaning(ui.g, fr.disc);
-        const named = mn ? `\\underbrace{${mn.tex}}_{\\text{${mn.name}}} \\;=\\; ` : "";
+        const named = mn ? `\\underbrace{${mn.tex}}_{\\mathclap{\\text{${mn.name}}}} \\;=\\; ` : "";
         math.set("expectation", fx, fy2, `\\mathbb{E}[g(X)] \\;=\\; ${named}${val(fr.total)}${defined ? G[ui.g].unit ?? "" : ""}`, { cls: "ex-ml-result" + (defined ? " ex-ml-boxed" : "") });
       }
       math.end();
     }
     function zoneAt(p) {
       if (RT.contains(p, 4) || RG.contains(p, 4)) return "x";
-      if (RA.contains(p, 4) || !noRI && RI.contains(p, 4)) return "u";
+      if (RA.contains(p, 4) || !wideBottom && RI.contains(p, 4)) return "u";
       if (p.y > zones.yTop - 6 && p.y < zones.yAx + 18 && p.x >= Math.min(RT.pl, RA.pl) - 4 && p.x <= Math.max(RT.pr, RA.pr) + 4) return "map";
       return null;
     }
@@ -1373,7 +1467,7 @@
         const edge = s.kind === "steps" ? [[s.ts[0], 0], ...pairs, [s.ts[s.ts.length - 1], 0]] : pairs;
         const shade = (list, cls) => list.length ? closed(O.X.data, [onX(list[0][0], 0), ...list.map((q) => onX(q[0], q[1])), onX(list[list.length - 1][0], 0)], cls) : null;
         if (ui.ghost) shade(edge, "fm")?.setAttribute("opacity", ".35");
-        shade(edge.filter((q) => q[0] <= pos.x).concat([[pos.x, densityAt(v, pos.x)]]), "fm");
+        shade(edge.filter((q) => q[0] <= pos.x).concat(Number.isFinite(pos.x) ? [[pos.x, densityAt(v, pos.x)]] : []), "fm");
         polyline(O.X.data, edge.map((q) => onX(q[0], q[1])), "curve");
         polyline(O.G.data, pts.map((q) => onG(q[2], q[0])), "curve");
         const lineThrough = (uu, xx, pp, cls) => polyline(lines, [onU(uu, 0), onG(uu, xx), onX(xx, 0), onX(xx, pp)], cls);
@@ -1502,7 +1596,7 @@
         const done = pts.filter((q) => q[0] <= fr.x);
         if (done.length) {
           const yNow = done[done.length - 1][1];
-          const run = done.concat([[fr.x, yNow]]);
+          const run = Number.isFinite(fr.x) ? done.concat([[fr.x, yNow]]) : done;
           R.area(run, "fm", R.gAbove());
           R.area(run, "fn", R.gBelow());
           R.path(run, "curve");
@@ -1510,7 +1604,7 @@
       }
       if (R.inX(fr.x)) R.vline(fr.x, "cursor");
       const t = texNum(pr.upto), val = Number.isNaN(pr.upto) ? "\\text{undefined}" : t.startsWith("-") ? `\\class{ex-neg}{${t}}` : t;
-      const tex = fr.disc ? `\\displaystyle\\sum_{x' \\le x} g(x')\\,p_X(x') \\;=\\; ${val}` : `\\displaystyle\\int_{-\\infty}^{x} g(x')\\,p_X(x') \\dee{x'} \\;=\\; ${val}`;
+      const tex = fr.disc ? `\\displaystyle\\sum_{x' \\le x} g(x')\\,p_X(x') \\;=\\; ${val}` : `\\displaystyle\\int_{-\\infty}^{${Number.isFinite(fr.x) ? "x" : "\\infty"}} g(x')\\,p_X(x') \\dee{x'} \\;=\\; ${val}`;
       if (row) math.set("sum", layoutW / 2, HF / 2 + 4, tex, { cls: "ex-ml-formula" });
       else math.set("sum", colL / 2, (R.pt + R.pb) / 2, tex, { cls: "ex-ml-formula" });
       math.end();
@@ -1553,7 +1647,7 @@
     const productSvg = document.getElementById("ex-product");
     if (!areaSvg && !transformSvg && !productSvg) return;
     const model = createModel(), pos = createPosition(model);
-    const ui = { g: "neglog", gBase: "neglog", gc: null, ghost: true, dk: 6 };
+    const ui = { g: "neglog", gBase: "neglog", gc: null, ghost: true };
     let controls = null, figs = [];
     function redraw() {
       const fr = computeFrame(model, pos, ui.g, ui.gc);

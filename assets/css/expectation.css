@@ -52,7 +52,7 @@ mjx-container[display="true"] { max-width: 100%; overflow-x: auto; overflow-y: h
   border: 1px solid var(--ex-rule); border-radius: 4px;
   height: 1.75rem; padding: 0 .5rem;
 }
-.ex-bar button { cursor: pointer; }
+.ex-bar button { cursor: pointer; white-space: nowrap; }
 /* a toggle is the same buttons, joined; the chosen one is filled lightly */
 .ex-seg { display: inline-flex; }
 .ex-seg button {
@@ -67,24 +67,23 @@ mjx-container[display="true"] { max-width: 100%; overflow-x: auto; overflow-y: h
 /* the case toggle in the opening sentence: the bar's toggle, at the text's size */
 p .ex-seg { vertical-align: baseline; font-family: var(--ex-sans); font-size: .8em; }
 p .ex-seg button { height: 1.75em; padding: 0 .55em; }
-/* the bar's copy of it opens in the bar's first place once the sentence's has
-   scrolled under the bar (the script sets .ex-with-case); until then it takes no
-   room, its gap included */
-.ex-case-slot {
-  display: flex; max-width: 0; margin-right: -1.2rem; opacity: 0; visibility: hidden; overflow: hidden;
-  transition: max-width .25s ease, margin-right .25s ease, opacity .15s ease, visibility 0s .25s;
+/* the g menu: typeset options, in a list that opens below its button */
+.ex-menu-btn { display: inline-flex; align-items: center; gap: .45rem; }
+.ex-menu-note { color: var(--ex-ink-soft); }
+.ex-menu-caret { color: var(--ex-ink-soft); font-size: .8em; }
+.ex-menu-list {
+  position: fixed; z-index: 30; margin: 0; padding: .25rem 0; list-style: none;
+  background: #fff; border: 1px solid var(--ex-rule); border-radius: 4px; box-shadow: 0 4px 14px rgba(28, 34, 56, .12);
+  font-family: var(--ex-sans); font-size: .82rem; color: var(--ex-ink);
 }
-.ex-bar.ex-with-case .ex-case-slot {
-  max-width: 16rem; margin-right: 0; opacity: 1; visibility: visible;
-  transition: max-width .25s ease, margin-right .25s ease, opacity .2s ease .08s, visibility 0s;
-}
-/* on a phone the bar is one row that scrolls sideways, so a control appearing or
-   leaving never changes its height and moves the page */
-@media (max-width: 640px) {
-  .ex-bar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
-  .ex-bar::-webkit-scrollbar { display: none; }
-  .ex-bar > * { flex: none; }
-}
+.ex-menu-list[hidden] { display: none; }
+.ex-menu-list > li { padding: .35rem .75rem; white-space: nowrap; cursor: pointer; }
+.ex-menu-list > li:hover, .ex-menu-list > li:focus { background: #f0f3f6; outline: none; }
+.ex-menu-list > li[aria-selected="true"] { background: #e9eef2; font-weight: 600; }
+/* each play button holds both labels */
+.ex-bar button:not(.playing) .ex-stop, .ex-bar button.playing .ex-go { display: none; }
+/* on a narrow screen the bar wraps into rows; tighter gaps keep them few */
+@media (max-width: 640px) { .ex-bar { gap: .4rem .5rem; } .ex-bar .ex-grp { gap: .3rem; } }
 .ex-bar :focus-visible, .ex-fig :focus-visible { outline: 2px solid var(--ex-now); outline-offset: 2px; }
 
 /* ---- figures ---- */
@@ -119,6 +118,8 @@ svg.ex-plot .fn { fill: var(--ex-neg-soft); }
 /* the area plot's frame; at u = 1 it stands out on a brighter ground, as the boxed result does */
 svg.ex-plot .result-box { fill: none; stroke: var(--ex-rule); stroke-width: 1; }
 svg.ex-plot .result-box.final { fill: #fff; stroke: var(--ex-ink); stroke-width: 1.8; }
+/* the average-height line's label, readable over the blocks or the curve */
+.ex-ml.ex-ml-avg { color: var(--ex-ink); background: rgba(255, 255, 255, .85); padding: .1em .3em; border-radius: 3px; }
 .ex-ml.ex-ml-boxed { background: #fff; border: 1.5px solid var(--ex-ink); border-radius: 4px; padding: .2em .45em .1em; }
 svg.ex-plot .cursor { stroke: var(--ex-now); stroke-width: 1.5; }
 svg.ex-plot .dot { fill: var(--ex-now); stroke: var(--ex-surface); stroke-width: 2; }
