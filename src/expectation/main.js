@@ -19,10 +19,10 @@ export function init() {
     if (!areaSvg && !transformSvg && !productSvg) return;
 
     const model = createModel(), pos = createPosition(model);
-    // the unbuilt rest of each plot is always shown, ghosted; the bridge's x-grid is δ = 2⁻⁶
+    // the unbuilt rest of each plot is always shown, ghosted
     // g is a named function, or 'custom' (discrete only): the values gc at the atoms,
     // which began as those of the named function gBase
-    const ui = { g: 'neglog', gBase: 'neglog', gc: null, ghost: true, dk: 6 };
+    const ui = { g: 'neglog', gBase: 'neglog', gc: null, ghost: true };
     let controls = null, figs = [];
     function redraw() {
         const fr = computeFrame(model, pos, ui.g, ui.gc);

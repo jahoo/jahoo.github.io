@@ -61,7 +61,7 @@ export function createProductFigure(svg, { model, pos, redraw, stopPlay }) {
             const done = pts.filter(q => q[0] <= fr.x);
             if (done.length) {
                 const yNow = done[done.length - 1][1];
-                const run = done.concat([[fr.x, yNow]]);
+                const run = Number.isFinite(fr.x) ? done.concat([[fr.x, yNow]]) : done;
                 R.area(run, 'fm', R.gAbove()); R.area(run, 'fn', R.gBelow());
                 R.path(run, 'curve');
             }
@@ -72,7 +72,7 @@ export function createProductFigure(svg, { model, pos, redraw, stopPlay }) {
         const t = texNum(pr.upto), val = Number.isNaN(pr.upto) ? '\\text{undefined}' : t.startsWith('-') ? `\\class{ex-neg}{${t}}` : t;
         const tex = fr.disc
             ? `\\displaystyle\\sum_{x' \\le x} g(x')\\,p_X(x') \\;=\\; ${val}`
-            : `\\displaystyle\\int_{-\\infty}^{x} g(x')\\,p_X(x') \\dee{x'} \\;=\\; ${val}`;
+            : `\\displaystyle\\int_{-\\infty}^{${Number.isFinite(fr.x) ? 'x' : '\\infty'}} g(x')\\,p_X(x') \\dee{x'} \\;=\\; ${val}`;
         if (row) math.set('sum', layoutW / 2, HF / 2 + 4, tex, { cls: 'ex-ml-formula' });
         else math.set('sum', colL / 2, (R.pt + R.pb) / 2, tex, { cls: 'ex-ml-formula' });
         math.end();

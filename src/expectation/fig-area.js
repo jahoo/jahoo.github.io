@@ -13,7 +13,7 @@
 //  g custom.
 // ================================================================
 
-import { clamp, discCdfAt, atX, lerp } from '../lib/prob/dist.js';
+import { clamp, discCdfAt, atX, atU, lerp } from '../lib/prob/dist.js';
 import { Region, el, svgContext, svgPoint } from '../lib/prob/region.js';
 import { createMathLayer, texNum } from '../lib/prob/mathlabels.js';
 import { fitWidth } from '../lib/prob/fit.js';
@@ -24,7 +24,7 @@ import { G, meaning } from './frame.js';
 // column of 572. A narrower layout (see fit.js) narrows both columns; once the left one
 // is too narrow for the integral and E[g(X)], the running integral is dropped and
 // they take its row, across the full width.
-const GAP = 28, WL0 = 400, WL_FORMULA = 340;
+const GAP = 28, WL0 = 400, WL_FORMULA = 340, N_MAP = 64;
 const HT = 200, HB = 150, HA = 250, HI = 200, H0 = HT + HB + HA + HI + 6;
 const mA = { l: 58, r: 16, t: 50, b: 30 };
 
@@ -60,6 +60,7 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
     const bridge = el('g', null, ctx.root), handles = el('g', null, ctx.root), over = el('g', null, ctx.root);
     const math = createMathLayer(svg.parentElement, 1000, H0);
     let noRI = false; // narrow: no running integral, the integral and E[g(X)] in its row
+    let wideBottom = false; // this frame: the bottom row is the formula's alone (narrow, or u = 1)
     let colL = WL0, layoutW = 1000; // the left column's width, and the layout's
     function layout(W) {
         const WL = Math.round((W - GAP) * WL0 / (1000 - GAP)), WR = W - WL - GAP;
@@ -83,7 +84,7 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
         lastFr = fr;
         // defined: E[g(X)] exists (the skewness of a constant X does not)
         const defined = Number.isFinite(fr.total);
-        const v = model.view(), done1 = fr.u >= 1 - 1e-9, yr = gDrag ? gDrag.yr : gRange(fr, ui.g), delta = 2 ** -ui.dk;
+        const v = model.view(), done1 = fr.u >= 1 - 1e-9, yr = gDrag ? gDrag.yr : gRange(fr, ui.g);
         lastK = fr.disc ? fr.k : -1;
         math.begin();
         const [x0, x1] = v.xRange;
@@ -107,7 +108,7 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
             const s = v.shape, edges = s.kind === 'steps' ? [[s.ts[0], 0], ...pts, [s.ts[s.ts.length - 1], 0]] : pts;
             if (ui.ghost) RT.area(edges, 'fm').setAttribute('opacity', '.35');
             const done = edges.filter(q => q[0] <= fr.x);
-            if (done.length) RT.area([...done, [fr.x, fr.fNow]], 'fm');
+            if (done.length) RT.area(Number.isFinite(fr.x) ? [...done, [fr.x, fr.fNow]] : done, 'fm');
             RT.path(edges, 'curve');
             RT.hline(1, 'hline').setAttribute('opacity', '.5');
             RT.vline(fr.x, 'cursor');
@@ -138,7 +139,7 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
             fr.S.xs.forEach((x, i) => { if (x >= x0 - .05 && x <= x1 + .05) pts.push([x, fr.gs[i]]); });
             RG.area(pts, 'fn', RG.gBelow());
             RG.path(pts.filter(q => q[0] > fr.x), 'curve later');
-            RG.path(pts.filter(q => q[0] <= fr.x).concat([[fr.x, fr.gNow]]), 'curve');
+            RG.path(pts.filter(q => q[0] <= fr.x).concat(Number.isFinite(fr.x) ? [[fr.x, fr.gNow]] : []), 'curve');
             RG.vline(fr.x, 'cursor');
         }
 
@@ -164,13 +165,20 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
             RA.path(done, 'curve');
         }
         if (fr.u > 0) RA.vline(fr.u, 'cursor');
+        // at u = 1: E[g(X)] as the average height of the whole area, which has width 1
+        if (done1 && defined && RA.inY(fr.total)) {
+            RA.hline(fr.total, 'hline avg');
+            math.set('avg', RA.pl + 8, RA.Y(fr.total) - 13, '\\mathbb{E}[g(X)]', { anchor: 'start', cls: 'ex-ml-avg' });
+        }
         // the area plot's frame, around its axis labels and ticks, behind everything in the
         // panel; at u = 1 it stands out, with a brighter ground, as the result's box does
         const fin = done1 && defined, fl = RA.o.ox + 2;
         RA.back.prepend(el('rect', { x: fl, y: RA.pt - 10, width: RA.pr + 10 - fl, height: RA.pb - RA.pt + 36, rx: 4, class: 'result-box' + (fin ? ' final' : '') }));
 
-        // ---- bottom right: the running integral (not on a narrow layout) ----
-        if (noRI) RI.clear();
+        // ---- bottom right: the running integral (not on a narrow layout, and not at u = 1,
+        // when the result takes the whole row) ----
+        wideBottom = noRI || done1;
+        if (wideBottom) RI.clear();
         else {
             const run = (fr.disc ? fr.cum : fr.I).filter(Number.isFinite);
             let ilo = 0, ihi = 0;
@@ -190,18 +198,23 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
             }
         }
 
-        // ---- the map x ↦ F_X(x), from x down to [0, 1] in u ----
+        // ---- the map between x and [0, 1] in u, read both ways: F_X down, F_X⁻¹ up. It is
+        // drawn from u (F_X⁻¹'s direction, the one the area uses), so all of [0, 1] has lines ----
         bridge.replaceChildren();
         const yTop = RT.pb + 20, yAx = RA.pt - 34, U = u => RA.X(u);
         zones.yTop = yTop; zones.yAx = yAx;
-        math.set('map', RT.pl - 10, (yTop + yAx) / 2, 'u = F_X(x)', { anchor: 'end' });
+        // rotated like the other axis labels, so it reads upward: u, then x = F_X⁻¹(u) above and
+        // F_X back down below (on screen: F_X⁻¹ on the left, going up; F_X on the right, going down)
+        math.set('map', RT.o.ox + 12, (yTop + yAx) / 2,
+            'u \\;\\substack{\\xrightarrow{\\;\\textstyle F_X^{-1}\\;} \\\\ \\xleftarrow[\\;\\textstyle F_X\\;]{}}\\; x', { rotate: -90 });
         if (fr.disc) {
-            // each outcome x to its block (P(X < x), P(X ≤ x)] of u, of width p: a triangle from the
-            // point to the interval (the current one filled up to u); without mass, a grey line
+            // each outcome x and its block (P(X < x), P(X ≤ x)] of u, of width p: a triangle between
+            // the point and the interval (the current one up to u). An outcome without mass has an
+            // empty block, so no u maps to it and nothing is drawn
             const tri = (top, a, b, cls) => el('path', { d: `M${top} ${yTop}L${a} ${yAx}L${b} ${yAx}Z`, class: cls }, bridge);
             fr.p.forEach((q, i) => {
                 const a = U(fr.F[i]), b = U(fr.F[i + 1]), top = RT.X(i + 1), end = i === fr.k ? U(fr.u) : b;
-                if (q <= 0) { el('line', { x1: top, y1: yTop, x2: b, y2: yAx, class: 'br-null' }, bridge); return; }
+                if (q <= 0) return;
                 if (i >= fr.k && ui.ghost) tri(top, a, b, 'tri-todo');
                 if (i <= fr.k) tri(top, a, end, 'tri-done');
             });
@@ -210,20 +223,20 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
             // the current pair: x = F_X⁻¹(u) on top, u below (the right side of its triangle once u = F_X(x))
             if (fr.k >= 0) el('line', { x1: RT.X(fr.k + 1), y1: yTop, x2: U(fr.u), y2: yAx, class: 'br-cur' }, bridge);
         } else {
-            const Fx = x => lerp(fr.S.Fs, atX(fr.S, x));
             el('line', { x1: U(0), x2: U(1), y1: yAx, y2: yAx, class: 'wax' }, bridge);
             el('line', { x1: U(0), x2: U(fr.u), y1: yAx, y2: yAx, class: 'wax done' }, bridge);
-            const j0 = Math.ceil(x0 / delta - 1e-9), j1 = Math.floor(x1 / delta + 1e-9);
-            for (let j = j0; j <= j1; j++) {
-                const x = j * delta, Fv = Fx(x), done = x <= fr.x;
-                if (done || ui.ghost) el('line', { x1: RT.X(x), y1: yTop, x2: U(Fv), y2: yAx, class: done ? 'br-done' : 'br-todo' }, bridge);
+            // evenly spaced u, each carried up to x = F_X⁻¹(u): they bunch where p_X is high
+            for (let j = 0; j < N_MAP; j++) {
+                const uj = (j + 0.5) / N_MAP, xj = lerp(fr.S.xs, atU(fr.S, uj)), done = uj <= fr.u;
+                if (done || ui.ghost) el('line', { x1: RT.X(xj), y1: yTop, x2: U(uj), y2: yAx, class: done ? 'br-done' : 'br-todo' }, bridge);
             }
-            el('line', { x1: RT.X(fr.x), y1: yTop, x2: U(fr.u), y2: yAx, class: 'br-cur' }, bridge);
+            if (Number.isFinite(fr.x)) el('line', { x1: RT.X(fr.x), y1: yTop, x2: U(fr.u), y2: yAx, class: 'br-cur' }, bridge);
         }
 
         // ---- crosshair from the point in the area plot to its two marginals ----
         over.replaceChildren();
-        const hasPoint = fr.disc ? fr.k >= 0 : true;
+        // (not at u = 1, where the finished area and its average height stand on their own)
+        const hasPoint = !done1 && (fr.disc ? fr.k >= 0 : true);
         if (hasPoint && isFinite(fr.gNow) && RA.inY(fr.gNow)) {
             const px = U(fr.u), py = RA.Y(fr.gNow);
             const gx = fr.disc ? RG.X(fr.k + 1) : RG.X(fr.x);
@@ -250,10 +263,10 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
         note('n-map', colL / 2, (zones.yTop + zones.yAx) / 2 - (noRI ? 30 : 0), '\\(F_X\\) rescales the real line into \\([0, 1]\\), so that each outcome takes up as much room as its probability. This gives us our horizontal axis.', nw);
         note('n-g', colL / 2, RG.pt - 12, 'The function \\(g\\) gives the height to integrate.', nw, true);
         // centred in the left column, or across the full width once the running integral is dropped
-        const riTop = RI.o.oy + RI.o.m.t, fx = noRI ? layoutW / 2 : colL / 2, fy1 = riTop + 60, fy2 = riTop + 130;
+        const riTop = RI.o.oy + RI.o.m.t, fx = wideBottom ? layoutW / 2 : colL / 2, fy1 = riTop + 60, fy2 = riTop + 130;
         // before u = 1 the integral is the area so far, and the expectation is still to come
         // (in the result's place); at u = 1 the integral is the expectation, and the result shows
-        const noteW = noRI ? layoutW - 32 : nw;
+        const noteW = wideBottom ? layoutW - 32 : nw;
         const areaNote = done1 ? 'The expectation is the whole area:' : `The area up to \\(u = \\class{ex-now}{${texNum(fr.u)}}\\) is:`;
         math.set('n-area', fx, riTop + 2, areaNote, { text: true, width: noteW, cls: 'ex-ml-note' });
         if (!done1) math.set('n-rest', fx, fy2, 'The expectation is the whole area (slide \\(u\\) to 1).', { text: true, width: noteW, cls: 'ex-ml-note' });
@@ -261,7 +274,8 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
         if (done1) {
             // what the expectation is, for a named g
             const mn = meaning(ui.g, fr.disc);
-            const named = mn ? `\\underbrace{${mn.tex}}_{\\text{${mn.name}}} \\;=\\; ` : '';
+            // the label under the brace takes no width, so a long name doesn't spread the equation
+            const named = mn ? `\\underbrace{${mn.tex}}_{\\mathclap{\\text{${mn.name}}}} \\;=\\; ` : '';
             math.set('expectation', fx, fy2, `\\mathbb{E}[g(X)] \\;=\\; ${named}${val(fr.total)}${defined ? G[ui.g].unit ?? '' : ''}`, { cls: 'ex-ml-result' + (defined ? ' ex-ml-boxed' : '') });
         }
         math.end();
@@ -270,7 +284,7 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
     // ---- dragging ----
     function zoneAt(p) {
         if (RT.contains(p, 4) || RG.contains(p, 4)) return 'x';
-        if (RA.contains(p, 4) || (!noRI && RI.contains(p, 4))) return 'u';
+        if (RA.contains(p, 4) || (!wideBottom && RI.contains(p, 4))) return 'u';
         if (p.y > zones.yTop - 6 && p.y < zones.yAx + 18 && p.x >= Math.min(RT.pl, RA.pl) - 4 && p.x <= Math.max(RT.pr, RA.pr) + 4) return 'map';
         return null;
     }

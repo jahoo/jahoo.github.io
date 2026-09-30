@@ -145,7 +145,7 @@ export function createTransformFigure(svg, { model, pos, ui, redraw, stopPlay })
             const edge = s.kind === 'steps' ? [[s.ts[0], 0], ...pairs, [s.ts[s.ts.length - 1], 0]] : pairs;
             const shade = (list, cls) => list.length ? closed(O.X.data, [onX(list[0][0], 0), ...list.map(q => onX(q[0], q[1])), onX(list[list.length - 1][0], 0)], cls) : null;
             if (ui.ghost) shade(edge, 'fm')?.setAttribute('opacity', '.35');
-            shade(edge.filter(q => q[0] <= pos.x).concat([[pos.x, densityAt(v, pos.x)]]), 'fm');
+            shade(edge.filter(q => q[0] <= pos.x).concat(Number.isFinite(pos.x) ? [[pos.x, densityAt(v, pos.x)]] : []), 'fm');
             polyline(O.X.data, edge.map(q => onX(q[0], q[1])), 'curve');
             polyline(O.G.data, pts.map(q => onG(q[2], q[0])), 'curve');
             // equal-probability lines (quantiles): the same set in either direction, since F_X is a bijection here

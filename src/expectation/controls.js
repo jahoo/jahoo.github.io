@@ -1,12 +1,12 @@
 // ================================================================
 //  Expectation — controls.js
-//  The case toggle in the opening sentence, the sticky control bar
-//  (its copy of the case toggle, distribution, g, play, atom steps).
-//  Every element is optional.
+//  The sticky control bar: case, distribution, g (a menu with typeset
+//  options), play, the whole area, reset. Every element is optional; a case toggle
+//  may also sit elsewhere on the page (the entropy post's draft section).
 // ================================================================
 
-import { clamp } from '../lib/prob/dist.js';
 import { DISC_PRESETS, CONT_PRESETS } from '../lib/prob/model.js';
+import { createMenu } from './menu.js';
 
 const $ = id => document.getElementById(id);
 
@@ -24,11 +24,11 @@ function seg(box, onChange) {
 export function bindControls({ model, pos, ui, redraw, customG }) {
     // ---- play: sweep x (or u) from its start to its end at a steady pace over ~7 s ----
     let raf = 0, t0 = 0, which = null;
-    const playLabel = { x: '▶ sweep x', u: '▶ sweep u' };
+    // each play button holds both labels (typeset); .playing shows the pause one
     function stopPlay() {
         if (raf) cancelAnimationFrame(raf);
         raf = 0; which = null;
-        for (const w of ['x', 'u']) { const b = $('ex-play' + w); if (b) b.textContent = playLabel[w]; }
+        for (const w of ['x', 'u']) $('ex-play' + w)?.classList.remove('playing');
     }
     function tick(t) {
         if (!t0) t0 = t;
@@ -42,23 +42,13 @@ export function bindControls({ model, pos, ui, redraw, customG }) {
         stopPlay();
         if (was === w) return;
         which = w; t0 = 0; raf = requestAnimationFrame(tick);
-        const b = $('ex-play' + w); if (b) b.textContent = '❚❚ pause';
+        $('ex-play' + w)?.classList.add('playing');
     }
     $('ex-playx')?.addEventListener('click', () => play('x'));
     $('ex-playu')?.addEventListener('click', () => play('u'));
 
-    // ---- atom to atom (discrete): x jumps to the next or previous atom ----
-    function step(dir) {
-        stopPlay();
-        const n = model.view().n;
-        const p = model.view().p;
-        let next = dir > 0 ? Math.floor(pos.x + 1e-9) + 1 : Math.ceil(pos.x - 1e-9) - 1;
-        while (next >= 1 && next <= n && p[next - 1] <= 0) next += dir; // skip atoms without mass
-        pos.setX(clamp(next, 0.5, n + 0.5));
-        redraw();
-    }
-    $('ex-fwd')?.addEventListener('click', () => step(1));
-    $('ex-back')?.addEventListener('click', () => step(-1));
+    // ---- the whole area: u = 1 ----
+    $('ex-whole')?.addEventListener('click', () => { stopPlay(); pos.setU(1); redraw(); });
 
     // ---- case, distribution, g ----
     const preset = $('ex-preset');
@@ -71,7 +61,6 @@ export function bindControls({ model, pos, ui, redraw, customG }) {
         preset.replaceChildren(...opts, custom);
         preset.value = cur;
     }
-    // the case toggle sits in the opening sentence, and a copy in the bar
     const cases = [...document.querySelectorAll('.ex-case')];
     for (const box of cases) seg(box, k => {
         if (k === model.kase) return;
@@ -81,27 +70,22 @@ export function bindControls({ model, pos, ui, redraw, customG }) {
         redraw();
     });
     preset?.addEventListener('change', () => { stopPlay(); model.setPreset(preset.value); });
-    const gsel = $('ex-gsel');
+    const gsel = $('ex-gsel') && createMenu($('ex-gsel'));
     gsel?.addEventListener('change', () => {
         if (gsel.value === 'custom') customG(false); else ui.g = ui.gBase = gsel.value;
         redraw();
     });
     fillPresets();
 
-    // ---- the bar's copy of the case toggle appears once the sentence's has scrolled under the bar ----
-    const bar = $('ex-bar'), inText = cases.find(box => !bar?.contains(box));
-    if (bar && inText) {
-        let queued = false;
-        const place = () => {
-            queued = false;
-            const b = bar.getBoundingClientRect();
-            bar.classList.toggle('ex-with-case', b.top <= 1 && inText.getBoundingClientRect().bottom < b.bottom);
-        };
-        const queue = () => { if (!queued) { queued = true; requestAnimationFrame(place); } };
-        addEventListener('scroll', queue, { passive: true });
-        addEventListener('resize', queue);
-        place();
-    }
+    // ---- reset: everything as the page loads (case, distributions, window, g, position) ----
+    $('ex-reset')?.addEventListener('click', () => {
+        stopPlay();
+        Object.assign(ui, { g: 'neglog', gBase: 'neglog', gc: null });
+        model.reset(); // first: the position's start (x = 4.1) is a discrete one
+        pos.reset();
+        fillPresets();
+        redraw();
+    });
 
     // ---- keep the case attribute and the preset menu in step with the model ----
     function update() {
@@ -110,8 +94,7 @@ export function bindControls({ model, pos, ui, redraw, customG }) {
         const key = model.kase === 'disc' ? model.discKey : model.contKey;
         if (preset && preset.value !== key) preset.value = key;
         if (gsel) {
-            const opt = gsel.querySelector('option[value="custom"]');
-            if (opt) opt.hidden = model.kase !== 'disc';
+            gsel.hide('custom', model.kase !== 'disc');
             if (gsel.value !== ui.g) gsel.value = ui.g;
         }
     }

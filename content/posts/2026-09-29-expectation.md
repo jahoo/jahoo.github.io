@@ -52,24 +52,25 @@ The fact that we've expressed the expectation as an integral over the unit inter
 
 Below, play around with visualizing the expectation as an area under a curve. Set the density or mass function $p_X$, and the function $g$ to integrate, and scrub the $x$ or $u$ axis to see the area build up.
 
-In this illustration, $X$ is <span class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></span>.
-
 ```{=html}
 <div class="ex-bar wide extra-wide" id="ex-bar">
-<div class="ex-case-slot"><div class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></div></div>
-<div class="ex-grp"><label class="ex-lab" for="ex-preset">p<sub>X</sub></label><select id="ex-preset"></select></div>
-<div class="ex-grp"><label class="ex-lab" for="ex-gsel">g(x) =</label>
-<select id="ex-gsel">
-<option value="neglog" selected>−log₂ p_X(x) (entropy)</option>
-<option value="x">x (mean)</option>
-<option value="x2">x² (second moment)</option>
-<option value="var">(x − 𝔼X)² (variance)</option>
-<option value="skew">((x − 𝔼X)/σ)³ (skewness)</option>
-<option value="custom">custom</option>
-</select>
+<div class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></div>
+<div class="ex-grp"><label class="ex-lab" for="ex-preset">\(p_X\)</label><select id="ex-preset"></select></div>
+<div class="ex-grp"><span class="ex-lab" id="ex-g-lab">\(g(x) =\)</span>
+<div class="ex-menu" id="ex-gsel">
+<button type="button" class="ex-menu-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="ex-g-lab"><span class="ex-menu-cur">\(-\log_2 p_X(x)\) <span class="ex-menu-note">(entropy)</span></span><span class="ex-menu-caret" aria-hidden="true">▾</span></button>
+<ul class="ex-menu-list" role="listbox" aria-labelledby="ex-g-lab" hidden>
+<li role="option" data-v="neglog" aria-selected="true">\(-\log_2 p_X(x)\) <span class="ex-menu-note">(entropy)</span></li>
+<li role="option" data-v="x">\(x\) <span class="ex-menu-note">(mean)</span></li>
+<li role="option" data-v="x2">\(x^2\) <span class="ex-menu-note">(second moment)</span></li>
+<li role="option" data-v="var">\((x - \mathbb{E}[X])^2\) <span class="ex-menu-note">(variance)</span></li>
+<li role="option" data-v="skew">\(\big((x - \mathbb{E}[X])/\sigma_X\big)^3\) <span class="ex-menu-note">(skewness)</span></li>
+<li role="option" data-v="custom"><span class="ex-menu-note">custom</span></li>
+</ul>
 </div>
-<div class="ex-grp"><button type="button" id="ex-playx">▶ sweep x</button><button type="button" id="ex-playu">▶ sweep u</button></div>
-<div class="ex-grp ex-disc"><button type="button" id="ex-back" aria-label="Previous atom">◀︎ atom</button><button type="button" id="ex-fwd" aria-label="Next atom">atom ▶︎</button></div>
+</div>
+<div class="ex-grp"><button type="button" id="ex-playx"><span class="ex-go">▶ sweep \(x\)</span><span class="ex-stop">❚❚ pause</span></button><button type="button" id="ex-playu"><span class="ex-go">▶ sweep \(u\)</span><span class="ex-stop">❚❚ pause</span></button></div>
+<div class="ex-grp"><button type="button" id="ex-whole">whole area (\(u = 1\))</button><button type="button" id="ex-reset">↺ reset</button></div>
 </div>
 ```
 

@@ -156,5 +156,8 @@ describe('the same expectation over the real line: g · p_X', () => {
         const fr = computeFrame(m, pos, 'x'), pr = productFrame(fr);
         close(pr.upto, fr.area, 1e-9);
         assert.equal(pr.ys.length, fr.S.xs.length);
+        pos.setU(1);                                  // x = +∞: the whole integral
+        const f1 = computeFrame(m, pos, 'x');
+        close(productFrame(f1).upto, f1.total, 1e-12);
     });
 });
