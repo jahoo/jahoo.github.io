@@ -119,7 +119,9 @@ export class Region {
     // o: { xticks, yticks, xfmt, xnow, noyl, noZero }; axis labels are math, set by the figure's math layer
     axes(o = {}) {
         const g = this.back;
-        const xt = o.xticks || niceTicks(this.x0, this.x1, 6), yt = o.yticks || niceTicks(this.y0, this.y1, 4);
+        // by default, as many x ticks as fit about 70 units apart (a narrow panel gets fewer)
+        const nx = Math.max(2, Math.min(6, Math.round(Math.abs(this.pr - this.pl) / 70)));
+        const xt = o.xticks || niceTicks(this.x0, this.x1, nx), yt = o.yticks || niceTicks(this.y0, this.y1, 4);
         for (const v of xt) {
             const x = this.X(v);
             if (x < Math.min(this.pl, this.pr) - .5 || x > Math.max(this.pl, this.pr) + .5) continue;
@@ -160,8 +162,9 @@ export class Region {
             width: Math.max(0, X1 - X0).toFixed(1), height: Math.max(0, Y1 - Y0).toFixed(1), class: cls,
         }, g || this.data);
     }
-    vline(x, cls, g) { return el('line', { x1: this.X(x), x2: this.X(x), y1: this.pt, y2: this.pb, class: cls }, g || this.data); }
-    hline(y, cls, g) { return el('line', { x1: this.pl, x2: this.pr, y1: this.Y(y), y2: this.Y(y), class: cls }, g || this.data); }
+    // (nothing for an x or y off at infinity, such as x = F_X⁻¹(1) for an unbounded support)
+    vline(x, cls, g) { if (!Number.isFinite(x)) return null; return el('line', { x1: this.X(x), x2: this.X(x), y1: this.pt, y2: this.pb, class: cls }, g || this.data); }
+    hline(y, cls, g) { if (!Number.isFinite(y)) return null; return el('line', { x1: this.pl, x2: this.pr, y1: this.Y(y), y2: this.Y(y), class: cls }, g || this.data); }
     // Anchor points for axis labels (placed by the math layer).
     xlabelAt() { return [(this.pl + this.pr) / 2, this.pb + 30]; }
     ylabelAt() { return [this.o.ox + 12, (this.pt + this.pb) / 2]; }

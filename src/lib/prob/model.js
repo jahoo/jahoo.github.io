@@ -4,7 +4,7 @@
 //  samples, and the plotting window. Pure: no DOM.
 // ================================================================
 
-import { withMass, shapeMoments, cdfOf, sampleShape } from './dist.js';
+import { withMass, shapeMoments, cdfOf, sampleShape, atU, lerp } from './dist.js';
 
 const norm = p => { const Z = p.reduce((a, b) => a + b, 0); return p.map(v => v / Z); };
 const SNAP_P = 0.03; // a dragged probability below this pops to zero
@@ -36,13 +36,17 @@ function fitWindow(shape, peak) {
 }
 
 // While a drag is live the window only grows: upward when the peak presses the
-// top, sideways when the shape presses an edge.
-function growWindow(win, shape, peak) {
+// top, sideways when the shape presses an edge or more than 0.1% of the mass
+// lies past one (so every panel, and the map's lines, stay on the distribution).
+function growWindow(win, shape, peak, S) {
     if (peak > 0.92 * win.y1) win.y1 = peak * 1.15;
     const span = win.x1 - win.x0, edge = 0.04 * span;
     const xs = shape.kind === 'steps' ? shape.ts : shape.comps.map(c => c.m);
     if (Math.min(...xs) < win.x0 + edge) win.x0 -= 0.1 * span;
     if (Math.max(...xs) > win.x1 - edge) win.x1 += 0.1 * span;
+    const lo = lerp(S.xs, atU(S, 0.001)), hi = lerp(S.xs, atU(S, 0.999));
+    if (lo < win.x0) win.x0 = lo - 0.05 * span;
+    if (hi > win.x1) win.x1 = hi + 0.05 * span;
 }
 
 export function createModel() {
@@ -55,12 +59,19 @@ export function createModel() {
     };
     const resample = () => {
         S = sampleShape(m.shape);
-        if (held && win) growWindow(win, m.shape, S.peak); else win = fitWindow(m.shape, S.peak);
+        if (held && win) growWindow(win, m.shape, S.peak, S); else win = fitWindow(m.shape, S.peak);
     };
     const changed = () => subs.forEach(f => f());
     resample();
 
     m.subscribe = fn => { subs.push(fn); };
+    // Back to the state a new model starts in: discrete zipf, the Gaussian, no edits kept,
+    // the window refitted.
+    m.reset = () => {
+        Object.assign(m, { kase: 'disc', discKey: 'zipf', contKey: 'gauss', p: DISC_PRESETS.zipf.p.slice(), shape: structuredClone(CONT_PRESETS.gauss.shape) });
+        customP = null; held = false; win = null;
+        resample(); changed();
+    };
     m.setCase = k => { m.kase = k; changed(); };
     m.setPreset = key => {
         if (m.kase === 'disc') {

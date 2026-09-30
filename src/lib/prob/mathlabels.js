@@ -54,6 +54,7 @@ export function createMathLayer(canvas, W, H) {
         let L = labels.get(key);
         if (!L) {
             const el = document.createElement('div');
+            el.dataset.key = key; // which label this is, for styling and tests
             layer.appendChild(el);
             L = { el, want: null, shown: null, busy: false };
             labels.set(key, L);

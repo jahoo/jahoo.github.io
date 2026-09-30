@@ -18,6 +18,22 @@ describe('position', () => {
         pos.setU(1); assert.equal(pos.x, 8);
         assert.equal(pos.driver, 'u');
     });
+    it('continuous: F_X⁻¹(1) is +∞ for unbounded support, the support\'s end for steps', () => {
+        const m = createModel(); m.setCase('cont');
+        const pos = createPosition(m);
+        pos.setU(1); assert.equal(pos.x, Infinity);
+        m.setPreset('steps'); pos.refresh();
+        assert.ok(Math.abs(pos.x - m.view().shape.ts.at(-1)) < 1e-2, String(pos.x));
+        pos.setU(0.999); assert.ok(Number.isFinite(pos.x));
+    });
+    it('continuous: dragging x to the right edge of an unbounded support snaps it to +∞ with u = 1', () => {
+        const m = createModel(); m.setCase('cont');
+        const pos = createPosition(m), [, b] = m.view().xRange;
+        pos.setX(b); assert.equal(pos.u, 1); assert.equal(pos.x, Infinity);
+        pos.setX(b - 0.3); assert.ok(Number.isFinite(pos.x) && pos.u < 1);
+        m.setPreset('steps');
+        pos.setX(m.view().xRange[1]); assert.equal(pos.u, 1); assert.ok(Number.isFinite(pos.x));
+    });
     it('continuous: setX and setU are inverse', () => {
         const m = createModel(); m.setCase('cont');
         const pos = createPosition(m);
@@ -40,7 +56,8 @@ describe('position', () => {
         pos.setX(7.9);
         m.setCase('cont'); pos.refresh();
         const [a, b] = m.view().xRange;
-        assert.ok(pos.x >= a && pos.x <= b && pos.u >= 0 && pos.u <= 1);
+        // in range, or at +∞ with u = 1 (past the right edge of an unbounded support)
+        assert.ok(pos.x >= a && (pos.x <= b || (pos.x === Infinity && pos.u === 1)) && pos.u >= 0 && pos.u <= 1);
     });
 });
 

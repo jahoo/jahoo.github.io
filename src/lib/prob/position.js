@@ -14,8 +14,9 @@ export function createPosition(model) {
         if (v.disc) { pos.u = discCdfAt(v.F, pos.x); return; }
         // at the ends of the plotted range (or past the samples, which cover the support)
         // all or none of the probability lies to the left
+        // (with an unbounded support, all of it lies to the left only at x = +∞, F_X⁻¹(1))
         const xs = v.S.xs;
-        if (pos.x >= Math.min(b, xs[xs.length - 1]) - 1e-12) pos.u = 1;
+        if (pos.x >= Math.min(b, xs[xs.length - 1]) - 1e-12) { pos.u = 1; if (v.shape.kind === 'mix') pos.x = Infinity; }
         else if (pos.x <= Math.max(a, xs[0]) + 1e-12) pos.u = 0;
         else pos.u = lerp(v.S.Fs, atX(v.S, pos.x));
     };
@@ -23,12 +24,17 @@ export function createPosition(model) {
         const v = model.view();
         pos.u = clamp(pos.u, 0, 1);
         if (v.disc) { const k = discQuantile(v.F, pos.u); pos.x = k === 0 ? 0.5 : k; }
+        // F_X⁻¹(1) = inf{x : F_X(x) ≥ 1} is +∞ when the support is unbounded (a mixture of
+        // Gaussians), and the support's end for steps
+        else if (pos.u >= 1 && v.shape.kind === 'mix') pos.x = Infinity;
         else pos.x = clamp(lerp(v.S.xs, atU(v.S, pos.u)), v.xRange[0], v.xRange[1]);
     };
     pos.setX = x => { pos.driver = 'x'; pos.x = x; fromX(); };
     pos.setU = u => { pos.driver = 'u'; pos.u = u; fromU(); };
     // After a model change: keep the driving coordinate, recompute the other.
     pos.refresh = () => (pos.driver === 'x' ? fromX() : fromU());
-    pos.setX(4.1);
+    // Where every page starts: x just past the fourth atom.
+    pos.reset = () => pos.setX(4.1);
+    pos.reset();
     return pos;
 }

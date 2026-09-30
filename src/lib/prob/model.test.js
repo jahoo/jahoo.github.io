@@ -61,11 +61,44 @@ describe('model', () => {
         m.hold(false);
         assert.deepEqual(m.view().win, grown);                          // releasing does not jump the axes
     });
+    it('during a drag the window grows to keep 99.9% of the mass in view, even with the mean inside', () => {
+        const m = createModel(); m.setCase('cont');
+        m.hold(true);
+        m.setShape({ kind: 'mix', comps: [{ w: 1, m: 0.75, s: 0.3 }] });   // mean inside, a third of the mass past the edge
+        const { win, S } = m.view();
+        const q = u => S.xs[S.Fs.findIndex(F => F >= u)];
+        assert.ok(win.x1 >= q(0.999), `${win.x1} vs ${q(0.999)}`);
+        assert.ok(win.x0 <= q(0.001));
+        m.hold(false);
+    });
     it('choosing a preset refits the window', () => {
         const m = createModel(); m.setCase('cont');
         m.hold(true); m.setShape({ kind: 'mix', comps: [{ w: 1, m: 0, s: 0.02 }] }); m.hold(false);
         const grown = { ...m.view().win };
         m.setPreset('gauss');
         assert.ok(m.view().win.y1 < grown.y1);
+    });
+});
+
+describe('model reset', () => {
+    it('undoes edits, presets, the case and a grown window: the view is a fresh model\'s', () => {
+        const fresh = createModel().view();
+        const m = createModel();
+        m.editPmf(2, 0.5);
+        m.setCase('cont'); m.hold(true);
+        m.setShape({ kind: 'mix', comps: [{ w: 1, m: 0.75, s: 0.3 }] });   // grows the window
+        m.hold(false); m.setPreset('steps');
+        let n = 0; m.subscribe(() => n++);
+        m.reset();
+        assert.equal(n, 1);
+        assert.equal(m.kase, 'disc');
+        assert.equal(m.discKey, 'zipf'); assert.equal(m.contKey, 'gauss');
+        assert.deepEqual(m.view().p, fresh.p);
+        m.setCase('cont');
+        const c = createModel(); c.setCase('cont');
+        assert.deepEqual(m.view().win, c.view().win);
+        assert.deepEqual(m.shape, c.shape);
+        m.setCase('disc'); m.setPreset('custom');
+        assert.deepEqual(m.p, fresh.p);                 // the edited pmf is forgotten
     });
 });
