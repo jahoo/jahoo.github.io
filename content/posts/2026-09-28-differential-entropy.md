@@ -7,8 +7,10 @@ tags: [exploration]
 unlisted: true
 js:
   - src/differential-entropy
+  - src/expectation
 css:
   - assets/css/differential-entropy.css
+  - assets/css/expectation.css
 bibliography: assets/differential-entropy/references.bib
 reference-section-title: References
 link-citations: true
@@ -100,6 +102,7 @@ The simplest case is the uniform density on $[0, w]$. It has height $1/w$, so $h
 <div class="de-seg" role="radiogroup" aria-label="Distribution family" id="de-b-fam">
 <button type="button" role="radio" aria-checked="true" data-v="gauss">Gaussian</button>
 <button type="button" role="radio" aria-checked="false" data-v="unif">Uniform</button>
+<button type="button" role="radio" aria-checked="false" data-v="steps">Steps</button>
 <button type="button" role="radio" aria-checked="false" data-v="bimodal">Bimodal</button>
 </div>
 <div class="de-ctl">
@@ -128,7 +131,7 @@ The simplest case is the uniform density on $[0, w]$. It has height $1/w$, so $h
 :::
 
 ::: {.de-caption}
-The magenta slice of mass on the left is exactly the magenta stretch of the horizontal axis on the right: the part of the distribution whose log-density term is negative. Drag a handle sideways to move that component, and up or down to make it taller and narrower or shorter and wider. The $\sigma$ slider rescales the current shape about its mean, and the family buttons reset it. Shrink $\sigma$, or raise a peak, and more of the mass moves above the $\pdf = 1$ line. The dashed box on the left is the uniform density with the same $h$; its width, $2^h$, is one reading of what $h$ measures. At a fixed $\sigma$, switch families: the Gaussian always has the largest $h$, $\tfrac12\log(2\pi e\sigma^2)$.
+The magenta slice of mass on the left is exactly the magenta stretch of the horizontal axis on the right: the part of the distribution whose log-density term is negative. For **Gaussian** and **Bimodal**, drag a handle sideways to move that component, and up or down to make it taller and narrower or shorter and wider. **Steps** is piecewise constant, with five chunks. Drag a dot on the axis to move a step point (the chunks beside it keep their mass, so their heights change), or drag a chunk's top to set its height (the other chunks' masses rescale to keep the total at 1, as for the pmf above). **Uniform** is the one-chunk case. For chunk masses $m_i$ and widths $w_i$, $h = H(m) + \sum_i m_i \log w_i$: the discrete entropy of the chunks plus their average log width. The $\sigma$ slider rescales the current shape about its mean, and the family buttons reset it. Shrink $\sigma$, or raise a peak, and more of the mass moves above the $\pdf = 1$ line. The dashed box on the left is the uniform density with the same $h$; its width, $2^h$, is one reading of what $h$ measures. At a fixed $\sigma$, switch families: the Gaussian always has the largest $h$, $\tfrac12\log(2\pi e\sigma^2)$.
 :::
 
 ::: {.callout-note title="On the word surprisal"}
@@ -309,3 +312,20 @@ Each row traces back to one of two facts: a density is probability per unit leng
 :::
 
 Shannon [-@shannon.c:1948a, Part III] introduces the integral form, noting there that it is measured relative to the coordinate system. The quantization argument above is the one in @cover.t:2006book2 [ch. 8].
+
+<!-- DRAFT for phase 2 (moved here from the expectation post, 2026-09-30): the transform figure,
+     to be reworked around the slope of the quantile function, h(X) = ∫₀¹ log (F_X⁻¹)′(u) du, with
+     (F_X⁻¹)′(u) = 1/p_X(F_X⁻¹(u)). It runs on the expectation post's bundle (src/expectation,
+     fig-transform.js) and styles. Not for publishing as is. -->
+
+# Draft: the quantile function
+
+$X$ is <span class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></span>.
+
+::: {.wide .extra-wide .ex-wrap}
+```{=html}
+<figure class="ex-fig">
+<div class="ex-canvas"><svg class="ex-plot" id="ex-transform" role="img" aria-label="Evenly spaced values of a uniform U, carried through the quantile function to X"></svg></div>
+</figure>
+```
+:::
