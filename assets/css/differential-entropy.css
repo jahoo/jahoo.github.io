@@ -162,6 +162,7 @@ svg.de-plot .grip { stroke: var(--de-ink); stroke-width: 2.5; stroke-linecap: ro
 svg.de-plot .grip.active { stroke: var(--de-focus); }
 svg.de-plot .handle.grab { cursor: grab; }
 svg.de-plot .handle.active { stroke: var(--de-focus); }
+svg.de-plot .handle-break { cursor: ew-resize; }
 /* Let a touch on a handle or bar drag it instead of scrolling the page. */
 svg.de-plot .handle, #de-a-pmf { touch-action: none; }
 

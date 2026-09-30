@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import {
     log2, erfc, gMass, numEntropy, gPdf, mixDist, unifDist, BIMODAL,
     family, quantH, softmax, shannonH, quantile,
-    temper, withProb, familyShape, shapeDist, shapeMoments, rescaleShape, setPeak,
+    temper, withProb, withMass, familyShape, shapeDist, shapeMoments, rescaleShape, setPeak,
+    stepsDist, setBreak, setLevel, MIN_WIDTH,
+    cdfOf, discCdfAt, discQuantile, sampleShape, atX, atU, lerp, runningIntegral,
 } from './dist.js';
 
 const close = (a, b, tol, msg) =>
@@ -145,5 +147,112 @@ describe('editable shapes', () => {
         const comps = [{ w: .5, m: -20, s: .01 }, { w: .5, m: 20, s: 2 }];
         const hi = s => 0.5 * log2(2 * Math.PI * Math.E * s * s);
         close(mixDist(comps).h, .5 * hi(.01) + .5 * hi(2) + 1, 1e-3);
+    });
+});
+
+describe('step densities', () => {
+    const shape = { kind: 'steps', ts: [-1, -0.2, 0.1, 0.9, 2], ms: [0.1, 0.4, 0.3, 0.2] };
+    const d = stepsDist(shape.ts, shape.ms);
+    it('integrates to 1 and has the closed-form h', () => {
+        close(d.mass(-5, 5), 1, 1e-12);
+        close(numEntropy(d.pdf, -1, 2, 300000), d.h, 1e-3);
+        const H = shannonH(shape.ms), Elogw = shape.ms.reduce((t, m, i) => t + m * log2(d.ws[i]), 0);
+        close(d.h, H + Elogw, 1e-12);
+    });
+    it('quantizing on the chunk grid gives exactly H(m) = h + log2(1/Δ) for equal widths', () => {
+        // chunks of width 1/2 that coincide with the bins [(k - 1/2)Δ, (k + 1/2)Δ], Δ = 1/2
+        const m = [0.2, 0.5, 0.3];
+        const aligned = stepsDist([-0.25, 0.25, 0.75, 1.25], m);
+        close(quantH(aligned, 0.5), shannonH(m), 1e-12);
+        close(aligned.h, shannonH(m) - 1, 1e-12);
+    });
+    it('moments match numerical integration', () => {
+        const N = 200000;
+        let mean = 0;
+        for (let i = 0; i < N; i++) { const x = -1 + 3 * (i + .5) / N; mean += x * d.pdf(x) * 3 / N; }
+        close(shapeMoments(shape).mean, mean, 1e-4);
+        const { sd } = shapeMoments(shape);
+        close(shapeMoments(rescaleShape(shape, 2 * sd)).sd, 2 * sd, 1e-12);
+    });
+    it('the uniform preset is one chunk with h = log2 w', () => {
+        const u = familyShape('unif', 1);
+        assert.equal(u.ms.length, 1);
+        close(shapeDist(u).h, log2(Math.sqrt(12)), 1e-12);
+    });
+    it('the step preset has the requested sd and mean 0', () => {
+        const st = familyShape('steps', 0.3);
+        close(shapeMoments(st).sd, 0.3, 1e-12);
+        close(shapeMoments(st).mean, 0, 1e-12);
+    });
+    it('setBreak keeps masses and chunk order', () => {
+        const s1 = setBreak(shape, 2, 5); // pushed past its right neighbour: clamped
+        assert.deepEqual(s1.ms, shape.ms);
+        close(s1.ts[2], shape.ts[3] - MIN_WIDTH, 1e-12);
+        const s2 = setBreak(shape, 0, -3);   // outer edge moves freely outward
+        close(s2.ts[0], -3, 1e-12);
+    });
+    it('setLevel hits the target height and stays normalized', () => {
+        const s1 = setLevel(shape, 1, 1.5);
+        const d1 = shapeDist(s1);
+        close(d1.hs[1], 1.5, 1e-12);
+        close(s1.ms.reduce((a, b) => a + b, 0), 1, 1e-12);
+    });
+});
+
+describe('sampled helpers', () => {
+    it('discrete CDF and generalized inverse satisfy F⁻¹(u) ≤ x ⟺ u ≤ F(x)', () => {
+        const p = [0.1, 0.4, 0.2, 0.3], F = cdfOf(p);
+        assert.deepEqual(F.map(v => +v.toFixed(12)), [0, 0.1, 0.5, 0.7, 1]);
+        for (let i = 0; i < 500; i++) {
+            const u = Math.random(), x = 0.5 + Math.random() * 4;
+            assert.equal(discQuantile(F, u) <= x + 1e-12, u <= discCdfAt(F, x) + 1e-12);
+        }
+        assert.equal(discQuantile(F, 0), 0);
+        assert.equal(discQuantile(F, 0.1), 1);      // closed at the block's end
+        assert.equal(discQuantile(F, 0.1000001), 2);
+    });
+    it('sampled CDF is monotone and ends at 1, for mixtures and steps', () => {
+        for (const shape of [familyShape('gauss', 0.2), familyShape('bimodal', 0.3),
+            { kind: 'steps', ts: [-.55, -.3, -.1, .1, .3, .55], ms: [.1, .28, .34, .18, .1] }]) {
+            const S = sampleShape(shape);
+            for (let i = 1; i < S.Fs.length; i++) assert.ok(S.Fs[i] >= S.Fs[i - 1] - 1e-12);
+            close(S.Fs[S.Fs.length - 1], 1, 1e-6);
+        }
+    });
+    it('quantile and CDF invert each other through the samples', () => {
+        const S = sampleShape(familyShape('gauss', 0.2));
+        const x = lerp(S.xs, atU(S, 0.3));
+        close(x, 0.2 * -0.5244005, 1e-3);
+        close(lerp(S.Fs, atX(S, x)), 0.3, 1e-4);
+    });
+    it('running integral of −log₂ f recovers h, and of 1 gives u', () => {
+        const S = sampleShape(familyShape('gauss', 0.2));
+        const I = runningIntegral(S.Fs, S.fs.map(f => -log2(f)));
+        close(I[I.length - 1], 0.5 * log2(2 * Math.PI * Math.E * 0.04), 1e-3);
+        const one = runningIntegral(S.Fs, S.fs.map(() => 1));
+        close(one[one.length - 1], 1, 1e-9);
+    });
+});
+
+describe('withMass (a pmf edit that may reach zero)', () => {
+    const sum = a => a.reduce((x, y) => x + y, 0);
+    it('hits the target exactly and keeps the others in proportion', () => {
+        const q = withMass([0.1, 0.2, 0.3, 0.4], 1, 0.5, 0.03);
+        assert.ok(Math.abs(q[1] - 0.5) < 1e-12);
+        assert.ok(Math.abs(q[2] / q[0] - 3) < 1e-12 && Math.abs(q[3] / q[0] - 4) < 1e-12);
+        assert.ok(Math.abs(sum(q) - 1) < 1e-12);
+    });
+    it('pops to zero below the snap', () => {
+        const q = withMass([0.25, 0.25, 0.25, 0.25], 2, 0.02, 0.03);
+        assert.equal(q[2], 0);
+        assert.ok(Math.abs(sum(q) - 1) < 1e-12);
+        assert.equal(withMass([0.25, 0.25, 0.25, 0.25], 2, -1, 0.03)[2], 0);
+    });
+    it('lowering the only atom with mass spreads the rest evenly over the others', () => {
+        assert.deepEqual(withMass([0, 0, 1, 0], 2, 0.4, 0.03).map(v => +v.toFixed(12)), [0.2, 0.2, 0.4, 0.2]);
+    });
+    it('raising a zero atom takes mass from the others in proportion; zeros stay zero', () => {
+        const q = withMass([0.5, 0, 0.5, 0], 1, 0.2, 0.03);
+        assert.deepEqual(q.map(v => +v.toFixed(12)), [0.4, 0.2, 0.4, 0]);
     });
 });

@@ -5,7 +5,7 @@
 //  its container. Styling lives in CSS under svg.de-plot.
 // ================================================================
 
-import { clamp } from './dist.js';
+import { clamp } from '../lib/prob/dist.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 

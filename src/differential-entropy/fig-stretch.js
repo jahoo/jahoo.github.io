@@ -3,7 +3,7 @@
 //  density of aX flattens by 1/a so that its area stays 1.
 // ================================================================
 
-import { family, shannonH, quantile } from './dist.js';
+import { family, shannonH, quantile } from '../lib/prob/dist.js';
 import { Plot, txt } from './svgplot.js';
 import { fmt, setSigned, setText, MINUS } from './ui.js';
 

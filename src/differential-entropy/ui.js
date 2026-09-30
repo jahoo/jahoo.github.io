@@ -3,7 +3,7 @@
 //  Number formatting for readouts, and the segmented family picker.
 // ================================================================
 
-import { log2 } from './dist.js';
+import { log2 } from '../lib/prob/dist.js';
 
 export const MINUS = '−';
 

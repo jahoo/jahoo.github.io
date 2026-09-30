@@ -3,7 +3,7 @@
 //  stretching X moves h(aX) and h(aX | Y) together; I(aX; Y) stays.
 // ================================================================
 
-import { log2 } from './dist.js';
+import { log2 } from '../lib/prob/dist.js';
 import { createPRNG } from '../lib/prng.js';
 import { Plot, txt } from './svgplot.js';
 import { fmt, setSigned, setText } from './ui.js';

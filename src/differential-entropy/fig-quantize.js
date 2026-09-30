@@ -3,7 +3,7 @@
 //  asymptote h + log2(1/Δ), and the histogram at the current Δ.
 // ================================================================
 
-import { densityPts, binRange, quantH, familyShape, shapeDist, shapeMoments } from './dist.js';
+import { densityPts, binRange, quantH, familyShape, shapeDist, shapeMoments } from '../lib/prob/dist.js';
 import { Plot, el, txt } from './svgplot.js';
 import { fmt, setSigned, setText } from './ui.js';
 import { createDensityEditor } from './density-edit.js';

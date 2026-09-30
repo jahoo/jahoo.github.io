@@ -5,7 +5,7 @@
 //  reset it to a family preset.
 // ================================================================
 
-import { log2, densityPts, sampleXs, familyShape, shapeDist, shapeMoments } from './dist.js';
+import { log2, densityPts, sampleXs, familyShape, shapeDist, shapeMoments } from '../lib/prob/dist.js';
 import { Plot, txt } from './svgplot.js';
 import { fmt, setSigned, setText } from './ui.js';
 import { createDensityEditor } from './density-edit.js';
@@ -44,8 +44,10 @@ export function initDensity() {
         P1.area(pts, 'fm');
         // shade (and total) the mass where f > 1
         let pneg = 0;
-        if (d.kind === 'unif') {
-            if (d.peak > 1) { P1.rect(d.a, 0, d.b, d.peak, 'fn'); pneg = 1; }
+        if (d.kind === 'steps') {
+            d.hs.forEach((ht, i) => {
+                if (ht > 1) { P1.rect(d.ts[i], 0, d.ts[i + 1], ht, 'fn'); pneg += d.ms[i]; }
+            });
         } else {
             let seg = [], start = null;
             const flush = end => {
@@ -71,8 +73,12 @@ export function initDensity() {
             xlabel: 'cumulative probability u = F(x)', ylabel: '−log₂ f(x)',
         });
         let mp;
-        if (d.kind === 'unif') mp = [[0, d.h], [1, d.h]];
-        else {
+        if (d.kind === 'steps') {
+            // one flat run per chunk, of width m_i, at height -log2 h_i
+            mp = [];
+            let u = 0;
+            d.ms.forEach((m, i) => { const v = -log2(d.hs[i]); mp.push([u, v], [u + m, v]); u += m; });
+        } else {
             mp = [];
             for (const x of sampleXs(d.comps, d.lo, d.hi, 1200)) {
                 const f = d.pdf(x);

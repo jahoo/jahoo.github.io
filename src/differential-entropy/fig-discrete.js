@@ -5,7 +5,7 @@
 //  shows its tempered version p^β, which is p itself at β = 1.
 // ================================================================
 
-import { log2, softmax, shannonH, temper, withProb, clamp } from './dist.js';
+import { log2, softmax, shannonH, temper, withProb, clamp } from '../lib/prob/dist.js';
 import { Plot, txt } from './svgplot.js';
 import { setText } from './ui.js';
 

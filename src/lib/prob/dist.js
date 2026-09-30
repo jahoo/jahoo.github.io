@@ -92,16 +92,43 @@ export function mixDist(comps) {
     return { kind: 'smooth', comps, pdf, cdf, mass, lo, hi, minScale, h, peak };
 }
 
-// Uniform on [a, b].
-export function unifDist(a, b) {
-    const w = b - a;
-    return {
-        kind: 'unif', a, b,
-        pdf: x => (x >= a && x <= b) ? 1 / w : 0,
-        cdf: x => clamp((x - a) / w, 0, 1),
-        mass: (u, v) => Math.max(0, Math.min(v, b) - Math.max(u, a)) / w,
-        lo: a, hi: b, minScale: w, h: log2(w), peak: 1 / w,
+// Piecewise-constant density: chunk i covers [ts[i], ts[i+1]] and holds
+// mass ms[i] (the ms sum to 1), so its height is ms[i] / width. Its
+// differential entropy has a closed form: with widths w_i,
+//   h = -Σ m_i log(m_i / w_i) = H(m) + Σ m_i log w_i.
+export function stepsDist(ts, ms) {
+    const K = ms.length;
+    const ws = ms.map((_, i) => ts[i + 1] - ts[i]);
+    const hs = ms.map((m, i) => m / ws[i]);
+    const cum = [0];
+    for (let i = 0; i < K; i++) cum.push(cum[i] + ms[i]);
+    const cdf = x => {
+        if (x <= ts[0]) return 0;
+        if (x >= ts[K]) return 1;
+        let i = 0;
+        while (x > ts[i + 1]) i++;
+        return cum[i] + hs[i] * (x - ts[i]);
     };
+    return {
+        kind: 'steps', ts, ms, ws, hs,
+        pdf: x => {
+            if (x < ts[0] || x > ts[K]) return 0;
+            let i = 0;
+            while (i < K - 1 && x > ts[i + 1]) i++;
+            return hs[i];
+        },
+        cdf,
+        mass: (u, v) => Math.max(0, cdf(v) - cdf(u)),
+        lo: ts[0], hi: ts[K],
+        minScale: Math.min(...ws),
+        h: ms.reduce((t, m, i) => t + (m > 0 ? m * log2(ws[i] / m) : 0), 0),
+        peak: Math.max(...hs),
+    };
+}
+
+// Uniform on [a, b]: the one-chunk case.
+export function unifDist(a, b) {
+    return stepsDist([a, b], [1]);
 }
 
 // Two-bump mixture, standardized to mean 0 and variance 1 so that the
@@ -124,14 +151,17 @@ export function family(name, sd) {
     return mixDist(BIMODAL.map(k => ({ w: k.w, m: k.m * sd, s: k.s * sd })));
 }
 
-// Polyline of the density over [x0, x1]; exact corners for the uniform.
+// Polyline of the density over [x0, x1]; exact corners for step densities.
 export function densityPts(d, x0, x1, N = 500) {
-    if (d.kind === 'unif') {
-        const ht = 1 / (d.b - d.a);
+    if (d.kind === 'steps') {
+        const { ts, hs } = d, K = hs.length;
         const pts = [[x0, 0]];
-        if (d.a > x0) pts.push([d.a, 0]);
-        pts.push([Math.max(d.a, x0), ht], [Math.min(d.b, x1), ht]);
-        if (d.b < x1) pts.push([d.b, 0]);
+        if (ts[0] > x0) pts.push([ts[0], 0]);
+        for (let i = 0; i < K; i++) {
+            const a = clamp(ts[i], x0, x1), b = clamp(ts[i + 1], x0, x1);
+            pts.push([a, hs[i]], [b, hs[i]]);
+        }
+        if (ts[K] < x1) pts.push([ts[K], 0]);
         pts.push([x1, 0]);
         return pts;
     }
@@ -197,28 +227,55 @@ export function withProb(p, i, target, minP) {
     return q.map(v => v / Z);
 }
 
+// Set p[i] to target (in [0, 1], popping to 0 below snap) and rescale the others
+// to keep the total 1, in proportion; when they have no mass between them, evenly.
+// Unlike withProb, a mass can be exactly zero.
+export function withMass(p, i, target, snap) {
+    const t = target < snap ? 0 : Math.min(target, 1), rest = 1 - p[i], n = p.length;
+    return p.map((v, j) => (j === i ? t : rest > 1e-12 ? v * (1 - t) / rest : (1 - t) / (n - 1)));
+}
+
 // ---- editable densities ----
-// A shape is { kind: 'unif', a, b } or { kind: 'mix', comps: [{ w, m, s }] }.
+// A shape is { kind: 'steps', ts, ms } (the uniform is one chunk) or
+// { kind: 'mix', comps: [{ w, m, s }] }.
 
 export const S_MIN = 2 ** -7, S_MAX = 16;
+export const MIN_WIDTH = 2 ** -6; // narrowest chunk
+export const MIN_MASS = 0.01;     // floor for a chunk's mass, as for the pmf
+
+// Masses for the step preset: five equal-width chunks.
+const STEP_MASSES = [0.10, 0.28, 0.34, 0.18, 0.10];
 
 // The standardized family, scaled to standard deviation sd (see family()).
 export function familyShape(name, sd) {
     if (name === 'unif') {
         const w = sd * Math.sqrt(12);
-        return { kind: 'unif', a: -w / 2, b: w / 2 };
+        return { kind: 'steps', ts: [-w / 2, w / 2], ms: [1] };
+    }
+    if (name === 'steps') {
+        const K = STEP_MASSES.length;
+        const shape = { kind: 'steps', ts: STEP_MASSES.map((_, i) => i - K / 2).concat(K / 2), ms: STEP_MASSES.slice() };
+        const { mean } = shapeMoments(shape);
+        return rescaleShape({ kind: 'steps', ts: shape.ts.map(t => t - mean), ms: shape.ms }, sd);
     }
     const comps = name === 'gauss' ? [{ w: 1, m: 0, s: 1 }] : BIMODAL;
     return { kind: 'mix', comps: comps.map(k => ({ w: k.w, m: k.m * sd, s: k.s * sd })) };
 }
 
 export function shapeDist(shape) {
-    return shape.kind === 'unif' ? unifDist(shape.a, shape.b) : mixDist(shape.comps);
+    return shape.kind === 'steps' ? stepsDist(shape.ts, shape.ms) : mixDist(shape.comps);
 }
 
 export function shapeMoments(shape) {
-    if (shape.kind === 'unif') {
-        return { mean: (shape.a + shape.b) / 2, sd: (shape.b - shape.a) / Math.sqrt(12) };
+    if (shape.kind === 'steps') {
+        const { ts, ms } = shape;
+        let mean = 0, m2 = 0;
+        ms.forEach((m, i) => {
+            const c = (ts[i] + ts[i + 1]) / 2, w = ts[i + 1] - ts[i];
+            mean += m * c;
+            m2 += m * (c * c + w * w / 12);
+        });
+        return { mean, sd: Math.sqrt(Math.max(m2 - mean * mean, 0)) };
     }
     const c = shape.comps;
     const mean = c.reduce((t, k) => t + k.w * k.m, 0);
@@ -230,8 +287,8 @@ export function shapeMoments(shape) {
 export function rescaleShape(shape, sd) {
     const { mean, sd: sd0 } = shapeMoments(shape);
     const k = sd / sd0;
-    if (shape.kind === 'unif') {
-        return { kind: 'unif', a: mean + (shape.a - mean) * k, b: mean + (shape.b - mean) * k };
+    if (shape.kind === 'steps') {
+        return { kind: 'steps', ts: shape.ts.map(t => mean + (t - mean) * k), ms: shape.ms.slice() };
     }
     return {
         kind: 'mix',
@@ -248,4 +305,90 @@ export function setPeak(comps, i, x, y) {
     const own = y - other;
     const s = own > 0 ? clamp(c.w / (own * SQ2PI), S_MIN, S_MAX) : S_MAX;
     return comps.map((k, j) => (j === i ? { w: k.w, m: x, s } : k));
+}
+
+// Move step point j to x, keeping every chunk's mass (so the two chunks
+// beside it change height) and every chunk at least MIN_WIDTH wide.
+export function setBreak(shape, j, x) {
+    const ts = shape.ts.slice(), K = shape.ms.length;
+    const lo = j > 0 ? ts[j - 1] + MIN_WIDTH : -Infinity;
+    const hi = j < K ? ts[j + 1] - MIN_WIDTH : Infinity;
+    ts[j] = clamp(x, lo, hi);
+    return { kind: 'steps', ts, ms: shape.ms.slice() };
+}
+
+// Set chunk i's height to y: its mass becomes y × width and the other
+// masses rescale to keep the total at 1 (the pmf drag rule, withProb).
+export function setLevel(shape, i, y) {
+    const w = shape.ts[i + 1] - shape.ts[i];
+    return { kind: 'steps', ts: shape.ts.slice(), ms: withProb(shape.ms, i, y * w, MIN_MASS) };
+}
+
+// ---- sampled CDFs and quantiles (both figures of the expectation post) ----
+
+// F with F[0] = 0 and F[k] = P(X ≤ k) for atoms at 1..n.
+export function cdfOf(p) {
+    const F = [0];
+    p.forEach((v, i) => F.push(F[i] + v));
+    return F;
+}
+
+// F_X(x) for atoms at 1..n: right-continuous, so the atom at x counts once x reaches it.
+export function discCdfAt(F, x) {
+    return F[clamp(Math.floor(x + 1e-9), 0, F.length - 1)];
+}
+
+// F_X⁻¹(u) = min{x : F_X(x) ≥ u}: the atom whose block (F[k−1], F[k]] holds u; 0 for u ≤ 0.
+export function discQuantile(F, u) {
+    if (u <= 0) return 0;
+    const k = F.findIndex((f, i) => i > 0 && f >= u - 1e-12);
+    return k === -1 ? F.length - 1 : k;
+}
+
+// Sorted samples of a shape over its support: x, density, CDF.
+export function sampleShape(shape) {
+    const xs = [], fs = [], Fs = [];
+    if (shape.kind === 'steps') {
+        const { ts, ms } = shape, e = 1e-9;
+        let F = 0;
+        ms.forEach((m, i) => {
+            const w = ts[i + 1] - ts[i], h = m / w;
+            for (let j = 0; j <= 40; j++) {
+                const x = ts[i] + (j === 0 ? e : j === 40 ? w - e : w * j / 40);
+                xs.push(x); fs.push(h); Fs.push(F + h * (x - ts[i]));
+            }
+            F += m;
+        });
+    } else {
+        const c = shape.comps, N = 1600;
+        const lo = Math.min(...c.map(k => k.m - 7 * k.s)), hi = Math.max(...c.map(k => k.m + 7 * k.s));
+        for (let i = 0; i <= N; i++) {
+            const x = lo + (hi - lo) * i / N;
+            let f = 0, F = 0;
+            for (const k of c) { f += k.w * gPdf(x, k.m, k.s); F += k.w * gCdf(x, k.m, k.s); }
+            xs.push(x); fs.push(f); Fs.push(F);
+        }
+    }
+    return { xs, fs, Fs, peak: Math.max(...fs) };
+}
+
+// Interpolation index into sorted samples, by x or by u.
+function bisect(arr, v) {
+    const n = arr.length;
+    if (v <= arr[0]) return { j: 0, t: 0 };
+    if (v >= arr[n - 1]) return { j: n - 2, t: 1 };
+    let lo = 0, hi = n - 1;
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (arr[m] <= v) lo = m; else hi = m; }
+    const d = arr[hi] - arr[lo];
+    return { j: lo, t: d > 0 ? (v - arr[lo]) / d : 0 };
+}
+export const atX = (S, x) => bisect(S.xs, x);
+export const atU = (S, u) => bisect(S.Fs, u);
+export const lerp = (arr, L) => arr[L.j] + (arr[L.j + 1] - arr[L.j]) * L.t;
+
+// ∫ g du along the samples (trapezoid), I[0] = 0.
+export function runningIntegral(Fs, gs) {
+    const I = [0];
+    for (let i = 1; i < gs.length; i++) I.push(I[i - 1] + (Fs[i] - Fs[i - 1]) * (gs[i] + gs[i - 1]) / 2);
+    return I;
 }
