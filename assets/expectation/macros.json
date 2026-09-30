@@ -1,0 +1,6 @@
+{
+  "dee": "\\mathop{\\mathrm{d}\\!}",
+  "defeq": "\\triangleq",
+  "pmf": ["\\mathrm{pmf}_{#1}", 1],
+  "pdf": ["\\mathrm{pdf}_{#1}", 1]
+}
