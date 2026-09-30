@@ -1,0 +1,911 @@
+<title>Entropy Area Construction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] }, svg: { fontCache: 'global' } };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+<style>
+/* Layout: a reading column for the text, one wide figure (a 2-column grid of
+   plots drawn in a single SVG so crosshairs can cross between panels), and a
+   sticky control bar. Palette follows the blog post: teal = mass/density,
+   magenta = negative values, ochre = discrete quantities, blue = "now". */
+:root {
+  --bg: #fbfcfc;
+  --surface: #f3f6f7;
+  --ink: #1c2238;
+  --ink-soft: #56607a;
+  --rule: #c9d2da;
+  --grid: #e1e7ec;
+  --mass: #13707f;
+  --mass-soft: rgba(19, 112, 127, .20);
+  --neg: #b02e68;
+  --neg-soft: rgba(176, 46, 104, .22);
+  --atom: #a87708;
+  --atom-soft: rgba(196, 142, 20, .26);
+  --now: #2f5bd3;
+  --now-soft: rgba(47, 91, 211, .16);
+  --ghost: rgba(86, 96, 122, .38);
+  --serif: "EB Garamond", "Iowan Old Style", Palatino, Georgia, serif;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141824; --surface: #1b2030; --ink: #e4e8f1; --ink-soft: #9ea7bb;
+    --rule: #2f3649; --grid: #262d3f;
+    --mass: #52bccb; --mass-soft: rgba(82, 188, 203, .22);
+    --neg: #ee72a8; --neg-soft: rgba(238, 114, 168, .24);
+    --atom: #e5b647; --atom-soft: rgba(229, 182, 71, .24);
+    --now: #8fb0ff; --now-soft: rgba(143, 176, 255, .2);
+    --ghost: rgba(158, 167, 187, .42);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141824; --surface: #1b2030; --ink: #e4e8f1; --ink-soft: #9ea7bb;
+  --rule: #2f3649; --grid: #262d3f;
+  --mass: #52bccb; --mass-soft: rgba(82, 188, 203, .22);
+  --neg: #ee72a8; --neg-soft: rgba(238, 114, 168, .24);
+  --atom: #e5b647; --atom-soft: rgba(229, 182, 71, .24);
+  --now: #8fb0ff; --now-soft: rgba(143, 176, 255, .2);
+  --ghost: rgba(158, 167, 187, .42);
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--serif); font-size: 1.14rem; line-height: 1.55;
+  padding-inline: 16px; padding-block: 0 4rem;
+}
+.col { max-width: 44rem; margin: 0 auto; }
+.wide { max-width: 1080px; margin: 0 auto; }
+h1 { font-weight: 500; font-size: clamp(2rem, 4.4vw, 2.8rem); line-height: 1.1; margin: 2.4rem 0 .8rem; text-wrap: balance; }
+h2 { font-weight: 500; font-size: 1.55rem; margin: 2.4rem 0 .5rem; text-wrap: balance; }
+p { margin: 0 0 .8em; }
+.muted { color: var(--ink-soft); }
+mjx-container { font-size: 96%; }
+
+/* ---- sticky control bar ---- */
+.bar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--rule);
+  margin: 1.2rem calc(-1 * 16px) 0; padding: .7rem 16px .6rem;
+  font-family: var(--sans); font-size: .86rem;
+}
+.bar-inner { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: .55rem; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.2rem; }
+.grp { display: flex; align-items: center; gap: .45rem; }
+.grp > .lab { color: var(--ink-soft); }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; padding: 2px; background: var(--surface); }
+.seg button { font: inherit; color: var(--ink); background: transparent; border: 0; padding: .25rem .7rem; border-radius: 999px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+select, .btn { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: .22rem .5rem; }
+.btn { cursor: pointer; min-width: 2.2rem; }
+.btn:hover { border-color: var(--ink-soft); }
+input[type=range] { accent-color: var(--now); }
+.scrub { flex: 1 1 18rem; display: flex; align-items: center; gap: .5rem; min-width: 0; }
+.scrub input { flex: 1; min-width: 0; }
+:focus-visible { outline: 2px solid var(--now); outline-offset: 2px; }
+.ro { display: flex; flex-wrap: wrap; gap: .2rem 1.4rem; font-variant-numeric: tabular-nums; }
+.ro .k { color: var(--ink-soft); }
+.ro .v { font-weight: 600; }
+.ro .v.neg { color: var(--neg); }
+label.chk { display: inline-flex; gap: .35rem; align-items: center; color: var(--ink-soft); cursor: pointer; }
+[data-case="cont"] .disc-only, [data-case="disc"] .cont-only { display: none; }
+
+/* ---- the figure ---- */
+figure.sk { margin: 1rem 0 0; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: .8rem; overflow-x: auto; }
+svg.plot { display: block; width: 100%; height: auto; min-width: 640px; user-select: none; -webkit-user-select: none; touch-action: pan-y; }
+.math { margin: .4rem 0 .6rem; }
+.def { margin: 0 0 .2rem; }
+.figctl { font-family: var(--sans); font-size: .86rem; display: flex; align-items: center; gap: .5rem; margin: 0 0 .4rem; }
+.figctl .lab { color: var(--ink-soft); }
+ol.qs { padding-left: 1.3rem; }
+ol.qs li { margin-bottom: .6rem; }
+
+/* SVG marks */
+.gl { stroke: var(--grid); stroke-width: 1; }
+.ax { stroke: var(--ink-soft); stroke-width: 1; }
+.ax0 { stroke: var(--ink); stroke-width: 1.2; }
+.tk { fill: var(--ink-soft); font: 11px var(--sans); font-variant-numeric: tabular-nums; }
+.tk.now { fill: var(--now); font-weight: 600; }
+.axl { fill: var(--ink-soft); font: italic 14px var(--serif); }
+.ttl { fill: var(--ink-soft); font: 500 12px var(--sans); }
+.lbl { fill: var(--ink); font: 12px var(--sans); paint-order: stroke; stroke: var(--surface); stroke-width: 3.5px; stroke-linejoin: round; }
+.lbl.now { fill: var(--now); font-weight: 600; }
+.done { fill: var(--atom-soft); stroke: var(--atom); stroke-width: 1.2; }
+.cur { fill: var(--now-soft); stroke: var(--now); stroke-width: 2; }
+.todo { fill: none; stroke: var(--ghost); stroke-width: 1; stroke-dasharray: 3 3; }
+.curve { fill: none; stroke: var(--mass); stroke-width: 2; stroke-linejoin: round; }
+.curve.later { stroke: var(--ghost); stroke-width: 1.3; stroke-dasharray: 4 3; }
+.curve.atom { stroke: var(--atom); }
+.fm { fill: var(--mass-soft); }
+.fn { fill: var(--neg-soft); }
+.cursor { stroke: var(--now); stroke-width: 1.5; }
+.dot { fill: var(--now); stroke: var(--surface); stroke-width: 2; }
+.cross { stroke: var(--now); stroke-width: 1.3; stroke-dasharray: 4 3; fill: none; }
+.hline { stroke: var(--ink); stroke-width: 1.2; stroke-dasharray: 2 3; }
+.stem-done { stroke: var(--atom); stroke-width: 2; }
+.stem-cur { stroke: var(--now); stroke-width: 2.6; }
+.stem-todo { stroke: var(--ghost); stroke-width: 1.2; stroke-dasharray: 3 3; }
+.pin-done { fill: var(--atom); }
+.pin-cur { fill: var(--now); }
+.pin-todo { fill: var(--surface); stroke: var(--ghost); stroke-width: 1.2; }
+.br-done { stroke: var(--mass); stroke-width: 1; }
+.br-done.atom { stroke: var(--atom); stroke-width: 1.3; }
+.br-cur { stroke: var(--now); stroke-width: 2.2; }
+.br-todo { stroke: var(--ghost); stroke-width: .8; }
+.wax { stroke: var(--ink-soft); stroke-width: 1.2; }
+.wax.done { stroke: var(--mass); stroke-width: 2.4; }
+.wax.done.atom { stroke: var(--atom); }
+.wax.cur { stroke: var(--now); stroke-width: 3; }
+.wtk { stroke: var(--ink-soft); stroke-width: 1; }
+.kh { fill: var(--ink); font: 600 13px var(--sans); }
+.strip { fill: var(--now-soft); }
+.stripl { stroke: var(--now); stroke-width: 1; fill: none; }
+.ref1 { stroke: var(--ink-soft); stroke-width: 1.3; stroke-dasharray: 4 3; }
+.odot { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
+.cdot { fill: var(--ink); }
+.graphline { fill: none; stroke: var(--ink); stroke-width: 1.8; }
+.fiber { fill: none; stroke: var(--now); stroke-width: 2; }
+.jump { stroke: var(--ghost); stroke-width: 1; stroke-dasharray: 2 3; }
+.flow { stroke: var(--now); stroke-width: 5; stroke-linecap: butt; opacity: .35; }
+.seg-now { stroke: var(--now); stroke-width: 4; stroke-linecap: butt; }
+.kl { fill: var(--ink-soft); font: 12.5px var(--sans); }
+.kv { fill: var(--ink); font: 600 12.5px var(--sans); font-variant-numeric: tabular-nums; }
+.kv.neg { fill: var(--neg); }
+.fx { fill: var(--ink); font: italic 19px var(--serif); }
+.fxs { fill: var(--ink-soft); font: 12.5px var(--sans); }
+.int { fill: var(--ink); font: 400 46px var(--serif); }
+.lim { fill: var(--ink-soft); font: 13px var(--sans); font-variant-numeric: tabular-nums; }
+.lim.now { fill: var(--now); font-weight: 600; }
+.fxv { fill: var(--ink); font: 600 17px var(--sans); font-variant-numeric: tabular-nums; }
+.fxv.neg, .exv.neg { fill: var(--neg); }
+.ex { fill: var(--ink); font: italic 26px var(--serif); }
+.exv { fill: var(--ink); font: 600 26px var(--sans); font-style: normal; font-variant-numeric: tabular-nums; }
+</style>
+
+<div class="col">
+  <h1>Expectation as an area</h1>
+  <div class="math">
+  <p class="def">Let \(X\) be a real random variable with cumulative distribution function \(F_X(x) = P(X \le x)\), and let \(p_X\) be the density of its law with respect to a reference measure \(\mu\): <span class="disc-only">counting measure, so \(p_X\) is the probability mass function.</span><span class="cont-only">Lebesgue measure, so \(p_X\) is the probability density function.</span></p>
+  <div class="disc-only">\[ \mathbb{E}[g(X)] \;=\; \int g(x)\,p_X(x)\,\mu(dx) \;=\; \sum_x g(x)\,p_X(x) \]</div>
+  <div class="cont-only">\[ \mathbb{E}[g(X)] \;=\; \int g(x)\,p_X(x)\,\mu(dx) \;=\; \int g(x)\,p_X(x)\,dx \]</div>
+  \[ F_X^{-1}(u) \;=\; \inf\{x : F_X(x) \ge u\} \qquad\qquad \mathbb{E}[g(X)] \;=\; \int_0^1 g\big(F_X^{-1}(u)\big)\,du \]
+  </div>
+</div>
+
+<div class="bar" id="bar">
+  <div class="bar-inner">
+    <div class="row">
+      <div class="grp"><span class="lab">case</span>
+        <div class="seg" id="case"><button type="button" data-v="disc" aria-pressed="true">Discrete</button><button type="button" data-v="cont" aria-pressed="false">Continuous</button></div>
+      </div>
+      <div class="grp"><label class="lab" for="preset">distribution</label>
+        <select id="preset"></select>
+      </div>
+      <div class="grp"><label class="lab" for="gsel">g(x) =</label>
+        <select id="gsel">
+          <option value="neglog" selected>−log₂ p_X(x)  (entropy)</option>
+          <option value="p">p_X(x)</option>
+          <option value="x">x  (mean)</option>
+          <option value="x2">x²</option>
+        </select>
+      </div>
+      <div class="grp cont-only"><label class="lab" for="delta">grid δ =</label>
+        <input type="range" id="delta" min="3" max="6" step="1" value="4" style="width:5rem">
+        <span class="v" id="deltav">1/16</span>
+      </div>
+      <label class="chk"><input type="checkbox" id="ghost" checked> show the unbuilt rest</label>
+    </div>
+    <div class="row">
+      <div class="grp">
+        <button class="btn" type="button" id="playx">▶ sweep x</button>
+        <button class="btn" type="button" id="playu">▶ sweep u</button>
+      </div>
+      <div class="grp disc-only">
+        <button class="btn" type="button" id="back" aria-label="Previous atom">◀︎ atom</button>
+        <button class="btn" type="button" id="fwd" aria-label="Next atom">atom ▶︎</button>
+      </div>
+      <div class="ro" id="ro">
+        <span><span class="k">x = </span><span class="v" id="r-x">–</span></span>
+        <span><span class="k">u = F<sub>X</sub>(x) = </span><span class="v" id="r-u">–</span></span>
+        <span><span class="k">g now: </span><span class="v" id="r-h">–</span></span>
+        <span><span class="k">area so far: </span><span class="v" id="r-a">–</span></span>
+        <span><span class="k" id="r-tk">E[g(X)]</span><span class="k"> = </span><span class="v" id="r-t">–</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wide">
+  <figure class="sk"><svg class="plot" id="svgD" role="img" aria-label="The area plot for an expectation, with the plot of g to its left, the map from x to u above it, and the running integral below it"></svg></figure>
+
+  <div class="col math">
+  \[ F_X^{-1}(u) \le x \iff u \le F_X(x) \qquad\Longrightarrow\qquad \int_0^{F_X(x)} p_U(u)\,du \;=\; \int_{(-\infty,\, x]} p_X\,d\mu, \qquad \{u : F_X^{-1}(u) = x\} \;=\; \big(F_X(x^-),\, F_X(x)\big] \]
+  \[ F_X^{-1}(U) \overset{d}{=} X \ \text{ for } U \sim \mathrm{Uniform}[0, 1] \qquad\Longrightarrow\qquad \mathbb{E}[g(X)] \;=\; \mathbb{E}\big[g\big(F_X^{-1}(U)\big)\big] \]
+  </div>
+  <figure class="sk">
+    <div class="figctl"><span class="lab">horizontal axis</span>
+      <div class="seg" id="orient"><button type="button" data-v="x" aria-pressed="true">x</button><button type="button" data-v="u" aria-pressed="false">u</button></div>
+    </div>
+    <svg class="plot" id="svgT" role="img" aria-label="Evenly spaced values of a uniform U, carried through the quantile function to X"></svg>
+  </figure>
+
+</div>
+
+<script>
+(function () {
+'use strict';
+const $ = id => document.getElementById(id);
+const NS = 'http://www.w3.org/2000/svg';
+const log2 = x => Math.log(x) / Math.LN2;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const MINUS = '−';
+const fmt = (v, d = 3) => (!isFinite(v) ? (v > 0 ? '∞' : MINUS + '∞') : (v < 0 && Math.abs(v) >= 0.5 * 10 ** -d ? MINUS : '') + Math.abs(v).toFixed(d));
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs || {}) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function txt(parent, x, y, s, cls, attrs) { const t = el('text', Object.assign({ x, y, class: cls }, attrs || {}), parent); rich(t, s); return t; }
+// Plain text, except "_c" / "_{..}" is a subscript and "^c" / "^{..}" a superscript.
+function rich(t, s) {
+  if (!/[_^]/.test(s)) { t.textContent = s; return; }
+  const re = /([_^])(\{([^}]*)\}|(.))/g;
+  let last = 0, m;
+  while ((m = re.exec(s))) {
+    if (m.index > last) el('tspan', null, t).textContent = s.slice(last, m.index);
+    const sc = el('tspan', { 'baseline-shift': m[1] === '_' ? 'sub' : 'super', 'font-size': '72%' }, t);
+    sc.textContent = m[3] !== undefined ? m[3] : m[4];
+    last = re.lastIndex;
+  }
+  if (last < s.length) el('tspan', null, t).textContent = s.slice(last);
+}
+function niceTicks(a, b, n) {
+  const span = b - a; if (!(span > 0)) return [a];
+  const s0 = span / n, mag = 10 ** Math.floor(Math.log10(s0)), r = s0 / mag;
+  const st = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, out = [];
+  for (let v = Math.ceil(a / st - 1e-9) * st; v <= b + 1e-9 * st; v += st) out.push(+v.toFixed(10));
+  return out;
+}
+const tf = v => (Math.abs(v) < 1e-9 ? '0' : String(+v.toPrecision(3)).replace('-', MINUS));
+
+/* ---------- a plot region inside the shared SVG ---------- */
+let uid = 0;
+class Region {
+  constructor(svg, o) {
+    this.o = o; this.id = 'c' + (uid++);
+    this.clip = el('rect', null, el('clipPath', { id: this.id }, svg.defs));
+    this.clipA = el('rect', null, el('clipPath', { id: this.id + 'a' }, svg.defs));
+    this.clipB = el('rect', null, el('clipPath', { id: this.id + 'b' }, svg.defs));
+    this.back = el('g', null, svg.root);
+    this.data = el('g', { 'clip-path': `url(#${this.id})` }, svg.root);
+    this.front = el('g', null, svg.root);
+  }
+  domain(x0, x1, y0, y1) {
+    Object.assign(this, { x0, x1, y0, y1 });
+    const { ox, oy, w, h, m } = this.o;
+    this.pl = ox + m.l; this.pr = ox + w - m.r; this.pt = oy + m.t; this.pb = oy + h - m.b;
+    const set = (r, x, y, ww, hh) => { r.setAttribute('x', x); r.setAttribute('y', y); r.setAttribute('width', Math.max(0, ww)); r.setAttribute('height', Math.max(0, hh)); };
+    set(this.clip, this.pl, this.pt - 1, this.pr - this.pl, this.pb - this.pt + 2);
+    const yz = this.Y(clamp(0, y0, y1));
+    set(this.clipA, this.pl, this.pt - 1, this.pr - this.pl, yz - this.pt + 1);
+    set(this.clipB, this.pl, yz, this.pr - this.pl, this.pb - yz + 1);
+    this.back.replaceChildren(); this.data.replaceChildren(); this.front.replaceChildren();
+    return this;
+  }
+  X(x) { return this.pl + (x - this.x0) / (this.x1 - this.x0) * (this.pr - this.pl); }
+  Y(y) { const s = this.y1 - this.y0; y = clamp(y, this.y0 - 2 * s, this.y1 + 2 * s); return this.pb - (y - this.y0) / s * (this.pb - this.pt); }
+  inX(x) { return x >= this.x0 && x <= this.x1; }
+  inY(y) { return y >= this.y0 && y <= this.y1; }
+  axes(o) {
+    const g = this.back;
+    const xt = o.xticks || niceTicks(this.x0, this.x1, 6), yt = o.yticks || niceTicks(this.y0, this.y1, 4);
+    for (const v of xt) { const x = this.X(v); if (x < this.pl - .5 || x > this.pr + .5) continue; el('line', { x1: x, x2: x, y1: this.pt, y2: this.pb, class: 'gl' }, g); txt(g, x, this.pb + 14, o.xfmt ? o.xfmt(v) : tf(v), 'tk' + (o.xnow === v ? ' now' : ''), { 'text-anchor': 'middle' }); }
+    for (const v of yt) { const y = this.Y(v); if (y < this.pt - .5 || y > this.pb + .5) continue; el('line', { x1: this.pl, x2: this.pr, y1: y, y2: y, class: 'gl' }, g); if (!o.noyl) txt(g, this.pl - 6, y + 3.5, tf(v), 'tk', { 'text-anchor': 'end' }); }
+    el('line', { x1: this.pl, x2: this.pr, y1: this.pb, y2: this.pb, class: 'ax' }, g);
+    el('line', { x1: this.pl, x2: this.pl, y1: this.pt, y2: this.pb, class: 'ax' }, g);
+    if (!o.noZero && this.y0 < 0 && this.y1 > 0) el('line', { x1: this.pl, x2: this.pr, y1: this.Y(0), y2: this.Y(0), class: 'ax0' }, g);
+    if (o.xlabel) txt(g, (this.pl + this.pr) / 2, this.pb + 30, o.xlabel, 'axl', { 'text-anchor': 'middle' });
+    if (o.ylabel) { const cy = (this.pt + this.pb) / 2, x = this.o.ox + 12; txt(g, x, cy, o.ylabel, 'axl', { 'text-anchor': 'middle', transform: `rotate(-90 ${x} ${cy})` }); }
+    if (o.title) txt(g, this.pl, this.pt - 8, o.title, 'ttl');
+  }
+  d(pts) { let s = ''; pts.forEach((p, i) => { s += (i ? 'L' : 'M') + this.X(p[0]).toFixed(1) + ' ' + this.Y(p[1]).toFixed(1); }); return s; }
+  path(pts, cls, g) { return pts.length ? el('path', { d: this.d(pts), class: cls }, g || this.data) : null; }
+  area(pts, cls, g) {
+    if (!pts.length) return null;
+    const yb = this.Y(clamp(0, this.y0, this.y1)).toFixed(1);
+    let s = `M${this.X(pts[0][0]).toFixed(1)} ${yb}`;
+    for (const p of pts) s += `L${this.X(p[0]).toFixed(1)} ${this.Y(p[1]).toFixed(1)}`;
+    s += `L${this.X(pts[pts.length - 1][0]).toFixed(1)} ${yb}Z`;
+    return el('path', { d: s, class: cls }, g || this.data);
+  }
+  rect(xa, ya, xb, yb, cls, g) {
+    const X0 = this.X(Math.min(xa, xb)), X1 = this.X(Math.max(xa, xb)), Y0 = this.Y(Math.max(ya, yb)), Y1 = this.Y(Math.min(ya, yb));
+    return el('rect', { x: X0.toFixed(1), y: Y0.toFixed(1), width: Math.max(0, X1 - X0).toFixed(1), height: Math.max(0, Y1 - Y0).toFixed(1), class: cls }, g || this.data);
+  }
+  vline(x, cls, g) { return el('line', { x1: this.X(x), x2: this.X(x), y1: this.pt, y2: this.pb, class: cls }, g || this.data); }
+  hline(y, cls, g) { return el('line', { x1: this.pl, x2: this.pr, y1: this.Y(y), y2: this.Y(y), class: cls }, g || this.data); }
+  gAbove() { return el('g', { 'clip-path': `url(#${this.id}a)` }, this.data); }
+  gBelow() { return el('g', { 'clip-path': `url(#${this.id}b)` }, this.data); }
+}
+
+/* ---------- distributions ---------- */
+function erfc(x) {
+  const z = Math.abs(x), t = 1 / (1 + 0.5 * z);
+  const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418 + t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
+  return x >= 0 ? r : 2 - r;
+}
+const SQ2PI = Math.sqrt(2 * Math.PI);
+const gPdf = (x, m, s) => { const z = (x - m) / s; return Math.exp(-.5 * z * z) / (s * SQ2PI); };
+const gCdf = (x, m, s) => .5 * erfc(-(x - m) / (s * Math.SQRT2));
+const softmax = L => { const e = L.map(Math.exp), Z = e.reduce((a, b) => a + b, 0); return e.map(v => v / Z); };
+const norm = p => { const Z = p.reduce((a, b) => a + b, 0); return p.map(v => v / Z); };
+
+// Discrete outcomes are the numbers 1..8.
+const DISC = {
+  default: { label: 'default (post)', p: softmax([1.9, 0.2, 1.1, -0.6, 0.7, -1.3, 0.1, -0.3]) },
+  peaked: { label: 'peaked', p: norm([0.02, 0.03, 0.05, 0.62, 0.13, 0.07, 0.05, 0.03]) },
+  zipf: { label: 'zipf', p: norm([1, 1 / 2, 1 / 3, 1 / 4, 1 / 5, 1 / 6, 1 / 7, 1 / 8]) },
+  uniform: { label: 'uniform', p: norm([1, 1, 1, 1, 1, 1, 1, 1]) },
+};
+const CONT = {
+  gauss: { label: 'Gaussian, σ = 0.2', comps: [{ w: 1, m: 0, s: 0.2 }], dom: [-0.85, 0.85] },
+  bimodal: { label: 'Bimodal', comps: [{ w: .62, m: -.35, s: .13 }, { w: .38, m: .4, s: .2 }], dom: [-0.95, 1.2] },
+  steps: { label: 'Steps', ts: [-.55, -.3, -.1, .1, .3, .55], ms: [.1, .28, .34, .18, .1], dom: [-0.8, 0.8] },
+};
+
+// The function being averaged, given the outcome x and its probability (or density) v.
+const G = {
+  neglog: { f: (x, v) => -log2(v), name: () => '−log₂ p_X(x)', clip: [-5, 9] },
+  p: { f: (x, v) => v, name: () => 'p_X(x)' },
+  x: { f: x => x, name: () => 'x' },
+  x2: { f: x => x * x, name: () => 'x²' },
+};
+
+// Continuous samples: sorted x, f, F, and the running integral over u of g.
+function sampleCont(key) {
+  const c = CONT[key]; const xs = [], fs = [], Fs = [];
+  if (c.ts) {
+    const { ts, ms } = c, e = 1e-9;
+    let F = 0;
+    ms.forEach((m, i) => {
+      const w = ts[i + 1] - ts[i], h = m / w;
+      for (let j = 0; j <= 40; j++) { const x = ts[i] + (j === 0 ? e : j === 40 ? w - e : w * j / 40); xs.push(x); fs.push(h); Fs.push(F + h * (x - ts[i])); }
+      F += m;
+    });
+  } else {
+    const lo = Math.min(...c.comps.map(k => k.m - 7 * k.s)), hi = Math.max(...c.comps.map(k => k.m + 7 * k.s)), N = 1600;
+    for (let i = 0; i <= N; i++) {
+      const x = lo + (hi - lo) * i / N; let f = 0, F = 0;
+      for (const k of c.comps) { f += k.w * gPdf(x, k.m, k.s); F += k.w * gCdf(x, k.m, k.s); }
+      xs.push(x); fs.push(f); Fs.push(F);
+    }
+  }
+  return { key, c, xs, fs, Fs, peak: Math.max(...fs) };
+}
+function withG(S, gk) {
+  const g = G[gk].f, gs = S.xs.map((x, i) => g(x, S.fs[i])), I = [0];
+  for (let i = 1; i < gs.length; i++) I.push(I[i - 1] + (S.Fs[i] - S.Fs[i - 1]) * (gs[i] + gs[i - 1]) / 2);
+  return { ...S, gs, I, gk };
+}
+function idxAtX(S, x) {
+  const xs = S.xs, n = xs.length;
+  if (x <= xs[0]) return { j: 0, t: 0 };
+  if (x >= xs[n - 1]) return { j: n - 2, t: 1 };
+  let lo = 0, hi = n - 1;
+  while (hi - lo > 1) { const m = (lo + hi) >> 1; if (xs[m] <= x) lo = m; else hi = m; }
+  return { j: lo, t: (x - xs[lo]) / (xs[hi] - xs[lo]) };
+}
+function idxAtU(S, u) {
+  const Fs = S.Fs, n = Fs.length;
+  if (u <= Fs[0]) return { j: 0, t: 0 };
+  if (u >= Fs[n - 1]) return { j: n - 2, t: 1 };
+  let lo = 0, hi = n - 1;
+  while (hi - lo > 1) { const m = (lo + hi) >> 1; if (Fs[m] <= u) lo = m; else hi = m; }
+  const du = Fs[hi] - Fs[lo];
+  return { j: lo, t: du > 0 ? (u - Fs[lo]) / du : 0 };
+}
+const at = (arr, L) => arr[L.j] + (arr[L.j + 1] - arr[L.j]) * L.t;
+
+/* ---------- state ---------- */
+const st = { kase: 'disc', disc: 'default', cont: 'gauss', g: 'neglog', x: 4.1, u: 0, ghost: true, dk: 4, orient: 'x' };
+let SC = withG(sampleCont(st.cont), st.g);
+
+// ---- position: x and u, kept consistent; whichever was dragged sets the other ----
+const discF = () => { const p = DISC[st.disc].p, F = [0]; p.forEach((v, i) => F.push(F[i] + v)); return F; };
+const xRange = () => (st.kase === 'disc' ? [0.5, DISC[st.disc].p.length + 0.5] : SC.c.dom);
+// u = F(x): right-continuous, so the atom at x is already counted when x reaches it.
+function setX(x) {
+  st.driver = 'x';
+  const [lo, hi] = xRange(); st.x = clamp(x, lo, hi);
+  if (st.kase === 'disc') { const F = discF(); st.u = F[clamp(Math.floor(st.x + 1e-9), 0, F.length - 1)]; }
+  else st.u = at(SC.Fs, idxAtX(SC, st.x));
+}
+// x = F⁻¹(u) = min{x : F(x) ≥ u}: in the discrete case, the atom whose block holds u.
+function setU(u) {
+  st.driver = 'u';
+  st.u = clamp(u, 0, 1);
+  if (st.kase === 'disc') {
+    const F = discF();
+    st.x = st.u <= 0 ? 0.5 : F.findIndex((f, i) => i > 0 && f >= st.u - 1e-12);
+  } else st.x = at(SC.xs, idxAtU(SC, st.u));
+}
+
+// Everything the figure needs for the current position.
+function frame() {
+  const gdef = G[st.g];
+  if (st.kase === 'disc') {
+    const p = DISC[st.disc].p, n = p.length, F = discF();
+    const gs = p.map((v, i) => gdef.f(i + 1, v));
+    const cum = [0]; gs.forEach((g, i) => cum.push(cum[i] + p[i] * g));
+    const u = st.u;
+    // the block holding u (its atom is x = k + 1); none while u = 0
+    const k = u <= 0 ? -1 : F.findIndex((f, i) => i > 0 && f >= u - 1e-12) - 1;
+    const area = k < 0 ? 0 : cum[k] + (u - F[k]) * gs[k];
+    return { disc: true, p, n, F, gs, cum, x: st.x, k, u, gNow: k >= 0 ? gs[k] : NaN, area, total: cum[n] };
+  }
+  const Lx = idxAtX(SC, st.x), Lu = idxAtU(SC, st.u);
+  const fNow = at(SC.fs, Lx);
+  return { disc: false, x: st.x, u: st.u, fNow, gNow: gdef.f(st.x, fNow), area: at(SC.I, Lu), total: SC.I[SC.I.length - 1] };
+}
+
+function gRange(fr) {
+  let lo = Infinity, hi = -Infinity;
+  const vals = fr.disc ? fr.gs : SC.gs.filter((g, i) => SC.Fs[i] > 1e-4 && SC.Fs[i] < 1 - 1e-4);
+  for (const v of vals) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+  const c = G[st.g].clip;
+  if (c) { lo = Math.max(lo, c[0]); hi = Math.min(hi, c[1]); }
+  lo = Math.min(lo, 0); hi = Math.max(hi, 0);
+  const pad = 0.08 * (hi - lo || 1);
+  return [lo < 0 ? lo - pad : 0, hi + pad];
+}
+
+/* ---------- the figure ---------- */
+const WW = 1000, GAP = 28, WL = 400, WR = WW - WL - GAP;
+const HT = 200, HB = 150, HA = 250, HI = 200;
+const mA = { l: 58, r: 16, t: 50, b: 30 };
+const svg = $('svgD');
+svg.setAttribute('viewBox', `0 0 ${WW} ${HT + HB + HA + HI + 6}`);
+const S = { defs: el('defs', null, svg), root: el('g', null, svg) };
+const RT = new Region(S, { ox: WL + GAP, oy: 0, w: WR, h: HT, m: { l: 58, r: 16, t: 26, b: 26 } });
+const RA = new Region(S, { ox: WL + GAP, oy: HT + HB, w: WR, h: HA, m: mA });
+const RG = new Region(S, { ox: 0, oy: HT + HB, w: WL, h: HA, m: mA });
+const RI = new Region(S, { ox: WL + GAP, oy: HT + HB + HA, w: WR, h: HI, m: { l: 58, r: 16, t: 26, b: 42 } });
+const bridge = el('g', null, S.root), over = el('g', null, S.root), formula = el('g', null, S.root);
+
+const cls3 = (i, k) => (i < k ? 'done' : i === k ? 'cur' : 'todo');
+
+function draw() { drawT(); drawD(); }
+
+function drawD() {
+  const fr = frame(), done1 = fr.u >= 1 - 1e-9, yr = gRange(fr), sym = fr.disc ? 'p' : 'f', gname = G[st.g].name(sym);
+  const delta = 2 ** -st.dk;
+
+  // ---- top right: the pmf (point masses) or the density, over x ----
+  if (fr.disc) {
+    RT.domain(0.4, fr.n + 0.6, 0, 1.05);
+    RT.axes({ xticks: fr.p.map((_, i) => i + 1), yticks: [0, .5, 1], ylabel: 'p_X(x)', title: 'p_X, density with respect to counting measure', xnow: fr.k + 1 });
+    fr.p.forEach((v, i) => {
+      const c = cls3(i, fr.k); if (c === 'todo' && !st.ghost) return;
+      el('line', { x1: RT.X(i + 1), x2: RT.X(i + 1), y1: RT.Y(0), y2: RT.Y(v), class: 'stem-' + c }, RT.data);
+      el('circle', { cx: RT.X(i + 1), cy: RT.Y(v), r: 4, class: 'pin-' + c }, RT.data);
+    });
+    RT.vline(fr.x, 'cursor');
+  } else {
+    const [x0, x1] = SC.c.dom;
+    RT.domain(x0, x1, 0, Math.max(1.1, SC.peak * 1.12));
+    RT.axes({ ylabel: 'p_X(x)', title: 'p_X, density with respect to Lebesgue measure' });
+    const pts = SC.xs.map((x, i) => [x, SC.fs[i]]).filter(p => p[0] >= x0 - .05 && p[0] <= x1 + .05);
+    const edges = SC.c.ts ? [[SC.c.ts[0], 0], ...pts, [SC.c.ts[SC.c.ts.length - 1], 0]] : pts;
+    if (st.ghost) R_opacity(RT.area(edges, 'fm'), .35);
+    const done = edges.filter(p => p[0] <= fr.x);
+    if (done.length) RT.area([...done, [fr.x, fr.fNow]], 'fm');
+    RT.path(edges, 'curve');
+    R_opacity(RT.hline(1, 'hline'), .5);
+    RT.vline(fr.x, 'cursor');
+    if (RT.inX(fr.x)) el('circle', { cx: RT.X(fr.x), cy: RT.Y(fr.fNow), r: 4.5, class: 'dot' }, RT.front);
+    const right = RT.X(fr.x) > RT.pr - 130;
+    txt(RT.front, RT.X(fr.x) + (right ? -7 : 7), RT.pt + 12, 'mass so far = u', 'lbl now', { 'text-anchor': right ? 'end' : 'start' });
+  }
+
+  // ---- bottom left: g over x (the height marginal) ----
+  if (fr.disc) {
+    RG.domain(0.4, fr.n + 0.6, yr[0], yr[1]);
+    RG.axes({ xticks: fr.p.map((_, i) => i + 1), ylabel: 'g(x) = ' + gname, title: 'g', xnow: fr.k + 1 });
+    fr.gs.forEach((g, i) => {
+      const c = cls3(i, fr.k); if (c === 'todo' && !st.ghost) return;
+      el('line', { x1: RG.X(i + 1), x2: RG.X(i + 1), y1: RG.Y(0), y2: RG.Y(g), class: 'stem-' + c }, RG.data);
+      el('circle', { cx: RG.X(i + 1), cy: RG.Y(g), r: 4, class: 'pin-' + c }, RG.data);
+    });
+    RG.vline(fr.x, 'cursor');
+  } else {
+    const [x0, x1] = SC.c.dom;
+    RG.domain(x0, x1, yr[0], yr[1]);
+    RG.axes({ ylabel: 'g(x) = ' + gname, xlabel: 'x', title: 'g' });
+    const pts = [];
+    SC.xs.forEach((x, i) => { if (x >= x0 - .05 && x <= x1 + .05) pts.push([x, SC.gs[i]]); });
+    RG.area(pts, 'fn', RG.gBelow());
+    RG.path(pts.filter(p => p[0] > fr.x), 'curve later');
+    RG.path(pts.filter(p => p[0] <= fr.x).concat([[fr.x, fr.gNow]]), 'curve');
+    RG.vline(fr.x, 'cursor');
+  }
+
+  // ---- middle right: the area plot over u ----
+  RA.domain(0, 1, yr[0], yr[1]);
+  RA.axes({ xticks: [0, .25, .5, .75, 1], ylabel: 'g(F_X^{−1}(u))', xlabel: null });
+  if (fr.disc) {
+    fr.p.forEach((v, i) => {
+      const c = cls3(i, fr.k);
+      if (st.ghost && c !== 'done') RA.rect(fr.F[i], 0, fr.F[i + 1], fr.gs[i], 'todo');
+      if (c === 'done') RA.rect(fr.F[i], 0, fr.F[i + 1], fr.gs[i], 'done');
+      if (c === 'cur') RA.rect(fr.F[i], 0, fr.u, fr.gs[i], 'cur');
+    });
+  } else {
+    const all = SC.Fs.map((u, i) => [u, SC.gs[i]]);
+    if (st.ghost) RA.path(all, 'curve later');
+    const done = all.filter(p => p[0] <= fr.u).concat([[fr.u, fr.gNow]]);
+    RA.area(done, 'fm', RA.gAbove()); RA.area(done, 'fn', RA.gBelow());
+    RA.path(done, 'curve');
+  }
+  if (fr.u > 0) RA.vline(fr.u, 'cursor');
+
+  // ---- bottom right: the running integral ----
+  let ilo = Math.min(0, fr.total), ihi = Math.max(0, fr.total);
+  if (fr.disc) fr.cum.forEach(c => { ilo = Math.min(ilo, c); ihi = Math.max(ihi, c); });
+  else SC.I.forEach(c => { ilo = Math.min(ilo, c); ihi = Math.max(ihi, c); });
+  const ipad = 0.1 * (ihi - ilo || 1);
+  RI.domain(0, 1, ilo < 0 ? ilo - ipad : 0, ihi + ipad);
+  RI.axes({ xticks: [0, .25, .5, .75, 1], ylabel: '∫₀ᵘ g∘F_X^{−1}', xlabel: 'u' });
+  const ipts = fr.disc ? fr.F.map((u, i) => [u, fr.cum[i]]) : SC.Fs.map((u, i) => [u, SC.I[i]]);
+  if (st.ghost) RI.path(ipts, 'curve later');
+  RI.path(ipts.filter(p => p[0] <= fr.u + 1e-12).concat([[fr.u, fr.area]]), fr.disc ? 'curve atom' : 'curve');
+  if (done1) RI.hline(fr.total, 'hline');
+  if (fr.u > 0) RI.vline(fr.u, 'cursor');
+  if (fr.u > 0 || !fr.disc) el('circle', { cx: RI.X(fr.u), cy: RI.Y(fr.area), r: 4.5, class: 'dot' }, RI.front);
+
+  // ---- the map x -> u = F(x), ending on a warped x-axis ----
+  bridge.replaceChildren();
+  const yTop = RT.pb + 20, yAx = RA.pt - 34, U = u => RA.X(u);
+  txt(bridge, RT.pl - 8, (yTop + yAx) / 2 + 4, 'u = F_X(x)', 'axl', { 'text-anchor': 'end' });
+  txt(bridge, RA.pl - 10, yAx + 4, 'x', 'axl', { 'text-anchor': 'end' });
+  if (fr.disc) {
+    // one segment of the axis per outcome, of width p; each line ends where its block ends
+    fr.p.forEach((v, i) => {
+      const c = cls3(i, fr.k); const a = U(fr.F[i]), b = U(fr.F[i + 1]);
+      el('line', { x1: a, x2: b, y1: yAx, y2: yAx, class: c === 'todo' ? 'wax' : c === 'done' ? 'wax done atom' : 'wax cur' }, bridge);
+      el('line', { x1: b, x2: b, y1: yAx - 4, y2: yAx + 4, class: 'wtk' }, bridge);
+      if (b - a > 9) txt(bridge, (a + b) / 2, yAx + 15, String(i + 1), 'tk' + (i === fr.k ? ' now' : ''), { 'text-anchor': 'middle' });
+      if (c === 'todo' && !st.ghost) return;
+      el('line', { x1: RT.X(i + 1), y1: yTop, x2: b, y2: yAx, class: c === 'done' ? 'br-done atom' : 'br-' + c }, bridge);
+    });
+    el('line', { x1: U(0), x2: U(0), y1: yAx - 4, y2: yAx + 4, class: 'wtk' }, bridge);
+  } else {
+    const [x0, x1] = SC.c.dom;
+    const Fx = x => at(SC.Fs, idxAtX(SC, x));
+    el('line', { x1: U(0), x2: U(1), y1: yAx, y2: yAx, class: 'wax' }, bridge);
+    el('line', { x1: U(0), x2: U(fr.u), y1: yAx, y2: yAx, class: 'wax done' }, bridge);
+    const j0 = Math.ceil(x0 / delta - 1e-9), j1 = Math.floor(x1 / delta + 1e-9);
+    let lastLab = -Infinity;
+    for (let j = j0; j <= j1; j++) {
+      const x = j * delta, Fv = Fx(x), done = x <= fr.x;
+      el('line', { x1: U(Fv), x2: U(Fv), y1: yAx - 4, y2: yAx + 4, class: 'wtk' }, bridge);
+      if (done || st.ghost) el('line', { x1: RT.X(x), y1: yTop, x2: U(Fv), y2: yAx, class: done ? 'br-done' : 'br-todo' }, bridge);
+      const onQuarter = Math.abs(x / 0.25 - Math.round(x / 0.25)) < 1e-9;
+      if (onQuarter && U(Fv) - lastLab > 26 && Fv > 0.004 && Fv < 0.996) { txt(bridge, U(Fv), yAx + 15, tf(x), 'tk', { 'text-anchor': 'middle' }); lastLab = U(Fv); }
+    }
+    el('line', { x1: RT.X(fr.x), y1: yTop, x2: U(fr.u), y2: yAx, class: 'br-cur' }, bridge);
+  }
+
+  // ---- crosshair from the point in the area plot to its two marginals ----
+  over.replaceChildren();
+  const hasPoint = fr.disc ? fr.k >= 0 : true;
+  zones.yTop = yTop; zones.yAx = yAx;
+  if (hasPoint && isFinite(fr.gNow) && RA.inY(fr.gNow)) {
+    const px = U(fr.u), py = RA.Y(fr.gNow);
+    const gx = fr.disc ? RG.X(fr.k + 1) : RG.X(fr.x);
+    el('path', { d: `M${px} ${py}L${gx} ${py}`, class: 'cross' }, over);
+    el('path', { d: `M${px} ${py}L${px} ${yAx}`, class: 'cross' }, over);
+    if (fr.disc || RG.inX(fr.x)) el('circle', { cx: gx, cy: py, r: 4.5, class: 'dot' }, over);
+    el('circle', { cx: px, cy: py, r: 4.5, class: 'dot' }, over);
+    el('circle', { cx: px, cy: yAx, r: 3.5, class: 'dot' }, over);
+  }
+
+  // ---- the integral so far, bottom left, level with the running-integral plot ----
+  formula.replaceChildren();
+  const fx = 34, fy = RI.pt + 64;
+  txt(formula, fx, fy + 12, '∫', 'int');
+  txt(formula, fx + 20, fy - 22, done1 ? '1' : fmt(fr.u, 3), 'lim' + (done1 ? '' : ' now'));
+  txt(formula, fx + 14, fy + 26, '0', 'lim');
+  const body = txt(formula, fx + 58, fy, 'g(F_X^{−1}(v)) dv  =  ', 'fx');
+  const val = el('tspan', { class: 'fxv' + (fr.area < 0 ? ' neg' : '') }, body); val.textContent = fmt(fr.area, 3);
+  if (done1) {
+    const ex = txt(formula, fx, fy + 74, '', 'ex');
+    ex.textContent = (st.g === 'neglog' ? (fr.disc ? 'H(X)' : 'h(X)') + ' = ' : '') + 'E[g(X)]  =  ';
+    const ev = el('tspan', { class: 'exv' + (fr.total < 0 ? ' neg' : '') }, ex); ev.textContent = fmt(fr.total, 3);
+  }
+
+  // ---- readouts ----
+  $('r-x').textContent = fr.disc ? fmt(fr.x, 2) : fmt(fr.x, 3);
+  $('r-u').textContent = fmt(fr.u, 3);
+  const hv = $('r-h'); hv.textContent = isFinite(fr.gNow) ? fmt(fr.gNow, 3) : '–'; hv.classList.toggle('neg', fr.gNow < 0);
+  const av = $('r-a'); av.textContent = fmt(fr.area, 3); av.classList.toggle('neg', fr.area < 0);
+  $('r-tk').textContent = st.g === 'neglog' ? (fr.disc ? 'H' : 'h') : 'E[g(X)]';
+  const tv = $('r-t'); tv.textContent = done1 ? fmt(fr.total, 3) : '–'; tv.classList.toggle('neg', done1 && fr.total < 0);
+}
+
+/* ---------- the pushforward figure: evenly spaced u, through F_X⁻¹, to x ---------- */
+// Two orientations, each a set of regions in the same SVG:
+//   'u' (U on top, as in the change-of-variables post): p_U over u; the graph x = F_X⁻¹(u); p_X with x vertical.
+//   'x' (X on top): p_X over x; the graph u = F_X(x); p_U with u vertical, on the right, so no two lines cross.
+const svgT = $('svgT');
+const TW = 1000, TH = 566;
+svgT.setAttribute('viewBox', `0 0 ${TW} ${TH}`);
+const ST = { defs: el('defs', null, svgT), root: el('g', null, svgT) };
+const tLines = el('g', null, ST.root); // under the panels, so the graphs stay legible where lines run along them
+const OU = {
+  U: new Region(ST, { ox: 0, oy: 0, w: 600, h: 170, m: { l: 58, r: 16, t: 26, b: 26 } }),
+  G: new Region(ST, { ox: 0, oy: 170, w: 600, h: 390, m: { l: 58, r: 16, t: 16, b: 42 } }),
+  X: new Region(ST, { ox: 624, oy: 170, w: 376, h: 390, m: { l: 20, r: 16, t: 16, b: 42 } }),
+};
+const OX = {
+  X: new Region(ST, { ox: 0, oy: 0, w: 676, h: 190, m: { l: 58, r: 16, t: 26, b: 24 } }),
+  G: new Region(ST, { ox: 0, oy: 190, w: 676, h: 370, m: { l: 58, r: 16, t: 16, b: 42 } }),
+  U: new Region(ST, { ox: 700, oy: 190, w: 300, h: 370, m: { l: 20, r: 16, t: 16, b: 42 } }),
+};
+const tOver = el('g', null, ST.root);
+const N_LINES = 40;
+const clearR = R => { R.back.replaceChildren(); R.data.replaceChildren(); R.front.replaceChildren(); };
+const polyline = (g, pts, cls) => el('path', { d: 'M' + pts.map(q => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join('L'), class: cls, fill: 'none' }, g);
+const closed = (g, pts, cls) => el('path', { d: 'M' + pts.map(q => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join('L') + 'Z', class: cls }, g);
+
+// x = F_X⁻¹(u) and p_X(x), for either case
+function quant(u) {
+  if (st.kase === 'disc') { const F = discF(); const k = F.findIndex((f, i) => i > 0 && f >= u - 1e-12); return { x: k, p: DISC[st.disc].p[k - 1] }; }
+  const x = at(SC.xs, idxAtU(SC, u));
+  return { x, p: at(SC.fs, idxAtX(SC, x)) };
+}
+
+function drawT() {
+  const disc = st.kase === 'disc', up = st.orient;
+  const O = up === 'u' ? OU : OX;
+  for (const R of Object.values(up === 'u' ? OX : OU)) clearR(R);
+  tLines.replaceChildren(); tOver.replaceChildren();
+  const u = st.u, [xa, xb] = xRange();
+  const P = disc ? DISC[st.disc].p : null, F = disc ? discF() : null;
+  const pmax = disc ? Math.max(0.3, Math.max(...P) * 1.2) : Math.max(1.1, SC.peak * 1.12);
+  const atoms = disc ? P.map((_, i) => i + 1) : undefined;
+  // screen position of a point in each panel, whatever the orientation
+  const onU = up === 'u' ? (uu, d) => [O.U.X(uu), O.U.Y(d)] : (uu, d) => [O.U.X(d), O.U.Y(uu)];
+  const onG = up === 'u' ? (uu, xx) => [O.G.X(uu), O.G.Y(xx)] : (uu, xx) => [O.G.X(xx), O.G.Y(uu)];
+  const onX = up === 'u' ? (xx, d) => [O.X.X(d), O.X.Y(xx)] : (xx, d) => [O.X.X(xx), O.X.Y(d)];
+
+  // ---- panel domains and axes ----
+  if (up === 'u') {
+    O.U.domain(0, 1, 0, 1.35);
+    O.U.axes({ xticks: [0, .25, .5, .75, 1], yticks: [0, 1], ylabel: 'p_U(u)' });
+    O.G.domain(0, 1, xa, xb);
+    O.G.axes({ xticks: [0, .25, .5, .75, 1], yticks: atoms, ylabel: 'x = F_X^{−1}(u)', xlabel: 'u', noZero: true });
+    O.X.domain(0, pmax, xa, xb);
+    O.X.axes({ yticks: atoms, noyl: true, xlabel: 'p_X(x)', noZero: true });
+  } else {
+    O.X.domain(xa, xb, 0, pmax);
+    O.X.axes({ xticks: atoms, ylabel: 'p_X(x)' });
+    O.G.domain(xa, xb, 0, 1);
+    O.G.axes({ xticks: atoms, yticks: [0, .25, .5, .75, 1], ylabel: 'u', xlabel: 'x = F_X^{−1}(u)' });
+    O.U.domain(0, 1.35, 0, 1);
+    O.U.axes({ xticks: [0, 1], yticks: [0, .25, .5, .75, 1], noyl: true, xlabel: 'p_U(u)' });
+  }
+
+
+  // F_X(x) at the current x: every u in [0, F_X(x)] lands at or below x, and no other u does
+  const Fnow = disc ? F[clamp(Math.floor(st.x + 1e-9), 0, P.length)] : u;
+  const byU = st.driver === 'u';
+
+  // ---- the uniform, with [0, F_X(x)] shaded ----
+  const uRect = (u0, u1, cls) => closed(O.U.data, [onU(u0, 0), onU(u0, 1), onU(u1, 1), onU(u1, 0)], cls);
+  if (st.ghost) R_opacity(uRect(0, 1, 'fm'), .35);
+  uRect(0, Fnow, 'fm');
+  polyline(O.U.data, [onU(0, 0), onU(0, 1), onU(1, 1), onU(1, 0)], 'curve');
+
+  if (disc) {
+    const n = P.length, kx = clamp(Math.floor(st.x + 1e-9), 0, n); // atoms 1..kx lie at or below x
+    // the pmf of X: atoms at or below x filled
+    P.forEach((v, i) => {
+      const c = i < kx ? (byU && i === kx - 1 ? 'cur' : 'done') : 'todo';
+      if (c === 'todo' && !st.ghost) return;
+      const a = onX(i + 1, 0), b = onX(i + 1, v);
+      el('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], class: 'stem-' + c }, O.X.data);
+      el('circle', { cx: b[0], cy: b[1], r: 4, class: 'pin-' + c }, O.X.data);
+    });
+    // graph of F_X⁻¹ (ink): x = k on (F(k−1), F(k)], open at the start of the block, closed at the end.
+    // Faint dotted: the flats of F_X, u = F(k) for x in [k, k+1), where x lands between atoms.
+    P.forEach((v, i) => { if (i + 1 < n) { const a = onG(F[i + 1], i + 1), b = onG(F[i + 1], i + 2); el('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], class: 'jump' }, O.G.data); } });
+    P.forEach((v, i) => {
+      const k = i + 1;
+      polyline(O.G.data, [onG(F[i], k), onG(F[i + 1], k)], 'graphline');
+      const o = onG(F[i], k), c = onG(F[i + 1], k);
+      el('circle', { cx: o[0], cy: o[1], r: 3.5, class: 'odot' }, O.G.front);
+      el('circle', { cx: c[0], cy: c[1], r: 3.5, class: 'cdot' }, O.G.front);
+    });
+    // evenly spaced u: coloured when it lands at or below x (equivalently, u ≤ F_X(x));
+    // when u was moved, the lines sharing its x (its block) are the fiber, in blue
+    const fiberK = byU && kx >= 1 ? kx : 0;
+    for (let j = 0; j < N_LINES; j++) {
+      const uj = (j + 0.5) / N_LINES, q = quant(uj), landed = q.x <= st.x + 1e-9;
+      if (!landed && !st.ghost) continue;
+      const cls = q.x === fiberK ? 'br-cur' : landed ? 'br-done atom' : 'br-todo';
+      polyline(tLines, [onU(uj, 0), onG(uj, q.x), onX(q.x, 0), onX(q.x, q.p)], cls);
+    }
+    if (byU && fiberK) {
+      // the fiber {u : F_X⁻¹(u) = x}: the whole block, bracketed on the uniform, with u inside it
+      const a = F[fiberK - 1], b = F[fiberK];
+      polyline(tOver, [onU(a, 1.08), onU(a, 1.2), onU(b, 1.2), onU(b, 1.08)], 'fiber');
+      const g = onG(u, fiberK); el('circle', { cx: g[0], cy: g[1], r: 4.5, class: 'dot' }, tOver);
+      const c0 = onU(u, 0), c1 = onU(u, 1); el('line', { x1: c0[0], y1: c0[1], x2: c1[0], y2: c1[1], class: 'cursor' }, tOver);
+    } else {
+      // x moved: read x ↦ F_X(x), across to the edge of the shaded run
+      polyline(tOver, [onX(st.x, 0), onG(Fnow, st.x), onU(Fnow, 0), onU(Fnow, 1)], 'br-cur');
+      const g = onG(Fnow, st.x); el('circle', { cx: g[0], cy: g[1], r: 4.5, class: 'dot' }, tOver);
+    }
+    return;
+  }
+
+  // ---- continuous: the density of X and the graph of the map ----
+  const pts = SC.xs.map((x, i) => [x, SC.fs[i], SC.Fs[i]]).filter(q => q[0] >= xa - .05 && q[0] <= xb + .05);
+  const edge = SC.c.ts ? [[SC.c.ts[0], 0], ...pts.map(q => [q[0], q[1]]), [SC.c.ts[SC.c.ts.length - 1], 0]] : pts.map(q => [q[0], q[1]]);
+  const shade = (list, cls) => { if (list.length) closed(O.X.data, [onX(list[0][0], 0), ...list.map(q => onX(q[0], q[1])), onX(list[list.length - 1][0], 0)], cls); };
+  if (st.ghost) R_opacity(shade(edge, 'fm'), .35);
+  shade(edge.filter(q => q[0] <= st.x).concat([[st.x, at(SC.fs, idxAtX(SC, st.x))]]), 'fm');
+  polyline(O.X.data, edge.map(q => onX(q[0], q[1])), 'curve');
+  polyline(O.G.data, pts.map(q => onG(q[2], q[0])), 'curve');
+  // equal-probability lines (quantiles): the same set in either direction, since F_X is a bijection here
+  const lineThrough = (uu, xx, pp, cls) => polyline(tLines, [onU(uu, 0), onG(uu, xx), onX(xx, 0), onX(xx, pp)], cls);
+  for (let j = 0; j < N_LINES; j++) {
+    const uj = (j + 0.5) / N_LINES, q = quant(uj), done = uj <= u;
+    if (!(q.x >= xa && q.x <= xb)) continue;
+    if (!done && !st.ghost) continue;
+    lineThrough(uj, q.x, q.p, done ? 'br-done' : 'br-todo');
+  }
+  if (u > 0) { const q = quant(u); if (q.x >= xa && q.x <= xb) { lineThrough(u, q.x, q.p, 'br-cur'); const g = onG(u, q.x); el('circle', { cx: g[0], cy: g[1], r: 4.5, class: 'dot' }, tOver); } }
+}
+
+function R_opacity(node, o) { if (node) node.setAttribute('opacity', String(o)); return node; }
+
+/* ---------- controls ---------- */
+function fillPresets() {
+  const sel = $('preset'), src = st.kase === 'disc' ? DISC : CONT, cur = st.kase === 'disc' ? st.disc : st.cont;
+  sel.replaceChildren(...Object.entries(src).map(([k, v]) => { const o = document.createElement('option'); o.value = k; o.textContent = v.label; o.selected = k === cur; return o; }));
+}
+function seg(id, key, after) {
+  const box = $(id);
+  box.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    box.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    st[key] = b.dataset.v; if (after) after(); draw();
+  }));
+}
+seg('case', 'kase', () => { document.body.dataset.case = st.kase; fillPresets(); setU(0.6); });
+$('preset').addEventListener('change', e => {
+  if (st.kase === 'disc') st.disc = e.target.value; else { st.cont = e.target.value; SC = withG(sampleCont(st.cont), st.g); }
+  setU(st.u); draw();
+});
+$('gsel').addEventListener('change', e => { st.g = e.target.value; SC = withG(SC, st.g); draw(); });
+$('ghost').addEventListener('change', e => { st.ghost = e.target.checked; draw(); });
+$('delta').addEventListener('input', e => { st.dk = +e.target.value; $('deltav').textContent = '1/' + 2 ** st.dk; draw(); });
+
+// Atom to atom (discrete): x jumps to the next or previous atom.
+function step(dir) {
+  stop();
+  const n = DISC[st.disc].p.length;
+  const next = dir > 0 ? Math.floor(st.x + 1e-9) + 1 : Math.ceil(st.x - 1e-9) - 1;
+  setX(clamp(next, 0.5, n + 0.5)); draw();
+}
+$('fwd').addEventListener('click', () => step(1));
+$('back').addEventListener('click', () => step(-1));
+
+// Play: sweep x (or u) from its start to its end at a steady pace over ~7 s.
+let raf = 0, t0 = 0, which = null;
+function stop() { if (raf) cancelAnimationFrame(raf); raf = 0; which = null; $('playx').textContent = '▶ sweep x'; $('playu').textContent = '▶ sweep u'; }
+function tick(t) {
+  if (!t0) t0 = t;
+  const f = Math.min(1, (t - t0) / 7000);
+  if (which === 'x') { const [lo, hi] = xRange(); setX(lo + f * (hi - lo)); } else setU(f);
+  draw();
+  if (f < 1) raf = requestAnimationFrame(tick); else stop();
+}
+function play(w) {
+  const was = which; stop(); if (was === w) return;
+  which = w; t0 = 0; raf = requestAnimationFrame(tick);
+  $(w === 'x' ? 'playx' : 'playu').textContent = '❚❚ pause';
+}
+$('playx').addEventListener('click', () => play('x'));
+$('playu').addEventListener('click', () => play('u'));
+
+// ---- dragging: which zone was grabbed decides what moves ----
+const zones = { yTop: 0, yAx: 0 };
+function svgPt(e) { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
+const inside = (R, p, pad = 0) => p.x >= R.pl - pad && p.x <= R.pr + pad && p.y >= R.pt - pad && p.y <= R.pb + pad;
+function zoneAt(p) {
+  if (inside(RT, p, 4) || inside(RG, p, 4)) return 'x';
+  if (inside(RA, p, 4) || inside(RI, p, 4)) return 'u';
+  if (p.y > zones.yTop - 6 && p.y < zones.yAx + 18 && p.x >= Math.min(RT.pl, RA.pl) - 4 && p.x <= Math.max(RT.pr, RA.pr) + 4) return 'map';
+  return null;
+}
+const invX = (R, px) => R.x0 + (px - R.pl) / (R.pr - R.pl) * (R.x1 - R.x0);
+function Fof(x) {
+  if (st.kase === 'disc') { const F = discF(); return F[clamp(Math.floor(x + 1e-9), 0, F.length - 1)]; }
+  return at(SC.Fs, idxAtX(SC, x));
+}
+// The map line through (x on top, F(x) on the axis) passes a height fraction t
+// at (1 - t)·X(x) + t·U(F(x)), which only grows with x: find the x under the cursor.
+function dragMap(p) {
+  const t = clamp((p.y - zones.yTop) / (zones.yAx - zones.yTop), 0, 1);
+  let [lo, hi] = xRange();
+  const pos = x => (1 - t) * RT.X(x) + t * RA.X(Fof(x));
+  for (let i = 0; i < 50; i++) { const m = (lo + hi) / 2; if (pos(m) < p.x) lo = m; else hi = m; }
+  setX((lo + hi) / 2);
+}
+let dragZone = null;
+let dragFrom = null;
+svg.addEventListener('pointerdown', e => {
+  const p = svgPt(e), z = zoneAt(p);
+  if (!z) return;
+  stop();
+  dragZone = z;
+  dragFrom = z === 'x' ? (inside(RT, p, 4) ? RT : RG) : null;
+  svg.setPointerCapture(e.pointerId);
+  e.preventDefault();
+  dragTo2(p);
+});
+function dragTo2(p) {
+  if (dragZone === 'x') setX(invX(dragFrom, p.x));
+  else if (dragZone === 'u') setU(invX(RA, p.x));
+  else dragMap(p);
+  draw();
+}
+svg.addEventListener('pointermove', e => {
+  const p = svgPt(e);
+  if (dragZone) { dragTo2(p); return; }
+  svg.style.cursor = zoneAt(p) ? 'ew-resize' : '';
+});
+const endDrag = () => { dragZone = null; dragFrom = null; };
+
+// In the pushforward figure: the uniform and the graph move u; the law of X moves x.
+let tDrag = null;
+function tPt(e) { const pt = svgT.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; return pt.matrixTransform(svgT.getScreenCTM().inverse()); }
+const invY = (R, py) => R.y0 + (R.pb - py) / (R.pb - R.pt) * (R.y1 - R.y0);
+function tZone(p) {
+  const O = st.orient === 'u' ? OU : OX;
+  if (inside(O.U, p, 4) || inside(O.G, p, 4)) return 'u';
+  if (inside(O.X, p, 4)) return 'x';
+  return null;
+}
+function tMove(p) {
+  const O = st.orient === 'u' ? OU : OX;
+  if (tDrag === 'u') setU(st.orient === 'u' ? invX(O.G, p.x) : invY(O.G, p.y));
+  else setX(st.orient === 'u' ? invY(O.X, p.y) : invX(O.X, p.x));
+  draw();
+}
+svgT.addEventListener('pointerdown', e => { const p = tPt(e); const z = tZone(p); if (!z) return; stop(); tDrag = z; svgT.setPointerCapture(e.pointerId); e.preventDefault(); tMove(p); });
+svgT.addEventListener('pointermove', e => {
+  const p = tPt(e); if (tDrag) { tMove(p); return; }
+  const z = tZone(p), vertU = st.orient === 'x';
+  svgT.style.cursor = !z ? '' : (z === 'u') === vertU ? 'ns-resize' : 'ew-resize';
+});
+svgT.addEventListener('pointerup', () => { tDrag = null; });
+svgT.addEventListener('pointercancel', () => { tDrag = null; });
+seg('orient', 'orient');
+svg.addEventListener('pointerup', endDrag);
+svg.addEventListener('pointercancel', endDrag);
+
+document.body.dataset.case = st.kase;
+fillPresets();
+setX(4.1);
+draw();
+})();
+</script>
