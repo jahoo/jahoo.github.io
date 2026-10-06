@@ -4,7 +4,7 @@
 //  samples, and the plotting window. Pure: no DOM.
 // ================================================================
 
-import { withMass, shapeMoments, cdfOf, sampleShape, atU, lerp } from './dist.js';
+import { withMass, shapeMoments, cdfOf, sampleShape, atU, lerp, temper } from './dist.js';
 
 const norm = p => { const Z = p.reduce((a, b) => a + b, 0); return p.map(v => v / Z); };
 const SNAP_P = 0.03; // a dragged probability below this pops to zero
@@ -53,7 +53,7 @@ export function createModel() {
     const subs = [];
     let S = null, win = null, held = false, customP = null; // customP: the last edited pmf
     const m = {
-        kase: 'disc', discKey: 'zipf', contKey: 'gauss',
+        kase: 'disc', discKey: 'zipf', contKey: 'gauss', beta: 1,
         p: DISC_PRESETS.zipf.p.slice(),
         shape: structuredClone(CONT_PRESETS.gauss.shape),
     };
@@ -68,7 +68,7 @@ export function createModel() {
     // Back to the state a new model starts in: discrete zipf, the Gaussian, no edits kept,
     // the window refitted.
     m.reset = () => {
-        Object.assign(m, { kase: 'disc', discKey: 'zipf', contKey: 'gauss', p: DISC_PRESETS.zipf.p.slice(), shape: structuredClone(CONT_PRESETS.gauss.shape) });
+        Object.assign(m, { kase: 'disc', discKey: 'zipf', contKey: 'gauss', beta: 1, p: DISC_PRESETS.zipf.p.slice(), shape: structuredClone(CONT_PRESETS.gauss.shape) });
         customP = null; held = false; win = null;
         resample(); changed();
     };
@@ -83,11 +83,20 @@ export function createModel() {
     };
     m.editPmf = (i, target) => { m.p = withMass(m.p, i, target, SNAP_P); customP = m.p.slice(); m.discKey = 'custom'; changed(); };
     m.setShape = shape => { m.shape = shape; m.contKey = 'custom'; resample(); changed(); };
+    // The discrete law shown is the base pmf tempered, p^β / Z: β = 1 is the pmf itself,
+    // β = 0 flattens it toward uniform (on its support), large β concentrates it. Edits
+    // and presets act on the base; the view carries both when they differ.
+    m.setBeta = b => { m.beta = b; changed(); };
     // While held (a drag is live) the window only grows; it stays put on release, and
     // refits only when a preset is chosen, so the axes never jump under an edit.
     m.hold = on => { held = on; };
-    m.view = () => m.kase === 'disc'
-        ? { disc: true, p: m.p, F: cdfOf(m.p), n: m.p.length, xRange: [0.5, m.p.length + 0.5] }
-        : { disc: false, shape: m.shape, S, win, xRange: [win.x0, win.x1] };
+    m.view = () => {
+        if (m.kase !== 'disc') return { disc: false, shape: m.shape, S, win, xRange: [win.x0, win.x1] };
+        const plain = m.beta === 1;
+        const p = plain ? m.p : temper(m.p, m.beta);
+        const v = { disc: true, p, F: cdfOf(p), n: p.length, xRange: [0.5, p.length + 0.5] };
+        if (!plain) v.base = m.p;
+        return v;
+    };
     return m;
 }

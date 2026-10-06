@@ -101,4 +101,42 @@ describe('model reset', () => {
         m.setCase('disc'); m.setPreset('custom');
         assert.deepEqual(m.p, fresh.p);                 // the edited pmf is forgotten
     });
+    it('beta tempers the view, not the base: p is p^beta normalized, base is the edited pmf', () => {
+        const m = createModel(); // zipf
+        m.setBeta(2);
+        const v = m.view();
+        assert.equal(m.beta, 2);
+        assert.deepEqual(v.base, m.p);
+        const Z = sum(m.p.map(q => q * q));
+        v.p.forEach((q, i) => assert.ok(Math.abs(q - m.p[i] ** 2 / Z) < 1e-12, `atom ${i}`));
+        assert.ok(Math.abs(sum(v.p) - 1) < 1e-12);
+        assert.ok(Math.abs(v.F[8] - 1) < 1e-12, 'F is of the tempered pmf');
+    });
+    it('at beta = 1 the view has no base and p is the pmf itself', () => {
+        const m = createModel();
+        assert.equal(m.view().base, undefined);
+        assert.deepEqual(m.view().p, m.p);
+    });
+    it('beta = 0 flattens a full-support pmf to uniform; a one-hot pmf stays one-hot', () => {
+        const m = createModel(); m.setBeta(0);
+        m.view().p.forEach(q => assert.ok(Math.abs(q - 1 / 8) < 1e-12));
+        m.setPreset('onehot');
+        assert.deepEqual(m.view().p, DISC_PRESETS.onehot.p);
+    });
+    it('tempering keeps zeros where the base has them', () => {
+        const m = createModel(); m.editPmf(2, 0.01); // pops atom 2 to zero
+        m.setBeta(3);
+        assert.equal(m.view().p[2], 0);
+        assert.equal(m.view().base[2], 0);
+    });
+    it('editPmf edits the base while tempered; setBeta notifies; reset restores beta = 1', () => {
+        const m = createModel(); let n = 0; m.subscribe(() => n++);
+        m.setBeta(2); assert.equal(n, 1);
+        m.editPmf(0, 0.5);
+        assert.ok(Math.abs(m.p[0] - 0.5) < 1e-12, 'the base took the target');
+        assert.ok(m.view().p[0] > 0.5, 'the tempered value is sharper than the base');
+        m.reset();
+        assert.equal(m.beta, 1);
+        assert.equal(m.view().base, undefined);
+    });
 });
