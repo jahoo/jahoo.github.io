@@ -151,6 +151,14 @@ Define macros in a JSON file (e.g., `assets/my-topic/macros.json`):
 
 Reference it in front matter with `mathjax-macros: assets/my-topic/macros.json`. Then use `$\target(\cdot)$` in your markdown. The JSON file avoids backslash escaping issues that arise with YAML metadata.
 
+The key also takes a list, merged in order with later files overriding earlier keys:
+
+```yaml
+mathjax-macros: [assets/prob/macros.json, assets/my-topic/macros.json]
+```
+
+`assets/prob/macros.json` holds the macros the probability posts share (`\dee`, `\defeq`, `\E`, `\pmf{X}`, `\pdf{X}`); a post that uses them lists it first and keeps only its own in its per-page file.
+
 ## Sidenotes and marginnotes
 
 Three mechanisms, chosen by content complexity:
