@@ -69,7 +69,7 @@ export function computeFrame(model, pos, g, custom) {
         // the block holding u (its atom is x = k + 1); none while u = 0
         const k = u <= 0 ? -1 : F.findIndex((f, i) => i > 0 && f >= u - 1e-12) - 1;
         const area = k < 0 ? 0 : cum[k] + (u - F[k]) * gs[k];
-        return { disc: true, p, F, n, gs, cum, x: pos.x, u, k, gNow: k >= 0 ? gs[k] : NaN, area, total: cum[n] };
+        return { disc: true, p, F, n, base: v.base, gs, cum, x: pos.x, u, k, gNow: k >= 0 ? gs[k] : NaN, area, total: cum[n] };
     }
     const { S } = v, { m, s, gs, I } = alongSamples(S, g);
     // the height is g at F_X⁻¹(u), a point of the support, so it stays on the curve even

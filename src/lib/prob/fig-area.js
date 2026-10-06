@@ -11,6 +11,10 @@
 //  moves both; a p_X handle takes precedence over a position drag.
 //  In the discrete case g's lollipops can be dragged too, which makes
 //  g custom.
+//  With sweep: false the figure is pinned at u = 1: no cursors, no
+//  crosshair, no running integral, and only p_X can be dragged. When
+//  the model is tempered (view().base), the base pmf is drawn faint
+//  behind the tempered one.
 // ================================================================
 
 import { clamp, discCdfAt, atX, atU, lerp } from './dist.js';
@@ -19,6 +23,7 @@ import { createMathLayer, texNum } from './mathlabels.js';
 import { fitWidth } from './fit.js';
 import { createEditor, regionAdapter } from './edit.js';
 import { G, meaning } from './frame.js';
+import { NOTES } from './area-notes.js';
 
 // Layout in viewBox units, for the full width of 1000: a left column of 400 and a right
 // column of 572. A narrower layout (see fit.js) narrows both columns; once the left one
@@ -50,7 +55,11 @@ function gRange(fr, g) {
     return [lo < 0 ? lo - pad : 0, hi + pad];
 }
 
-export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, customG }) {
+// opts: sweep — the position can move (cursors, crosshair, the running integral, position
+//       drags); false pins the figure at u = 1, where only p_X is editable.
+//       notes — which post's wording the figure carries (see area-notes.js).
+export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, customG }, { sweep = true, notes = 'expectation' } = {}) {
+    const T = NOTES[notes];
     const ctx = svgContext(svg, 1000, H0);
     // column positions are set by layout()
     const RT = new Region(ctx, { ox: 0, oy: 0, w: 0, h: HT, m: { l: 58, r: 16, t: 26, b: 26 } });
@@ -93,6 +102,12 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
         if (fr.disc) {
             RT.domain(0.4, fr.n + 0.6, 0, 1.05);
             RT.axes({ xticks: fr.p.map((_, i) => i + 1), yticks: [0, .5, 1] });
+            // the pmf being edited, when the figure shows it tempered
+            if (fr.base) fr.base.forEach((q, i) => {
+                if (q <= 0) return;
+                el('line', { x1: RT.X(i + 1), x2: RT.X(i + 1), y1: RT.Y(0), y2: RT.Y(q), class: 'stem-base' }, RT.data);
+                el('circle', { cx: RT.X(i + 1), cy: RT.Y(q), r: 4.5, class: 'pin-base' }, RT.data);
+            });
             fr.p.forEach((q, i) => {
                 // an atom without mass: a hollow pin on the axis, still draggable
                 if (q <= 0) { el('circle', { cx: RT.X(i + 1), cy: RT.Y(0), r: 4, class: 'pin-null' }, RT.data); return; }
@@ -100,7 +115,7 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
                 el('line', { x1: RT.X(i + 1), x2: RT.X(i + 1), y1: RT.Y(0), y2: RT.Y(q), class: 'stem-' + c }, RT.data);
                 el('circle', { cx: RT.X(i + 1), cy: RT.Y(q), r: 4.5, class: 'pin-' + c }, RT.data);
             });
-            RT.vline(fr.x, 'cursor');
+            if (sweep) RT.vline(fr.x, 'cursor');
         } else {
             RT.domain(x0, x1, 0, v.win.y1);
             RT.axes({});
@@ -111,15 +126,17 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
             if (done.length) RT.area(Number.isFinite(fr.x) ? [...done, [fr.x, fr.fNow]] : done, 'fm');
             RT.path(edges, 'curve');
             RT.hline(1, 'hline').setAttribute('opacity', '.5');
-            RT.vline(fr.x, 'cursor');
-            if (RT.inX(fr.x)) el('circle', { cx: RT.X(fr.x), cy: RT.Y(fr.fNow), r: 4.5, class: 'dot' }, RT.front);
+            if (sweep) {
+                RT.vline(fr.x, 'cursor');
+                if (RT.inX(fr.x)) el('circle', { cx: RT.X(fr.x), cy: RT.Y(fr.fNow), r: 4.5, class: 'dot' }, RT.front);
+            }
         }
         yLabel('rt-y', RT, 'p_X(x)');
         handles.replaceChildren();
         editor.draw(handles);
 
         // ---- bottom left: g over x ----
-        const gtex = ui.g === 'custom' ? 'g(x)' : 'g(x) = ' + G[ui.g].tex;
+        const gtex = T.gLabel(ui.g === 'custom' ? null : G[ui.g].tex);
         if (fr.disc) {
             RG.domain(0.4, fr.n + 0.6, yr[0], yr[1]);
             RG.axes({ xticks: fr.p.map((_, i) => i + 1) });
@@ -130,7 +147,7 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
                 el('circle', { cx: RG.X(i + 1), cy: RG.Y(y), r: 4, class: 'pin-' + c }, RG.data);
                 el('circle', { cx: RG.X(i + 1), cy: RG.Y(y), r: 13, class: 'hit' }, RG.data);
             });
-            RG.vline(fr.x, 'cursor');
+            if (sweep) RG.vline(fr.x, 'cursor');
         } else {
             RG.domain(x0, x1, yr[0], yr[1]);
             RG.axes({});
@@ -140,7 +157,7 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
             RG.area(pts, 'fn', RG.gBelow());
             RG.path(pts.filter(q => q[0] > fr.x), 'curve later');
             RG.path(pts.filter(q => q[0] <= fr.x).concat(Number.isFinite(fr.x) ? [[fr.x, fr.gNow]] : []), 'curve');
-            RG.vline(fr.x, 'cursor');
+            if (sweep) RG.vline(fr.x, 'cursor');
         }
 
         yLabel('rg-y', RG, gtex);
@@ -148,7 +165,7 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
         // ---- middle right: the area plot over u ----
         RA.domain(0, 1, yr[0], yr[1]);
         RA.axes({ xticks: [0, .25, .5, .75, 1] });
-        yLabel('ra-y', RA, 'g(F_X^{-1}(u))');
+        yLabel('ra-y', RA, T.aLabel(G[ui.g].tex));
         if (fr.disc) {
             fr.p.forEach((q, i) => {
                 if (q <= 0 || !Number.isFinite(fr.gs[i])) return; // an empty block, or no value of g
@@ -164,11 +181,11 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
             RA.area(done, 'fm', RA.gAbove()); RA.area(done, 'fn', RA.gBelow());
             RA.path(done, 'curve');
         }
-        if (fr.u > 0) RA.vline(fr.u, 'cursor');
+        if (sweep && fr.u > 0) RA.vline(fr.u, 'cursor');
         // at u = 1: E[g(X)] as the average height of the whole area, which has width 1
         if (done1 && defined && RA.inY(fr.total)) {
             RA.hline(fr.total, 'hline avg');
-            math.set('avg', RA.pl + 8, RA.Y(fr.total) - 13, '\\mathbb{E}[g(X)]', { anchor: 'start', cls: 'ex-ml-avg' });
+            math.set('avg', RA.pl + 8, RA.Y(fr.total) - 13, T.avg(fr.disc), { anchor: 'start', cls: 'ex-ml-avg' });
         }
         // the area plot's frame, around its axis labels and ticks, behind everything in the
         // panel; at u = 1 it stands out, with a brighter ground, as the result's box does
@@ -221,7 +238,7 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
             el('line', { x1: U(0), x2: U(1), y1: yAx, y2: yAx, class: 'wax' }, bridge);
             el('line', { x1: U(0), x2: U(fr.u), y1: yAx, y2: yAx, class: 'wax done' }, bridge);
             // the current pair: x = F_X⁻¹(u) on top, u below (the right side of its triangle once u = F_X(x))
-            if (fr.k >= 0) el('line', { x1: RT.X(fr.k + 1), y1: yTop, x2: U(fr.u), y2: yAx, class: 'br-cur' }, bridge);
+            if (sweep && fr.k >= 0) el('line', { x1: RT.X(fr.k + 1), y1: yTop, x2: U(fr.u), y2: yAx, class: 'br-cur' }, bridge);
         } else {
             el('line', { x1: U(0), x2: U(1), y1: yAx, y2: yAx, class: 'wax' }, bridge);
             el('line', { x1: U(0), x2: U(fr.u), y1: yAx, y2: yAx, class: 'wax done' }, bridge);
@@ -230,13 +247,13 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
                 const uj = (j + 0.5) / N_MAP, xj = lerp(fr.S.xs, atU(fr.S, uj)), done = uj <= fr.u;
                 if (done || ui.ghost) el('line', { x1: RT.X(xj), y1: yTop, x2: U(uj), y2: yAx, class: done ? 'br-done' : 'br-todo' }, bridge);
             }
-            if (Number.isFinite(fr.x)) el('line', { x1: RT.X(fr.x), y1: yTop, x2: U(fr.u), y2: yAx, class: 'br-cur' }, bridge);
+            if (sweep && Number.isFinite(fr.x)) el('line', { x1: RT.X(fr.x), y1: yTop, x2: U(fr.u), y2: yAx, class: 'br-cur' }, bridge);
         }
 
         // ---- crosshair from the point in the area plot to its two marginals ----
         over.replaceChildren();
         // (not at u = 1, where the finished area and its average height stand on their own)
-        const hasPoint = !done1 && (fr.disc ? fr.k >= 0 : true);
+        const hasPoint = sweep && !done1 && (fr.disc ? fr.k >= 0 : true);
         if (hasPoint && isFinite(fr.gNow) && RA.inY(fr.gNow)) {
             const px = U(fr.u), py = RA.Y(fr.gNow);
             const gx = fr.disc ? RG.X(fr.k + 1) : RG.X(fr.x);
@@ -257,32 +274,32 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
         // what each part is, in the left column's free space (the last one above the integral)
         const note = (key, x, y, t, w, bottom) => math.set(key, x, y, t, { text: true, width: w, cls: 'ex-ml-note', bottom });
         const nw = Math.min(colL - 30, 370);
-        note('n-dist', colL / 2, (RT.pt + RT.pb) / 2, 'The distribution of \\(X\\): what the expectation averages over.', colL - 10);
+        note('n-dist', colL / 2, (RT.pt + RT.pb) / 2, T.dist, colL - 10);
         // on a narrow layout the notes run to more lines: the map's sits a little higher, and g's
         // grows upward from just above its plot
-        note('n-map', colL / 2, (zones.yTop + zones.yAx) / 2 - (noRI ? 30 : 0), '\\(F_X\\) rescales the real line into \\([0, 1]\\), so that each outcome takes up as much room as its probability. This gives us our horizontal axis.', nw);
-        note('n-g', colL / 2, RG.pt - 12, 'The function \\(g\\) gives the height to integrate.', nw, true);
+        note('n-map', colL / 2, (zones.yTop + zones.yAx) / 2 - (noRI ? 30 : 0), T.map, nw);
+        note('n-g', colL / 2, RG.pt - 12, T.g, nw, true);
         // centred in the left column, or across the full width once the running integral is dropped
         const riTop = RI.o.oy + RI.o.m.t, fx = wideBottom ? layoutW / 2 : colL / 2, fy1 = riTop + 60, fy2 = riTop + 130;
         // before u = 1 the integral is the area so far, and the expectation is still to come
         // (in the result's place); at u = 1 the integral is the expectation, and the result shows
         const noteW = wideBottom ? layoutW - 32 : nw;
-        const areaNote = done1 ? 'The expectation is the whole area:' : `The area up to \\(u = \\class{ex-now}{${texNum(fr.u)}}\\) is:`;
+        const areaNote = T.area(done1, texNum(fr.u));
         math.set('n-area', fx, riTop + 2, areaNote, { text: true, width: noteW, cls: 'ex-ml-note' });
-        if (!done1) math.set('n-rest', fx, fy2, 'The expectation is the whole area (slide \\(u\\) to 1).', { text: true, width: noteW, cls: 'ex-ml-note' });
-        math.set('integral', fx, fy1, `\\displaystyle\\int_0^{${upper}} g\\big(F_X^{-1}(v)\\big) \\dee{v} \\;=\\; ${val(fr.area)}`, { cls: 'ex-ml-formula' });
+        if (!done1) math.set('n-rest', fx, fy2, T.rest, { text: true, width: noteW, cls: 'ex-ml-note' });
+        math.set('integral', fx, fy1, `\\displaystyle\\int_0^{${upper}} ${T.integrand(G[ui.g].tex)} \\dee{v} \\;=\\; ${val(fr.area)}`, { cls: 'ex-ml-formula' });
         if (done1) {
             // what the expectation is, for a named g
             const mn = meaning(ui.g, fr.disc);
-            // the label under the brace takes no width, so a long name doesn't spread the equation
-            const named = mn ? `\\underbrace{${mn.tex}}_{\\mathclap{\\text{${mn.name}}}} \\;=\\; ` : '';
-            math.set('expectation', fx, fy2, `\\mathbb{E}[g(X)] \\;=\\; ${named}${val(fr.total)}${defined ? G[ui.g].unit ?? '' : ''}`, { cls: 'ex-ml-result' + (defined ? ' ex-ml-boxed' : '') });
+            const tex = T.result({ mn, val: val(fr.total), unit: defined ? G[ui.g].unit ?? '' : '', disc: fr.disc });
+            math.set('expectation', fx, fy2, tex, { cls: 'ex-ml-result' + (defined ? ' ex-ml-boxed' : '') });
         }
         math.end();
     }
 
     // ---- dragging ----
     function zoneAt(p) {
+        if (!sweep) return null; // pinned: the pointer only edits p_X
         if (RT.contains(p, 4) || RG.contains(p, 4)) return 'x';
         if (RA.contains(p, 4) || (!wideBottom && RI.contains(p, 4))) return 'u';
         if (p.y > zones.yTop - 6 && p.y < zones.yAx + 18 && p.x >= Math.min(RT.pl, RA.pl) - 4 && p.x <= Math.max(RT.pr, RA.pr) + 4) return 'map';
@@ -303,6 +320,7 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
     }
     // the g lollipop under p, in the discrete case
     function gHit(p) {
+        if (!sweep) return -1;
         const fr = lastFr;
         if (!fr?.disc || !RG.contains(p, 14)) return -1;
         let best = -1, bd = 13;
