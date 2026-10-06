@@ -1,6 +1,7 @@
 {
   "dee": "\\mathop{\\mathrm{d}\\!}",
   "defeq": "\\triangleq",
+  "E": "\\mathbb{E}",
   "pmf": ["\\mathrm{pmf}_{#1}", 1],
   "pdf": ["\\mathrm{pdf}_{#1}", 1]
 }

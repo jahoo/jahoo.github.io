@@ -8,17 +8,17 @@ js:
   - src/expectation
 css:
   - assets/css/expectation.css
-mathjax-macros: assets/expectation/macros.json
+mathjax-macros: assets/prob/macros.json
 ---
 
 Let $X$ be a real random variable, specified by its cumulative distribution function $F_X(x) = P(X \le x)$.^[Formally, $X : \Omega \to \mathbb{R}$ is a measurable map on a probability space $(\Omega, \mathcal{F}, P)$, and its law is the pushforward $P_X \defeq X_* P$, so that $P_X(A) = P(X \in A)$ for every Borel set $A$. The law is determined by $F_X(x) = P_X\big((-\infty, x]\big)$.] The expectation of a function $g$ of $X$ is the sum or integral of $g$ weighted by the probability mass function $\pmf{X}$ or the probability density function $\pdf{X}$:
 
-$$ \mathbb{E}[g(X)] \;\defeq\; \begin{cases} \displaystyle\sum_x g(x)\,\pmf{X}(x) & \text{if } X \text{ is discrete,} \\[1.2ex] \displaystyle\int g(x)\,\pdf{X}(x) \dee{x} & \text{if } X \text{ is continuous.} \end{cases} $$
+$$ \E[g(X)] \;\defeq\; \begin{cases} \displaystyle\sum_x g(x)\,\pmf{X}(x) & \text{if } X \text{ is discrete,} \\[1.2ex] \displaystyle\int g(x)\,\pdf{X}(x) \dee{x} & \text{if } X \text{ is continuous.} \end{cases} $$
 
 In what follows, we write $p_X$ for either pdf or pmf.^[This isn't sloppy. Both are densities of the law, $p_X = \dee{P_X} / \dee{\mu}$, with respect to a reference measure $\mu$ on $\mathbb{R}$. We simply swap out which reference measure we are using: in the discrete case, it isthe counting measure, in the continuous case it is the Lebesgue measure. Both cases of the definition are then one: 
 $$
 \begin{aligned}
-\mathbb{E}[g(X)] 
+\E[g(X)] 
 &\defeq \int_\Omega g \circ X \dee{P} \\
 &= \int_{\mathbb{R}} g \dee{P_X} \\
 &= \int_{\mathbb{R}} g \, p_X \dee{\mu}
@@ -29,7 +29,7 @@ $$
 We can equivalently write the expectation as an integral over the unit interval, using a substitution by $F_X^{-1}(u) = \inf\{x : F_X(x) \ge u\}$, the inverse CDF (aka quantile function).^[If $X$ is discrete, $F_X$ is a staircase that jumps by $p_X(x)$ at each outcome $x$. The infimum simply picks the first $x$ at which the staircase reaches $u$, so $F_X^{-1}(u) = x$ for every $u$ in the interval $\big(P(X < x),\, P(X \le x)\big]$. These intervals partition $[0, 1]$ into blocks, one per outcome, each as wide as its probability, in order of $x$; $F_X^{-1}$ is the staircase that takes the value $x$ on the block for $x$.]
 
 $$
-\mathbb{E}[g(X)] = \int_0^1 g\big(F_X^{-1}(u)\big) \dee{u}
+\E[g(X)] = \int_0^1 g\big(F_X^{-1}(u)\big) \dee{u}
 $$
 
 
@@ -40,12 +40,12 @@ $$
 F_X^{-1}(u) \le x \iff u \le F_X(x) \\\Longrightarrow\quad P\big(F_X^{-1}(U) \le x\big) = P\big(U \le F_X(x)\big) = F_X(x),
 $$
 
-so $F_X^{-1}(U)$ has the law of $X$ (this is the identity behind "inverse-transform sampling"), and $\mathbb{E}[g(X)] = \mathbb{E}\big[g\big(F_X^{-1}(U)\big)\big]$.
+so $F_X^{-1}(U)$ has the law of $X$ (this is the identity behind "inverse-transform sampling"), and $\E[g(X)] = \E\big[g\big(F_X^{-1}(U)\big)\big]$.
 
 I wrote up a note about this kind of density transformation [in a previous post](/posts/transform-pdf/) (see examples 3, 4, and 5).
 :::
 
-The fact that we've expressed the expectation as an integral over the unit interval of the function $g$, suggests a nice visual interpretation of the expectation as an area. We use the map $x \mapsto u = F_X(x)$ to rescale the real line into $[0, 1]$ so that each outcome takes up as much room as its probability.  Then evaluate $g$ over the rescaled axis, and the area under $g \circ F_X^{-1}$ is $\mathbb{E}[g(X)]$. 
+The fact that we've expressed the expectation as an integral over the unit interval of the function $g$, suggests a nice visual interpretation of the expectation as an area. We use the map $x \mapsto u = F_X(x)$ to rescale the real line into $[0, 1]$ so that each outcome takes up as much room as its probability.  Then evaluate $g$ over the rescaled axis, and the area under $g \circ F_X^{-1}$ is $\E[g(X)]$. 
 
 - If $X$ is discrete, $g \circ F_X^{-1}$ is a step function: one block of height $g(x)$ and width $p_X(x)$ for each outcome $x$, side by side in order of $x$, so the area is the sum.
 - If $X$ is continuous, the block widths shrink to infinitesimal $p_X(x) \dee{x}$, and the area is the integral.
@@ -63,8 +63,8 @@ Below, play around with visualizing the expectation as an area under a curve. Se
 <li role="option" data-v="neglog" aria-selected="true">\(-\log_2 p_X(x)\) <span class="ex-menu-note">(entropy)</span></li>
 <li role="option" data-v="x">\(x\) <span class="ex-menu-note">(mean)</span></li>
 <li role="option" data-v="x2">\(x^2\) <span class="ex-menu-note">(second moment)</span></li>
-<li role="option" data-v="var">\((x - \mathbb{E}[X])^2\) <span class="ex-menu-note">(variance)</span></li>
-<li role="option" data-v="skew">\(\big((x - \mathbb{E}[X])/\sigma_X\big)^3\) <span class="ex-menu-note">(skewness)</span></li>
+<li role="option" data-v="var">\((x - \E[X])^2\) <span class="ex-menu-note">(variance)</span></li>
+<li role="option" data-v="skew">\(\big((x - \E[X])/\sigma_X\big)^3\) <span class="ex-menu-note">(skewness)</span></li>
 <li role="option" data-v="custom"><span class="ex-menu-note">custom</span></li>
 </ul>
 </div>

@@ -14,7 +14,7 @@ css:
 bibliography: assets/differential-entropy/references.bib
 reference-section-title: References
 link-citations: true
-mathjax-macros: assets/differential-entropy/macros.json
+mathjax-macros: [assets/prob/macros.json, assets/differential-entropy/macros.json]
 ---
 
 Shannon's entropy is the expected value of $-\log \pmf(X)$ under a probability mass function $\pmf$. Replace the sum with an integral and the mass function with a density, and you get a formula that looks the same but is not the same kind of object. It can be negative, it changes when you change units, and it is not the limit of any Shannon entropy. Below, the substitution is taken apart one picture at a time.

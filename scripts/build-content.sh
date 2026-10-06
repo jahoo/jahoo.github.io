@@ -30,9 +30,11 @@ strip_date() {
 # JSON (injected into the head by the template) and resolves citations
 # against its bibliography at build time, so it must rebuild when either
 # file changes — not only when the markdown does.
+# `mathjax-macros` may list several files.
 deps_newer() {
   local src="$1" dest="$2" dep
-  for dep in $(head -30 "$src" | sed -nE 's/^(mathjax-macros|bibliography): *//p' | tr -d '"'"'"); do
+  # a value may be a YAML flow list, `[a.json, b.json]`: drop the brackets and split on commas
+  for dep in $(head -30 "$src" | sed -nE 's/^(mathjax-macros|bibliography): *//p' | tr -d "\"'[]" | tr ',' ' '); do
     [ -f "$dep" ] && [ "$dep" -nt "$dest" ] && return 0
   done
   return 1

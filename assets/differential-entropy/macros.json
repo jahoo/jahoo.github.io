@@ -1,11 +1,8 @@
 {
-  "dee": "\\mathop{\\mathrm{d}\\!}",
-  "E": "\\mathbb{E}",
   "pmf": "p",
   "pdf": "f",
   "bw": "\\Delta",
   "Xq": "{X_{\\bw}}",
   "DKL": "{D_{\\mathrm{KL}}}",
-  "KL": ["\\DKL(#1\\,\\|\\,#2)", 2],
-  "defeq": "\\triangleq"
+  "KL": ["\\DKL(#1\\,\\|\\,#2)", 2]
 }
