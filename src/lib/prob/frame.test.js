@@ -1,9 +1,9 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { createModel } from '../lib/prob/model.js';
-import { createPosition } from '../lib/prob/position.js';
+import { createModel } from './model.js';
+import { createPosition } from './position.js';
 import { computeFrame, meaning, productFrame } from './frame.js';
-import { atU, lerp } from '../lib/prob/dist.js';
+import { atU, lerp } from './dist.js';
 
 const close = (a, b, tol, msg) => assert.ok(Math.abs(a - b) < tol, `${msg ?? ''} ${a} vs ${b}`);
 

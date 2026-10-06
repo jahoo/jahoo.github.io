@@ -1,5 +1,5 @@
 // ================================================================
-//  Expectation — fig-area.js
+//  Probability figures — fig-area.js
 //  E[g(X)] as the area under g ∘ F_X⁻¹ over [0, 1]. Panels, in one SVG:
 //    top right:    p_X over x (editable)
 //    bottom left:  g over x (the height marginal)
@@ -13,11 +13,11 @@
 //  g custom.
 // ================================================================
 
-import { clamp, discCdfAt, atX, atU, lerp } from '../lib/prob/dist.js';
-import { Region, el, svgContext, svgPoint } from '../lib/prob/region.js';
-import { createMathLayer, texNum } from '../lib/prob/mathlabels.js';
-import { fitWidth } from '../lib/prob/fit.js';
-import { createEditor, regionAdapter } from '../lib/prob/edit.js';
+import { clamp, discCdfAt, atX, atU, lerp } from './dist.js';
+import { Region, el, svgContext, svgPoint } from './region.js';
+import { createMathLayer, texNum } from './mathlabels.js';
+import { fitWidth } from './fit.js';
+import { createEditor, regionAdapter } from './edit.js';
 import { G, meaning } from './frame.js';
 
 // Layout in viewBox units, for the full width of 1000: a left column of 400 and a right

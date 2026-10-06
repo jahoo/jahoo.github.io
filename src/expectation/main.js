@@ -6,10 +6,10 @@
 
 import { createModel } from '../lib/prob/model.js';
 import { createPosition } from '../lib/prob/position.js';
-import { computeFrame } from './frame.js';
+import { computeFrame } from '../lib/prob/frame.js';
 import { bindControls } from './controls.js';
-import { createAreaFigure } from './fig-area.js';
-import { createTransformFigure } from './fig-transform.js';
+import { createAreaFigure } from '../lib/prob/fig-area.js';
+import { createTransformFigure } from '../lib/prob/fig-transform.js';
 import { createProductFigure } from './fig-product.js';
 
 export function init() {

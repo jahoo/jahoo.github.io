@@ -1,5 +1,5 @@
 // ================================================================
-//  Expectation — fig-transform.js
+//  Probability figures — fig-transform.js
 //  Why the inverse CDF works: 40 evenly spaced u from the uniform,
 //  carried through the graph of F_X⁻¹ to x and on to p_X(x). A line is
 //  coloured iff it lands at or below x (⟺ u ≤ F_X(x)). u runs across,
@@ -9,12 +9,12 @@
 //  a p_X handle takes precedence.
 // ================================================================
 
-import { clamp, discCdfAt, discQuantile, atX, atU, lerp } from '../lib/prob/dist.js';
-import { Region, el, svgContext, svgPoint } from '../lib/prob/region.js';
-import { createEditor, regionAdapter } from '../lib/prob/edit.js';
+import { clamp, discCdfAt, discQuantile, atX, atU, lerp } from './dist.js';
+import { Region, el, svgContext, svgPoint } from './region.js';
+import { createEditor, regionAdapter } from './edit.js';
 import { densityAt } from './frame.js';
-import { createMathLayer } from '../lib/prob/mathlabels.js';
-import { fitWidth } from '../lib/prob/fit.js';
+import { createMathLayer } from './mathlabels.js';
+import { fitWidth } from './fit.js';
 
 const TW = 1000, TH = 566, N_LINES = 40;
 

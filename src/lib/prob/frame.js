@@ -1,11 +1,11 @@
 // ================================================================
-//  Expectation — frame.js
+//  Probability figures — frame.js
 //  Everything the figures and readouts share for the current
 //  position: the function g, its values, the area accumulated up
 //  to u, and the total E[g(X)]. Pure: no DOM.
 // ================================================================
 
-import { log2, atX, atU, lerp, runningIntegral } from '../lib/prob/dist.js';
+import { log2, atX, atU, lerp, runningIntegral } from './dist.js';
 
 // The function being averaged, given the outcome x, its probability (or density) v,
 // and the mean m and standard deviation s of X; and what its expectation is, in each case.

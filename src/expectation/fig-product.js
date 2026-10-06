@@ -11,7 +11,7 @@
 import { Region, el, svgContext, svgPoint } from '../lib/prob/region.js';
 import { createMathLayer, texNum } from '../lib/prob/mathlabels.js';
 import { fitWidth } from '../lib/prob/fit.js';
-import { productFrame } from './frame.js';
+import { productFrame } from '../lib/prob/frame.js';
 
 // the area figure's columns (see fig-area.js), so the x-axes line up
 const GAP = 28, WL0 = 400, WL_FORMULA = 340;
