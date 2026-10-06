@@ -7,7 +7,6 @@ tags: [exploration]
 unlisted: true
 js:
   - src/differential-entropy
-  - src/expectation
 css:
   - assets/css/differential-entropy.css
   - assets/css/expectation.css
@@ -17,126 +16,41 @@ link-citations: true
 mathjax-macros: [assets/prob/macros.json, assets/differential-entropy/macros.json]
 ---
 
-Shannon's entropy is the expected value of $-\log \pmf(X)$ under a probability mass function $\pmf$. Replace the sum with an integral and the mass function with a density, and you get a formula that looks the same but is not the same kind of object. It can be negative, it changes when you change units, and it is not the limit of any Shannon entropy. Below, the substitution is taken apart one picture at a time.
+Shannon's entropy is the expected value of $-\log p_X(X)$. Replace the sum with an integral and the mass function with a density, and you get a formula that looks the same but is not the same kind of object: it can be negative, it changes when you change units, and it is not the limit of any Shannon entropy. Below, the substitution is taken apart one picture at a time.
 
-# Discrete entropy is an average of surprisals
+For a discrete random variable $X$ with pmf $p_X$, the *surprisal* of an outcome $x$ is $-\log p_X(x)$.^[The number of bits an optimal code spends on $x$. The figures take $\log_2$ throughout, so entropies are in bits.] Entropy is its expected value:
 
-For a discrete random variable $X$ with pmf $\pmf$, the *surprisal* of an outcome $x$ is $-\log \pmf(x)$: the number of bits an optimal code spends on it. Entropy is the average surprisal, weighted by how often each outcome happens:
+$$ H(X) \defeq \E\big[-\log p_X(X)\big] = -\sum_{x} p_X(x)\log p_X(x). $$
 
-$$ H(X) \defeq \E\big[-\log \pmf(X)\big] = -\sum_{x} \pmf(x)\log \pmf(x). $$
+We draw this below. First, the natural generalization: let $X$ have a density $p_X$ and keep the formula,
 
-Two facts do most of the work in what follows.
+$$ h(X) \defeq \E\big[-\log p_X(X)\big] = -\int p_X(x)\log p_X(x)\,\dee x, $$
 
-**Every surprisal is non-negative.** A probability is at most 1, so $\log \pmf(x) \le 0$ and $-\log \pmf(x) \ge 0$. An average of non-negative numbers is non-negative, so $H(X) \ge 0$, with equality only when a single outcome has probability 1.
+the *differential entropy*.^[The recipe looks the same, but $p_X(x)\,\dee x$ is a probability and $p_X(x)$ alone is not: $-\log p_X(x)$ is a log-density, not the information content of an event. The sections after the figure take this apart.]
 
-**Only the list of probabilities matters.** The outcomes' names or numeric values never enter the formula. Relabel them with any one-to-one map and $H$ does not move.
+Both are the expectation of one function, $g(x) = -\log p_X(x)$. As in [Visualizing expected value](/posts/expectation/), lay the probability out along $[0, 1]$ with $u = F_X(x)$, and the expectation is an area:
 
-The right-hand panel below draws entropy as an area. Give each outcome a column whose width is its probability and whose height is its surprisal. The widths add to 1, so the total area equals the average height, which is $H$.
+$$ \E\big[-\log p_X(X)\big] = \int_0^1 -\log p_X\big(F_X^{-1}(u)\big)\,\dee u. $$
 
-Drag the bars to set the pmf $\pmf$. The slider tempers it: the figure shows $\pmf^{\beta}(x) \propto \pmf(x)^{\beta}$, which sharpens $\pmf$ for $\beta > 1$ and flattens it toward uniform for $\beta < 1$.^[{-} This is temperature scaling with $\beta = 1/T$; see [temperature scaling and truncation](/posts/temperature-scaling/).]
-
-::: {.wide .extra-wide}
 ```{=html}
-<div class="de-fig">
-<div class="de-controls">
-<div class="de-ctl">
-<label for="de-a-beta">inverse temperature \(\beta\) = <b id="de-a-betav">1.00</b></label>
-<input type="range" id="de-a-beta" min="0" max="5" step="0.05" value="1">
+<div class="ex-bar wide extra-wide" id="ex-bar">
+<div class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></div>
+<div class="ex-grp"><label class="ex-lab" for="ex-preset">\(p_X\)</label><select id="ex-preset"></select></div>
+<div class="ex-grp ex-disc"><label class="ex-lab" for="de-beta">\(\beta\) = <b id="de-betav">1.00</b></label><input type="range" id="de-beta" min="0" max="5" step="0.05" value="1"></div>
+<div class="ex-grp"><button type="button" id="ex-reset">↺ reset</button></div>
 </div>
-<div class="de-ctl de-ctl-narrow">
-<label for="de-a-preset">base \(p\)</label>
-<select id="de-a-preset">
-<option value="default" selected>default</option>
-<option value="unimodal">unimodal</option>
-<option value="uniform">uniform</option>
-<option value="peaked">peaked</option>
-<option value="bimodal">bimodal</option>
-<option value="zipf">zipf</option>
-<option value="custom" hidden>custom</option>
-</select>
-</div>
-<div class="de-btns">
-<button class="de-btn" id="de-a-shuffle" type="button">Shuffle labels</button>
-<button class="de-btn" id="de-a-unshuffle" type="button" disabled>Reset order</button>
-</div>
-</div>
-<div class="de-panels">
-<div>
-<div class="de-ptitle">pmf over eight outcomes (drag the bars)</div>
-<svg id="de-a-pmf" role="img" aria-label="Bar chart of the pmf"></svg>
-</div>
-<div>
-<div class="de-ptitle">Same pmf as area: width \(p(x)\), height \(-\log p(x)\)</div>
-<svg id="de-a-area" role="img" aria-label="Columns with width equal to probability and height equal to surprisal"></svg>
-</div>
-</div>
-<div class="de-readouts">
-<span><span class="k">\(H(p^{\beta})\) = </span><span class="v" id="de-a-H">–</span> bits</span>
-<span><span class="k">\(H(p)\) = </span><span class="v" id="de-a-Hbase">–</span> bits</span>
-<span><span class="k">range: </span><span class="v">\(0 \le H \le \log 8 = 3\)</span></span>
-</div>
-</div>
+```
+
+::: {.wide .extra-wide .ex-wrap}
+```{=html}
+<figure class="ex-fig"><div class="ex-canvas"><svg class="ex-plot" id="de-area" role="img" aria-label="Entropy as the area under minus log p_X of the inverse CDF over the unit interval, with the surprisal to its left and the map from x to u above it"></svg></div></figure>
 ```
 :::
 
 ::: {.de-caption}
-Outlined bars with a dark top edge are the base $\pmf$ you edit; filled bars are the tempered $\pmf^{\beta}$, which the right panel and $H$ describe. The two coincide at $\beta = 1$. At $\beta = 0$ the tempered pmf is uniform and every column has height 3 bits. Raising $\beta$ piles mass onto the most probable outcome: its column gets wide and short, the others get narrow and tall, and the area shrinks toward 0 but never goes below the axis. **Shuffle labels** reorders the outcomes; the set of column shapes is unchanged, and so is $H$. **Reset order** puts them back in alphabetical order.
+Drag $p_X$ to reshape it. In the discrete case, $\beta$ tempers the pmf: the figure shows $p_X^{\beta}(x) \propto p_X(x)^{\beta}$, uniform on its support at $\beta = 0$ and a single outcome as $\beta \to \infty$.^[{-} Temperature scaling with $\beta = 1/T$; see [temperature scaling and truncation](/posts/temperature-scaling/).]
 :::
 
-# The same recipe with a density
-
-Let $X$ have a density $\pdf$. The tempting move is to keep the expected negative log and swap each discrete ingredient for its continuous counterpart:
-
-$$ -\sum_x \pmf(x)\log \pmf(x) \quad\longrightarrow\quad h(X) \defeq -\int \pdf(x)\log \pdf(x)\dee x = \E\big[-\log \pdf(X)\big]. $$
-
-This is the *differential entropy*. The area picture still works: lay the probability mass out along $[0,1]$ using the cumulative distribution $u = F(x)$, and above each slice of mass draw the height $-\log \pdf(x)$. The net area is $h(X)$.
-
-What breaks is the first fact. A density is not a probability; it is probability *per unit length*, $P(x \le X \le x+\dee x) \approx \pdf(x)\dee x$. Only its integral is constrained to equal 1, so $\pdf$ can be as tall as it likes as long as it is correspondingly narrow. Wherever $\pdf(x) > 1$, the height $-\log \pdf(x)$ is negative. If enough mass sits in such places, the net area is negative.
-
-The simplest case is the uniform density on $[0, w]$. It has height $1/w$, so $h = \log w$, which is negative whenever $w < 1$. A discrete variable with $n$ equally likely outcomes has entropy $\log n \ge 0$ for every $n$. (Choose **Uniform** below and drag its edges.)
-
-::: {.wide .extra-wide}
-```{=html}
-<div class="de-fig">
-<div class="de-controls">
-<div class="de-seg" role="radiogroup" aria-label="Distribution family" id="de-b-fam">
-<button type="button" role="radio" aria-checked="true" data-v="gauss">Gaussian</button>
-<button type="button" role="radio" aria-checked="false" data-v="unif">Uniform</button>
-<button type="button" role="radio" aria-checked="false" data-v="steps">Steps</button>
-<button type="button" role="radio" aria-checked="false" data-v="bimodal">Bimodal</button>
-</div>
-<div class="de-ctl">
-<label for="de-b-sd">standard deviation \(\sigma\) = <b id="de-b-sdv">1</b></label>
-<input type="range" id="de-b-sd" min="-4" max="1.5" step="0.05" value="-2.3">
-</div>
-</div>
-<div class="de-panels">
-<div>
-<div class="de-ptitle">Density \(f(x)\) (drag the handles); mass where \(f &gt; 1\) in magenta</div>
-<svg id="de-b-pdf" role="img" aria-label="Density plot"></svg>
-</div>
-<div>
-<div class="de-ptitle">As area: width = probability, height \(-\log f(x)\)</div>
-<svg id="de-b-area" role="img" aria-label="Log-density drawn against cumulative probability"></svg>
-</div>
-</div>
-<div class="de-readouts">
-<span><span class="k">\(h(X)\) = </span><span class="v" id="de-b-h">–</span> bits</span>
-<span><span class="k">peak density: </span><span class="v" id="de-b-peak">–</span></span>
-<span><span class="k">\(P(f(X) &gt; 1)\) = </span><span class="v" id="de-b-pneg">–</span></span>
-<span><span class="k">effective width \(2^{h}\) = </span><span class="v" id="de-b-eff">–</span></span>
-</div>
-</div>
-```
-:::
-
-::: {.de-caption}
-The magenta slice of mass on the left is exactly the magenta stretch of the horizontal axis on the right: the part of the distribution whose log-density term is negative. For **Gaussian** and **Bimodal**, drag a handle sideways to move that component, and up or down to make it taller and narrower or shorter and wider. **Steps** is piecewise constant, with five chunks. Drag a dot on the axis to move a step point (the chunks beside it keep their mass, so their heights change), or drag a chunk's top to set its height (the other chunks' masses rescale to keep the total at 1, as for the pmf above). **Uniform** is the one-chunk case. For chunk masses $m_i$ and widths $w_i$, $h = H(m) + \sum_i m_i \log w_i$: the discrete entropy of the chunks plus their average log width. The $\sigma$ slider rescales the current shape about its mean, and the family buttons reset it. Shrink $\sigma$, or raise a peak, and more of the mass moves above the $\pdf = 1$ line. The dashed box on the left is the uniform density with the same $h$; its width, $2^h$, is one reading of what $h$ measures. At a fixed $\sigma$, switch families: the Gaussian always has the largest $h$, $\tfrac12\log(2\pi e\sigma^2)$.
-:::
-
-::: {.callout-note title="On the word surprisal"}
-In the discrete case, $-\log \pmf(x)$ is the information content of an actual event. In the continuous case, $\{X = x\}$ has probability 0, and $-\log \pdf(x)$ is not the information content of anything. It is a log-density, and its sign depends on the unit $x$ is measured in. The next section shows what it is instead.
-:::
 
 # Where $h$ comes from: quantize, then subtract
 

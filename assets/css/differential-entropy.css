@@ -169,3 +169,6 @@ svg.de-plot .handle, #de-a-pmf { touch-action: none; }
 .de-btns { display: flex; gap: .5rem; }
 .de-btn:disabled { color: var(--de-ink-soft); opacity: .55; cursor: default; }
 .de-btn:disabled:hover { border-color: var(--de-rule); }
+
+/* ---- the β slider in the shared control bar (assets/css/expectation.css styles the rest) ---- */
+.ex-bar input[type=range] { width: 8rem; margin: 0; accent-color: var(--ex-mass); }
