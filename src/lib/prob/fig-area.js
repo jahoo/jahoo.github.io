@@ -22,7 +22,7 @@ import { Region, el, svgContext, svgPoint } from './region.js';
 import { createMathLayer, texNum } from './mathlabels.js';
 import { fitWidth } from './fit.js';
 import { createEditor, regionAdapter } from './edit.js';
-import { G, meaning } from './frame.js';
+import { G, meaning, gRange } from './frame.js';
 import { NOTES } from './area-notes.js';
 
 // Layout in viewBox units, for the full width of 1000: a left column of 400 and a right
@@ -36,28 +36,6 @@ const mA = { l: 58, r: 16, t: 50, b: 30 };
 // an atom is integrated (up to and including the one u is in) or not yet
 const cls2 = (i, k) => (i <= k ? 'done' : 'todo');
 
-// g's extent over the support (clipped for −log p on the tails), always including 0:
-// the vertical extent of the area under g ∘ F_X⁻¹.
-function gExtent(fr, g) {
-    let lo = Infinity, hi = -Infinity;
-    const vals = fr.disc ? fr.gs.filter(Number.isFinite) : fr.gs.filter((y, i) => fr.S.Fs[i] > 1e-4 && fr.S.Fs[i] < 1 - 1e-4);
-    for (const v of vals) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
-    const c = G[g].clip;
-    if (c) { lo = Math.max(lo, c[0]); hi = Math.min(hi, c[1]); }
-    return [Math.min(lo, 0), Math.max(hi, 0)];
-}
-
-// Vertical range for g: its extent, with a little room.
-function gRange(fr, g) {
-    let [lo, hi] = gExtent(fr, g);
-    if (hi - lo < 1e-9) hi = lo + 1; // a g that is 0 wherever there is mass still gets a unit of room
-    const pad = 0.08 * (hi - lo);
-    return [lo < 0 ? lo - pad : 0, hi + pad];
-}
-
-// opts: sweep — the position can move (cursors, crosshair, the running integral, position
-//       drags); false pins the figure at u = 1, where only p_X is editable.
-//       notes — which post's wording the figure carries (see area-notes.js).
 export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, customG }, { sweep = true, notes = 'expectation' } = {}) {
     const T = NOTES[notes];
     const ctx = svgContext(svg, 1000, H0);

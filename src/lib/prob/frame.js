@@ -81,6 +81,27 @@ export function computeFrame(model, pos, g, custom) {
     };
 }
 
+// g's extent over the support, always including 0: the vertical extent of the area under
+// g ∘ F_X⁻¹. In the continuous case −log p runs to +∞ in the tails, so it is clipped to the
+// window G[g].clip; a discrete surprisal is finite and is never clipped, however sharp the
+// tempering makes it.
+export function gExtent(fr, g) {
+    let lo = Infinity, hi = -Infinity;
+    const vals = fr.disc ? fr.gs.filter(Number.isFinite) : fr.gs.filter((y, i) => fr.S.Fs[i] > 1e-4 && fr.S.Fs[i] < 1 - 1e-4);
+    for (const v of vals) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+    const c = G[g].clip;
+    if (c && !fr.disc) { lo = Math.max(lo, c[0]); hi = Math.min(hi, c[1]); }
+    return [Math.min(lo, 0), Math.max(hi, 0)];
+}
+
+// Vertical range for g: its extent, with a little room.
+export function gRange(fr, g) {
+    let [lo, hi] = gExtent(fr, g);
+    if (hi - lo < 1e-9) hi = lo + 1; // a g that is 0 wherever there is mass still gets a unit of room
+    const pad = 0.08 * (hi - lo);
+    return [lo < 0 ? lo - pad : 0, hi + pad];
+}
+
 // The same expectation over the real line: the weights g(x) p_X(x) (one per atom, NaN
 // without mass; or along the continuous samples) and their sum or integral up to x.
 // A point mass is counted whole, so in the discrete case this is the area up to

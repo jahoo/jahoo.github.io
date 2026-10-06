@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { createModel } from './model.js';
 import { createPosition } from './position.js';
-import { computeFrame, meaning, productFrame } from './frame.js';
+import { computeFrame, meaning, productFrame, gRange, gExtent } from './frame.js';
 import { atU, lerp } from './dist.js';
 
 const close = (a, b, tol, msg) => assert.ok(Math.abs(a - b) < tol, `${msg ?? ''} ${a} vs ${b}`);
@@ -159,5 +159,27 @@ describe('the same expectation over the real line: g · p_X', () => {
         pos.setU(1);                                  // x = +∞: the whole integral
         const f1 = computeFrame(m, pos, 'x');
         close(productFrame(f1).upto, f1.total, 1e-12);
+    });
+});
+
+describe('g range', () => {
+    it('discrete: every finite surprisal stays in range, however sharp the tempering', () => {
+        // zipf at beta = 5 puts five atoms above 9 bits; the continuous tail clip must not apply
+        const m = createModel(); m.setBeta(5);
+        const fr = computeFrame(m, { x: Infinity, u: 1 }, 'neglog');
+        const top = Math.max(...fr.gs.filter(Number.isFinite));
+        assert.ok(top > 9, `the test needs a surprisal above the clip, got ${top}`);
+        const [lo, hi] = gRange(fr, 'neglog');
+        assert.ok(hi >= top, `range top ${hi} below the largest surprisal ${top}`);
+        assert.equal(lo, 0);
+    });
+    it('continuous: the tails are still clipped to the neglog window', () => {
+        // the bimodal preset's narrow component puts its interior tail just past 9 bits
+        const m = createModel(); m.setCase('cont'); m.setPreset('bimodal');
+        const pos = createPosition(m); pos.setU(0.5);
+        const fr = computeFrame(m, pos, 'neglog');
+        const raw = Math.max(...fr.gs.filter((y, i) => fr.S.Fs[i] > 1e-4 && fr.S.Fs[i] < 1 - 1e-4));
+        assert.ok(raw > 9, `the test needs a tail above the clip, got ${raw}`);
+        assert.equal(gExtent(fr, 'neglog')[1], 9);
     });
 });
