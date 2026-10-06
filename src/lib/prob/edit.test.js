@@ -31,4 +31,15 @@ describe('p_X editor hit test', () => {
         const [qx, qy] = adapter.toScreen(2, m.p[1]);
         assert.equal(ed.hit({ x: qx, y: qy })?.type, 'atom');
     });
+    it('while tempered, the handles sit on the base pmf, not the tempered one', () => {
+        const m = createModel(); m.setBeta(3);
+        const ed = createEditor({ model: m, adapter });
+        const v = m.view();
+        // atom 1 (zipf: base ≈ .368) is far sharper tempered; the handle is at the base height
+        const [bx, by] = adapter.toScreen(1, v.base[0]);
+        assert.equal(ed.hit({ x: bx, y: by })?.type, 'atom');
+        const [tx, ty] = adapter.toScreen(1, v.p[0]);
+        assert.ok(Math.abs(ty - by) > 14, 'the two heights differ by more than the hit radius');
+        assert.equal(ed.hit({ x: tx, y: ty }), null);
+    });
 });

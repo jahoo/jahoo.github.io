@@ -51,7 +51,8 @@ export function createEditor({ model, adapter, visible = () => true, onHold }) {
     // Handle positions for the current distribution, in (x, density).
     function handles() {
         const v = model.view(), top = adapter.dTop();
-        if (v.disc) return v.p.map((d, i) => ({ type: 'atom', i, x: i + 1, d: Math.min(d, top) })).filter(h => visible(h.i));
+        // discrete: the handles are on the pmf you edit, the base, even while the figure shows it tempered
+        if (v.disc) return (v.base ?? v.p).map((d, i) => ({ type: 'atom', i, x: i + 1, d: Math.min(d, top) })).filter(h => visible(h.i));
         const s = v.shape;
         if (s.kind === 'steps') return s.ts.map((t, j) => ({ type: 'break', j, x: t, d: 0 }));
         return s.comps.map((c, i) => ({ type: 'peak', i, x: c.m, d: Math.min(mixPdf(s.comps, c.m), top) }));
