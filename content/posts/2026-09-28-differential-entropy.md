@@ -16,8 +16,6 @@ link-citations: true
 mathjax-macros: [assets/prob/macros.json, assets/differential-entropy/macros.json]
 ---
 
-Shannon's entropy is defined for a discrete random variable. Keep the formula and hand it a density instead, and you get a quantity that looks the same but behaves differently: it can be negative, it changes with the units of $x$, and it is not the limit of any Shannon entropy. Below, the two are drawn as one picture, then taken apart.
-
 For a discrete random variable $X$ with pmf $p_X$, the entropy is the expected value of the *surprisal* $-\log p_X(X)$:^[The surprisal of an outcome $x$ is the number of bits an optimal code spends on it. The figures take $\log_2$ throughout, so entropies are in bits.]
 
 $$ H(X) \defeq \E\big[-\log p_X(X)\big] = -\sum_{x} p_X(x)\log p_X(x). $$
