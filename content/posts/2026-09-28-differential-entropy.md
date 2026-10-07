@@ -16,19 +16,19 @@ link-citations: true
 mathjax-macros: [assets/prob/macros.json, assets/differential-entropy/macros.json]
 ---
 
-Shannon's entropy is the expected value of $-\log p_X(X)$. Replace the sum with an integral and the mass function with a density, and you get a formula that looks the same but is not the same kind of object: it can be negative, it changes when you change units, and it is not the limit of any Shannon entropy. Below, the substitution is taken apart one picture at a time.
+Shannon's entropy is the expected value of $-\log \pmf{X}(X)$. Replace the sum with an integral and the mass function with a density, and you get a formula that looks the same but is not the same kind of object: it can be negative, it changes when you change units, and it is not the limit of any Shannon entropy. Below, the substitution is taken apart one picture at a time.
 
-For a discrete random variable $X$ with pmf $p_X$, the *surprisal* of an outcome $x$ is $-\log p_X(x)$.^[The number of bits an optimal code spends on $x$. The figures take $\log_2$ throughout, so entropies are in bits.] Entropy is its expected value:
+For a discrete random variable $X$ with pmf $\pmf{X}$, the *surprisal* of an outcome $x$ is $-\log \pmf{X}(x)$.^[The number of bits an optimal code spends on $x$. The figures take $\log_2$ throughout, so entropies are in bits.] Entropy is its expected value:
 
-$$ H(X) \defeq \E\big[-\log p_X(X)\big] = -\sum_{x} p_X(x)\log p_X(x). $$
+$$ H(X) \defeq \E\big[-\log \pmf{X}(X)\big] = -\sum_{x} \pmf{X}(x)\log \pmf{X}(x). $$
 
-We draw this below. First, the natural generalization: let $X$ have a density $p_X$ and keep the formula,
+We draw this below. First, the natural generalization: let $X$ have a density $\pdf{X}$ and keep the formula,
 
-$$ h(X) \defeq \E\big[-\log p_X(X)\big] = -\int p_X(x)\log p_X(x)\,\dee x, $$
+$$ h(X) \defeq \E\big[-\log \pdf{X}(X)\big] = -\int \pdf{X}(x)\log \pdf{X}(x)\,\dee x, $$
 
-the *differential entropy*.^[The recipe looks the same, but $p_X(x)\,\dee x$ is a probability and $p_X(x)$ alone is not: $-\log p_X(x)$ is a log-density, not the information content of an event. The sections after the figure take this apart.]
+the *differential entropy*.^[The recipe looks the same, but $\pdf{X}(x)\,\dee x$ is a probability and $\pdf{X}(x)$ alone is not: $-\log \pdf{X}(x)$ is a log-density, not the information content of an event. The sections after the figure take this apart.]
 
-Both are the expectation of one function, $g(x) = -\log p_X(x)$. As in [Visualizing expected value](/posts/expectation/), lay the probability out along $[0, 1]$ with $u = F_X(x)$, and the expectation is an area:
+Both are the expectation of one function, $g(x) = -\log p_X(x)$, writing $p_X$ for either pmf or pdf as in [Visualizing expected value](/posts/expectation/). As there, lay the probability out along $[0, 1]$ with $u = F_X(x)$, and the expectation is an area:
 
 $$ \E\big[-\log p_X(X)\big] = \int_0^1 -\log p_X\big(F_X^{-1}(u)\big)\,\dee u. $$
 
@@ -56,14 +56,14 @@ Drag $p_X$ to reshape it. In the discrete case, $\beta$ tempers the pmf: the fig
 
 The question with a Shannon answer is what the entropy of a continuous $X$ is *at some resolution*. Cut the real line into bins of width $\bw$ and let $\Xq$ be the bin that $X$ lands in. $\Xq$ is discrete, so $H(\Xq)$ is a Shannon entropy and cannot be negative.
 
-For small $\bw$, bin $i$ with midpoint $x_i$ has probability $\pmf_i \approx \pdf(x_i)\,\bw$, and
+For small $\bw$, bin $i$ with midpoint $x_i$ has probability $p_i \approx p_X(x_i)\,\bw$, and
 
 $$
 \begin{aligned}
-H(\Xq) &= -\sum_i \pmf_i \log \pmf_i
-\approx -\sum_i \pdf(x_i)\bw\,\log\!\big(\pdf(x_i)\bw\big) \\[2pt]
-&= \underbrace{-\sum_i \pdf(x_i)\log \pdf(x_i)\,\bw}_{\to\; h(X)}
-\;\underbrace{-\;\log\bw\,\sum_i \pdf(x_i)\bw}_{\to\; -\log \bw}.
+H(\Xq) &= -\sum_i p_i \log p_i
+\approx -\sum_i p_X(x_i)\bw\,\log\!\big(p_X(x_i)\bw\big) \\[2pt]
+&= \underbrace{-\sum_i p_X(x_i)\log p_X(x_i)\,\bw}_{\to\; h(X)}
+\;\underbrace{-\;\log\bw\,\sum_i p_X(x_i)\bw}_{\to\; -\log \bw}.
 \end{aligned}
 $$
 
@@ -112,7 +112,7 @@ The discrete entropy goes to infinity: pinning down a real number exactly takes 
 :::
 
 ::: {.de-caption}
-The **ochre curve** is the true discrete entropy $H(\Xq)$. It never enters the shaded region below zero. Once the bins are small compared with the density's features, it rises one bit per halving of $\bw$ and runs along the **dashed teal line** $h(X) + \log(1/\bw)$. The histogram bars have height $\pmf_i/\bw$, which puts them on the density's scale. The teal dot is where that line crosses $\bw = 1$: that height is $h(X)$. With the defaults (a Gaussian with $\sigma = 1/8$), the whole distribution fits inside one unit-width bin, so the true entropy at $\bw = 1$ is almost 0, while the extrapolated line is at $-0.95$. **That gap is the negativity of $h$**: it comes from extending a small-$\bw$ approximation to a resolution where it no longer holds. Widen $\sigma$ past about 0.24 and the intercept rises above zero. The density is editable as in the previous figure. Put a narrow bump beside a wide one and the curve rises more slowly than one bit per halving until the bins resolve both: its slope is the fraction of the mass whose shape the bins resolve.
+The **ochre curve** is the true discrete entropy $H(\Xq)$. It never enters the shaded region below zero. Once the bins are small compared with the density's features, it rises one bit per halving of $\bw$ and runs along the **dashed teal line** $h(X) + \log(1/\bw)$. The histogram bars have height $p_i/\bw$, which puts them on the density's scale. The teal dot is where that line crosses $\bw = 1$: that height is $h(X)$. With the defaults (a Gaussian with $\sigma = 1/8$), the whole distribution fits inside one unit-width bin, so the true entropy at $\bw = 1$ is almost 0, while the extrapolated line is at $-0.95$. **That gap is the negativity of $h$**: it comes from extending a small-$\bw$ approximation to a resolution where it no longer holds. Widen $\sigma$ past about 0.24 and the intercept rises above zero. The density is editable as in the previous figure. Put a narrow bump beside a wide one and the curve rises more slowly than one bit per halving until the bins resolve both: its slope is the fraction of the mass whose shape the bins resolve.
 :::
 
 This picture also explains the limit of a distribution concentrating to a point. For a discrete variable, piling all the mass on one outcome drives $H$ down to 0. For a Gaussian with $\sigma \to 0$, the whole ochre curve slides right, and $h = \tfrac12\log(2\pi e\sigma^2) \to -\infty$. At any fixed resolution $\bw$, though, $H(\Xq)$ still bottoms out at 0 as soon as the mass fits in one bin. Nothing about Shannon entropy went wrong; the intercept moved.
@@ -123,7 +123,7 @@ Reading the line off at $\bw = 1$ is where the next problem hides: "one unit" de
 
 In the discrete case, a one-to-one relabeling moves the outcomes but leaves every probability, and therefore $H$, where it was. The continuous analogue is a change of variable. Take $Y = aX$. The same probability now spreads over a stretch $|a|$ times as long, so the density drops by the same factor to keep its area:^[{-} For the general change-of-variables formula for densities, see [this earlier note](/posts/transform-pdf/).]
 
-$$ \pdf_Y(y) = \frac{1}{|a|}\,\pdf_X\!\Big(\frac{y}{a}\Big) \qquad\Longrightarrow\qquad h(aX) = h(X) + \log|a|. $$
+$$ p_Y(y) = \frac{1}{|a|}\,p_X\!\Big(\frac{y}{a}\Big) \qquad\Longrightarrow\qquad h(aX) = h(X) + \log|a|. $$
 
 More generally, for a smooth invertible $g$, $h(g(X)) = h(X) + \E\big[\log|g'(X)|\big]$. The Jacobian of the transformation enters the density, and so enters the log. In the quantization picture, a bin of width $\bw$ on the $Y$-axis corresponds to a bin of width $\bw/|a|$ on the $X$-axis. Measuring $Y$ at unit resolution is measuring $X$ at a finer resolution, which costs $\log|a|$ more bits.
 
@@ -168,9 +168,9 @@ Mutual information is the main example:
 
 $$ I(X;Y) = h(X) - h(X\mid Y) = \lim_{\bw\to0} I(\Xq; Y_{\bw}). $$
 
-It needs no renormalization, it is always $\ge 0$, and it is unchanged by any invertible transformation of $X$ or $Y$ separately. The same goes for KL divergence, $\KL{\pdf}{g} = \int \pdf\log(\pdf/g)\dee x \ge 0$: in the ratio $\pdf/g$ the Jacobians cancel, so it does not depend on coordinates.
+It needs no renormalization, it is always $\ge 0$, and it is unchanged by any invertible transformation of $X$ or $Y$ separately. The same goes for KL divergence, $\KL{p_X}{g} = \int p_X\log(p_X/g)\dee x \ge 0$: in the ratio $p_X/g$ the Jacobians cancel, so it does not depend on coordinates.
 
-This also says what $h$ is. Writing $h(X) = -\int \pdf(x)\log\frac{\pdf(x)}{1}\dee x$ shows it as a negative divergence of $\pdf$ from the flat reference "density" 1, which is Lebesgue measure with a chosen unit length. The reference is where the dependence on units lives. Jaynes' *limiting density of discrete points* replaces that 1 with an explicit reference density $m(x)$ and gets a coordinate-free quantity $-\int \pdf\log(\pdf/m)\dee x$ [@jaynes.e:1968, sec. VI].^[{-} There, $m(x)$ is proportional to the density of the discrete points in the limit, and since $\pdf$ and $m$ transform the same way under a change of variables, the ratio $\pdf/m$ and so the whole quantity are invariant. Jaynes credits the derivation to his 1963 Brandeis lectures.]
+This also says what $h$ is. Writing $h(X) = -\int p_X(x)\log\frac{p_X(x)}{1}\dee x$ shows it as a negative divergence of $p_X$ from the flat reference "density" 1, which is Lebesgue measure with a chosen unit length. The reference is where the dependence on units lives. Jaynes' *limiting density of discrete points* replaces that 1 with an explicit reference density $m(x)$ and gets a coordinate-free quantity $-\int p_X\log(p_X/m)\dee x$ [@jaynes.e:1968, sec. VI].^[{-} There, $m(x)$ is proportional to the density of the discrete points in the limit, and since $p_X$ and $m$ transform the same way under a change of variables, the ratio $p_X/m$ and so the whole quantity are invariant. Jaynes credits the derivation to his 1963 Brandeis lectures.]
 
 ::: {.wide .extra-wide}
 ```{=html}
@@ -215,9 +215,9 @@ Each row traces back to one of two facts: a density is probability per unit leng
 ::: {.wide .extra-wide}
 | | Shannon entropy, pmf | Differential entropy, pdf | Why |
 |--|-----|-----|-----|
-| Definition | $-\sum \pmf\log \pmf$ | $-\int \pdf\log \pdf\dee x$ | Same expected negative log, with a sum or an integral as the expectation. |
+| Definition | $-\sum p_X\log p_X$ | $-\int p_X\log p_X\dee x$ | Same expected negative log, with a sum or an integral as the expectation. |
 | Inside the log | A probability, $\le 1$ | A density, unbounded | Density is probability per unit length; only its integral is fixed. |
-| Sign | $H \ge 0$, zero iff deterministic | [Any real number]{.de-flag}; $\to -\infty$ as the distribution concentrates | $-\log \pdf < 0$ wherever $\pdf > 1$. |
+| Sign | $H \ge 0$, zero iff deterministic | [Any real number]{.de-flag}; $\to -\infty$ as the distribution concentrates | $-\log p_X < 0$ wherever $p_X > 1$. |
 | Relation to discretization | It is the discrete quantity | $H(\Xq) \approx h(X) + \log(1/\bw)$ | $h$ is the offset of a divergent entropy, not an entropy. |
 | Invertible transforms | Invariant under any relabeling | [Shifts by $\E\log\lvert g'(X)\rvert$]{.de-flag}; depends on units | The Jacobian rescales the density. |
 | Translation | Invariant | Invariant | Shift has Jacobian 1. |
