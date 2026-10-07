@@ -256,7 +256,7 @@ export function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, custom
         // on a narrow layout the notes run to more lines: the map's sits a little higher, and g's
         // grows upward from just above its plot
         note('n-map', colL / 2, (zones.yTop + zones.yAx) / 2 - (noRI ? 30 : 0), T.map, nw);
-        note('n-g', colL / 2, RG.pt - 12, T.g, nw, true);
+        note('n-g', colL / 2, RG.pt - 12, T.g(fr.disc), nw, true);
         // centred in the left column, or across the full width once the running integral is dropped
         const riTop = RI.o.oy + RI.o.m.t, fx = wideBottom ? layoutW / 2 : colL / 2, fy1 = riTop + 60, fy2 = riTop + 130;
         // before u = 1 the integral is the area so far, and the expectation is still to come

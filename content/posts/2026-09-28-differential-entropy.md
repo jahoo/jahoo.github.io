@@ -43,7 +43,7 @@ $$ \E\big[-\log p_X(X)\big] = \int_0^1 -\log p_X\big(F_X^{-1}(u)\big)\,\dee u. $
 
 ::: {.wide .extra-wide .ex-wrap}
 ```{=html}
-<figure class="ex-fig"><div class="ex-canvas"><svg class="ex-plot" id="de-area" role="img" aria-label="Entropy as the area under minus log p_X of the inverse CDF over the unit interval, with the surprisal to its left and the map from x to u above it"></svg></div></figure>
+<figure class="ex-fig"><div class="ex-canvas"><svg class="ex-plot" id="de-area" role="img" aria-label="Entropy as the area under minus log p_X of the inverse CDF over the unit interval, with minus log p_X to its left and the map from x to u above it"></svg></div></figure>
 ```
 :::
 

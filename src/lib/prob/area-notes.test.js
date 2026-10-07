@@ -11,7 +11,8 @@ describe('area figure notes', () => {
     it('the expectation variant is the wording the expectation post shipped with', () => {
         const T = NOTES.expectation;
         assert.equal(T.dist, 'The distribution of \\(X\\): what the expectation averages over.');
-        assert.equal(T.g, 'The function \\(g\\) gives the height to integrate.');
+        assert.equal(T.g(true), 'The function \\(g\\) gives the height to integrate.');
+        assert.equal(T.g(false), T.g(true));
         assert.equal(T.area(true, '1'), 'The expectation is the whole area:');
         assert.equal(T.area(false, '0.600'), 'The area up to \\(u = \\class{ex-now}{0.600}\\) is:');
         assert.equal(T.rest, 'The expectation is the whole area (slide \\(u\\) to 1).');
@@ -28,7 +29,9 @@ describe('area figure notes', () => {
         const T = NOTES.entropy;
         assert.equal(T.dist, 'The distribution of \\(X\\): what the entropy averages over.');
         assert.equal(T.map, NOTES.expectation.map);
-        assert.equal(T.g, 'The height is the surprisal, \\(-\\log_2 p_X(x)\\).');
+        // surprisal is a name for the information of an event: a density has none, only a log-density
+        assert.equal(T.g(true), 'The height is the surprisal, \\(-\\log_2 p_X(x)\\).');
+        assert.equal(T.g(false), 'The height is the negative log-density, \\(-\\log_2 p_X(x)\\).');
         assert.equal(T.area(true, '1'), 'The entropy is the whole area:');
         assert.equal(T.gLabel('-\\log_2 p_X(x)'), '-\\log_2 p_X(x)');
         assert.equal(T.aLabel('-\\log_2 p_X(x)'), '-\\log_2 p_X(F_X^{-1}(u))');

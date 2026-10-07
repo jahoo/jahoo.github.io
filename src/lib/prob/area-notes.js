@@ -17,7 +17,7 @@ export const NOTES = {
     expectation: {
         dist: 'The distribution of \\(X\\): what the expectation averages over.',
         map: MAP,
-        g: 'The function \\(g\\) gives the height to integrate.',
+        g: () => 'The function \\(g\\) gives the height to integrate.',
         gLabel: gtex => (gtex ? 'g(x) = ' + gtex : 'g(x)'),
         aLabel: () => 'g(F_X^{-1}(u))',
         avg: () => '\\mathbb{E}[g(X)]', // the average-height line in the area panel
@@ -30,7 +30,8 @@ export const NOTES = {
     entropy: {
         dist: 'The distribution of \\(X\\): what the entropy averages over.',
         map: MAP,
-        g: 'The height is the surprisal, \\(-\\log_2 p_X(x)\\).',
+        // surprisal names the information of an event; a density gives only a log-density
+        g: disc => `The height is the ${disc ? 'surprisal' : 'negative log-density'}, \\(-\\log_2 p_X(x)\\).`,
         gLabel: gtex => gtex,
         aLabel: () => '-\\log_2 p_X(F_X^{-1}(u))',
         avg: disc => (disc ? 'H(X)' : 'h(X)'),
