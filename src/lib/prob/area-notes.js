@@ -31,13 +31,13 @@ export const NOTES = {
         dist: 'The distribution of \\(X\\): what the entropy averages over.',
         map: MAP,
         // surprisal names the information of an event; a density gives only a log-density
-        g: disc => `The height is the ${disc ? 'surprisal' : 'negative log-density'}, \\(-\\log_2 p_X(x)\\).`,
+        g: disc => `The height is the ${disc ? 'surprisal' : 'negative log-density'}, \\(-\\log p_X(x)\\).`,
         gLabel: gtex => gtex,
-        aLabel: () => '-\\log_2 p_X(F_X^{-1}(u))',
+        aLabel: () => '-\\log p_X(F_X^{-1}(u))',
         avg: disc => (disc ? 'H(X)' : 'h(X)'),
         area: () => 'The entropy is the whole area:',
         rest: '', // never shown: this figure is always at u = 1
-        integrand: () => '-\\log_2 p_X\\big(F_X^{-1}(v)\\big)',
-        result: ({ val, unit, disc }) => `${disc ? 'H(X)' : 'h(X)'} \\;=\\; \\mathbb{E}[-\\log_2 p_X(X)] \\;=\\; ${val}${unit}`,
+        integrand: () => '-\\log p_X\\big(F_X^{-1}(v)\\big)',
+        result: ({ val, unit, disc }) => `${disc ? 'H(X)' : 'h(X)'} \\;=\\; \\mathbb{E}[-\\log p_X(X)] \\;=\\; ${val}${unit}`,
     },
 };

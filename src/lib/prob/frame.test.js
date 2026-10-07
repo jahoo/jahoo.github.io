@@ -33,7 +33,7 @@ describe('frame', () => {
         assert.equal(fr.area, 0);
         assert.ok(Number.isNaN(fr.gNow));
     });
-    it('continuous: −log₂ p_X totals to h, and x totals to the mean', () => {
+    it('continuous: −log p_X totals to h, and x totals to the mean', () => {
         const m = createModel(); m.setCase('cont');
         const pos = createPosition(m);
         close(computeFrame(m, pos, 'neglog').total, 0.5 * Math.log2(2 * Math.PI * Math.E * 0.04), 1e-3);

@@ -225,7 +225,7 @@ describe('sampled helpers', () => {
         close(x, 0.2 * -0.5244005, 1e-3);
         close(lerp(S.Fs, atX(S, x)), 0.3, 1e-4);
     });
-    it('running integral of −log₂ f recovers h, and of 1 gives u', () => {
+    it('running integral of −log f recovers h, and of 1 gives u', () => {
         const S = sampleShape(familyShape('gauss', 0.2));
         const I = runningIntegral(S.Fs, S.fs.map(f => -log2(f)));
         close(I[I.length - 1], 0.5 * log2(2 * Math.PI * Math.E * 0.04), 1e-3);

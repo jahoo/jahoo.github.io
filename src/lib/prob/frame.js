@@ -11,7 +11,7 @@ import { log2, atX, atU, lerp, runningIntegral } from './dist.js';
 // and the mean m and standard deviation s of X; and what its expectation is, in each case.
 export const G = {
     neglog: {
-        f: (x, v) => -log2(v), tex: '-\\log_2 p_X(x)', clip: [-5, 9], unit: '\\text{ bits}',
+        f: (x, v) => -log2(v), tex: '-\\log p_X(x)', clip: [-5, 9], unit: '\\text{ bits}',
         means: disc => (disc ? { tex: 'H(X)', name: 'entropy' } : { tex: 'h(X)', name: 'differential entropy' }),
     },
     x: { f: x => x, tex: 'x', means: () => ({ tex: '\\mathbb{E}[X]', name: 'mean' }) },

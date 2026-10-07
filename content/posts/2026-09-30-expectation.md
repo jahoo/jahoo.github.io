@@ -58,9 +58,9 @@ Below, play around with visualizing the expectation as an area under a curve. Se
 <div class="ex-grp"><label class="ex-lab" for="ex-preset">\(p_X\)</label><select id="ex-preset"></select></div>
 <div class="ex-grp"><span class="ex-lab" id="ex-g-lab">\(g(x) =\)</span>
 <div class="ex-menu" id="ex-gsel">
-<button type="button" class="ex-menu-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="ex-g-lab"><span class="ex-menu-cur">\(-\log_2 p_X(x)\) <span class="ex-menu-note">(entropy)</span></span><span class="ex-menu-caret" aria-hidden="true">▾</span></button>
+<button type="button" class="ex-menu-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="ex-g-lab"><span class="ex-menu-cur">\(-\log p_X(x)\) <span class="ex-menu-note">(entropy)</span></span><span class="ex-menu-caret" aria-hidden="true">▾</span></button>
 <ul class="ex-menu-list" role="listbox" aria-labelledby="ex-g-lab" hidden>
-<li role="option" data-v="neglog" aria-selected="true">\(-\log_2 p_X(x)\) <span class="ex-menu-note">(entropy)</span></li>
+<li role="option" data-v="neglog" aria-selected="true">\(-\log p_X(x)\) <span class="ex-menu-note">(entropy)</span></li>
 <li role="option" data-v="x">\(x\) <span class="ex-menu-note">(mean)</span></li>
 <li role="option" data-v="x2">\(x^2\) <span class="ex-menu-note">(second moment)</span></li>
 <li role="option" data-v="var">\((x - \E[X])^2\) <span class="ex-menu-note">(variance)</span></li>

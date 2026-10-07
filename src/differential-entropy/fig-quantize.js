@@ -66,7 +66,7 @@ export function initQuantize() {
         P1.axes({
             xticks: [-3, -2, -1, 0, 2, 4, 6, 8, 10, 12],
             yticks: [-6, -4, -2, 0, 2, 4, 6, 8, 10, 12, 14, 16],
-            xlabel: 'log₂(1/Δ)   (finer bins →)', ylabel: 'bits',
+            xlabel: 'log(1/Δ)   (finer bins →)', ylabel: 'bits',
         });
         P1.rect(T_MIN, -7, T_MAX, 0, 'negzone');
         txt(P1.data, P1.X(11.8), P1.Y(-6.3), 'no discrete entropy is ever down here', 'lbl neg', { 'text-anchor': 'end' });
@@ -84,7 +84,7 @@ export function initQuantize() {
         el('tspan', { 'baseline-shift': 'sub', 'font-size': '9' }, hl).textContent = 'Δ';
         el('tspan', null, hl).textContent = ') = ' + Hq.toFixed(2);
         const yEnd = d.h + 11.9;
-        txt(P1.front, P1.X(11.9), P1.Y(Math.min(15.2, yEnd)) + (yEnd > 15.2 ? 14 : -8), 'h(X) + log₂(1/Δ)', 'lbl mass', { 'text-anchor': 'end' });
+        txt(P1.front, P1.X(11.9), P1.Y(Math.min(15.2, yEnd)) + (yEnd > 15.2 ? 14 : -8), 'h(X) + log(1/Δ)', 'lbl mass', { 'text-anchor': 'end' });
 
         // right: density and histogram (bar height p_i / Δ)
         if (!editor.dragging || !win) {
