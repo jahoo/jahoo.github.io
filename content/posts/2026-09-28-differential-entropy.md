@@ -16,19 +16,17 @@ link-citations: true
 mathjax-macros: [assets/prob/macros.json, assets/differential-entropy/macros.json]
 ---
 
-Shannon's entropy is the expected value of $-\log \pmf{X}(X)$. Replace the sum with an integral and the mass function with a density, and you get a formula that looks the same but is not the same kind of object: it can be negative, it changes when you change units, and it is not the limit of any Shannon entropy. Below, the substitution is taken apart one picture at a time.
+Shannon's entropy is defined for a discrete random variable. Keep the formula and hand it a density instead, and you get a quantity that looks the same but behaves differently: it can be negative, it changes with the units of $x$, and it is not the limit of any Shannon entropy. Below, the two are drawn as one picture, then taken apart.
 
-For a discrete random variable $X$ with pmf $\pmf{X}$, the *surprisal* of an outcome $x$ is $-\log \pmf{X}(x)$.^[The number of bits an optimal code spends on $x$. The figures take $\log_2$ throughout, so entropies are in bits.] Entropy is its expected value:
+For a discrete random variable $X$ with pmf $p_X$, the entropy is the expected value of the *surprisal* $-\log p_X(X)$:^[The surprisal of an outcome $x$ is the number of bits an optimal code spends on it. The figures take $\log_2$ throughout, so entropies are in bits.]
 
-$$ H(X) \defeq \E\big[-\log \pmf{X}(X)\big] = -\sum_{x} \pmf{X}(x)\log \pmf{X}(x). $$
+$$ H(X) \defeq \E\big[-\log p_X(X)\big] = -\sum_{x} p_X(x)\log p_X(x). $$
 
-We draw this below. First, the natural generalization: let $X$ have a density $\pdf{X}$ and keep the formula,
+It is natural to ask what happens for a continuous $X$, with $p_X$ now its pdf:
 
-$$ h(X) \defeq \E\big[-\log \pdf{X}(X)\big] = -\int \pdf{X}(x)\log \pdf{X}(x)\,\dee x, $$
+$$ h(X) \defeq \E\big[-\log p_X(X)\big] = -\int p_X(x)\log p_X(x)\,\dee x. $$
 
-the *differential entropy*.^[The recipe looks the same, but $\pdf{X}(x)\,\dee x$ is a probability and $\pdf{X}(x)$ alone is not: $-\log \pdf{X}(x)$ is a log-density, not the information content of an event. The sections after the figure take this apart.]
-
-Both are the expectation of one function, $g(x) = -\log p_X(x)$, writing $p_X$ for either pmf or pdf as in [Visualizing expected value](/posts/expectation/). As there, lay the probability out along $[0, 1]$ with $u = F_X(x)$, and the expectation is an area:
+This is the *differential entropy*, and its properties differ.^[The recipe looks the same, but $p_X(x)\,\dee x$ is a probability and $p_X(x)$ alone is not: $-\log p_X(x)$ is a log-density, not the information content of an event. The sections after the figure take this apart.] Both are the expectation of one function, $g(x) = -\log p_X(x)$. As in [Visualizing expected value](/posts/expectation/), lay the probability out along $[0, 1]$ with $u = F_X(x)$, and the expectation is an area:
 
 $$ \E\big[-\log p_X(X)\big] = \int_0^1 -\log p_X\big(F_X^{-1}(u)\big)\,\dee u. $$
 
