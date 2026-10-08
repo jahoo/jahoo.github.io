@@ -3,7 +3,7 @@ title: Differential entropy
 date: 2026-10-05
 author: Jacob Hoover Vigly
 tags: [exploration]
-unlisted: true
+published: false
 js:
   - src/differential-entropy
 css:
