@@ -106,6 +106,9 @@ $endif$
 $if(unlisted)$
   · <span class="post-badge" title="Not in the blog listing; reachable only by link">unlisted</span>
 $endif$
+$if(unpublished)$
+  · <span class="post-badge" title="A draft: built only under make serve-drafts, never deployed">unpublished</span>
+$endif$
 $if(tags)$
   · <span class="post-tags">$for(tags)$$tags$$sep$, $endfor$</span>
 $endif$

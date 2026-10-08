@@ -8,7 +8,8 @@ local system = pandoc.system
 -- SHOW_UNLISTED=1 (set by `make serve-drafts`) lists the posts that the
 -- deployed listing hides — `unlisted: true` and `published: false` — marked
 -- so they read as different. Every other path (`make`, `make serve`,
--- `make deploy`) leaves it unset and gets the listing as deployed.
+-- `make deploy`) leaves it unset and gets the listing as deployed; there
+-- build-content.sh doesn't even build a `published: false` draft.
 local show_unlisted = os.getenv("SHOW_UNLISTED") == "1"
 
 ------------------------------------------------------------

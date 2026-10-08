@@ -86,8 +86,10 @@ with an "unlisted"/"unpublished" badge. Plain `make serve` and `make deploy` nev
 list them.
 
 Compare `published: false`, which is for drafts that shouldn't be reachable at
-all — it also hides the post from the listing, but the page is still built, so
-prefer `unlisted: true` when you actually want to share the link.
+all: the page is built only under `make serve-drafts` (where its byline gets an
+"unpublished" badge), so `make`, `make serve` and `make deploy` never produce
+it, and a deploy with the draft merged in ships everything but the draft.
+Prefer `unlisted: true` when you actually want to share the link.
 
 For an unlisted post that shouldn't visibly point back to the site — e.g. a
 one-off page you want to share without it looking like part of the blog — add:
@@ -517,7 +519,7 @@ The listing page at `/posts.html` is auto-generated from post front matter by `s
 pandoc lua scripts/build-index.lua
 ```
 
-The script scans `content/posts/` and `content/explorations/`, reads front matter, and writes `_generated/posts.md`. Posts with `unlisted: true` or `published: false` are skipped unless `SHOW_UNLISTED=1` is set, as `make serve-drafts` does (see [Unlisted posts](#unlisted-posts)).
+The script scans `content/posts/` and `content/explorations/`, reads front matter, and writes `_generated/posts.md`. Posts with `unlisted: true` or `published: false` are skipped unless `SHOW_UNLISTED=1` is set, as `make serve-drafts` does (see [Unlisted posts](#unlisted-posts)); `build-content.sh` reads the same variable to decide whether to build a `published: false` draft at all.
 
 ## Adding a publication
 

@@ -130,6 +130,11 @@ build_one() {
   # shareable-by-link without the page becoming publicly discoverable.
   head -30 "$src" | grep -q '^unlisted: *true' && \
     extra_flags="$extra_flags --include-in-header templates/noindex.html"
+  # `published: false` is a draft: built only under `make serve-drafts` (the
+  # posts loop skips it otherwise), with the same noindex header and an
+  # "unpublished" badge in the byline so the preview says what it is.
+  head -30 "$src" | grep -q '^published: *false' && \
+    extra_flags="$extra_flags --metadata unpublished=true --include-in-header templates/noindex.html"
   # `standalone-page: true` (intended for unlisted posts) drops the site
   # navbar so the page doesn't visibly link back to the site; the template
   # gates the include-before block on it.
@@ -150,6 +155,13 @@ for src in content/posts/*.md; do
   case "$basename" in *.markdown) continue ;; esac
   slug=$(strip_date "$basename")
   dest="$OUTDIR/posts/$slug/index.html"
+
+  # `published: false` is a draft: no page outside drafts mode, so a deploy
+  # never carries it (the listing skips it too; see build-index.lua).
+  if [ "${SHOW_UNLISTED:-}" != "1" ] && head -30 "$src" | grep -q '^published: *false'; then
+    echo "Skip (published: false): $src"
+    continue
+  fi
 
   # Check if source (or a per-page dependency) is newer than destination
   if [ "$src" -nt "$dest" ] || [ assets/vendor/pandoc-markdown-css-theme/template.html5 -nt "$dest" ] || [ templates/navbar.html -nt "$dest" ] || [ site.yaml -nt "$dest" ] || deps_newer "$src" "$dest"; then
