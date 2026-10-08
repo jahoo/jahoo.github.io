@@ -1,5 +1,9 @@
 {
   "dee": "\\mathop{\\mathrm{d}\\!}",
+  "supp": [
+    "\\mathop{\\mathrm{supp}(#1)}",
+    1
+  ],
   "defeq": "\\triangleq",
   "pmf": ["\\mathrm{pmf}_{#1}", 1],
   "pdf": ["\\mathrm{pdf}_{#1}", 1]
