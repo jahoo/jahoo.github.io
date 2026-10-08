@@ -106,5 +106,7 @@ export function createQuantizeFigure(svg, { model }, { slider, label }) {
     svg.addEventListener('pointercancel', end);
     slider.addEventListener('input', draw);
     fitWidth(svg.parentElement, layout);
-    return { draw };
+    // back to the Δ the page loads with (the page redraws after a reset)
+    const reset = () => { slider.value = slider.defaultValue; };
+    return { draw, reset };
 }

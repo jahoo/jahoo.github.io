@@ -9,9 +9,9 @@ import { bindCommonControls } from '../lib/prob/controls.js';
 
 const $ = id => document.getElementById(id);
 
-export function bindControls({ model, pos, redraw }) {
+export function bindControls({ model, pos, redraw, onReset }) {
     const slider = $('de-beta'), label = $('de-betav');
-    const common = bindCommonControls({ model, pos, redraw }, { afterCase: () => pos.setU(0.6) });
+    const common = bindCommonControls({ model, pos, redraw }, { afterCase: () => pos.setU(0.6), onReset });
     // setBeta notifies the model's subscribers, which redraw
     slider?.addEventListener('input', () => model.setBeta(+slider.value));
 

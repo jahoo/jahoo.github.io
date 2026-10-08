@@ -68,5 +68,7 @@ export function createStretchFigure(svg, { model }, { slider, label, shuffle }) 
     slider.addEventListener('input', draw);
     shuffle?.addEventListener('click', () => { perm = randomPerm(model.view().p.length); draw(); });
     fitWidth(svg.parentElement, layout);
-    return { draw };
+    // a = 1 and the atoms in their own order, as the page loads (the page redraws after a reset)
+    const reset = () => { slider.value = slider.defaultValue; perm = null; };
+    return { draw, reset };
 }

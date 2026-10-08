@@ -92,7 +92,7 @@ The curve is $H(\Xq)$ against $\log(1/\bw)$; the bars are the bin masses at the 
 
 # Stretching the axis
 
-Relabel the outcomes of a pmf, by shuffling them or by spreading them out, and every probability stays where it was: $H$ and the count do not move. Stretch a density by $a$ and the same mass covers $a$ times the length, so the density drops and the width grows:^[For a smooth invertible $g$, $h(g(X)) = h(X) + \E\log\lvert g'(X)\rvert$: the Jacobian enters the density, and so the log. A shift has Jacobian 1, so $h(X + c) = h(X)$. Recording the same quantity in centimetres instead of metres adds $\log 100 \approx 6.64$ bits, and nothing about the uncertainty has changed. See also the [density of a transformed random variable](/posts/transform-pdf/).]
+Relabel the outcomes of a pmf, by shuffling them or by spreading them out, and every probability is kept: $H$ and the count do not move. Stretch a density by $a$ and the same mass covers $a$ times the length, so the density drops and the width grows:^[For a smooth invertible $g$, $h(g(X)) = h(X) + \E\log\lvert g'(X)\rvert$: the Jacobian enters the density, and so the log. A shift has Jacobian 1, so $h(X + c) = h(X)$. Recording the same quantity in centimetres instead of metres adds $\log 100 \approx 6.64$ bits, and nothing about the uncertainty has changed. See also the [density of a transformed random variable](/posts/transform-pdf/).]
 
 $$ p_{aX}(y) = \frac{1}{a}\,p_X\!\Big(\frac{y}{a}\Big) \qquad\Longrightarrow\qquad h(aX) = h(X) + \log a. $$
 
@@ -113,7 +113,7 @@ Same stretch, two responses. Atoms move apart and keep their heights, and the bo
 
 # What survives: differences
 
-Both anomalies are units. The divergent $\log(1/\bw)$ and the shift $\log a$ are the same for every entropy of the same variable, so they cancel in differences: a difference of widths is a ratio, and unit-free.^[This also says what $h$ is: $h(X) = -\KL{p_X}{1}$, a negative divergence from the flat reference "density" 1, Lebesgue measure with a chosen unit length. Jaynes' *limiting density of discrete points* replaces the 1 with an explicit reference density $m(x)$, $-\int p_X\log(p_X/m)\,\dee x$, which is coordinate-free since $p_X$ and $m$ transform alike [@jaynes.e:1968, sec. VI].] Mutual information is the main example,
+Both anomalies are units. The divergent $\log(1/\bw)$ and the shift $\log a$ are the same for every entropy of the same variable, so they cancel in differences: a difference of log-widths is a log-ratio, and unit-free.^[This also says what $h$ is: $h(X) = -\KL{p_X}{1}$, a negative divergence from the flat reference "density" 1, Lebesgue measure with a chosen unit length. Jaynes' *limiting density of discrete points* replaces the 1 with an explicit reference density $m(x)$, $-\int p_X\log(p_X/m)\,\dee x$, which is coordinate-free since $p_X$ and $m$ transform alike [@jaynes.e:1968, sec. VI].] Mutual information is the main example,
 
 $$ I(X;Y) = h(X) - h(X\mid Y) = \lim_{\bw\to0} I(\Xq; Y_{\bw}) \;\ge\; 0, $$
 

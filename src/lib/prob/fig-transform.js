@@ -192,12 +192,16 @@ export function createTransformFigure(svg, { model, pos, ui, redraw, stopPlay },
                         math.set('local', mx, my - 16, `\\text{run} = p_X(${k}) = ${texNum(v.p[k - 1])}`, { cls: 'ex-ml-note' });
                     }
                 } else {
-                    // the tangent at u: its slope is 1 / p_X there
-                    const q = quant(u), slope = 1 / q.p, du = 0.06;
-                    const seg = [[u - du, q.x - du * slope], [u + du, q.x + du * slope]].map(([uu, xx]) => onG(uu, xx));
-                    el('path', { d: 'M' + seg.map(c => c.join(' ')).join('L'), class: 'tangent', 'clip-path': `url(#${O.G.id})` }, over);
-                    const [mx, my] = onG(u, q.x);
-                    math.set('local', mx + 14, my - 18, `\\text{slope} = 1/p_X(x) = ${texNum(slope, 2)}`, { anchor: 'start', cls: 'ex-ml-note' });
+                    // the tangent at u: its slope is 1 / p_X there (not past the window's ends, where
+                    // u = 0 or 1 lands on the samples' extreme tail and the slope is astronomical)
+                    const q = quant(u);
+                    if (q.x >= xa && q.x <= xb) {
+                        const slope = 1 / q.p, du = 0.06;
+                        const seg = [[u - du, q.x - du * slope], [u + du, q.x + du * slope]].map(([uu, xx]) => onG(uu, xx));
+                        el('path', { d: 'M' + seg.map(c => c.join(' ')).join('L'), class: 'tangent', 'clip-path': `url(#${O.G.id})` }, over);
+                        const [mx, my] = onG(u, q.x);
+                        math.set('local', mx + 14, my - 18, `\\text{slope} = 1/p_X(x) = ${texNum(slope, 2)}`, { anchor: 'start', cls: 'ex-ml-note' });
+                    }
                 }
             }
             const name = disc ? 'H' : 'h';

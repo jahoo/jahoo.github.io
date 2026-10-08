@@ -36,7 +36,8 @@ export function init() {
             stretch?.draw();
             controls?.update();
         }
-        const ctx = { model, pos, ui, redraw, customG: () => {}, stopPlay: () => {} };
+        // reset also returns the quantize and stretch figures' own controls to their starting values
+        const ctx = { model, pos, ui, redraw, customG: () => {}, stopPlay: () => {}, onReset: () => { quant?.reset(); stretch?.reset(); } };
         controls = bindControls(ctx);
         if (areaSvg) area = createAreaFigure(areaSvg, ctx, { sweep: false, notes: 'entropy' });
         if (widthSvg) width = createTransformFigure(widthSvg, ctx, { width: true });
