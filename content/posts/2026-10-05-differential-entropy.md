@@ -70,24 +70,11 @@ Drag $u$ to read the run or the slope, and $p_X$ to reshape it. The dashed box i
 
 # Where $h$ comes from: quantize, then subtract
 
-The question with a Shannon answer is what the entropy of a continuous $X$ is *at some resolution*. Cut the real line into bins of width $\bw$ and let $\Xq$ be the bin that $X$ lands in. $\Xq$ is discrete, so $H(\Xq)$ is a Shannon entropy and cannot be negative.
-
-For small $\bw$, bin $i$ with midpoint $x_i$ has probability $p_i \approx p_X(x_i)\,\bw$, and
-
-$$
-\begin{aligned}
-H(\Xq) &= -\sum_i p_i \log p_i
-\approx -\sum_i p_X(x_i)\bw\,\log\!\big(p_X(x_i)\bw\big) \\[2pt]
-&= \underbrace{-\sum_i p_X(x_i)\log p_X(x_i)\,\bw}_{\to\; h(X)}
-\;\underbrace{-\;\log\bw\,\sum_i p_X(x_i)\bw}_{\to\; -\log \bw}.
-\end{aligned}
-$$
-
-The first sum is a Riemann sum for the differential entropy. The second is $\log(1/\bw)$ times a sum that tends to 1. So
+Cut the line into bins of width $\bw$ and let $\Xq$ be the bin $X$ lands in. Its Shannon entropy counts the width in bins, $2^{H(\Xq)} \approx 2^{h(X)}/\bw$:^[For small $\bw$, bin $i$ has mass $p_i \approx p_X(x_i)\,\bw$, so $H(\Xq) = -\sum_i p_i\log p_i \approx -\sum_i p_X(x_i)\log p_X(x_i)\,\bw \;-\; \log\bw\sum_i p_X(x_i)\,\bw$. The first sum is a Riemann sum for $h(X)$; the second tends to 1. The limit holds for any Riemann-integrable density with finite $h$ [@cover.t:2006book2, ch. 8].]
 
 $$ H(\Xq) \approx h(X) + \log\frac{1}{\bw}, \qquad h(X) = \lim_{\bw\to 0}\Big[H(\Xq) + \log\bw\Big]. $$
 
-The discrete entropy goes to infinity: pinning down a real number exactly takes infinitely many bits. Differential entropy is what remains after subtracting that divergent term. It is not itself an entropy; it is an *offset*.^[The limit holds for any Riemann-integrable density with finite $h$ [@cover.t:2006book2, ch. 8].]
+Pinning down a real number exactly takes infinitely many bits; $h$ is what is left once that cost, the unit, is subtracted. A pmf has nothing to subtract: once the bins are finer than the atoms' spacing, $H(\Xq) = H(X)$. An atom inside a density does the same at its point, which is why a distribution with atoms has no differential entropy.^[$h = -\infty$ for a point mass, and undefined for a mixed distribution, whose $H(\Xq)$ grows like $\log(1/\bw)$ times the mass of its continuous part.]
 
 ::: {.wide .extra-wide .ex-wrap}
 ```{=html}
@@ -100,22 +87,14 @@ The discrete entropy goes to infinity: pinning down a real number exactly takes 
 :::
 
 ::: {.de-caption}
-The **ochre curve** is the true discrete entropy $H(\Xq)$. It never enters the shaded region below zero. Once the bins are small compared with the density's features, it rises one bit per halving of $\bw$ and runs along the **dashed teal line** $h(X) + \log(1/\bw)$. The histogram bars have height $p_i/\bw$, which puts them on the density's scale. The teal dot is where that line crosses $\bw = 1$: that height is $h(X)$. With the defaults (a Gaussian with $\sigma = 1/8$), the whole distribution fits inside one unit-width bin, so the true entropy at $\bw = 1$ is almost 0, while the extrapolated line is at $-0.95$. **That gap is the negativity of $h$**: it comes from extending a small-$\bw$ approximation to a resolution where it no longer holds. Widen $\sigma$ past about 0.24 and the intercept rises above zero. The density is editable as in the previous figure. Put a narrow bump beside a wide one and the curve rises more slowly than one bit per halving until the bins resolve both: its slope is the fraction of the mass whose shape the bins resolve.
+The curve is $H(\Xq)$ against $\log(1/\bw)$; the bars are the bin masses at the current $\bw$. For a density it climbs the dashed line $h(X) + \log(1/\bw)$, one bit per halving of $\bw$. For a pmf it is flat at $H(X)$ once $\bw < 1$. Squeeze the density toward a point and the curve slides right, $h \to -\infty$; the curve itself never goes below zero.
 :::
-
-This picture also explains the limit of a distribution concentrating to a point. For a discrete variable, piling all the mass on one outcome drives $H$ down to 0. For a Gaussian with $\sigma \to 0$, the whole ochre curve slides right, and $h = \tfrac12\log(2\pi e\sigma^2) \to -\infty$. At any fixed resolution $\bw$, though, $H(\Xq)$ still bottoms out at 0 as soon as the mass fits in one bin. Nothing about Shannon entropy went wrong; the intercept moved.
-
-Reading the line off at $\bw = 1$ is where the next problem hides: "one unit" depends on the unit.
 
 # Stretching the axis
 
-In the discrete case, a one-to-one relabeling moves the outcomes but leaves every probability, and therefore $H$, where it was. The continuous analogue is a change of variable. Take $Y = aX$. The same probability now spreads over a stretch $|a|$ times as long, so the density drops by the same factor to keep its area:^[{-} For the general change-of-variables formula for densities, see [this earlier note](/posts/transform-pdf/).]
+Relabel the outcomes of a pmf, by shuffling them or by spreading them out, and every probability stays where it was: $H$ and the count do not move. Stretch a density by $a$ and the same mass covers $a$ times the length, so the density drops and the width grows:^[For a smooth invertible $g$, $h(g(X)) = h(X) + \E\log\lvert g'(X)\rvert$: the Jacobian enters the density, and so the log. A shift has Jacobian 1, so $h(X + c) = h(X)$. Recording the same quantity in centimetres instead of metres adds $\log 100 \approx 6.64$ bits, and nothing about the uncertainty has changed. See also the [density of a transformed random variable](/posts/transform-pdf/).]
 
-$$ p_Y(y) = \frac{1}{|a|}\,p_X\!\Big(\frac{y}{a}\Big) \qquad\Longrightarrow\qquad h(aX) = h(X) + \log|a|. $$
-
-More generally, for a smooth invertible $g$, $h(g(X)) = h(X) + \E\big[\log|g'(X)|\big]$. The Jacobian of the transformation enters the density, and so enters the log. In the quantization picture, a bin of width $\bw$ on the $Y$-axis corresponds to a bin of width $\bw/|a|$ on the $X$-axis. Measuring $Y$ at unit resolution is measuring $X$ at a finer resolution, which costs $\log|a|$ more bits.
-
-Translation is harmless, $h(X + c) = h(X)$, because shifting has Jacobian 1. Scaling is not. Recording the same quantity in centimetres instead of metres adds $\log 100 \approx 6.64$ bits to $h$, and nothing about the uncertainty has changed.
+$$ p_{aX}(y) = \frac{1}{a}\,p_X\!\Big(\frac{y}{a}\Big) \qquad\Longrightarrow\qquad h(aX) = h(X) + \log a. $$
 
 ::: {.wide .extra-wide .ex-wrap}
 ```{=html}
@@ -129,20 +108,16 @@ Translation is harmless, $h(X + c) = h(X)$, because shifting has Jacobian 1. Sca
 :::
 
 ::: {.de-caption}
-Same stretch, two responses. On the left the atoms move apart but keep their heights: a pmf's heights are probabilities, and the stretch moves no probability between outcomes. On the right the density flattens as it widens: the ochre band holds the middle 50% of the mass, and its area stays at 0.5 while its shape changes. The dashed box, the uniform with the same $h$, has width $2^h$, and it scales by exactly $a$. The dashed curves show $a = 1$.
+Same stretch, two responses. Atoms move apart and keep their heights, and the box keeps its count. The density flattens to keep its area, and the box is $a$ times as long. Shuffle relabels the atoms: a different staircase, the same probabilities.
 :::
 
 # What survives: differences
 
-Both anomalies are additive constants. The divergent $\log(1/\bw)$ and the unit shift $\log|a|$ are the same for every entropy of the same variable, so they cancel in differences, and differences of differential entropies behave like Shannon quantities.
+Both anomalies are units. The divergent $\log(1/\bw)$ and the shift $\log a$ are the same for every entropy of the same variable, so they cancel in differences: a difference of widths is a ratio, and unit-free.^[This also says what $h$ is: $h(X) = -\KL{p_X}{1}$, a negative divergence from the flat reference "density" 1, Lebesgue measure with a chosen unit length. Jaynes' *limiting density of discrete points* replaces the 1 with an explicit reference density $m(x)$, $-\int p_X\log(p_X/m)\,\dee x$, which is coordinate-free since $p_X$ and $m$ transform alike [@jaynes.e:1968, sec. VI].] Mutual information is the main example,
 
-Mutual information is the main example:
+$$ I(X;Y) = h(X) - h(X\mid Y) = \lim_{\bw\to0} I(\Xq; Y_{\bw}) \;\ge\; 0, $$
 
-$$ I(X;Y) = h(X) - h(X\mid Y) = \lim_{\bw\to0} I(\Xq; Y_{\bw}). $$
-
-It needs no renormalization, it is always $\ge 0$, and it is unchanged by any invertible transformation of $X$ or $Y$ separately. The same goes for KL divergence, $\KL{p_X}{g} = \int p_X\log(p_X/g)\dee x \ge 0$: in the ratio $p_X/g$ the Jacobians cancel, so it does not depend on coordinates.
-
-This also says what $h$ is. Writing $h(X) = -\int p_X(x)\log\frac{p_X(x)}{1}\dee x$ shows it as a negative divergence of $p_X$ from the flat reference "density" 1, which is Lebesgue measure with a chosen unit length. The reference is where the dependence on units lives. Jaynes' *limiting density of discrete points* replaces that 1 with an explicit reference density $m(x)$ and gets a coordinate-free quantity $-\int p_X\log(p_X/m)\dee x$ [@jaynes.e:1968, sec. VI].^[{-} There, $m(x)$ is proportional to the density of the discrete points in the limit, and since $p_X$ and $m$ transform the same way under a change of variables, the ratio $p_X/m$ and so the whole quantity are invariant. Jaynes credits the derivation to his 1963 Brandeis lectures.]
+unchanged by any invertible transformation of $X$ or $Y$ separately, as is KL divergence, $\KL{p_X}{g} = \int p_X\log(p_X/g)\,\dee x$, where the Jacobians cancel in the ratio.
 
 ::: {.wide .extra-wide}
 ```{=html}
@@ -182,19 +157,20 @@ $X$ and $Y$ each have unit variance and correlation $\rho$. Stretching $X$ lifts
 
 # Side by side
 
-Each row traces back to one of two facts: a density is probability per unit length rather than probability, and $h$ is the finite offset left after subtracting $\log(1/\bw)$.
+Each row traces back to one fact: $2^H$ counts outcomes, and $2^h$ measures a length, which needs a unit.
 
 ::: {.wide .extra-wide}
 | | Shannon entropy, pmf | Differential entropy, pdf | Why |
 |--|-----|-----|-----|
-| Definition | $-\sum p_X\log p_X$ | $-\int p_X\log p_X\dee x$ | Same expected negative log, with a sum or an integral as the expectation. |
+| Definition | $-\sum p_X\log p_X$ | $-\int p_X\log p_X\dee x$ | The same expectation of $-\log p_X$, as a sum or an integral. |
+| Effective size | $2^H$ outcomes, $\ge 1$ | $2^h$ long, any positive length | The uniform with the same entropy. |
 | Inside the log | A probability, $\le 1$ | A density, unbounded | Density is probability per unit length; only its integral is fixed. |
-| Sign | $H \ge 0$, zero iff deterministic | [Any real number]{.de-flag}; $\to -\infty$ as the distribution concentrates | $-\log p_X < 0$ wherever $p_X > 1$. |
-| Relation to discretization | It is the discrete quantity | $H(\Xq) \approx h(X) + \log(1/\bw)$ | $h$ is the offset of a divergent entropy, not an entropy. |
+| Sign | $H \ge 0$, zero iff deterministic | [Any real number]{.de-flag}; $\to -\infty$ as the distribution concentrates | A count is at least 1; a width can be less than 1. |
+| Quantization | $H(\Xq) = H(X)$ once $\bw < 1$ | $H(\Xq) \approx h(X) + \log(1/\bw)$ | A count is a width in units of $\bw$; $h$ is the width with the unit left out. |
 | Invertible transforms | Invariant under any relabeling | [Shifts by $\E\log\lvert g'(X)\rvert$]{.de-flag}; depends on units | The Jacobian rescales the density. |
-| Translation | Invariant | Invariant | Shift has Jacobian 1. |
-| Maximum | $\log n$, uniform on $n$ outcomes | No global max. On support of length $L$: $\log L$ (uniform). With variance $\sigma^2$: $\tfrac12\log(2\pi e\sigma^2)$ (Gaussian) | Constraints play the role of "number of outcomes". |
-| Mutual information, KL | $\ge 0$, invariant | $\ge 0$, invariant; limits of the discrete versions | The $\log(1/\bw)$ and Jacobian terms cancel in differences and ratios. |
+| Translation | Invariant | Invariant | A shift has Jacobian 1. |
+| Maximum | $\log n$, uniform on $n$ outcomes | $\log L$ on a support of length $L$ (uniform); $\tfrac12\log(2\pi e\sigma^2)$ with variance $\sigma^2$ (Gaussian) | A count is at most $n$; a width is at most the support. |
+| Mutual information, KL | $\ge 0$, invariant | $\ge 0$, invariant; limits of the discrete versions | Units cancel in differences and ratios. |
 :::
 
 Shannon [-@shannon.c:1948a, Part III] introduces the integral form, noting there that it is measured relative to the coordinate system. The quantization argument above is the one in @cover.t:2006book2 [ch. 8].
