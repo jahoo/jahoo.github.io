@@ -70,13 +70,20 @@ unlisted: true
 The page builds and deploys at its normal URL (`/posts/<slug>/`), so the link
 works for anyone you send it to, but it doesn't appear on `/posts/` and it gets
 a `<meta name="robots" content="noindex, nofollow">` header so search engines
-skip it. Nothing else about the page changes. Delete the line and redeploy to
+skip it, and it shows an "unlisted" badge in its byline so anyone reading it
+can tell. Nothing else about the page changes. Delete the line and redeploy to
 make it a real post.
 
 Two caveats: the URL is guessable, and the markdown source is public on the
 `source` branch — this is "not advertised", not "private". For something less
 guessable, give the file a random-ish slug while it's unlisted (the URL changes
 when you rename it later).
+
+To see unlisted posts in the listing while you work on them, run
+`make serve-drafts` instead of `make serve`: `/posts/` then lists them (and
+any `published: false` drafts) in date order, greyed out in a dashed outline,
+with an "unlisted"/"unpublished" badge. Plain `make serve` and `make deploy` never
+list them.
 
 Compare `published: false`, which is for drafts that shouldn't be reachable at
 all — it also hides the post from the listing, but the page is still built, so
@@ -93,7 +100,8 @@ This drops the site navbar (site name + home/blog links) from the rendered
 page; everything else (the post's own title header, styling, assets) is
 unchanged. It's meant to be combined with `unlisted: true` — the build prints
 a warning if you set it on a listed post, since the listing would then link to
-a page with no navigation back.
+a page with no navigation back. Under `make serve-drafts` the listing marks
+such posts with a "standalone" badge.
 
 ### Tags
 
@@ -105,7 +113,7 @@ tags: [note, paper]
 
 ### External content
 
-Not all content is rendered by Pandoc. Some pages are standalone HTML, pre-rendered notebooks, or frozen output from another tool. Every piece of listable content has a `.md` stub in `content/` — even if the actual content lives elsewhere. The `external` field (a repo-relative path) tells `build-content.sh` where to copy the standalone file from:
+Not all content is rendered by Pandoc. Some pages are standalone HTML, pre-rendered notebooks, or frozen output from another tool. Every piece of listable content has a `.md` stub in `content/` — even if the actual content lives elsewhere. The `external` field (a repo-relative path) tells `build-content.sh` where to copy the standalone file from (under `make serve-drafts` the blog listing marks these with a "standalone" badge):
 
 ```yaml
 # Standalone HTML exploration, now living under assets/frozen/
@@ -481,7 +489,7 @@ The listing page at `/posts.html` is auto-generated from post front matter by `s
 pandoc lua scripts/build-index.lua
 ```
 
-The script scans `content/posts/` and `content/explorations/`, reads front matter, and writes `_generated/posts.md`. Posts with `unlisted: true` or `published: false` are skipped (see [Unlisted posts](#unlisted-posts)).
+The script scans `content/posts/` and `content/explorations/`, reads front matter, and writes `_generated/posts.md`. Posts with `unlisted: true` or `published: false` are skipped unless `SHOW_UNLISTED=1` is set, as `make serve-drafts` does (see [Unlisted posts](#unlisted-posts)).
 
 ## Adding a publication
 

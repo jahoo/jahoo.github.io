@@ -74,6 +74,7 @@ PIDS+=($!)
 
 echo ""
 echo "Dev server running at http://localhost:4000"
+[ "${SHOW_UNLISTED:-}" = "1" ] && echo "Drafts mode: unlisted posts are shown on /posts/"
 echo "Watching: content/, filters/, templates/, assets/css/, assets/fonts/, site.yaml"
 echo "Press Ctrl+C to stop."
 echo ""

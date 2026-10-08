@@ -24,9 +24,9 @@ STATIC_DIRS := assets/css assets/js assets/fonts assets/images assets/bibliograp
 ROOT_HTML   := interactive-divergence-fitting.html interactive-kl-fitting.html
 PRESENTATION_DIRS := $(wildcard 20[0-9][0-9]-*/)
 
-.PHONY: all clean content js assets static-html serve test generate pubs homepage posts-index deploy notebooks
+.PHONY: help all clean content js assets static-html serve serve-drafts test generate pubs homepage posts-index deploy notebooks
 
-all: generate content js assets static-html
+all: generate content js assets static-html ## Build the whole site into _site/ (default; parallel with -j4)
 
 # ---- Generate listing + publications + homepage ----
 generate: homepage posts-index
@@ -102,7 +102,7 @@ $(NB_VENV_STAMP): pyproject.toml uv.lock
 # byte-identical to the source prose. --resource-path is still needed so
 # Quarto's own (now-discarded) pandoc pass exits 0 instead of failing to
 # resolve the bibliography path.
-notebooks: $(NB_MDS)
+notebooks: $(NB_MDS) ## Re-run the Julia behind notebook-backed posts (needs Quarto, julia-1.10 kernel, uv)
 
 # $* is the stem (e.g. content/posts/2022-08-29-rejection-sampling), so
 # $*.markdown.md is the intermediate Quarto leaves beside the source, and
@@ -161,13 +161,25 @@ static-html:
 	@touch $(OUTDIR)/.nojekyll
 	@echo "Static HTML copied"
 
-serve:
+# Lists every target whose rule line carries a `## description`.
+help: ## Show this list
+	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | \
+	  sed -E 's/^([a-z-]+):.*## (.*)/\1\t\2/' | \
+	  awk -F'\t' '{ printf "  make %-13s %s\n", $$1, $$2 }'
+
+serve: ## Dev server at localhost:4000, listing as deployed
 	@bash scripts/serve.sh
 
-test:
+# Same server, but the blog listing also shows unlisted and unpublished posts,
+# marked. The flag lives only in this process's environment, so it can't leak
+# into `make deploy`, which regenerates the listing from scratch anyway.
+serve-drafts: ## Dev server, listing also shows unlisted/unpublished posts, marked
+	@SHOW_UNLISTED=1 bash scripts/serve.sh
+
+test: ## Run the JS tests
 	@node --test 'src/**/*.test.js' 'test/**/*.test.js'
 
-clean:
+clean: ## Move _site/ and _build/ to the Trash
 	@if [ -d "$(OUTDIR)" ]; then trash "$(OUTDIR)"; fi
 	@if [ -d "_build" ]; then trash "_build"; fi
 
@@ -184,7 +196,7 @@ clean:
 #   4. rsync _site/ into the worktree (preserving .git).
 #   5. Commit + push `static` if the build changed anything.
 #   6. Remove the worktree.
-deploy:
+deploy: ## Build on `source` and push _site/ to the `static` branch
 	@git diff --quiet && git diff --cached --quiet || \
 	  { echo "error: uncommitted changes on $$(git branch --show-current); commit or stash first"; exit 1; }
 	@[ "$$(git branch --show-current)" = "source" ] || \

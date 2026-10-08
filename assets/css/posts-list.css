@@ -67,3 +67,28 @@ main .post-list h3 {
     line-height: 1.4;
   }
 }
+
+/* `make serve-drafts` only: badges in the meta line, `unlisted`/`unpublished`
+   and `standalone` (`standalone-page: true` or an `external` page). Their
+   small caps come from site-chrome.css; standalone gets a colour of its own. */
+.post-list .post-meta .post-badge.standalone {
+  color: #2f6db5;
+}
+
+/* `make serve-drafts` only: posts the deployed listing hides read as not-live
+   rather than featured. A dashed outline (drawn with `outline`, so it costs
+   no layout and leaves the margin-floated meta in place) and greyed titles,
+   no fill, since a tint reads as a highlight. */
+.drafts-note {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+.post-list li.hidden-post {
+  outline: 1px dashed var(--color-border-heavy);
+  outline-offset: 0.4rem;
+}
+.post-list li.hidden-post a.post-link,
+.post-list li.hidden-post a.post-link:link,
+.post-list li.hidden-post a.post-link:visited {
+  color: var(--color-text-secondary);
+}
