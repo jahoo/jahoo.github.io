@@ -11,7 +11,7 @@ const $ = id => document.getElementById(id);
 
 export function bindControls({ model, pos, redraw }) {
     const slider = $('de-beta'), label = $('de-betav');
-    const common = bindCommonControls({ model, pos, redraw });
+    const common = bindCommonControls({ model, pos, redraw }, { afterCase: () => pos.setU(0.6) });
     // setBeta notifies the model's subscribers, which redraw
     slider?.addEventListener('input', () => model.setBeta(+slider.value));
 

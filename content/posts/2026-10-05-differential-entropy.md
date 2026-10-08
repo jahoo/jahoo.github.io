@@ -48,6 +48,26 @@ Drag $p_X$ to reshape it. In the discrete case, $\beta$ tempers the pmf: the fig
 :::
 
 
+# $h$ is a width
+
+Read the integrand off the graph of $F_X^{-1}$. For a pmf the graph is a staircase, and $p_X(F_X^{-1}(u))$ is the run of the tread under $u$. For a density it is $1/(F_X^{-1})'(u)$, the reciprocal of the slope. So
+
+$$ H(X) = \int_0^1 \log\frac{1}{\operatorname{run}(u)}\,\dee u, \qquad h(X) = \int_0^1 \log (F_X^{-1})'(u)\,\dee u, $$
+
+and $2^{H(X)}$ is the geometric mean of $1/\operatorname{run}$, an **effective number of outcomes**, while $2^{h(X)}$ is the geometric mean of the slope, an **effective width**.^[The perplexity, in the discrete case. A uniform on $n$ outcomes has exactly $n$; a uniform on $[0, L]$ has exactly $L$.] Each is the uniform with the same entropy: on $2^H$ outcomes, or on an interval of length $2^h$. A count is at least 1, so $H \ge 0$; a width can be less than 1, so $h$ can be negative. A count is at most $n$, so $H \le \log n$; a width is at most the support, so $h \le \log L$.^[With the variance fixed instead of the support, the Gaussian is widest: $h \le \tfrac12\log(2\pi e\sigma^2)$ [@cover.t:2006book2, ch. 8].]
+
+::: {.wide .extra-wide .ex-wrap}
+```{=html}
+<div class="de-row"><div class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></div></div>
+<figure class="ex-fig"><div class="ex-canvas"><svg class="ex-plot" id="de-width" role="img" aria-label="Evenly spaced u carried through the quantile function to x, with the run or slope at the cursor, and the uniform with the same entropy drawn as a box over p_X"></svg></div></figure>
+```
+:::
+
+::: {.de-caption}
+Drag $u$ to read the run or the slope, and $p_X$ to reshape it. The dashed box is the uniform with the same entropy: $2^H$ slots or $2^h$ long, and 1 over that high. The uniform presets make it coincide with $p_X$.
+:::
+
+
 # Where $h$ comes from: quantize, then subtract
 
 The question with a Shannon answer is what the entropy of a continuous $X$ is *at some resolution*. Cut the real line into bins of width $\bw$ and let $\Xq$ be the bin that $X$ lands in. $\Xq$ is discrete, so $H(\Xq)$ is a Shannon entropy and cannot be negative.

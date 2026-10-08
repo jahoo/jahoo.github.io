@@ -7,22 +7,31 @@
 //  and p_X on the right with x vertical.
 //  Dragging: the uniform and the graph set u; the p_X panel sets x;
 //  a p_X handle takes precedence.
+//  With width: true the figure also shows entropy as a size: the run
+//  of the tread (pmf) or the slope (density) at the cursor on the graph
+//  of F_X⁻¹, the uniform with the same entropy as a dashed box in the
+//  p_X panel, and a readout of H or h and 2^H or 2^h.
 // ================================================================
 
 import { clamp, discCdfAt, discQuantile, atX, atU, lerp } from './dist.js';
 import { Region, el, svgContext, svgPoint } from './region.js';
 import { createEditor, regionAdapter } from './edit.js';
 import { densityAt } from './frame.js';
-import { createMathLayer } from './mathlabels.js';
+import { createMathLayer, texNum } from './mathlabels.js';
 import { fitWidth } from './fit.js';
+import { boxOf } from './width.js';
 
 const TW = 1000, TH = 566, N_LINES = 40;
+const READOUT = 56; // a line of math under the panels, in width mode
+// a readout value: magenta when negative
+const val = x => { const t = texNum(x); return t.startsWith('-') ? `\\class{ex-neg}{${t}}` : t; };
 
 const polyline = (g, pts, cls) => el('path', { d: 'M' + pts.map(q => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join('L'), class: cls, fill: 'none' }, g);
 const closed = (g, pts, cls) => el('path', { d: 'M' + pts.map(q => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join('L') + 'Z', class: cls }, g);
 
-export function createTransformFigure(svg, { model, pos, ui, redraw, stopPlay }) {
-    const ctx = svgContext(svg, TW, TH);
+export function createTransformFigure(svg, { model, pos, ui, redraw, stopPlay }, { width = false } = {}) {
+    const H = width ? TH + READOUT : TH;
+    const ctx = svgContext(svg, TW, H);
     const lines = el('g', null, ctx.root); // under the panels, so the graphs stay legible where lines run along them
     const O = {
         U: new Region(ctx, { ox: 0, oy: 0, w: 600, h: 170, m: { l: 58, r: 16, t: 26, b: 26 } }),
@@ -30,16 +39,17 @@ export function createTransformFigure(svg, { model, pos, ui, redraw, stopPlay })
         X: new Region(ctx, { ox: 624, oy: 170, w: 376, h: 390, m: { l: 20, r: 16, t: 16, b: 42 } }),
     };
     const handles = el('g', null, ctx.root), over = el('g', null, ctx.root);
-    const math = createMathLayer(svg.parentElement, TW, TH);
+    const math = createMathLayer(svg.parentElement, TW, H);
     // at the full width of 1000: the uniform and the graph 600 wide, then a gap of 24 and
     // p_X; a narrower layout (see fit.js) narrows all three in proportion
-    let drawn = false;
+    let drawn = false, layoutW = TW;
     function layout(W) {
         const wl = Math.round(0.6 * W), gap = Math.round(0.024 * W);
         Object.assign(O.U.o, { w: wl }); Object.assign(O.G.o, { w: wl });
         Object.assign(O.X.o, { ox: wl + gap, w: W - wl - gap });
-        svg.setAttribute('viewBox', `0 0 ${W} ${TH}`);
-        math.resize(W, TH);
+        layoutW = W;
+        svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+        math.resize(W, H);
         if (drawn) draw();
     }
     const yLabel = (key, R, tex) => { const [x, y] = R.ylabelAt(); math.set(key, x, y, tex, { rotate: -90 }); };
@@ -79,7 +89,6 @@ export function createTransformFigure(svg, { model, pos, ui, redraw, stopPlay })
         O.X.domain(0, pmax, xa, xb);
         O.X.axes({ yticks: atoms, noyl: true, noZero: true });
         xLabel('x-x', O.X, 'p_X(x)');
-        math.end();
 
         // F_X(x) at the current x: every u in [0, F_X(x)] lands at or below x, and no other u does
         const Fnow = disc ? discCdfAt(v.F, pos.x) : u;
@@ -164,7 +173,40 @@ export function createTransformFigure(svg, { model, pos, ui, redraw, stopPlay })
                 }
             }
         }
+        // ---- width mode: the run or slope at u, the box of area 1, and the readout ----
+        if (width) {
+            const b = boxOf(v);
+            // the uniform with the same entropy, in the p_X panel (density across, x up)
+            O.X.rect(0, b.cx - b.w / 2, b.ht, b.cx + b.w / 2, 'eqbox');
+            const bx = O.X.X(Math.min(b.ht, pmax)), by = O.X.Y(b.cx + b.w / 2);
+            const fits = bx < O.X.pr - 90;
+            math.set('eq', fits ? bx + 6 : bx - 6, Math.max(by, O.X.pt + 10),
+                `2^{${disc ? 'H' : 'h'}} = ${texNum(b.w, 2)}`, { anchor: fits ? 'start' : 'end', cls: 'ex-ml-note' });
+            if (u > 0) {
+                if (disc) {
+                    // the tread holding u: its run is p_X at that atom
+                    const k = discQuantile(v.F, u);
+                    if (k >= 1 && v.p[k - 1] > 0) {
+                        polyline(over, [onG(v.F[k - 1], k), onG(v.F[k], k)], 'tread');
+                        const [mx, my] = onG((v.F[k - 1] + v.F[k]) / 2, k);
+                        math.set('local', mx, my - 16, `\\text{run} = p_X(${k}) = ${texNum(v.p[k - 1])}`, { cls: 'ex-ml-note' });
+                    }
+                } else {
+                    // the tangent at u: its slope is 1 / p_X there
+                    const q = quant(u), slope = 1 / q.p, du = 0.06;
+                    const seg = [[u - du, q.x - du * slope], [u + du, q.x + du * slope]].map(([uu, xx]) => onG(uu, xx));
+                    el('path', { d: 'M' + seg.map(c => c.join(' ')).join('L'), class: 'tangent', 'clip-path': `url(#${O.G.id})` }, over);
+                    const [mx, my] = onG(u, q.x);
+                    math.set('local', mx + 14, my - 18, `\\text{slope} = 1/p_X(x) = ${texNum(slope, 2)}`, { anchor: 'start', cls: 'ex-ml-note' });
+                }
+            }
+            const name = disc ? 'H' : 'h';
+            math.set('readout', layoutW / 2, TH + 30,
+                `${name}(X) = ${val(b.H)}\\text{ bits}, \\qquad 2^{${name}(X)} = ${texNum(b.w, 2)}\\ \\text{${disc ? 'effective outcomes' : 'effective width'}}`,
+                { cls: 'ex-ml-formula' });
+        }
         editor.draw(handles);
+        math.end();
     }
 
     // ---- dragging ----
