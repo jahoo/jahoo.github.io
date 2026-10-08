@@ -138,6 +138,12 @@ header:not(.site-header) {
   margin: 0.15rem 0;
 }
 .post-meta .post-tags { font-style: italic; }
+/* Status badge in a meta line: `unlisted` on an unlisted post's own page, and
+   in the blog listing under `make serve-drafts` (see posts-list.css). */
+.post-meta .post-badge {
+  font-variant: small-caps;
+  letter-spacing: 0.03em;
+}
 
 /* Subtle divider between post header and content, at body-text width.
    Inserted by the vendored template as <hr class="post-divider"> at the

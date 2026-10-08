@@ -40,7 +40,7 @@ MathJax = {
     // AMS-style numbering: only {equation}/{align} environments get
     // numbers, so ordinary $ displays stay untagged.
     tags: 'ams'
-    , macros: { "dee": "\\mathop{\\mathrm{d}\\!}", "defeq": "\\triangleq", "pmf": ["\\mathrm{pmf}_{#1}", 1], "pdf": ["\\mathrm{pdf}_{#1}", 1] }
+    , macros: { "dee": "\\mathop{\\mathrm{d}\\!}", "supp": [ "\\mathop{\\mathrm{supp}(#1)}", 1 ], "defeq": "\\triangleq", "E": "\\mathbb{E}", "pmf": ["\\mathrm{pmf}_{#1}", 1], "pdf": ["\\mathrm{pdf}_{#1}", 1] }
   },
   options: {
     // Disable click-to-explore on math. Without these, clicking on a
@@ -108,49 +108,56 @@ the unit interval</p>
 
 
 <main>
-<p>Let <span class="math inline">\(X\)</span> be a real random variable,
-specified by its cumulative distribution function <span
-class="math inline">\(F_X(x) = P(X \le x)\)</span>.<span
+<p>Let <span class="math inline">\(X\)</span> be a random variable
+taking values in (some subset of) <span
+class="math inline">\(\mathbb{R}\)</span>, write its law as <span
+class="math inline">\(P_X\)</span>, and its cumulative distribution
+function as <span class="math inline">\(F_X(x) = P_X\big((-\infty,
+x]\big) = P(X \le x)\)</span>.<span
 class="sidenote-wrapper"><label for="sn-0" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-0" class="margin-toggle"/><span
-class="sidenote">Formally, <span class="math inline">\(X : \Omega \to
-\mathbb{R}\)</span> is a measurable map on a probability space <span
+class="sidenote">If we want to be really formal to define all the
+notation, <span class="math inline">\(X : \Omega \to \mathbb{R}\)</span>
+is a measurable map on a probability space <span
 class="math inline">\((\Omega, \mathcal{F}, P)\)</span>, and its law is
 the pushforward <span class="math inline">\(P_X \defeq X_* P\)</span>,
 so that <span class="math inline">\(P_X(A) = P(X \in A)\)</span> for
-every Borel set <span class="math inline">\(A\)</span>. The law is
-determined by <span class="math inline">\(F_X(x) = P_X\big((-\infty,
-x]\big)\)</span>.<br />
+every Borel set <span class="math inline">\(A\)</span>.<br />
 <br />
-</span></span> The expectation of a function <span
-class="math inline">\(g\)</span> of <span
-class="math inline">\(X\)</span> is the sum or integral of <span
-class="math inline">\(g\)</span> weighted by the probability mass
-function <span class="math inline">\(\pmf{X}\)</span> or the probability
-density function <span class="math inline">\(\pdf{X}\)</span>:</p>
-<p><span class="math display">\[ \mathbb{E}[g(X)] \;\defeq\;
-\begin{cases} \displaystyle\sum_x g(x)\,\pmf{X}(x) &amp; \text{if } X
-\text{ is discrete,} \\[1.2ex] \displaystyle\int g(x)\,\pdf{X}(x)
-\dee{x} &amp; \text{if } X \text{ is continuous.} \end{cases}
+</span></span> The expected value of a function <span
+class="math inline">\(g(X)\)</span> is given by</p>
+<p><span class="math display">\[
+\E[g(X)]
+\defeq \int_{\mathbb{R}} g \dee{P_X}
 \]</span></p>
-<p>In what follows, we write <span class="math inline">\(p_X\)</span>
-for either pdf or pmf.<span
+<p>Writing <span class="math inline">\(p_X\)</span> for the probability
+density function (or probability mass function), this general definition
+simplifies to a sum or integral of <span
+class="math inline">\(g\)</span> weighted by <span
+class="math inline">\(p_X\)</span>:<span
 class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle"/><span
-class="sidenote">This isn’t sloppy. Both are densities of the law, <span
-class="math inline">\(p_X = \dee{P_X} / \dee{\mu}\)</span>, with respect
-to a reference measure <span class="math inline">\(\mu\)</span> on <span
-class="math inline">\(\mathbb{R}\)</span>. We simply swap out which
-reference measure we are using: in the discrete case, it isthe counting
-measure, in the continuous case it is the Lebesgue measure. Both cases
-of the definition are then one: <span class="math display">\[
-\begin{aligned}
-\mathbb{E}[g(X)]
-&amp;\defeq \int_\Omega g \circ X \dee{P} \\
-&amp;= \int_{\mathbb{R}} g \dee{P_X} \\
-&amp;= \int_{\mathbb{R}} g \, p_X \dee{\mu}
-\end{aligned}
-\]</span><br />
+class="sidenote">In what follows, we’ll consider both discrete and
+continuous cases, and write <span class="math inline">\(p_X\)</span> for
+either pdf or pmf. This same notation reflects the fact that either can
+be defined formally as <span class="math inline">\(p_X = \dee{P_X} /
+\dee{\mu}\)</span>, the density of the random variable’s law, <span
+class="math inline">\(P_X\)</span>, with respect to some reference
+measure <span class="math inline">\(\mu\)</span> on <span
+class="math inline">\(\mathbb{R}\)</span>, which is the counting measure
+for the discrete case, or the Lebesgue measure for the continuous case,
+so either the integral or the sum is the same: <span
+class="math inline">\(\E[g(X)] = \int_{\mathbb{R}} g \, p_X
+\dee{\mu}\)</span>.<br />
 <br />
-</span></span></p>
+</span></span> <span class="math display">\[
+\E[g(X)]
+=
+\begin{cases}
+\displaystyle\int_{-\infty}^{\infty} g(x)\,p_X(x) \dee{x} &amp; \text{if
+} X \text{ is continuous,}\\[1.2ex]
+\displaystyle\sum_{x \in \supp{X}} g(x)\,p_X(x) &amp; \text{if } X
+\text{ is discrete.}
+\end{cases}
+\]</span></p>
 <p>We can equivalently write the expectation as an integral over the
 unit interval, using a substitution by <span
 class="math inline">\(F_X^{-1}(u) = \inf\{x : F_X(x) \ge u\}\)</span>,
@@ -174,7 +181,7 @@ class="math inline">\(x\)</span>.<br />
 <br />
 </span></span></p>
 <p><span class="math display">\[
-\mathbb{E}[g(X)] = \int_0^1 g\big(F_X^{-1}(u)\big) \dee{u}
+\E[g(X)] = \int_0^1 g\big(F_X^{-1}(u)\big) \dee{u}
 \]</span></p>
 <div class="callout callout-note">
 <details class="callout-details"><summary>More on that substitution...</summary>
@@ -192,9 +199,8 @@ P\big(F_X^{-1}(U) \le x\big) = P\big(U \le F_X(x)\big) = F_X(x),
 \]</span></p>
 <p>so <span class="math inline">\(F_X^{-1}(U)\)</span> has the law of
 <span class="math inline">\(X\)</span> (this is the identity behind
-“inverse-transform sampling”), and <span
-class="math inline">\(\mathbb{E}[g(X)] =
-\mathbb{E}\big[g\big(F_X^{-1}(U)\big)\big]\)</span>.</p>
+“inverse-transform sampling”), and <span class="math inline">\(\E[g(X)]
+= \E\big[g\big(F_X^{-1}(U)\big)\big]\)</span>.</p>
 <p>I wrote up a note about this kind of density transformation <a
 href="/posts/transform-pdf/">in a previous post</a> (see examples 3, 4,
 and 5).</p>
@@ -209,7 +215,7 @@ rescale the real line into <span class="math inline">\([0, 1]\)</span>
 so that each outcome takes up as much room as its probability. Then
 evaluate <span class="math inline">\(g\)</span> over the rescaled axis,
 and the area under <span class="math inline">\(g \circ F_X^{-1}\)</span>
-is <span class="math inline">\(\mathbb{E}[g(X)]\)</span>.</p>
+is <span class="math inline">\(\E[g(X)]\)</span>.</p>
 <ul>
 <li>If <span class="math inline">\(X\)</span> is discrete, <span
 class="math inline">\(g \circ F_X^{-1}\)</span> is a step function: one
@@ -230,15 +236,16 @@ class="math inline">\(u\)</span> axis to see the area build up.</p>
 <div class="ex-bar wide extra-wide" id="ex-bar">
 <div class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></div>
 <div class="ex-grp"><label class="ex-lab" for="ex-preset">\(p_X\)</label><select id="ex-preset"></select></div>
+<div class="ex-grp" id="ex-mix-grp" hidden><label class="ex-lab" for="ex-mix" title="The left bump's share of the mass; the right bump takes the rest">mix = <b id="ex-mixv">0.62</b></label><input type="range" id="ex-mix" min="0.02" max="0.98" step="0.01" value="0.62"></div>
 <div class="ex-grp"><span class="ex-lab" id="ex-g-lab">\(g(x) =\)</span>
 <div class="ex-menu" id="ex-gsel">
-<button type="button" class="ex-menu-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="ex-g-lab"><span class="ex-menu-cur">\(-\log_2 p_X(x)\) <span class="ex-menu-note">(entropy)</span></span><span class="ex-menu-caret" aria-hidden="true">▾</span></button>
+<button type="button" class="ex-menu-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="ex-g-lab"><span class="ex-menu-cur">\(-\log p_X(x)\) <span class="ex-menu-note">(entropy)</span></span><span class="ex-menu-caret" aria-hidden="true">▾</span></button>
 <ul class="ex-menu-list" role="listbox" aria-labelledby="ex-g-lab" hidden>
-<li role="option" data-v="neglog" aria-selected="true">\(-\log_2 p_X(x)\) <span class="ex-menu-note">(entropy)</span></li>
+<li role="option" data-v="neglog" aria-selected="true">\(-\log p_X(x)\) <span class="ex-menu-note">(entropy)</span></li>
 <li role="option" data-v="x">\(x\) <span class="ex-menu-note">(mean)</span></li>
 <li role="option" data-v="x2">\(x^2\) <span class="ex-menu-note">(second moment)</span></li>
-<li role="option" data-v="var">\((x - \mathbb{E}[X])^2\) <span class="ex-menu-note">(variance)</span></li>
-<li role="option" data-v="skew">\(\big((x - \mathbb{E}[X])/\sigma_X\big)^3\) <span class="ex-menu-note">(skewness)</span></li>
+<li role="option" data-v="var">\((x - \E[X])^2\) <span class="ex-menu-note">(variance)</span></li>
+<li role="option" data-v="skew">\(\big((x - \E[X])/\sigma_X\big)^3\) <span class="ex-menu-note">(skewness)</span></li>
 <li role="option" data-v="custom"><span class="ex-menu-note">custom</span></li>
 </ul>
 </div>
@@ -343,7 +350,7 @@ area you can fully plot.</li>
 <script src="/assets/js/expectation.bundle.js"></script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-09-30 13:11</span>
+    <span class="last-modified">Last modified: 2026-10-08 18:25</span>
   </div>
 </footer>
 </body>

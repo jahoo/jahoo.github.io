@@ -45,6 +45,12 @@ mjx-container[display="true"] { max-width: 100%; overflow-x: auto; overflow-y: h
   display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.2rem;
 }
 .ex-grp { display: flex; align-items: center; gap: .4rem; }
+/* a group a page hides by script (the mix slider, off unless p_X is two bumps): `hidden`
+   must beat the flex display above */
+.ex-grp[hidden] { display: none; }
+/* a slider in the bar (the mix weight here; the entropy post adds β): short, flush with the
+   other controls, in the mass colour */
+.ex-bar input[type=range] { width: 8rem; margin: 0; accent-color: var(--ex-mass); }
 .ex-lab { color: var(--ex-ink-soft); }
 /* every control the same: native select or button, one height, one border */
 .ex-bar select, .ex-bar button {
@@ -139,6 +145,9 @@ svg.ex-plot .tri-todo { fill: none; stroke: var(--ex-ghost); stroke-width: .8; s
 /* an atom without mass: no block, a grey dotted line where it would be, a hollow pin on the axis */
 svg.ex-plot .br-null { stroke: var(--ex-ghost); stroke-width: .9; stroke-dasharray: 1 5; fill: none; }
 svg.ex-plot .pin-null { fill: var(--ex-surface); stroke: var(--ex-ghost); stroke-width: 1.2; }
+/* the pmf being edited, drawn faint behind its tempered version (the entropy post's β) */
+svg.ex-plot .stem-base { stroke: var(--ex-ink-soft); stroke-width: 1; stroke-dasharray: 3 2; opacity: .55; }
+svg.ex-plot .pin-base { fill: none; stroke: var(--ex-ink-soft); stroke-width: 1; stroke-dasharray: 2 2; opacity: .55; }
 svg.ex-plot .br-cur { stroke: var(--ex-now); stroke-width: 2.2; }
 svg.ex-plot .br-todo { stroke: var(--ex-ghost); stroke-width: .8; stroke-dasharray: 2 3; }
 svg.ex-plot .wax { stroke: var(--ex-ink-soft); stroke-width: 1.2; }
@@ -162,3 +171,15 @@ svg.ex-plot .grip.active { stroke: var(--ex-now); }
 svg.ex-plot .hit { fill: rgba(0, 0, 0, 0); touch-action: none; }
 svg.ex-plot .grip-hit { stroke: rgba(0, 0, 0, 0); stroke-width: 18; touch-action: none; }
 svg.ex-plot .handle { touch-action: none; }
+
+/* ---- entropy as a size (the transform figure's width mode, and the entropy post's figures) ---- */
+svg.ex-plot .eqbox { fill: none; stroke: var(--ex-ink); stroke-width: 1.3; stroke-dasharray: 6 4; }
+/* the same uniform's quantile function on the graph of F_X⁻¹, in the box's dashes, and the
+   guides that carry its ends across to the box's edges */
+svg.ex-plot .eqline { fill: none; stroke: var(--ex-ink); stroke-width: 1.3; stroke-dasharray: 6 4; }
+svg.ex-plot .eqguide { fill: none; stroke: var(--ex-ghost); stroke-width: 1; stroke-dasharray: 2 3; }
+svg.ex-plot .tread, svg.ex-plot .tangent { fill: none; stroke: var(--ex-now); stroke-width: 5; stroke-linecap: round; opacity: .85; }
+svg.ex-plot .bin { fill: var(--ex-now-soft); stroke: var(--ex-now); stroke-width: 1; }
+svg.ex-plot .qcurve { fill: none; stroke: var(--ex-now); stroke-width: 2.6; stroke-linejoin: round; }
+svg.ex-plot .asym { fill: none; stroke: var(--ex-mass); stroke-width: 1.6; stroke-dasharray: 7 5; }
+svg.ex-plot .negzone { fill: var(--ex-neg-soft); opacity: .45; }

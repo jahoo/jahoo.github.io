@@ -56,25 +56,6 @@
 .de-ctl label b { color: var(--de-ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .de-fig input[type=range] { width: 100%; accent-color: var(--de-mass); margin: .2rem 0; }
 
-.de-seg {
-  display: inline-flex;
-  border: 1px solid var(--de-rule);
-  border-radius: 999px;
-  padding: 2px;
-  background: #fff;
-}
-.de-seg button, .de-btn {
-  font: inherit;
-  color: var(--de-ink);
-  background: transparent;
-  border: 0;
-  padding: .38rem .85rem;
-  border-radius: 999px;
-  cursor: pointer;
-}
-.de-seg button[aria-checked="true"] { background: var(--de-ink); color: #fff; }
-.de-btn { border: 1px solid var(--de-rule); background: #fff; }
-.de-btn:hover { border-color: var(--de-ink-soft); }
 .de-fig :focus-visible { outline: 2px solid var(--de-focus); outline-offset: 2px; }
 
 .de-readouts {
@@ -87,7 +68,6 @@
 .de-readouts .k { color: var(--de-ink-soft); }
 .de-readouts .v { font-weight: 600; }
 .de-fig .neg { color: var(--de-neg); }
-
 
 /* ---- SVG marks ---- */
 
@@ -111,37 +91,14 @@ svg.de-plot .lbl.mass { fill: var(--de-mass); }
 svg.de-plot .lbl.atom { fill: var(--de-atom); }
 svg.de-plot .lbl.b { font-weight: 600; }
 
-svg.de-plot .curve { fill: none; stroke: var(--de-mass); stroke-width: 2; stroke-linejoin: round; }
-svg.de-plot .curve.ghost { stroke: var(--de-ink-soft); stroke-width: 1.3; stroke-dasharray: 4 3; opacity: .8; }
-svg.de-plot .fm { fill: var(--de-mass-soft); }
-svg.de-plot .fn { fill: var(--de-neg-soft); }
-svg.de-plot .fmb { fill: var(--de-mass-soft); stroke: var(--de-mass); stroke-width: 1.5; }
-svg.de-plot .fnb { fill: var(--de-neg-soft); stroke: var(--de-neg); stroke-width: 1.5; }
-svg.de-plot .bar { fill: var(--de-atom-soft); stroke: var(--de-atom); stroke-width: 1; }
 svg.de-plot .ref { stroke: var(--de-ink-soft); stroke-width: 1.2; stroke-dasharray: 5 4; fill: none; }
-svg.de-plot .hmark { stroke: var(--de-ink); stroke-width: 1.5; stroke-dasharray: 2 3; }
-svg.de-plot .eqbox { fill: none; stroke: var(--de-ink); stroke-width: 1.2; stroke-dasharray: 6 4; }
-svg.de-plot .stem { stroke: var(--de-atom); stroke-width: 2.4; }
-svg.de-plot .stem.ghost { stroke: var(--de-ink-soft); stroke-width: 1.2; stroke-dasharray: 3 3; }
-svg.de-plot .dot { fill: var(--de-atom); }
-svg.de-plot .dot.ghost { fill: none; stroke: var(--de-ink-soft); stroke-width: 1.2; }
-svg.de-plot .handle { fill: var(--de-surface); stroke: var(--de-mass); stroke-width: 2.2; }
-svg.de-plot .edge { stroke: var(--de-mass); stroke-width: 3; }
-svg.de-plot .asym { stroke: var(--de-mass); stroke-width: 1.6; stroke-dasharray: 7 5; fill: none; }
-svg.de-plot .qcurve { fill: none; stroke: var(--de-atom); stroke-width: 2.6; stroke-linejoin: round; }
-svg.de-plot .negzone { fill: var(--de-neg-soft); opacity: .45; }
-svg.de-plot .gap { stroke: var(--de-neg); stroke-width: 2.2; }
-svg.de-plot .pt { fill: var(--de-atom); stroke: var(--de-surface); stroke-width: 2; }
-svg.de-plot .ptm { fill: var(--de-mass); stroke: var(--de-surface); stroke-width: 2; }
 svg.de-plot .sc { fill: var(--de-mass); opacity: .45; }
-svg.de-plot .band { fill: var(--de-atom-soft); }
 svg.de-plot .brk { stroke: var(--de-atom); stroke-width: 2; fill: none; }
 svg.de-plot .hbar.pos { fill: var(--de-mass-soft); stroke: var(--de-mass); stroke-width: 1.4; }
 svg.de-plot .hbar.neg { fill: var(--de-neg-soft); stroke: var(--de-neg); stroke-width: 1.4; }
 svg.de-plot .hbar.mi { fill: var(--de-atom-soft); stroke: var(--de-atom); stroke-width: 1.4; }
 
 /* ---- page-level bits ---- */
-
 
 .de-caption p {
   font-size: 0.9em;
@@ -152,20 +109,22 @@ svg.de-plot .hbar.mi { fill: var(--de-atom-soft); stroke: var(--de-atom); stroke
 
 .de-flag { color: var(--de-neg); font-weight: 600; }
 
-/* ---- editing affordances ---- */
+/* ---- the β slider in the shared control bar (assets/css/expectation.css styles the slider itself and the rest) ---- */
+/* the readout keeps one width as it changes ("1", "0.0503", "∞"), so the
+   slider beside it doesn't shift under the pointer */
+#de-betav { display: inline-block; min-width: 3.3em; font-variant-numeric: tabular-nums; }
+/* 0 · 1 · ∞ under the slider, as in the temperature post: each at the
+   thumb's center for that snap (the center travels [w/2, 100% - w/2] for a
+   thumb of width w, 16px natively), small enough that slider and ticks
+   together stay within the bar's 1.75rem row */
+.de-beta-wrap { display: flex; flex-direction: column; }
+.de-beta-ticks { position: relative; height: .8rem; font-size: .66rem; line-height: 1; color: var(--ex-ink-soft); user-select: none; }
+.de-beta-ticks span { position: absolute; top: 0; transform: translateX(-50%); }
+.de-beta-ticks span:nth-child(1) { left: 8px; }
+.de-beta-ticks span:nth-child(2) { left: 50%; }
+.de-beta-ticks span:nth-child(3) { left: calc(100% - 8px); }
 
-.de-ctl.de-ctl-narrow { min-width: 0; flex: 0 1 auto; }
-.de-fig select { font: inherit; padding: .25rem .4rem; }
-
-svg.de-plot .bar-base { fill: none; stroke: var(--de-ink-soft); stroke-width: 1; stroke-dasharray: 3 2; }
-svg.de-plot .grip { stroke: var(--de-ink); stroke-width: 2.5; stroke-linecap: round; }
-svg.de-plot .grip.active { stroke: var(--de-focus); }
-svg.de-plot .handle.grab { cursor: grab; }
-svg.de-plot .handle.active { stroke: var(--de-focus); }
-svg.de-plot .handle-break { cursor: ew-resize; }
-/* Let a touch on a handle or bar drag it instead of scrolling the page. */
-svg.de-plot .handle, #de-a-pmf { touch-action: none; }
-
-.de-btns { display: flex; gap: .5rem; }
-.de-btn:disabled { color: var(--de-ink-soft); opacity: .55; cursor: default; }
-.de-btn:disabled:hover { border-color: var(--de-rule); }
+/* ---- a figure's own control row: not sticky, same controls as the bar ---- */
+.de-row { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.2rem; margin: .9rem 0 0; font-family: var(--ex-sans); font-size: .82rem; line-height: 1.3; color: var(--ex-ink); }
+.de-row button { font: inherit; color: var(--ex-ink); background: #fff; border: 1px solid var(--ex-rule); border-radius: 4px; height: 1.75rem; padding: 0 .5rem; cursor: pointer; white-space: nowrap; }
+.de-row input[type=range] { width: 8rem; margin: 0; accent-color: var(--ex-mass); }

@@ -5,7 +5,7 @@
   <meta name="generator" content="pandoc-markdown-css-theme" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <meta name="author" content="Jacob Hoover Vigly" />
-  <meta name="dcterms.date" content="2026-09-28" />
+  <meta name="dcterms.date" content="2026-10-05" />
   <meta name="description" content="Scientific Program Coordinator at CHI FRO, LLC. Formerly Postdoc at MIT, Department of Brain and Cognitive Sciences. PhD in Linguistics from McGill University." />
   <title>Differential entropy</title>
   <!--
@@ -41,7 +41,7 @@ MathJax = {
     // AMS-style numbering: only {equation}/{align} environments get
     // numbers, so ordinary $ displays stay untagged.
     tags: 'ams'
-    , macros: { "dee": "\\mathop{\\mathrm{d}\\!}", "E": "\\mathbb{E}", "pmf": "p", "pdf": "f", "bw": "\\Delta", "Xq": "{X_{\\bw}}", "DKL": "{D_{\\mathrm{KL}}}", "KL": ["\\DKL(#1\\,\\|\\,#2)", 2], "defeq": "\\triangleq" }
+    , macros: { "dee": "\\mathop{\\mathrm{d}\\!}", "supp": [ "\\mathop{\\mathrm{supp}(#1)}", 1 ], "defeq": "\\triangleq", "E": "\\mathbb{E}", "pmf": ["\\mathrm{pmf}_{#1}", 1], "pdf": ["\\mathrm{pdf}_{#1}", 1], "bw": "\\Delta", "Xq": "{X_{\\bw}}", "DKL": "{D_{\\mathrm{KL}}}", "KL": [ "\\DKL(#1\\,\\|\\,#2)", 2 ] }
   },
   options: {
     // Disable click-to-explore on math. Without these, clicking on a
@@ -96,10 +96,10 @@ MathJax = {
 
 <h1 class="title">Differential entropy</h1>
 
-<p class="subtitle">Entropy, once the outcomes stop being countable</p>
 <p class="post-meta">
-  <time datetime="2026-09-28">2026-09-28</time>
+  <time datetime="2026-10-05">2026-10-05</time>
   · Jacob Hoover Vigly
+  · <span class="post-badge" title="A draft: built only under make serve-drafts, never deployed">unpublished</span>
   · <span class="post-tags">exploration</span>
 </p>
 </header>
@@ -110,451 +110,305 @@ MathJax = {
 
 
 <main>
-<p>Shannon’s entropy is the expected value of <span
-class="math inline">\(-\log \pmf(X)\)</span> under a probability mass
-function <span class="math inline">\(\pmf\)</span>. Replace the sum with
-an integral and the mass function with a density, and you get a formula
-that looks the same but is not the same kind of object. It can be
-negative, it changes when you change units, and it is not the limit of
-any Shannon entropy. Below, the substitution is taken apart one picture
-at a time.</p>
-<section id="discrete-entropy-is-an-average-of-surprisals"
-class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span>
-Discrete entropy is an average of surprisals</h1>
 <p>For a discrete random variable <span class="math inline">\(X\)</span>
-with pmf <span class="math inline">\(\pmf\)</span>, the
-<em>surprisal</em> of an outcome <span class="math inline">\(x\)</span>
-is <span class="math inline">\(-\log \pmf(x)\)</span>: the number of
-bits an optimal code spends on it. Entropy is the average surprisal,
-weighted by how often each outcome happens:</p>
-<p><span class="math display">\[ H(X) \defeq \E\big[-\log \pmf(X)\big] =
--\sum_{x} \pmf(x)\log \pmf(x). \]</span></p>
-<p>Two facts do most of the work in what follows.</p>
-<p><strong>Every surprisal is non-negative.</strong> A probability is at
-most 1, so <span class="math inline">\(\log \pmf(x) \le 0\)</span> and
-<span class="math inline">\(-\log \pmf(x) \ge 0\)</span>. An average of
-non-negative numbers is non-negative, so <span
-class="math inline">\(H(X) \ge 0\)</span>, with equality only when a
-single outcome has probability 1.</p>
-<p><strong>Only the list of probabilities matters.</strong> The
-outcomes’ names or numeric values never enter the formula. Relabel them
-with any one-to-one map and <span class="math inline">\(H\)</span> does
-not move.</p>
-<p>The right-hand panel below draws entropy as an area. Give each
-outcome a column whose width is its probability and whose height is its
-surprisal. The widths add to 1, so the total area equals the average
-height, which is <span class="math inline">\(H\)</span>.</p>
-<p>Drag the bars to set the pmf <span
-class="math inline">\(\pmf\)</span>. The slider tempers it: the figure
-shows <span class="math inline">\(\pmf^{\beta}(x) \propto
-\pmf(x)^{\beta}\)</span>, which sharpens <span
-class="math inline">\(\pmf\)</span> for <span
-class="math inline">\(\beta &gt; 1\)</span> and flattens it toward
-uniform for <span class="math inline">\(\beta &lt; 1\)</span>.<span
-class="sidenote-wrapper"><label for="sn-0" class="margin-toggle">&#8853;</label><input type="checkbox" id="sn-0" class="margin-toggle"/><span
-class="marginnote">This is temperature scaling with <span
+with pmf <span class="math inline">\(p_X\)</span>, the entropy <span
+class="math inline">\(H(X)\)</span> is a measure of the uncertainty of
+the variable, defined as the expected value of the negative logarithm of
+<span class="math inline">\(p_X\)</span>:<span
+class="sidenote-wrapper"><label for="sn-0" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-0" class="margin-toggle"/><span
+class="sidenote">That is, it is the expected <em>surprisal</em>.<br />
+<br />
+</span></span></p>
+<p><span class="math display">\[
+H(X)
+\defeq \E\big[-\log p_X(X)\big]
+= -\sum_{x} p_X(x)\log p_X(x).
+\]</span></p>
+<p>If instead we say <span class="math inline">\(X\)</span> is a
+<em>continuous</em> random variable, and <span
+class="math inline">\(p_X\)</span> is its pdf, then we can define a
+similar quantity:</p>
+<p><span class="math display">\[
+h(X)
+\defeq \E\big[-\log p_X(X)\big]
+= -\int p_X(x)\log p_X(x)\dee{x}.
+\]</span></p>
+<p>This is the <em>differential entropy</em>, and its interpretation and
+properties differ.<span
+class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle"/><span
+class="sidenote">The recipe looks the same, but in the continuous case,
+<span class="math inline">\(-\log p_X(x)\)</span> is a negative
+log-density at a point, not the information content of an event. For
+starters, note it is negative whenever density is greater than 1.<br />
+<br />
+</span></span> Both are the expectation of one function, <span
+class="math inline">\(g(x) = -\log p_X(x)\)</span>. As in <a
+href="/posts/expectation/">Visualizing expected value</a>, lay the
+probability out along <span class="math inline">\([0, 1]\)</span> with
+<span class="math inline">\(u = F_X(x)\)</span>, and the expectation is
+an area:</p>
+<p><span class="math display">\[
+\E\big[-\log p_X(X)\big]
+= \int_0^1 -\log p_X\big(F_X^{-1}(u)\big)\dee{u}.
+\]</span></p>
+<div class="ex-bar wide extra-wide" id="ex-bar">
+<div class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></div>
+<div class="ex-grp"><label class="ex-lab" for="ex-preset">\(p_X\)</label><select id="ex-preset"></select></div>
+<div class="ex-grp ex-disc"><label class="ex-lab" for="de-beta">\(\beta\) = <b id="de-betav">1</b></label><div class="de-beta-wrap"><input type="range" id="de-beta" min="0" max="1000" value="500"><div class="de-beta-ticks" aria-hidden="true"><span>0</span><span>1</span><span>∞</span></div></div></div>
+<div class="ex-grp" id="ex-mix-grp" hidden><label class="ex-lab" for="ex-mix" title="The left bump's share of the mass; the right bump takes the rest">mix = <b id="ex-mixv">0.62</b></label><input type="range" id="ex-mix" min="0.02" max="0.98" step="0.01" value="0.62"></div>
+<div class="ex-grp"><button type="button" id="ex-reset">↺ reset</button></div>
+</div>
+<div class="wide extra-wide ex-wrap">
+<figure class="ex-fig"><div class="ex-canvas"><svg class="ex-plot" id="de-area" role="img" aria-label="Entropy as the area under minus log p_X of the inverse CDF over the unit interval, with minus log p_X to its left and the map from x to u above it"></svg></div></figure>
+</div>
+<div class="de-caption">
+<p>Drag <span class="math inline">\(p_X\)</span> to reshape it. In the
+discrete case, I’ve put in a parameter<span
+class="sidenote-wrapper"><label for="sn-2" class="margin-toggle">&#8853;</label><input type="checkbox" id="sn-2" class="margin-toggle"/><span
+class="marginnote">Temperature scaling with <span
 class="math inline">\(\beta = 1/T\)</span>; see <a
 href="/posts/temperature-scaling/">temperature scaling and
 truncation</a>.<br />
 <br />
-</span></span></p>
-<div class="wide extra-wide">
-<div class="de-fig">
-<div class="de-controls">
-<div class="de-ctl">
-<label for="de-a-beta">inverse temperature \(\beta\) = <b id="de-a-betav">1.00</b></label>
-<input type="range" id="de-a-beta" min="0" max="5" step="0.05" value="1">
+</span></span> <span class="math inline">\(\beta\)</span> to temper the
+pmf as <span class="math inline">\(p_X^{\beta}(x) \propto
+p_X(x)^{\beta}\)</span>, just so you can easily see how the entropy
+changes when the distribution slides from uniform on its support (at
+<span class="math inline">\(\beta = 0\)</span>) through to a single
+outcome as <span class="math inline">\(\beta \to \infty\)</span>.</p>
 </div>
-<div class="de-ctl de-ctl-narrow">
-<label for="de-a-preset">base \(p\)</label>
-<select id="de-a-preset">
-<option value="default" selected>default</option>
-<option value="unimodal">unimodal</option>
-<option value="uniform">uniform</option>
-<option value="peaked">peaked</option>
-<option value="bimodal">bimodal</option>
-<option value="zipf">zipf</option>
-<option value="custom" hidden>custom</option>
-</select>
-</div>
-<div class="de-btns">
-<button class="de-btn" id="de-a-shuffle" type="button">Shuffle labels</button>
-<button class="de-btn" id="de-a-unshuffle" type="button" disabled>Reset order</button>
-</div>
-</div>
-<div class="de-panels">
-<div>
-<div class="de-ptitle">pmf over eight outcomes (drag the bars)</div>
-<svg id="de-a-pmf" role="img" aria-label="Bar chart of the pmf"></svg>
-</div>
-<div>
-<div class="de-ptitle">Same pmf as area: width \(p(x)\), height \(-\log p(x)\)</div>
-<svg id="de-a-area" role="img" aria-label="Columns with width equal to probability and height equal to surprisal"></svg>
-</div>
-</div>
-<div class="de-readouts">
-<span><span class="k">\(H(p^{\beta})\) = </span><span class="v" id="de-a-H">–</span> bits</span>
-<span><span class="k">\(H(p)\) = </span><span class="v" id="de-a-Hbase">–</span> bits</span>
-<span><span class="k">range: </span><span class="v">\(0 \le H \le \log 8 = 3\)</span></span>
-</div>
-</div>
-</div>
-<div class="de-caption">
-<p>Outlined bars with a dark top edge are the base <span
-class="math inline">\(\pmf\)</span> you edit; filled bars are the
-tempered <span class="math inline">\(\pmf^{\beta}\)</span>, which the
-right panel and <span class="math inline">\(H\)</span> describe. The two
-coincide at <span class="math inline">\(\beta = 1\)</span>. At <span
-class="math inline">\(\beta = 0\)</span> the tempered pmf is uniform and
-every column has height 3 bits. Raising <span
-class="math inline">\(\beta\)</span> piles mass onto the most probable
-outcome: its column gets wide and short, the others get narrow and tall,
-and the area shrinks toward 0 but never goes below the axis.
-<strong>Shuffle labels</strong> reorders the outcomes; the set of column
-shapes is unchanged, and so is <span class="math inline">\(H\)</span>.
-<strong>Reset order</strong> puts them back in alphabetical order.</p>
-</div>
-</section>
-<section id="the-same-recipe-with-a-density" class="level1"
-data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> The
-same recipe with a density</h1>
-<p>Let <span class="math inline">\(X\)</span> have a density <span
-class="math inline">\(\pdf\)</span>. The tempting move is to keep the
-expected negative log and swap each discrete ingredient for its
-continuous counterpart:</p>
-<p><span class="math display">\[ -\sum_x \pmf(x)\log \pmf(x)
-\quad\longrightarrow\quad h(X) \defeq -\int \pdf(x)\log \pdf(x)\dee x =
-\E\big[-\log \pdf(X)\big]. \]</span></p>
-<p>This is the <em>differential entropy</em>. The area picture still
-works: lay the probability mass out along <span
-class="math inline">\([0,1]\)</span> using the cumulative distribution
-<span class="math inline">\(u = F(x)\)</span>, and above each slice of
-mass draw the height <span class="math inline">\(-\log \pdf(x)\)</span>.
-The net area is <span class="math inline">\(h(X)\)</span>.</p>
-<p>What breaks is the first fact. A density is not a probability; it is
-probability <em>per unit length</em>, <span class="math inline">\(P(x
-\le X \le x+\dee x) \approx \pdf(x)\dee x\)</span>. Only its integral is
-constrained to equal 1, so <span class="math inline">\(\pdf\)</span> can
-be as tall as it likes as long as it is correspondingly narrow. Wherever
-<span class="math inline">\(\pdf(x) &gt; 1\)</span>, the height <span
-class="math inline">\(-\log \pdf(x)\)</span> is negative. If enough mass
-sits in such places, the net area is negative.</p>
-<p>The simplest case is the uniform density on <span
-class="math inline">\([0, w]\)</span>. It has height <span
-class="math inline">\(1/w\)</span>, so <span class="math inline">\(h =
-\log w\)</span>, which is negative whenever <span
-class="math inline">\(w &lt; 1\)</span>. A discrete variable with <span
-class="math inline">\(n\)</span> equally likely outcomes has entropy
-<span class="math inline">\(\log n \ge 0\)</span> for every <span
-class="math inline">\(n\)</span>. (Choose <strong>Uniform</strong> below
-and drag its edges.)</p>
-<div class="wide extra-wide">
-<div class="de-fig">
-<div class="de-controls">
-<div class="de-seg" role="radiogroup" aria-label="Distribution family" id="de-b-fam">
-<button type="button" role="radio" aria-checked="true" data-v="gauss">Gaussian</button>
-<button type="button" role="radio" aria-checked="false" data-v="unif">Uniform</button>
-<button type="button" role="radio" aria-checked="false" data-v="steps">Steps</button>
-<button type="button" role="radio" aria-checked="false" data-v="bimodal">Bimodal</button>
-</div>
-<div class="de-ctl">
-<label for="de-b-sd">standard deviation \(\sigma\) = <b id="de-b-sdv">1</b></label>
-<input type="range" id="de-b-sd" min="-4" max="1.5" step="0.05" value="-2.3">
-</div>
-</div>
-<div class="de-panels">
-<div>
-<div class="de-ptitle">Density \(f(x)\) (drag the handles); mass where \(f &gt; 1\) in magenta</div>
-<svg id="de-b-pdf" role="img" aria-label="Density plot"></svg>
-</div>
-<div>
-<div class="de-ptitle">As area: width = probability, height \(-\log f(x)\)</div>
-<svg id="de-b-area" role="img" aria-label="Log-density drawn against cumulative probability"></svg>
-</div>
-</div>
-<div class="de-readouts">
-<span><span class="k">\(h(X)\) = </span><span class="v" id="de-b-h">–</span> bits</span>
-<span><span class="k">peak density: </span><span class="v" id="de-b-peak">–</span></span>
-<span><span class="k">\(P(f(X) &gt; 1)\) = </span><span class="v" id="de-b-pneg">–</span></span>
-<span><span class="k">effective width \(2^{h}\) = </span><span class="v" id="de-b-eff">–</span></span>
-</div>
-</div>
-</div>
-<div class="de-caption">
-<p>The magenta slice of mass on the left is exactly the magenta stretch
-of the horizontal axis on the right: the part of the distribution whose
-log-density term is negative. For <strong>Gaussian</strong> and
-<strong>Bimodal</strong>, drag a handle sideways to move that component,
-and up or down to make it taller and narrower or shorter and wider.
-<strong>Steps</strong> is piecewise constant, with five chunks. Drag a
-dot on the axis to move a step point (the chunks beside it keep their
-mass, so their heights change), or drag a chunk’s top to set its height
-(the other chunks’ masses rescale to keep the total at 1, as for the pmf
-above). <strong>Uniform</strong> is the one-chunk case. For chunk masses
-<span class="math inline">\(m_i\)</span> and widths <span
-class="math inline">\(w_i\)</span>, <span class="math inline">\(h = H(m)
-+ \sum_i m_i \log w_i\)</span>: the discrete entropy of the chunks plus
-their average log width. The <span class="math inline">\(\sigma\)</span>
-slider rescales the current shape about its mean, and the family buttons
-reset it. Shrink <span class="math inline">\(\sigma\)</span>, or raise a
-peak, and more of the mass moves above the <span
-class="math inline">\(\pdf = 1\)</span> line. The dashed box on the left
-is the uniform density with the same <span
-class="math inline">\(h\)</span>; its width, <span
-class="math inline">\(2^h\)</span>, is one reading of what <span
-class="math inline">\(h\)</span> measures. At a fixed <span
-class="math inline">\(\sigma\)</span>, switch families: the Gaussian
-always has the largest <span class="math inline">\(h\)</span>, <span
-class="math inline">\(\tfrac12\log(2\pi e\sigma^2)\)</span>.</p>
-</div>
-<div class="callout callout-note">
-<div class="callout-header">
-On the word surprisal
-</div>
-<div class="callout-body">
-<p>In the discrete case, <span class="math inline">\(-\log
-\pmf(x)\)</span> is the information content of an actual event. In the
-continuous case, <span class="math inline">\(\{X = x\}\)</span> has
-probability 0, and <span class="math inline">\(-\log \pdf(x)\)</span> is
-not the information content of anything. It is a log-density, and its
-sign depends on the unit <span class="math inline">\(x\)</span> is
-measured in. The next section shows what it is instead.</p>
-</div>
-</div>
-</section>
-<section id="where-h-comes-from-quantize-then-subtract" class="level1"
-data-number="3">
-<h1 data-number="3"><span class="header-section-number">3</span> Where
-<span class="math inline">\(h\)</span> comes from: quantize, then
-subtract</h1>
-<p>The question with a Shannon answer is what the entropy of a
-continuous <span class="math inline">\(X\)</span> is <em>at some
-resolution</em>. Cut the real line into bins of width <span
-class="math inline">\(\bw\)</span> and let <span
-class="math inline">\(\Xq\)</span> be the bin that <span
-class="math inline">\(X\)</span> lands in. <span
-class="math inline">\(\Xq\)</span> is discrete, so <span
-class="math inline">\(H(\Xq)\)</span> is a Shannon entropy and cannot be
-negative.</p>
-<p>For small <span class="math inline">\(\bw\)</span>, bin <span
-class="math inline">\(i\)</span> with midpoint <span
-class="math inline">\(x_i\)</span> has probability <span
-class="math inline">\(\pmf_i \approx \pdf(x_i)\,\bw\)</span>, and</p>
+<section id="reading-the-integrand-off-the-graph-of-f_x-1"
+class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Reading
+the integrand off the graph of <span
+class="math inline">\(F_X^{-1}\)</span></h1>
+<p>The integrand <span class="math inline">\(-\log p_X(x)\)</span> is
+the log of the slope of the inverse CDF at <span class="math inline">\(u
+= F_X(x)\)</span>,<span
+class="sidenote-wrapper"><label for="sn-3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-3" class="margin-toggle"/><span
+class="sidenote">Since <span class="math inline">\(\frac{\dee F_X}{\dee
+x} = p_X(x)\)</span>, the inverse has <span
+class="math inline">\(\frac{\dee F_X^{-1}}{\dee u} =
+\frac{1}{p_X(x)}\)</span> at <span class="math inline">\(u =
+F_X(x)\)</span>, wherever <span class="math inline">\(p_X(x) &gt;
+0\)</span>. See also <a href="/posts/quantile-transform/">through the
+quantile function</a>.<br />
+<br />
+</span></span> which invites a look at the graph of <span
+class="math inline">\(F_X^{-1}\)</span>. For a pmf the graph is a
+staircase, with a step for each outcome <span
+class="math inline">\(x\)</span> as wide as <span
+class="math inline">\(p_X(x)\)</span>,<span
+class="sidenote-wrapper"><label for="sn-4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-4" class="margin-toggle"/><span
+class="sidenote"><span class="math inline">\(F_X^{-1}(u) = \inf\{x :
+F_X(x) \ge u\}\)</span> takes the value <span
+class="math inline">\(x\)</span> for every <span
+class="math inline">\(u\)</span> in <span class="math inline">\(\big(P(X
+&lt; x),\, P(X \le x)\big]\)</span>, an interval of width <span
+class="math inline">\(p_X(x)\)</span>.<br />
+<br />
+</span></span> so the integrand, there the surprisal of the outcome
+<span class="math inline">\(x\)</span>, is the log of how many steps
+that wide would fill <span class="math inline">\([0, 1]\)</span>. Either
+way it is the log of how much the map spreads the probability near <span
+class="math inline">\(u\)</span>.</p>
+<p>The entropy is this log-spread, averaged over <span
+class="math inline">\(u\)</span>:</p>
 <p><span class="math display">\[
-\begin{aligned}
-H(\Xq) &amp;= -\sum_i \pmf_i \log \pmf_i
-\approx -\sum_i \pdf(x_i)\bw\,\log\!\big(\pdf(x_i)\bw\big) \\[2pt]
-&amp;= \underbrace{-\sum_i \pdf(x_i)\log \pdf(x_i)\,\bw}_{\to\; h(X)}
-\;\underbrace{-\;\log\bw\,\sum_i \pdf(x_i)\bw}_{\to\; -\log \bw}.
-\end{aligned}
+h(X) = \int_0^1 \log \frac{\dee x}{\dee u}\dee{u}.
 \]</span></p>
-<p>The first sum is a Riemann sum for the differential entropy. The
-second is <span class="math inline">\(\log(1/\bw)\)</span> times a sum
-that tends to 1. So</p>
-<p><span class="math display">\[ H(\Xq) \approx h(X) +
-\log\frac{1}{\bw}, \qquad h(X) = \lim_{\bw\to 0}\Big[H(\Xq) +
-\log\bw\Big]. \]</span></p>
-<p>The discrete entropy goes to infinity: pinning down a real number
-exactly takes infinitely many bits. Differential entropy is what remains
-after subtracting that divergent term. It is not itself an entropy; it
-is an <em>offset</em>.<span
-class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle"/><span
-class="sidenote">The limit holds for any Riemann-integrable density with
-finite <span class="math inline">\(h\)</span> <span class="citation"
+<p>The map that spreads at this one rate everywhere is a straight line
+of slope <span class="math inline">\(2^{h(X)}\)</span>, the quantile
+function of a uniform on an interval of length <span
+class="math inline">\(2^{h(X)}\)</span>. That uniform has the same
+entropy as <span class="math inline">\(X\)</span>, which is the sense in
+which <span class="math inline">\(2^{h(X)}\)</span> is an
+<strong>effective width</strong>. For a pmf the same line has slope
+<span class="math inline">\(2^{H(X)}\)</span>, and the uniform with that
+many equally likely outcomes has the same entropy as <span
+class="math inline">\(X\)</span>: <span
+class="math inline">\(2^{H(X)}\)</span> is an <strong>effective number
+of outcomes</strong>.<span
+class="sidenote-wrapper"><label for="sn-5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-5" class="margin-toggle"/><span
+class="sidenote">The perplexity, in the discrete case. A uniform on
+<span class="math inline">\(n\)</span> outcomes has exactly <span
+class="math inline">\(n\)</span>; a uniform on <span
+class="math inline">\([0, L]\)</span> has exactly <span
+class="math inline">\(L\)</span>.<br />
+<br />
+</span></span> A count is at least 1, so <span class="math inline">\(H
+\ge 0\)</span>; a width can be less than 1, so <span
+class="math inline">\(h\)</span> can be negative. A count is at most
+<span class="math inline">\(n\)</span>, so <span class="math inline">\(H
+\le \log n\)</span>; a width is at most the support, so <span
+class="math inline">\(h \le \log L\)</span>.<span
+class="sidenote-wrapper"><label for="sn-6" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-6" class="margin-toggle"/><span
+class="sidenote">With the variance fixed instead of the support, the
+Gaussian is widest: <span class="math inline">\(h \le \tfrac12\log(2\pi
+e\sigma^2)\)</span> <span class="citation"
 data-cites="cover.t:2006book2">(<a href="#ref-cover.t:2006book2"
 role="doc-biblioref">Cover &amp; Thomas, 2006</a>, ch. 8)</span>.<br />
 <br />
 </span></span></p>
-<div class="wide extra-wide">
-<div class="de-fig">
-<div class="de-controls">
-<div class="de-seg" role="radiogroup" aria-label="Distribution family" id="de-c-fam">
-<button type="button" role="radio" aria-checked="true" data-v="gauss">Gaussian</button>
-<button type="button" role="radio" aria-checked="false" data-v="unif">Uniform</button>
-<button type="button" role="radio" aria-checked="false" data-v="bimodal">Bimodal</button>
-</div>
-<div class="de-ctl">
-<label for="de-c-sd">standard deviation \(\sigma\) = <b id="de-c-sdv">1/8</b></label>
-<input type="range" id="de-c-sd" min="-4" max="1.5" step="0.05" value="-3">
-</div>
-<div class="de-ctl">
-<label for="de-c-d">bin width \(\Delta\) = <b id="de-c-dv">1/4</b></label>
-<input type="range" id="de-c-d" min="-3" max="12" step="0.25" value="2">
-</div>
-</div>
-<div class="de-panels de-wide-left">
-<div>
-<div class="de-ptitle">Discrete entropy of the quantized variable, against resolution</div>
-<svg id="de-c-curve" role="img" aria-label="H of the quantized variable against log of one over delta"></svg>
-</div>
-<div>
-<div class="de-ptitle">Density and histogram at bin width \(\Delta\) (drag the handles)</div>
-<svg id="de-c-pdf" role="img" aria-label="Density with histogram bars"></svg>
-</div>
-</div>
-<div class="de-readouts">
-<span><span class="k">\(H(X_\Delta)\) = </span><span class="v" id="de-c-H">–</span> bits</span>
-<span><span class="k">\(\log(1/\Delta)\) = </span><span class="v" id="de-c-L">–</span></span>
-<span><span class="k">\(H(X_\Delta) - \log(1/\Delta)\) = </span><span class="v" id="de-c-diff">–</span></span>
-<span><span class="k">\(h(X)\) = </span><span class="v" id="de-c-h">–</span> bits</span>
-</div>
-</div>
+<div class="wide extra-wide ex-wrap">
+<div class="de-row"><div class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></div></div>
+<figure class="ex-fig"><div class="ex-canvas"><svg class="ex-plot" id="de-width" role="img" aria-label="Evenly spaced u carried through the quantile function to x, with the slope or step width at the cursor, the straight line of the uniform with the same entropy, and the uniform with the same entropy drawn as a box over p_X"></svg></div></figure>
 </div>
 <div class="de-caption">
-<p>The <strong>ochre curve</strong> is the true discrete entropy <span
-class="math inline">\(H(\Xq)\)</span>. It never enters the shaded region
-below zero. Once the bins are small compared with the density’s
-features, it rises one bit per halving of <span
-class="math inline">\(\bw\)</span> and runs along the <strong>dashed
-teal line</strong> <span class="math inline">\(h(X) +
-\log(1/\bw)\)</span>. The histogram bars have height <span
-class="math inline">\(\pmf_i/\bw\)</span>, which puts them on the
-density’s scale. The teal dot is where that line crosses <span
-class="math inline">\(\bw = 1\)</span>: that height is <span
-class="math inline">\(h(X)\)</span>. With the defaults (a Gaussian with
-<span class="math inline">\(\sigma = 1/8\)</span>), the whole
-distribution fits inside one unit-width bin, so the true entropy at
-<span class="math inline">\(\bw = 1\)</span> is almost 0, while the
-extrapolated line is at <span class="math inline">\(-0.95\)</span>.
-<strong>That gap is the negativity of <span
-class="math inline">\(h\)</span></strong>: it comes from extending a
-small-<span class="math inline">\(\bw\)</span> approximation to a
-resolution where it no longer holds. Widen <span
-class="math inline">\(\sigma\)</span> past about 0.24 and the intercept
-rises above zero. The density is editable as in the previous figure. Put
-a narrow bump beside a wide one and the curve rises more slowly than one
-bit per halving until the bins resolve both: its slope is the fraction
-of the mass whose shape the bins resolve.</p>
+<p>Drag <span class="math inline">\(u\)</span> to read the slope of
+<span class="math inline">\(F_X^{-1}\)</span> there, or the width of its
+step, and <span class="math inline">\(p_X\)</span> to reshape it. The
+dashed line is the uniform with the same entropy as <span
+class="math inline">\(X\)</span>: it climbs <span
+class="math inline">\(2^h\)</span> (or <span
+class="math inline">\(2^H\)</span> outcome slots) over the unit
+interval, and that rise is the dashed box in the <span
+class="math inline">\(p_X\)</span> panel, an interval <span
+class="math inline">\(2^h\)</span> long and <span
+class="math inline">\(1/2^h\)</span> high. The uniform presets make both
+coincide with <span class="math inline">\(p_X\)</span>.</p>
 </div>
-<p>This picture also explains the limit of a distribution concentrating
-to a point. For a discrete variable, piling all the mass on one outcome
-drives <span class="math inline">\(H\)</span> down to 0. For a Gaussian
-with <span class="math inline">\(\sigma \to 0\)</span>, the whole ochre
-curve slides right, and <span class="math inline">\(h =
-\tfrac12\log(2\pi e\sigma^2) \to -\infty\)</span>. At any fixed
-resolution <span class="math inline">\(\bw\)</span>, though, <span
-class="math inline">\(H(\Xq)\)</span> still bottoms out at 0 as soon as
-the mass fits in one bin. Nothing about Shannon entropy went wrong; the
-intercept moved.</p>
-<p>Reading the line off at <span class="math inline">\(\bw = 1\)</span>
-is where the next problem hides: “one unit” depends on the unit.</p>
 </section>
-<section id="stretching-the-axis" class="level1" data-number="4">
-<h1 data-number="4"><span class="header-section-number">4</span>
+<section id="where-h-comes-from-quantize-then-subtract" class="level1"
+data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Where
+<span class="math inline">\(h\)</span> comes from: quantize, then
+subtract</h1>
+<p>Cut the line into bins of width <span
+class="math inline">\(\bw\)</span> and let <span
+class="math inline">\(\Xq\)</span> be the bin <span
+class="math inline">\(X\)</span> lands in. Its Shannon entropy counts
+the width in bins, <span class="math inline">\(2^{H(\Xq)} \approx
+2^{h(X)}/\bw\)</span>:<span
+class="sidenote-wrapper"><label for="sn-7" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-7" class="margin-toggle"/><span
+class="sidenote">For small <span class="math inline">\(\bw\)</span>, bin
+<span class="math inline">\(i\)</span> has mass <span
+class="math inline">\(p_i \approx p_X(x_i)\,\bw\)</span>, so <span
+class="math inline">\(H(\Xq) = -\sum_i p_i\log p_i \approx -\sum_i
+p_X(x_i)\log p_X(x_i)\,\bw \;-\; \log\bw\sum_i p_X(x_i)\,\bw\)</span>.
+The first sum is a Riemann sum for <span
+class="math inline">\(h(X)\)</span>; the second tends to 1. The limit
+holds for any Riemann-integrable density with finite <span
+class="math inline">\(h\)</span> <span class="citation"
+data-cites="cover.t:2006book2">(<a href="#ref-cover.t:2006book2"
+role="doc-biblioref">Cover &amp; Thomas, 2006</a>, ch. 8)</span>.<br />
+<br />
+</span></span></p>
+<p><span class="math display">\[
+H(\Xq) \approx h(X) + \log\frac{1}{\bw},
+\qquad
+h(X) = \lim_{\bw\to 0}\Big[H(\Xq) + \log\bw\Big].
+\]</span></p>
+<p>Pinning down a real number exactly takes infinitely many bits; <span
+class="math inline">\(h\)</span> is what is left once that cost, the
+unit, is subtracted. A pmf has nothing to subtract: once the bins are
+finer than the atoms’ spacing, <span class="math inline">\(H(\Xq) =
+H(X)\)</span>. An atom inside a density does the same at its point,
+which is why a distribution with atoms has no differential entropy.<span
+class="sidenote-wrapper"><label for="sn-8" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-8" class="margin-toggle"/><span
+class="sidenote"><span class="math inline">\(h = -\infty\)</span> for a
+point mass, and undefined for a mixed distribution, whose <span
+class="math inline">\(H(\Xq)\)</span> grows like <span
+class="math inline">\(\log(1/\bw)\)</span> times the mass of its
+continuous part.<br />
+<br />
+</span></span></p>
+<div class="wide extra-wide ex-wrap">
+<div class="de-row">
+<div class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></div>
+<div class="ex-grp"><label class="ex-lab" for="de-q-delta">bin width \(\Delta\) = <b id="de-q-deltav">1/4</b></label><input type="range" id="de-q-delta" min="-3" max="12" step="0.25" value="2"></div>
+</div>
+<figure class="ex-fig"><div class="ex-canvas"><svg class="ex-plot" id="de-quantize" role="img" aria-label="Entropy of the quantized variable against log of one over delta, beside p_X with the histogram at bin width delta"></svg></div></figure>
+</div>
+<div class="de-caption">
+<p>The curve is <span class="math inline">\(H(\Xq)\)</span> against
+<span class="math inline">\(\log(1/\bw)\)</span>; the bars are the bin
+masses at the current <span class="math inline">\(\bw\)</span>. For a
+density it climbs the dashed line <span class="math inline">\(h(X) +
+\log(1/\bw)\)</span>, one bit per halving of <span
+class="math inline">\(\bw\)</span>. For a pmf it is flat at <span
+class="math inline">\(H(X)\)</span> once <span class="math inline">\(\bw
+&lt; 1\)</span>. Squeeze the density toward a point and the curve slides
+right, <span class="math inline">\(h \to -\infty\)</span>; the curve
+itself never goes below zero.</p>
+</div>
+</section>
+<section id="stretching-the-axis" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span>
 Stretching the axis</h1>
-<p>In the discrete case, a one-to-one relabeling moves the outcomes but
-leaves every probability, and therefore <span
-class="math inline">\(H\)</span>, where it was. The continuous analogue
-is a change of variable. Take <span class="math inline">\(Y =
-aX\)</span>. The same probability now spreads over a stretch <span
-class="math inline">\(|a|\)</span> times as long, so the density drops
-by the same factor to keep its area:<span
-class="sidenote-wrapper"><label for="sn-2" class="margin-toggle">&#8853;</label><input type="checkbox" id="sn-2" class="margin-toggle"/><span
-class="marginnote">For the general change-of-variables formula for
-densities, see <a href="/posts/transform-pdf/">this earlier
-note</a>.<br />
+<p>Relabel the outcomes of a pmf, by shuffling them or by spreading them
+out, and every probability is kept: <span
+class="math inline">\(H\)</span> and the count do not move. Stretch a
+density by <span class="math inline">\(a\)</span> and the same mass
+covers <span class="math inline">\(a\)</span> times the length, so the
+density drops and the width grows:<span
+class="sidenote-wrapper"><label for="sn-9" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-9" class="margin-toggle"/><span
+class="sidenote">For a smooth invertible <span
+class="math inline">\(g\)</span>, <span class="math inline">\(h(g(X)) =
+h(X) + \E\log\lvert g&#39;(X)\rvert\)</span>: the Jacobian enters the
+density, and so the log. A shift has Jacobian 1, so <span
+class="math inline">\(h(X + c) = h(X)\)</span>. Recording the same
+quantity in centimetres instead of metres adds <span
+class="math inline">\(\log 100 \approx 6.64\)</span> bits, and nothing
+about the uncertainty has changed. See also the <a
+href="/posts/transform-pdf/">density of a transformed random
+variable</a>.<br />
 <br />
 </span></span></p>
-<p><span class="math display">\[ \pdf_Y(y) =
-\frac{1}{|a|}\,\pdf_X\!\Big(\frac{y}{a}\Big) \qquad\Longrightarrow\qquad
-h(aX) = h(X) + \log|a|. \]</span></p>
-<p>More generally, for a smooth invertible <span
-class="math inline">\(g\)</span>, <span class="math inline">\(h(g(X)) =
-h(X) + \E\big[\log|g&#39;(X)|\big]\)</span>. The Jacobian of the
-transformation enters the density, and so enters the log. In the
-quantization picture, a bin of width <span
-class="math inline">\(\bw\)</span> on the <span
-class="math inline">\(Y\)</span>-axis corresponds to a bin of width
-<span class="math inline">\(\bw/|a|\)</span> on the <span
-class="math inline">\(X\)</span>-axis. Measuring <span
-class="math inline">\(Y\)</span> at unit resolution is measuring <span
-class="math inline">\(X\)</span> at a finer resolution, which costs
-<span class="math inline">\(\log|a|\)</span> more bits.</p>
-<p>Translation is harmless, <span class="math inline">\(h(X + c) =
-h(X)\)</span>, because shifting has Jacobian 1. Scaling is not.
-Recording the same quantity in centimetres instead of metres adds <span
-class="math inline">\(\log 100 \approx 6.64\)</span> bits to <span
-class="math inline">\(h\)</span>, and nothing about the uncertainty has
-changed.</p>
-<div class="wide extra-wide">
-<div class="de-fig">
-<div class="de-controls">
-<div class="de-ctl">
-<label for="de-d-a">stretch factor \(a\) = <b id="de-d-av">1</b></label>
-<input type="range" id="de-d-a" min="-3" max="3" step="0.05" value="0">
+<p><span class="math display">\[
+p_{aX}(y) = \frac{1}{a}\,p_X\!\Big(\frac{y}{a}\Big)
+\qquad\Longrightarrow\qquad
+h(aX) = h(X) + \log a.
+\]</span></p>
+<div class="wide extra-wide ex-wrap">
+<div class="de-row">
+<div class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></div>
+<div class="ex-grp"><label class="ex-lab" for="de-s-a">stretch \(a\) = <b id="de-s-av">1</b></label><input type="range" id="de-s-a" min="-3" max="3" step="0.05" value="0"></div>
+<div class="ex-grp ex-disc"><button type="button" id="de-s-shuffle">shuffle the outcomes</button></div>
 </div>
-</div>
-<div class="de-panels">
-<div>
-<div class="de-ptitle">Discrete: atoms at \(a x_i\), heights are probabilities</div>
-<svg id="de-d-disc" role="img" aria-label="Stretched discrete distribution"></svg>
-</div>
-<div>
-<div class="de-ptitle">Continuous: density of \(aX\), heights are probability per unit length</div>
-<svg id="de-d-cont" role="img" aria-label="Stretched density"></svg>
-</div>
-</div>
-<div class="de-readouts">
-<span><span class="k">\(H(aX) = H(X)\) = </span><span class="v" id="de-d-H">–</span> bits</span>
-<span><span class="k">\(h(aX) = h(X) + \log a\) = </span><span id="de-d-hx">–</span> <span id="de-d-la">–</span> = <span class="v" id="de-d-h">–</span> bits</span>
-</div>
-</div>
+<figure class="ex-fig"><div class="ex-canvas"><svg class="ex-plot" id="de-stretch" role="img" aria-label="The distribution of a X with the original behind it, and the uniform with the same entropy as a box"></svg></div></figure>
 </div>
 <div class="de-caption">
-<p>Same stretch, two responses. On the left the atoms move apart but
-keep their heights: a pmf’s heights are probabilities, and the stretch
-moves no probability between outcomes. On the right the density flattens
-as it widens: the ochre band holds the middle 50% of the mass, and its
-area stays at 0.5 while its shape changes. The dashed box, the uniform
-with the same <span class="math inline">\(h\)</span>, has width <span
-class="math inline">\(2^h\)</span>, and it scales by exactly <span
-class="math inline">\(a\)</span>. The dashed curves show <span
-class="math inline">\(a = 1\)</span>.</p>
+<p>Same stretch, two responses. Atoms move apart and keep their heights,
+and the box keeps its count. The density flattens to keep its area, and
+the box is <span class="math inline">\(a\)</span> times as long. Shuffle
+relabels the atoms: a different staircase, the same probabilities.</p>
 </div>
 </section>
-<section id="what-survives-differences" class="level1" data-number="5">
-<h1 data-number="5"><span class="header-section-number">5</span> What
+<section id="what-survives-differences" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> What
 survives: differences</h1>
-<p>Both anomalies are additive constants. The divergent <span
-class="math inline">\(\log(1/\bw)\)</span> and the unit shift <span
-class="math inline">\(\log|a|\)</span> are the same for every entropy of
-the same variable, so they cancel in differences, and differences of
-differential entropies behave like Shannon quantities.</p>
-<p>Mutual information is the main example:</p>
-<p><span class="math display">\[ I(X;Y) = h(X) - h(X\mid Y) =
-\lim_{\bw\to0} I(\Xq; Y_{\bw}). \]</span></p>
-<p>It needs no renormalization, it is always <span
-class="math inline">\(\ge 0\)</span>, and it is unchanged by any
-invertible transformation of <span class="math inline">\(X\)</span> or
-<span class="math inline">\(Y\)</span> separately. The same goes for KL
-divergence, <span class="math inline">\(\KL{\pdf}{g} = \int
-\pdf\log(\pdf/g)\dee x \ge 0\)</span>: in the ratio <span
-class="math inline">\(\pdf/g\)</span> the Jacobians cancel, so it does
-not depend on coordinates.</p>
-<p>This also says what <span class="math inline">\(h\)</span> is.
-Writing <span class="math inline">\(h(X) = -\int
-\pdf(x)\log\frac{\pdf(x)}{1}\dee x\)</span> shows it as a negative
-divergence of <span class="math inline">\(\pdf\)</span> from the flat
-reference “density” 1, which is Lebesgue measure with a chosen unit
-length. The reference is where the dependence on units lives. Jaynes’
-<em>limiting density of discrete points</em> replaces that 1 with an
-explicit reference density <span class="math inline">\(m(x)\)</span> and
-gets a coordinate-free quantity <span class="math inline">\(-\int
-\pdf\log(\pdf/m)\dee x\)</span> <span class="citation"
-data-cites="jaynes.e:1968">(<a href="#ref-jaynes.e:1968"
-role="doc-biblioref">Jaynes, 1968, Section VI</a>)</span>.<span
-class="sidenote-wrapper"><label for="sn-3" class="margin-toggle">&#8853;</label><input type="checkbox" id="sn-3" class="margin-toggle"/><span
-class="marginnote">There, <span class="math inline">\(m(x)\)</span> is
-proportional to the density of the discrete points in the limit, and
-since <span class="math inline">\(\pdf\)</span> and <span
-class="math inline">\(m\)</span> transform the same way under a change
-of variables, the ratio <span class="math inline">\(\pdf/m\)</span> and
-so the whole quantity are invariant. Jaynes credits the derivation to
-his 1963 Brandeis lectures.<br />
+<p>Both anomalies are units. The divergent <span
+class="math inline">\(\log(1/\bw)\)</span> and the shift <span
+class="math inline">\(\log a\)</span> are the same for every entropy of
+the same variable, so they cancel in differences: a difference of
+log-widths is a log-ratio, and unit-free.<span
+class="sidenote-wrapper"><label for="sn-10" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-10" class="margin-toggle"/><span
+class="sidenote">This also says what <span
+class="math inline">\(h\)</span> is: <span class="math inline">\(h(X) =
+-\KL{p_X}{1}\)</span>, a negative divergence from the flat reference
+“density” 1, Lebesgue measure with a chosen unit length. Jaynes’
+<em>limiting density of discrete points</em> replaces the 1 with an
+explicit reference density <span class="math inline">\(m(x)\)</span>,
+<span class="math inline">\(-\int p_X\log(p_X/m)\dee{x}\)</span>, which
+is coordinate-free since <span class="math inline">\(p_X\)</span> and
+<span class="math inline">\(m\)</span> transform alike <span
+class="citation" data-cites="jaynes.e:1968">(<a
+href="#ref-jaynes.e:1968" role="doc-biblioref">Jaynes, 1968, Section
+VI</a>)</span>.<br />
 <br />
-</span></span></p>
+</span></span> Mutual information is the main example,</p>
+<p><span class="math display">\[
+I(X;Y)
+= h(X) - h(X\mid Y)
+= \lim_{\bw\to0} I(\Xq; Y_{\bw})
+\ge 0,
+\]</span></p>
+<p>unchanged by any invertible transformation of <span
+class="math inline">\(X\)</span> or <span
+class="math inline">\(Y\)</span> separately, as is KL divergence, <span
+class="math inline">\(\KL{p_X}{g} = \int p_X\log(p_X/g)\dee{x}\)</span>,
+where the Jacobians cancel in the ratio.</p>
 <div class="wide extra-wide">
 <div class="de-fig">
 <div class="de-controls">
@@ -599,13 +453,13 @@ without bound, which matches the discrete intuition that a noiseless
 real-valued channel carries infinitely many bits.</p>
 </div>
 </section>
-<section id="side-by-side" class="level1" data-number="6">
-<h1 data-number="6"><span class="header-section-number">6</span> Side by
+<section id="side-by-side" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Side by
 side</h1>
-<p>Each row traces back to one of two facts: a density is probability
-per unit length rather than probability, and <span
-class="math inline">\(h\)</span> is the finite offset left after
-subtracting <span class="math inline">\(\log(1/\bw)\)</span>.</p>
+<p>Each row traces back to one fact: <span
+class="math inline">\(2^H\)</span> counts outcomes, and <span
+class="math inline">\(2^h\)</span> measures a length, which needs a
+unit.</p>
 <div class="wide extra-wide">
 <table>
 <colgroup>
@@ -625,10 +479,18 @@ subtracting <span class="math inline">\(\log(1/\bw)\)</span>.</p>
 <tbody>
 <tr>
 <td>Definition</td>
-<td><span class="math inline">\(-\sum \pmf\log \pmf\)</span></td>
-<td><span class="math inline">\(-\int \pdf\log \pdf\dee x\)</span></td>
-<td>Same expected negative log, with a sum or an integral as the
-expectation.</td>
+<td><span class="math inline">\(-\sum p_X\log p_X\)</span></td>
+<td><span class="math inline">\(-\int p_X\log p_X\dee{x}\)</span></td>
+<td>The same expectation of <span class="math inline">\(-\log
+p_X\)</span>, as a sum or an integral.</td>
+</tr>
+<tr>
+<td>Effective size</td>
+<td><span class="math inline">\(2^H\)</span> outcomes, <span
+class="math inline">\(\ge 1\)</span></td>
+<td><span class="math inline">\(2^h\)</span> long, any positive
+length</td>
+<td>The uniform with the same entropy.</td>
 </tr>
 <tr>
 <td>Inside the log</td>
@@ -644,16 +506,18 @@ deterministic</td>
 <td><span class="de-flag">Any real number</span>; <span
 class="math inline">\(\to -\infty\)</span> as the distribution
 concentrates</td>
-<td><span class="math inline">\(-\log \pdf &lt; 0\)</span> wherever
-<span class="math inline">\(\pdf &gt; 1\)</span>.</td>
+<td>A count is at least 1; a width can be less than 1.</td>
 </tr>
 <tr>
-<td>Relation to discretization</td>
-<td>It is the discrete quantity</td>
+<td>Quantization</td>
+<td><span class="math inline">\(H(\Xq) = H(X)\)</span> once <span
+class="math inline">\(\bw &lt; 1\)</span></td>
 <td><span class="math inline">\(H(\Xq) \approx h(X) +
 \log(1/\bw)\)</span></td>
-<td><span class="math inline">\(h\)</span> is the offset of a divergent
-entropy, not an entropy.</td>
+<td>A count is a width in units of <span
+class="math inline">\(\bw\)</span>; <span
+class="math inline">\(h\)</span> is the width with the unit left
+out.</td>
 </tr>
 <tr>
 <td>Invertible transforms</td>
@@ -667,27 +531,25 @@ depends on units</td>
 <td>Translation</td>
 <td>Invariant</td>
 <td>Invariant</td>
-<td>Shift has Jacobian 1.</td>
+<td>A shift has Jacobian 1.</td>
 </tr>
 <tr>
 <td>Maximum</td>
 <td><span class="math inline">\(\log n\)</span>, uniform on <span
 class="math inline">\(n\)</span> outcomes</td>
-<td>No global max. On support of length <span
-class="math inline">\(L\)</span>: <span class="math inline">\(\log
-L\)</span> (uniform). With variance <span
-class="math inline">\(\sigma^2\)</span>: <span
-class="math inline">\(\tfrac12\log(2\pi e\sigma^2)\)</span>
-(Gaussian)</td>
-<td>Constraints play the role of “number of outcomes”.</td>
+<td><span class="math inline">\(\log L\)</span> on a support of length
+<span class="math inline">\(L\)</span> (uniform); <span
+class="math inline">\(\tfrac12\log(2\pi e\sigma^2)\)</span> with
+variance <span class="math inline">\(\sigma^2\)</span> (Gaussian)</td>
+<td>A count is at most <span class="math inline">\(n\)</span>; a width
+is at most the support.</td>
 </tr>
 <tr>
 <td>Mutual information, KL</td>
 <td><span class="math inline">\(\ge 0\)</span>, invariant</td>
 <td><span class="math inline">\(\ge 0\)</span>, invariant; limits of the
 discrete versions</td>
-<td>The <span class="math inline">\(\log(1/\bw)\)</span> and Jacobian
-terms cancel in differences and ratios.</td>
+<td>Units cancel in differences and ratios.</td>
 </tr>
 </tbody>
 </table>
@@ -700,23 +562,6 @@ above is the one in <span class="citation"
 data-cites="cover.t:2006book2">Cover &amp; Thomas (<a
 href="#ref-cover.t:2006book2" role="doc-biblioref">2006</a>,
 ch. 8)</span>.</p>
-<!-- DRAFT for phase 2 (moved here from the expectation post, 2026-09-30): the transform figure,
-     to be reworked around the slope of the quantile function, h(X) = ∫₀¹ log (F_X⁻¹)′(u) du, with
-     (F_X⁻¹)′(u) = 1/p_X(F_X⁻¹(u)). It runs on the expectation post's bundle (src/expectation,
-     fig-transform.js) and styles. Not for publishing as is. -->
-</section>
-<section id="draft-the-quantile-function" class="level1"
-data-number="7">
-<h1 data-number="7"><span class="header-section-number">7</span> Draft:
-the quantile function</h1>
-<p><span class="math inline">\(X\)</span> is <span
-class="ex-seg ex-case" role="group"
-aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></span>.</p>
-<div class="wide extra-wide ex-wrap">
-<figure class="ex-fig">
-<div class="ex-canvas"><svg class="ex-plot" id="ex-transform" role="img" aria-label="Evenly spaced values of a uniform U, carried through the quantile function to X"></svg></div>
-</figure>
-</div>
 </section>
 <section id="bibliography" class="level1 unnumbered">
 <h1 class="unnumbered">References</h1>
@@ -799,10 +644,9 @@ href="https://doi.org/10.1002/j.1538-7305.1948.tb01338.x">https://doi.org/10.100
 })();
 </script>
 <script src="/assets/js/differential-entropy.bundle.js"></script>
-<script src="/assets/js/expectation.bundle.js"></script>
 <footer class="site-footer">
   <div class="wrapper">
-    <span class="last-modified">Last modified: 2026-09-30 11:34</span>
+    <span class="last-modified">Last modified: 2026-10-08 18:25</span>
   </div>
 </footer>
 </body>

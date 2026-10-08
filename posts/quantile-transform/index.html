@@ -1,22 +1,13 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="$lang$" xml:lang="$lang$"$if(dir)$ dir="$dir$"$endif$>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc-markdown-css-theme" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-$for(author-meta)$
-  <meta name="author" content="$author-meta$" />
-$endfor$
-$if(date-meta)$
-  <meta name="dcterms.date" content="$date-meta$" />
-$endif$
-$if(keywords)$
-  <meta name="keywords" content="$for(keywords)$$keywords$$sep$, $endfor$" />
-$endif$
-$if(description-meta)$
-  <meta name="description" content="$description-meta$" />
-$endif$
-  <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+  <meta name="author" content="Jacob Hoover Vigly" />
+  <meta name="dcterms.date" content="2026-10-07" />
+  <meta name="description" content="Scientific Program Coordinator at CHI FRO, LLC. Formerly Postdoc at MIT, Department of Brain and Cognitive Sciences. PhD in Linguistics from McGill University." />
+  <title>Through the quantile function</title>
   <!--
     Preload the two navbar fonts used above the fold on every page.
     `font-display: swap` already prevents invisible text, but the fonts
@@ -25,19 +16,17 @@ $endif$
     the site-title `Linux Biolinum Outline` and nav-link `Linux Libertine`.
     `crossorigin` is required on `as=font` preloads even for same-origin.
   -->
-$if(standalone-page)$$else$
+
   <link rel="preload" as="font" type="font/woff2" crossorigin
         href="/assets/fonts/LinBiolinum/LinBiolinum_aU.woff2" />
   <link rel="preload" as="font" type="font/woff2" crossorigin
         href="/assets/fonts/LinLibertine/LinLibertine_Re-4.1_.8_.woff2" />
-$endif$
+
   <link rel="stylesheet" href="/assets/vendor/pandoc-markdown-css-theme/theme.css" />
   <link rel="stylesheet" href="/assets/css/code.css" />
   <link rel="stylesheet" href="/assets/css/overrides.css" />
   <link rel="stylesheet" href="/assets/css/site-chrome.css" />
-$for(css)$
-  <link rel="stylesheet" href="$css$" />
-$endfor$
+  <link rel="stylesheet" href="/assets/css/expectation.css" />
 <script>
 MathJax = {
   // tex-chtml ships base + AMS only. mathtools adds the commands LaTeX authors
@@ -46,14 +35,12 @@ MathJax = {
   loader: { load: ['[tex]/mathtools'] },
   tex: {
     packages: { '[+]': ['mathtools'] },
-    inlineMath: [['\\(', '\\)'], ['$$', '$$']],
-    displayMath: [['\\[', '\\]'], ['$$$$', '$$$$']],
+    inlineMath: [['\\(', '\\)'], ['$', '$']],
+    displayMath: [['\\[', '\\]'], ['$$', '$$']],
     // AMS-style numbering: only {equation}/{align} environments get
-    // numbers, so ordinary $$ displays stay untagged.
+    // numbers, so ordinary $ displays stay untagged.
     tags: 'ams'
-$if(mathjax-macros-json)$
-    , macros: $mathjax-macros-json$
-$endif$
+    , macros: { "dee": "\\mathop{\\mathrm{d}\\!}", "supp": [ "\\mathop{\\mathrm{supp}(#1)}", 1 ], "defeq": "\\triangleq", "E": "\\mathbb{E}", "pmf": ["\\mathrm{pmf}_{#1}", 1], "pdf": ["\\mathrm{pdf}_{#1}", 1] }
   },
   options: {
     // Disable click-to-explore on math. Without these, clicking on a
@@ -79,72 +66,80 @@ $endif$
 };
 </script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
-$for(header-includes)$
-  $header-includes$
-$endfor$
+  <!-- Included in <head> for pages with `unlisted: true` in front matter:
+       the page is reachable by its URL but shouldn't be indexed or crawled. -->
+  <meta name="robots" content="noindex, nofollow">
 </head>
 <body>
-$if(standalone-page)$$else$
-$for(include-before)$
-$include-before$
-$endfor$
-$endif$
+
+<header class="site-header">
+  <div class="wrapper">
+    <a class="site-title" href="/">
+      <span class="site-title-full">jacob hoover vigly</span>
+      <span class="site-title-short">jacob vigly</span>
+      <span class="site-title-xs">jv</span>
+    </a>
+    <nav class="site-nav">
+      <div class="trigger">
+        <a class="page-link" href="/">home</a>
+        <a class="page-link" href="/posts/">blog</a>
+      </div>
+    </nav>
+  </div>
+</header>
+<script src="/assets/js/section-marks.js" defer></script>
+<script src="/assets/js/active-nav.js" defer></script>
+
 
 <header>
-$if(hide-post-title)$$else$
-<h1 class="title">$title$</h1>
-$endif$
-$if(subtitle)$
-<p class="subtitle">$subtitle$</p>
-$endif$
-$if(date)$
+
+<h1 class="title">Through the quantile function</h1>
+
+<p class="subtitle">A uniform carried through the inverse CDF has the
+law of X</p>
 <p class="post-meta">
-  <time datetime="$date$">$date$</time>
-$if(author)$
-  · $if(author-url)$<a href="$author-url$">$author$</a>$else$$author$$endif$
-$endif$
-$if(unlisted)$
+  <time datetime="2026-10-07">2026-10-07</time>
+  · Jacob Hoover Vigly
   · <span class="post-badge" title="Not in the blog listing; reachable only by link">unlisted</span>
-$endif$
-$if(unpublished)$
-  · <span class="post-badge" title="A draft: built only under make serve-drafts, never deployed">unpublished</span>
-$endif$
-$if(tags)$
-  · <span class="post-tags">$for(tags)$$tags$$sep$, $endfor$</span>
-$endif$
-$if(qmd-source)$
-  · <a class="qmd-download" href="$qmd-source$" download title="Quarto source for this post, with the code that produced its figures">source .qmd</a>
-$endif$
+  · <span class="post-tags">exploration</span>
 </p>
-$endif$
 </header>
 
-$if(hide-post-title)$$else$
-<hr class="post-divider" />
-$endif$
 
-$if(toc)$
-<nav id="$idprefix$TOC" role="doc-toc">
-  $if(return-url)$
-  <a href="$return-url$">$if(return-text)$$return-text$$else$← Return$endif$</a><br>
-  $endif$
-  <strong>Contents</strong><label for="contents">⊕</label>
-  <input type="checkbox" id="contents">
-  $table-of-contents$
-</nav>
-$endif$
+<hr class="post-divider" />
+
+
 
 <main>
-$body$
+<p>Let <span class="math inline">\(U\)</span> be uniform on <span
+class="math inline">\([0, 1]\)</span>. Then <span
+class="math inline">\(F_X^{-1}(U)\)</span> has the law of <span
+class="math inline">\(X\)</span>, which is why sampling by the inverse
+CDF works. Evenly spaced values of <span
+class="math inline">\(u\)</span> land at <span class="math inline">\(x =
+F_X^{-1}(u)\)</span> with spacing <span class="math inline">\(\dee u /
+p_X(x)\)</span>, so they bunch where <span
+class="math inline">\(p_X\)</span> is high: the density is the
+reciprocal of the quantile function’s slope. This builds on an earlier
+note on the <a href="/posts/transform-pdf/">density of a transformed
+random variable</a>; here the transformation is the one that produces
+any law from a uniform.</p>
+<div class="ex-bar wide extra-wide" id="ex-bar">
+<div class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></div>
+<div class="ex-grp"><label class="ex-lab" for="ex-preset">\(p_X\)</label><select id="ex-preset"></select></div>
+<div class="ex-grp"><button type="button" id="ex-reset">↺ reset</button></div>
+</div>
+<div class="wide extra-wide ex-wrap">
+<figure class="ex-fig">
+<div class="ex-canvas"><svg class="ex-plot" id="qt-transform" role="img" aria-label="Evenly spaced values of a uniform U, carried through the quantile function to X"></svg></div>
+</figure>
+</div>
+<p>Drag along the uniform or the graph to move <span
+class="math inline">\(u\)</span>; drag in the right panel to move <span
+class="math inline">\(x\)</span>; drag <span
+class="math inline">\(p_X\)</span> to reshape it.</p>
 </main>
 
-$if(return-url)$
-<footer>
-<p class="signoff">
-  <a href="$return-url$">$if(return-text)$$return-text$$else$← Return$endif$</a>
-</p>
-</footer>
-$endif$
 <script>
 ;(function() {
   // Non-essential if user has JavaScript off. Just makes checkboxes look nicer.
@@ -202,17 +197,10 @@ $endif$
   }
 })();
 </script>
-$for(include-after)$
-$include-after$
-$endfor$
-$for(js)$
-<script src="$js$"></script>
-$endfor$
+<script src="/assets/js/quantile-transform.bundle.js"></script>
 <footer class="site-footer">
   <div class="wrapper">
-$if(last-modified)$
-    <span class="last-modified">Last modified: $last-modified$</span>
-$endif$
+    <span class="last-modified">Last modified: 2026-10-08 18:25</span>
   </div>
 </footer>
 </body>

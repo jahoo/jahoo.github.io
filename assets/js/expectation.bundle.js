@@ -23,6 +23,17 @@
     const sd = Math.sqrt(v);
     return c.map((k) => ({ w: k.w, m: (k.m - mu) / sd, s: k.s / sd }));
   })();
+  function temper(p, beta) {
+    if (beta === Infinity) {
+      const max = Math.max(...p);
+      const q2 = p.map((v) => v === max ? 1 : 0);
+      const Z2 = q2.reduce((a, b) => a + b, 0);
+      return q2.map((v) => v / Z2);
+    }
+    const q = p.map((v) => v > 0 ? Math.pow(v, beta) : 0);
+    const Z = q.reduce((a, b) => a + b, 0);
+    return q.map((v) => v / Z);
+  }
   function withProb(p, i, target, minP) {
     target = clamp(target, minP, 1 - (p.length - 1) * minP);
     const scale = (1 - target) / (1 - p[i]);
@@ -63,6 +74,12 @@
     const own = y - other;
     const s = own > 0 ? clamp(c.w / (own * SQ2PI), S_MIN, S_MAX) : S_MAX;
     return comps.map((k, j) => j === i ? { w: k.w, m: x, s } : k);
+  }
+  var MIN_W = 0.02;
+  function setWeight(comps, i, w) {
+    w = clamp(w, MIN_W, 1 - MIN_W);
+    const rest = 1 - comps[i].w, scale = rest > 0 ? (1 - w) / rest : 0;
+    return comps.map((k, j) => ({ ...k, w: j === i ? w : rest > 0 ? k.w * scale : (1 - w) / (comps.length - 1) }));
   }
   function setBreak(shape, j, x) {
     const ts = shape.ts.slice(), K = shape.ms.length;
@@ -191,6 +208,7 @@
       kase: "disc",
       discKey: "zipf",
       contKey: "gauss",
+      beta: 1,
       p: DISC_PRESETS.zipf.p.slice(),
       shape: structuredClone(CONT_PRESETS.gauss.shape)
     };
@@ -205,7 +223,7 @@
       subs.push(fn);
     };
     m.reset = () => {
-      Object.assign(m, { kase: "disc", discKey: "zipf", contKey: "gauss", p: DISC_PRESETS.zipf.p.slice(), shape: structuredClone(CONT_PRESETS.gauss.shape) });
+      Object.assign(m, { kase: "disc", discKey: "zipf", contKey: "gauss", beta: 1, p: DISC_PRESETS.zipf.p.slice(), shape: structuredClone(CONT_PRESETS.gauss.shape) });
       customP = null;
       held = false;
       win = null;
@@ -240,10 +258,21 @@
       resample();
       changed();
     };
+    m.setBeta = (b) => {
+      m.beta = b;
+      changed();
+    };
     m.hold = (on) => {
       held = on;
     };
-    m.view = () => m.kase === "disc" ? { disc: true, p: m.p, F: cdfOf(m.p), n: m.p.length, xRange: [0.5, m.p.length + 0.5] } : { disc: false, shape: m.shape, S, win, xRange: [win.x0, win.x1] };
+    m.view = () => {
+      if (m.kase !== "disc") return { disc: false, shape: m.shape, S, win, xRange: [win.x0, win.x1] };
+      const plain = m.beta === 1;
+      const p = plain ? m.p : temper(m.p, m.beta);
+      const v = { disc: true, p, F: cdfOf(p), n: p.length, xRange: [0.5, p.length + 0.5] };
+      if (!plain) v.base = m.p;
+      return v;
+    };
     return m;
   }
 
@@ -289,11 +318,11 @@
     return pos;
   }
 
-  // src/expectation/frame.js
+  // src/lib/prob/frame.js
   var G = {
     neglog: {
       f: (x, v) => -log2(v),
-      tex: "-\\log_2 p_X(x)",
+      tex: "-\\log p_X(x)",
       clip: [-5, 9],
       unit: "\\text{ bits}",
       means: (disc) => disc ? { tex: "H(X)", name: "entropy" } : { tex: "h(X)", name: "differential entropy" }
@@ -344,7 +373,7 @@
       const u = pos.u;
       const k = u <= 0 ? -1 : F.findIndex((f, i) => i > 0 && f >= u - 1e-12) - 1;
       const area = k < 0 ? 0 : cum[k] + (u - F[k]) * gs2[k];
-      return { disc: true, p, F, n, gs: gs2, cum, x: pos.x, u, k, gNow: k >= 0 ? gs2[k] : NaN, area, total: cum[n] };
+      return { disc: true, p, F, n, base: v.base, gs: gs2, cum, x: pos.x, u, k, gNow: k >= 0 ? gs2[k] : NaN, area, total: cum[n] };
     }
     const { S } = v, { m, s, gs, I } = alongSamples(S, g);
     const xq = lerp(S.xs, atU(S, pos.u));
@@ -361,6 +390,26 @@
       total: I[I.length - 1]
     };
   }
+  function gExtent(fr, g) {
+    let lo = Infinity, hi = -Infinity;
+    const vals = fr.disc ? fr.gs.filter(Number.isFinite) : fr.gs.filter((y, i) => fr.S.Fs[i] > 1e-4 && fr.S.Fs[i] < 1 - 1e-4);
+    for (const v of vals) {
+      lo = Math.min(lo, v);
+      hi = Math.max(hi, v);
+    }
+    const c = G[g].clip;
+    if (c && !fr.disc) {
+      lo = Math.max(lo, c[0]);
+      hi = Math.min(hi, c[1]);
+    }
+    return [Math.min(lo, 0), Math.max(hi, 0)];
+  }
+  function gRange(fr, g) {
+    let [lo, hi] = gExtent(fr, g);
+    if (hi - lo < 1e-9) hi = lo + 1;
+    const pad = 0.08 * (hi - lo);
+    return [lo < 0 ? lo - pad : 0, hi + pad];
+  }
   function productFrame(fr) {
     if (fr.disc) {
       const ys2 = fr.p.map((q, i) => q > 0 ? q * fr.gs[i] : NaN);
@@ -375,6 +424,84 @@
       return Number.isFinite(y) ? y : 0;
     });
     return { ys, upto: lerp(fr.I, atX(S, fr.x)) };
+  }
+
+  // src/lib/prob/controls.js
+  var $ = (id) => document.getElementById(id);
+  function seg(box, onChange) {
+    if (!box) return;
+    const btns = [...box.querySelectorAll("button")];
+    btns.forEach((b) => b.addEventListener("click", () => {
+      btns.forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+      onChange(b.dataset.v);
+    }));
+  }
+  function bindCommonControls({ model, pos, redraw }, { beforeCase, afterCase, onReset, stopPlay = () => {
+  } } = {}) {
+    const preset = $("ex-preset");
+    function fillPresets() {
+      if (!preset) return;
+      const disc = model.kase === "disc", src = disc ? DISC_PRESETS : CONT_PRESETS, cur = disc ? model.discKey : model.contKey;
+      const opts = Object.entries(src).map(([k, v]) => {
+        const o = document.createElement("option");
+        o.value = k;
+        o.textContent = v.label;
+        return o;
+      });
+      const custom = document.createElement("option");
+      custom.value = "custom";
+      custom.textContent = "custom";
+      custom.hidden = !disc && cur !== "custom";
+      preset.replaceChildren(...opts, custom);
+      preset.value = cur;
+    }
+    const cases = [...document.querySelectorAll(".ex-case")];
+    for (const box of cases) seg(box, (k) => {
+      if (k === model.kase) return;
+      stopPlay();
+      beforeCase?.(k);
+      model.setCase(k);
+      fillPresets();
+      afterCase?.(k);
+      redraw();
+    });
+    preset?.addEventListener("change", () => {
+      stopPlay();
+      model.setPreset(preset.value);
+    });
+    fillPresets();
+    const mix = $("ex-mix"), mixGrp = $("ex-mix-grp"), mixVal = $("ex-mixv");
+    const isMix = () => model.kase === "cont" && model.shape.kind === "mix" && model.shape.comps.length > 1;
+    mix?.addEventListener("pointerdown", () => {
+      stopPlay();
+      model.hold(true);
+    });
+    mix?.addEventListener("input", () => {
+      if (!isMix() || Math.abs(+mix.value - model.shape.comps[0].w) < 1e-9) return;
+      model.setShape({ kind: "mix", comps: setWeight(model.shape.comps, 0, +mix.value) });
+    });
+    for (const ev of ["pointerup", "pointercancel", "keyup"]) mix?.addEventListener(ev, () => model.hold(false));
+    $("ex-reset")?.addEventListener("click", () => {
+      stopPlay();
+      onReset?.();
+      model.reset();
+      pos.reset();
+      fillPresets();
+      redraw();
+    });
+    function update() {
+      document.body.dataset.exCase = model.kase;
+      for (const b of cases.flatMap((box) => [...box.querySelectorAll("button")])) b.setAttribute("aria-pressed", b.dataset.v === model.kase ? "true" : "false");
+      const key = model.kase === "disc" ? model.discKey : model.contKey;
+      if (preset && preset.value !== key) preset.value = key;
+      if (mixGrp) mixGrp.hidden = !isMix();
+      if (mix && isMix()) {
+        const w = model.shape.comps[0].w;
+        if (Math.abs(+mix.value - w) > 5e-3) mix.value = String(w);
+        if (mixVal) mixVal.textContent = w.toFixed(2);
+      }
+    }
+    return { update, fillPresets };
   }
 
   // src/expectation/menu.js
@@ -466,22 +593,14 @@
   }
 
   // src/expectation/controls.js
-  var $ = (id) => document.getElementById(id);
-  function seg(box, onChange) {
-    if (!box) return;
-    const btns = [...box.querySelectorAll("button")];
-    btns.forEach((b) => b.addEventListener("click", () => {
-      btns.forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
-      onChange(b.dataset.v);
-    }));
-  }
+  var $2 = (id) => document.getElementById(id);
   function bindControls({ model, pos, ui, redraw, customG }) {
     let raf = 0, t0 = 0, which = null;
     function stopPlay() {
       if (raf) cancelAnimationFrame(raf);
       raf = 0;
       which = null;
-      for (const w of ["x", "u"]) $("ex-play" + w)?.classList.remove("playing");
+      for (const w of ["x", "u"]) $2("ex-play" + w)?.classList.remove("playing");
     }
     function tick(t) {
       if (!t0) t0 = t;
@@ -501,66 +620,32 @@
       which = w;
       t0 = 0;
       raf = requestAnimationFrame(tick);
-      $("ex-play" + w)?.classList.add("playing");
+      $2("ex-play" + w)?.classList.add("playing");
     }
-    $("ex-playx")?.addEventListener("click", () => play("x"));
-    $("ex-playu")?.addEventListener("click", () => play("u"));
-    $("ex-whole")?.addEventListener("click", () => {
+    $2("ex-playx")?.addEventListener("click", () => play("x"));
+    $2("ex-playu")?.addEventListener("click", () => play("u"));
+    $2("ex-whole")?.addEventListener("click", () => {
       stopPlay();
       pos.setU(1);
       redraw();
     });
-    const preset = $("ex-preset");
-    function fillPresets() {
-      if (!preset) return;
-      const disc = model.kase === "disc", src = disc ? DISC_PRESETS : CONT_PRESETS, cur = disc ? model.discKey : model.contKey;
-      const opts = Object.entries(src).map(([k, v]) => {
-        const o = document.createElement("option");
-        o.value = k;
-        o.textContent = v.label;
-        return o;
-      });
-      const custom = document.createElement("option");
-      custom.value = "custom";
-      custom.textContent = "custom";
-      custom.hidden = !disc && cur !== "custom";
-      preset.replaceChildren(...opts, custom);
-      preset.value = cur;
-    }
-    const cases = [...document.querySelectorAll(".ex-case")];
-    for (const box of cases) seg(box, (k) => {
-      if (k === model.kase) return;
-      stopPlay();
-      if (k === "cont" && ui.g === "custom") ui.g = ui.gBase;
-      model.setCase(k);
-      fillPresets();
-      pos.setU(0.6);
-      redraw();
+    const common = bindCommonControls({ model, pos, redraw }, {
+      stopPlay,
+      // a custom g lives on the atoms; drop it before setCase redraws
+      beforeCase: (k) => {
+        if (k === "cont" && ui.g === "custom") ui.g = ui.gBase;
+      },
+      afterCase: () => pos.setU(0.6),
+      onReset: () => Object.assign(ui, { g: "neglog", gBase: "neglog", gc: null })
     });
-    preset?.addEventListener("change", () => {
-      stopPlay();
-      model.setPreset(preset.value);
-    });
-    const gsel = $("ex-gsel") && createMenu($("ex-gsel"));
+    const gsel = $2("ex-gsel") && createMenu($2("ex-gsel"));
     gsel?.addEventListener("change", () => {
       if (gsel.value === "custom") customG(false);
       else ui.g = ui.gBase = gsel.value;
       redraw();
     });
-    fillPresets();
-    $("ex-reset")?.addEventListener("click", () => {
-      stopPlay();
-      Object.assign(ui, { g: "neglog", gBase: "neglog", gc: null });
-      model.reset();
-      pos.reset();
-      fillPresets();
-      redraw();
-    });
     function update() {
-      document.body.dataset.exCase = model.kase;
-      for (const b of cases.flatMap((box) => [...box.querySelectorAll("button")])) b.setAttribute("aria-pressed", b.dataset.v === model.kase ? "true" : "false");
-      const key = model.kase === "disc" ? model.discKey : model.contKey;
-      if (preset && preset.value !== key) preset.value = key;
+      common.update();
       if (gsel) {
         gsel.hide("custom", model.kase !== "disc");
         if (gsel.value !== ui.g) gsel.value = ui.g;
@@ -882,7 +967,7 @@
     let drag = null;
     function handles() {
       const v = model.view(), top = adapter.dTop();
-      if (v.disc) return v.p.map((d, i) => ({ type: "atom", i, x: i + 1, d: Math.min(d, top) })).filter((h) => visible(h.i));
+      if (v.disc) return (v.base ?? v.p).map((d, i) => ({ type: "atom", i, x: i + 1, d: Math.min(d, top) })).filter((h) => visible(h.i));
       const s = v.shape;
       if (s.kind === "steps") return s.ts.map((t, j) => ({ type: "break", j, x: t, d: 0 }));
       return s.comps.map((c, i) => ({ type: "peak", i, x: c.m, d: Math.min(mixPdf(s.comps, c.m), top) }));
@@ -978,7 +1063,40 @@
     } };
   }
 
-  // src/expectation/fig-area.js
+  // src/lib/prob/area-notes.js
+  var MAP = "\\(F_X\\) rescales the real line into \\([0, 1]\\), so that each outcome takes up as much room as its probability. This gives us our horizontal axis.";
+  var NOTES = {
+    expectation: {
+      dist: "The distribution of \\(X\\): what the expectation averages over.",
+      map: MAP,
+      g: () => "The function \\(g\\) gives the height to integrate.",
+      gLabel: (gtex) => gtex ? "g(x) = " + gtex : "g(x)",
+      aLabel: () => "g(F_X^{-1}(u))",
+      avg: () => "\\mathbb{E}[g(X)]",
+      // the average-height line in the area panel
+      area: (done1, uTex) => done1 ? "The expectation is the whole area:" : `The area up to \\(u = \\class{ex-now}{${uTex}}\\) is:`,
+      rest: "The expectation is the whole area (slide \\(u\\) to 1).",
+      integrand: () => "g\\big(F_X^{-1}(v)\\big)",
+      // the label under the brace takes no width, so a long name doesn't spread the equation
+      result: ({ mn, val: val2, unit }) => `\\mathbb{E}[g(X)] \\;=\\; ${mn ? `\\underbrace{${mn.tex}}_{\\mathclap{\\text{${mn.name}}}} \\;=\\; ` : ""}${val2}${unit}`
+    },
+    entropy: {
+      dist: "The distribution of \\(X\\): what the entropy averages over.",
+      map: MAP,
+      // surprisal names the information of an event; a density gives only a log-density
+      g: (disc) => `The height is the ${disc ? "surprisal" : "negative log-density"}, \\(-\\log p_X(x)\\).`,
+      gLabel: (gtex) => gtex,
+      aLabel: () => "-\\log p_X(F_X^{-1}(u))",
+      avg: (disc) => disc ? "H(X)" : "h(X)",
+      area: () => "The entropy is the whole area:",
+      rest: "",
+      // never shown: this figure is always at u = 1
+      integrand: () => "-\\log p_X\\big(F_X^{-1}(v)\\big)",
+      result: ({ val: val2, unit, disc }) => `${disc ? "H(X)" : "h(X)"} \\;=\\; \\mathbb{E}[-\\log p_X(X)] \\;=\\; ${val2}${unit}`
+    }
+  };
+
+  // src/lib/prob/fig-area.js
   var GAP = 28;
   var WL0 = 400;
   var WL_FORMULA = 340;
@@ -990,27 +1108,8 @@
   var H0 = HT + HB + HA + HI + 6;
   var mA = { l: 58, r: 16, t: 50, b: 30 };
   var cls2 = (i, k) => i <= k ? "done" : "todo";
-  function gExtent(fr, g) {
-    let lo = Infinity, hi = -Infinity;
-    const vals = fr.disc ? fr.gs.filter(Number.isFinite) : fr.gs.filter((y, i) => fr.S.Fs[i] > 1e-4 && fr.S.Fs[i] < 1 - 1e-4);
-    for (const v of vals) {
-      lo = Math.min(lo, v);
-      hi = Math.max(hi, v);
-    }
-    const c = G[g].clip;
-    if (c) {
-      lo = Math.max(lo, c[0]);
-      hi = Math.min(hi, c[1]);
-    }
-    return [Math.min(lo, 0), Math.max(hi, 0)];
-  }
-  function gRange(fr, g) {
-    let [lo, hi] = gExtent(fr, g);
-    if (hi - lo < 1e-9) hi = lo + 1;
-    const pad = 0.08 * (hi - lo);
-    return [lo < 0 ? lo - pad : 0, hi + pad];
-  }
-  function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, customG }) {
+  function createAreaFigure(svg, { model, pos, ui, redraw, stopPlay, customG }, { sweep = true, notes = "expectation" } = {}) {
+    const T = NOTES[notes];
     const ctx = svgContext(svg, 1e3, H0);
     const RT = new Region(ctx, { ox: 0, oy: 0, w: 0, h: HT, m: { l: 58, r: 16, t: 26, b: 26 } });
     const RA = new Region(ctx, { ox: 0, oy: HT + HB, w: 0, h: HA, m: mA });
@@ -1055,6 +1154,11 @@
       if (fr.disc) {
         RT.domain(0.4, fr.n + 0.6, 0, 1.05);
         RT.axes({ xticks: fr.p.map((_, i) => i + 1), yticks: [0, 0.5, 1] });
+        if (fr.base) fr.base.forEach((q, i) => {
+          if (q <= 0) return;
+          el("line", { x1: RT.X(i + 1), x2: RT.X(i + 1), y1: RT.Y(0), y2: RT.Y(q), class: "stem-base" }, RT.data);
+          el("circle", { cx: RT.X(i + 1), cy: RT.Y(q), r: 4.5, class: "pin-base" }, RT.data);
+        });
         fr.p.forEach((q, i) => {
           if (q <= 0) {
             el("circle", { cx: RT.X(i + 1), cy: RT.Y(0), r: 4, class: "pin-null" }, RT.data);
@@ -1065,7 +1169,7 @@
           el("line", { x1: RT.X(i + 1), x2: RT.X(i + 1), y1: RT.Y(0), y2: RT.Y(q), class: "stem-" + c }, RT.data);
           el("circle", { cx: RT.X(i + 1), cy: RT.Y(q), r: 4.5, class: "pin-" + c }, RT.data);
         });
-        RT.vline(fr.x, "cursor");
+        if (sweep) RT.vline(fr.x, "cursor");
       } else {
         RT.domain(x0, x1, 0, v.win.y1);
         RT.axes({});
@@ -1076,13 +1180,15 @@
         if (done.length) RT.area(Number.isFinite(fr.x) ? [...done, [fr.x, fr.fNow]] : done, "fm");
         RT.path(edges, "curve");
         RT.hline(1, "hline").setAttribute("opacity", ".5");
-        RT.vline(fr.x, "cursor");
-        if (RT.inX(fr.x)) el("circle", { cx: RT.X(fr.x), cy: RT.Y(fr.fNow), r: 4.5, class: "dot" }, RT.front);
+        if (sweep) {
+          RT.vline(fr.x, "cursor");
+          if (RT.inX(fr.x)) el("circle", { cx: RT.X(fr.x), cy: RT.Y(fr.fNow), r: 4.5, class: "dot" }, RT.front);
+        }
       }
       yLabel("rt-y", RT, "p_X(x)");
       handles.replaceChildren();
       editor.draw(handles);
-      const gtex = ui.g === "custom" ? "g(x)" : "g(x) = " + G[ui.g].tex;
+      const gtex = T.gLabel(ui.g === "custom" ? null : G[ui.g].tex);
       if (fr.disc) {
         RG.domain(0.4, fr.n + 0.6, yr[0], yr[1]);
         RG.axes({ xticks: fr.p.map((_, i) => i + 1) });
@@ -1094,7 +1200,7 @@
           el("circle", { cx: RG.X(i + 1), cy: RG.Y(y), r: 4, class: "pin-" + c }, RG.data);
           el("circle", { cx: RG.X(i + 1), cy: RG.Y(y), r: 13, class: "hit" }, RG.data);
         });
-        RG.vline(fr.x, "cursor");
+        if (sweep) RG.vline(fr.x, "cursor");
       } else {
         RG.domain(x0, x1, yr[0], yr[1]);
         RG.axes({});
@@ -1106,12 +1212,12 @@
         RG.area(pts, "fn", RG.gBelow());
         RG.path(pts.filter((q) => q[0] > fr.x), "curve later");
         RG.path(pts.filter((q) => q[0] <= fr.x).concat(Number.isFinite(fr.x) ? [[fr.x, fr.gNow]] : []), "curve");
-        RG.vline(fr.x, "cursor");
+        if (sweep) RG.vline(fr.x, "cursor");
       }
       yLabel("rg-y", RG, gtex);
       RA.domain(0, 1, yr[0], yr[1]);
       RA.axes({ xticks: [0, 0.25, 0.5, 0.75, 1] });
-      yLabel("ra-y", RA, "g(F_X^{-1}(u))");
+      yLabel("ra-y", RA, T.aLabel(G[ui.g].tex));
       if (fr.disc) {
         fr.p.forEach((q, i) => {
           if (q <= 0 || !Number.isFinite(fr.gs[i])) return;
@@ -1127,10 +1233,10 @@
         RA.area(done, "fn", RA.gBelow());
         RA.path(done, "curve");
       }
-      if (fr.u > 0) RA.vline(fr.u, "cursor");
+      if (sweep && fr.u > 0) RA.vline(fr.u, "cursor");
       if (done1 && defined && RA.inY(fr.total)) {
         RA.hline(fr.total, "hline avg");
-        math.set("avg", RA.pl + 8, RA.Y(fr.total) - 13, "\\mathbb{E}[g(X)]", { anchor: "start", cls: "ex-ml-avg" });
+        math.set("avg", RA.pl + 8, RA.Y(fr.total) - 13, T.avg(fr.disc), { anchor: "start", cls: "ex-ml-avg" });
       }
       const fin = done1 && defined, fl = RA.o.ox + 2;
       RA.back.prepend(el("rect", { x: fl, y: RA.pt - 10, width: RA.pr + 10 - fl, height: RA.pb - RA.pt + 36, rx: 4, class: "result-box" + (fin ? " final" : "") }));
@@ -1178,7 +1284,7 @@
         });
         el("line", { x1: U(0), x2: U(1), y1: yAx, y2: yAx, class: "wax" }, bridge);
         el("line", { x1: U(0), x2: U(fr.u), y1: yAx, y2: yAx, class: "wax done" }, bridge);
-        if (fr.k >= 0) el("line", { x1: RT.X(fr.k + 1), y1: yTop, x2: U(fr.u), y2: yAx, class: "br-cur" }, bridge);
+        if (sweep && fr.k >= 0) el("line", { x1: RT.X(fr.k + 1), y1: yTop, x2: U(fr.u), y2: yAx, class: "br-cur" }, bridge);
       } else {
         el("line", { x1: U(0), x2: U(1), y1: yAx, y2: yAx, class: "wax" }, bridge);
         el("line", { x1: U(0), x2: U(fr.u), y1: yAx, y2: yAx, class: "wax done" }, bridge);
@@ -1186,10 +1292,10 @@
           const uj = (j + 0.5) / N_MAP, xj = lerp(fr.S.xs, atU(fr.S, uj)), done = uj <= fr.u;
           if (done || ui.ghost) el("line", { x1: RT.X(xj), y1: yTop, x2: U(uj), y2: yAx, class: done ? "br-done" : "br-todo" }, bridge);
         }
-        if (Number.isFinite(fr.x)) el("line", { x1: RT.X(fr.x), y1: yTop, x2: U(fr.u), y2: yAx, class: "br-cur" }, bridge);
+        if (sweep && Number.isFinite(fr.x)) el("line", { x1: RT.X(fr.x), y1: yTop, x2: U(fr.u), y2: yAx, class: "br-cur" }, bridge);
       }
       over.replaceChildren();
-      const hasPoint = !done1 && (fr.disc ? fr.k >= 0 : true);
+      const hasPoint = sweep && !done1 && (fr.disc ? fr.k >= 0 : true);
       if (hasPoint && isFinite(fr.gNow) && RA.inY(fr.gNow)) {
         const px = U(fr.u), py = RA.Y(fr.gNow);
         const gx = fr.disc ? RG.X(fr.k + 1) : RG.X(fr.x);
@@ -1199,7 +1305,7 @@
         el("circle", { cx: px, cy: py, r: 4.5, class: "dot" }, over);
         el("circle", { cx: px, cy: yAx, r: 3.5, class: "dot" }, over);
       }
-      const val = (v2) => {
+      const val2 = (v2) => {
         if (Number.isNaN(v2)) return "\\text{undefined}";
         const t = texNum(v2);
         return t.startsWith("-") ? `\\class{ex-neg}{${t}}` : t;
@@ -1207,23 +1313,24 @@
       const upper = done1 ? "1" : `\\class{ex-now}{${texNum(fr.u)}}`;
       const note = (key, x, y, t, w, bottom) => math.set(key, x, y, t, { text: true, width: w, cls: "ex-ml-note", bottom });
       const nw = Math.min(colL - 30, 370);
-      note("n-dist", colL / 2, (RT.pt + RT.pb) / 2, "The distribution of \\(X\\): what the expectation averages over.", colL - 10);
-      note("n-map", colL / 2, (zones.yTop + zones.yAx) / 2 - (noRI ? 30 : 0), "\\(F_X\\) rescales the real line into \\([0, 1]\\), so that each outcome takes up as much room as its probability. This gives us our horizontal axis.", nw);
-      note("n-g", colL / 2, RG.pt - 12, "The function \\(g\\) gives the height to integrate.", nw, true);
+      note("n-dist", colL / 2, (RT.pt + RT.pb) / 2, T.dist, colL - 10);
+      note("n-map", colL / 2, (zones.yTop + zones.yAx) / 2 - (noRI ? 30 : 0), T.map, nw);
+      note("n-g", colL / 2, RG.pt - 12, T.g(fr.disc), nw, true);
       const riTop = RI.o.oy + RI.o.m.t, fx = wideBottom ? layoutW / 2 : colL / 2, fy1 = riTop + 60, fy2 = riTop + 130;
       const noteW = wideBottom ? layoutW - 32 : nw;
-      const areaNote = done1 ? "The expectation is the whole area:" : `The area up to \\(u = \\class{ex-now}{${texNum(fr.u)}}\\) is:`;
+      const areaNote = T.area(done1, texNum(fr.u));
       math.set("n-area", fx, riTop + 2, areaNote, { text: true, width: noteW, cls: "ex-ml-note" });
-      if (!done1) math.set("n-rest", fx, fy2, "The expectation is the whole area (slide \\(u\\) to 1).", { text: true, width: noteW, cls: "ex-ml-note" });
-      math.set("integral", fx, fy1, `\\displaystyle\\int_0^{${upper}} g\\big(F_X^{-1}(v)\\big) \\dee{v} \\;=\\; ${val(fr.area)}`, { cls: "ex-ml-formula" });
+      if (!done1) math.set("n-rest", fx, fy2, T.rest, { text: true, width: noteW, cls: "ex-ml-note" });
+      math.set("integral", fx, fy1, `\\displaystyle\\int_0^{${upper}} ${T.integrand(G[ui.g].tex)} \\dee{v} \\;=\\; ${val2(fr.area)}`, { cls: "ex-ml-formula" });
       if (done1) {
         const mn = meaning(ui.g, fr.disc);
-        const named = mn ? `\\underbrace{${mn.tex}}_{\\mathclap{\\text{${mn.name}}}} \\;=\\; ` : "";
-        math.set("expectation", fx, fy2, `\\mathbb{E}[g(X)] \\;=\\; ${named}${val(fr.total)}${defined ? G[ui.g].unit ?? "" : ""}`, { cls: "ex-ml-result" + (defined ? " ex-ml-boxed" : "") });
+        const tex = T.result({ mn, val: val2(fr.total), unit: defined ? G[ui.g].unit ?? "" : "", disc: fr.disc });
+        math.set("expectation", fx, fy2, tex, { cls: "ex-ml-result" + (defined ? " ex-ml-boxed" : "") });
       }
       math.end();
     }
     function zoneAt(p) {
+      if (!sweep) return null;
       if (RT.contains(p, 4) || RG.contains(p, 4)) return "x";
       if (RA.contains(p, 4) || !wideBottom && RI.contains(p, 4)) return "u";
       if (p.y > zones.yTop - 6 && p.y < zones.yAx + 18 && p.x >= Math.min(RT.pl, RA.pl) - 4 && p.x <= Math.max(RT.pr, RA.pr) + 4) return "map";
@@ -1245,6 +1352,7 @@
       pos.setX((lo + hi) / 2);
     }
     function gHit(p) {
+      if (!sweep) return -1;
       const fr = lastFr;
       if (!fr?.disc || !RG.contains(p, 14)) return -1;
       let best = -1, bd = 13;
@@ -1334,14 +1442,38 @@
     return { draw };
   }
 
-  // src/expectation/fig-transform.js
+  // src/lib/prob/width.js
+  function entropyOf(v) {
+    if (v.disc) return v.p.reduce((t, q) => t - (q > 0 ? q * log2(q) : 0), 0);
+    return runningIntegral(v.S.Fs, v.S.fs.map((f) => -log2(f))).at(-1);
+  }
+  var positionsOf = (v) => v.xs ?? v.p.map((_, i) => i + 1);
+  function meanOf(v) {
+    if (!v.disc) return shapeMoments(v.shape).mean;
+    const xs = positionsOf(v);
+    return v.p.reduce((t, q, i) => t + q * xs[i], 0);
+  }
+  function boxOf(v) {
+    const H = entropyOf(v), cx = meanOf(v);
+    if (!v.disc) return { H, cx, w: 2 ** H, ht: 2 ** -H };
+    const xs = positionsOf(v), slot = xs.length > 1 ? xs[1] - xs[0] : 1;
+    return { H, cx, w: 2 ** H * slot, ht: 2 ** -H };
+  }
+
+  // src/lib/prob/fig-transform.js
   var TW = 1e3;
   var TH = 566;
   var N_LINES = 40;
+  var READOUT = 56;
+  var val = (x) => {
+    const t = texNum(x);
+    return t.startsWith("-") ? `\\class{ex-neg}{${t}}` : t;
+  };
   var polyline = (g, pts, cls) => el("path", { d: "M" + pts.map((q) => q[0].toFixed(1) + " " + q[1].toFixed(1)).join("L"), class: cls, fill: "none" }, g);
   var closed = (g, pts, cls) => el("path", { d: "M" + pts.map((q) => q[0].toFixed(1) + " " + q[1].toFixed(1)).join("L") + "Z", class: cls }, g);
-  function createTransformFigure(svg, { model, pos, ui, redraw, stopPlay }) {
-    const ctx = svgContext(svg, TW, TH);
+  function createTransformFigure(svg, { model, pos, ui, redraw, stopPlay }, { width = false } = {}) {
+    const H = width ? TH + READOUT : TH;
+    const ctx = svgContext(svg, TW, H);
     const lines = el("g", null, ctx.root);
     const O = {
       U: new Region(ctx, { ox: 0, oy: 0, w: 600, h: 170, m: { l: 58, r: 16, t: 26, b: 26 } }),
@@ -1349,15 +1481,16 @@
       X: new Region(ctx, { ox: 624, oy: 170, w: 376, h: 390, m: { l: 20, r: 16, t: 16, b: 42 } })
     };
     const handles = el("g", null, ctx.root), over = el("g", null, ctx.root);
-    const math = createMathLayer(svg.parentElement, TW, TH);
-    let drawn = false;
+    const math = createMathLayer(svg.parentElement, TW, H);
+    let drawn = false, layoutW = TW;
     function layout(W) {
       const wl = Math.round(0.6 * W), gap = Math.round(0.024 * W);
       Object.assign(O.U.o, { w: wl });
       Object.assign(O.G.o, { w: wl });
       Object.assign(O.X.o, { ox: wl + gap, w: W - wl - gap });
-      svg.setAttribute("viewBox", `0 0 ${W} ${TH}`);
-      math.resize(W, TH);
+      layoutW = W;
+      svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+      math.resize(W, H);
       if (drawn) draw();
     }
     const yLabel = (key, R, tex) => {
@@ -1403,7 +1536,6 @@
       O.X.domain(0, pmax, xa, xb);
       O.X.axes({ yticks: atoms, noyl: true, noZero: true });
       xLabel("x-x", O.X, "p_X(x)");
-      math.end();
       const Fnow = disc ? discCdfAt(v.F, pos.x) : u;
       const byU = pos.driver === "u";
       const uRect = (u0, u1, cls) => closed(O.U.data, [onU(u0, 0), onU(u0, 1), onU(u1, 1), onU(u1, 0)], cls);
@@ -1486,7 +1618,54 @@
           }
         }
       }
+      if (width) {
+        const b = boxOf(v), x0 = b.cx - b.w / 2, x1 = b.cx + b.w / 2;
+        O.X.rect(0, x0, b.ht, x1, "eqbox");
+        el("path", { d: "M" + [onG(0, x0), onG(1, x1)].map((c) => c.join(" ")).join("L"), class: "eqline", "clip-path": `url(#${O.G.id})` }, O.G.data);
+        for (const xe of [x0, x1]) {
+          if (xe < xa || xe > xb) continue;
+          polyline(lines, [onG(1, xe), onX(xe, 0)], "eqguide");
+        }
+        const bx = O.X.X(Math.min(b.ht, pmax)), by = O.X.Y(b.cx + b.w / 2);
+        const fits = bx < O.X.pr - 90;
+        math.set(
+          "eq",
+          fits ? bx + 6 : bx - 6,
+          Math.max(by, O.X.pt + 10),
+          `2^{${disc ? "H" : "h"}} = ${texNum(b.w, 2)}`,
+          { anchor: fits ? "start" : "end", cls: "ex-ml-note" }
+        );
+        if (u > 0) {
+          if (disc) {
+            const k = discQuantile(v.F, u);
+            if (k >= 1 && v.p[k - 1] > 0) {
+              polyline(over, [onG(v.F[k - 1], k), onG(v.F[k], k)], "tread");
+              const [mx, my] = onG((v.F[k - 1] + v.F[k]) / 2, k);
+              math.set("local", mx, my - 16, `\\text{step width} = p_X(${k}) = ${texNum(v.p[k - 1])}`, { cls: "ex-ml-note" });
+            }
+          } else {
+            const q = quant(u);
+            if (q.x >= xa && q.x <= xb) {
+              const slope = 1 / q.p, du = 0.06;
+              const seg2 = [[u - du, q.x - du * slope], [u + du, q.x + du * slope]].map(([uu, xx]) => onG(uu, xx));
+              el("path", { d: "M" + seg2.map((c) => c.join(" ")).join("L"), class: "tangent", "clip-path": `url(#${O.G.id})` }, over);
+              const [mx, my] = onG(u, q.x);
+              math.set("local", mx + 14, my - 18, `\\tfrac{\\dee x}{\\dee u} = 1/p_X(x) = ${texNum(slope, 2)}`, { anchor: "start", cls: "ex-ml-note" });
+            }
+          }
+        }
+        const name = disc ? "H" : "h";
+        const integrand = disc ? "\\frac{1}{p_X(F_X^{-1}(u))}" : "\\frac{\\dee x}{\\dee u}";
+        math.set(
+          "readout",
+          layoutW / 2,
+          TH + 30,
+          `${name}(X) = \\int_0^1 \\log ${integrand}\\,\\dee u = ${val(b.H)}\\text{ bits}, \\qquad 2^{${name}(X)} = ${texNum(b.w, 2)}\\ \\text{${disc ? "effective outcomes" : "effective width"}}`,
+          { cls: "ex-ml-formula" }
+        );
+      }
       editor.draw(handles);
+      math.end();
     }
     let zone = null, editing = null;
     function zoneAt(p) {
@@ -1603,8 +1782,8 @@
         }
       }
       if (R.inX(fr.x)) R.vline(fr.x, "cursor");
-      const t = texNum(pr.upto), val = Number.isNaN(pr.upto) ? "\\text{undefined}" : t.startsWith("-") ? `\\class{ex-neg}{${t}}` : t;
-      const tex = fr.disc ? `\\displaystyle\\sum_{x' \\le x} g(x')\\,p_X(x') \\;=\\; ${val}` : `\\displaystyle\\int_{-\\infty}^{${Number.isFinite(fr.x) ? "x" : "\\infty"}} g(x')\\,p_X(x') \\dee{x'} \\;=\\; ${val}`;
+      const t = texNum(pr.upto), val2 = Number.isNaN(pr.upto) ? "\\text{undefined}" : t.startsWith("-") ? `\\class{ex-neg}{${t}}` : t;
+      const tex = fr.disc ? `\\displaystyle\\sum_{x' \\le x} g(x')\\,p_X(x') \\;=\\; ${val2}` : `\\displaystyle\\int_{-\\infty}^{${Number.isFinite(fr.x) ? "x" : "\\infty"}} g(x')\\,p_X(x') \\dee{x'} \\;=\\; ${val2}`;
       if (row) math.set("sum", layoutW / 2, HF / 2 + 4, tex, { cls: "ex-ml-formula" });
       else math.set("sum", colL / 2, (R.pt + R.pb) / 2, tex, { cls: "ex-ml-formula" });
       math.end();
