@@ -171,8 +171,9 @@ serve: ## Dev server at localhost:4000, listing as deployed
 	@bash scripts/serve.sh
 
 # Same server, but the blog listing also shows unlisted and unpublished posts,
-# marked. The flag lives only in this process's environment, so it can't leak
-# into `make deploy`, which regenerates the listing from scratch anyway.
+# marked, and `published: false` drafts are built. The flag lives only in this
+# process's environment; `make deploy` regenerates everything from scratch, and
+# refuses to run while any dev server's watcher could write into _site.
 serve-drafts: ## Dev server, listing also shows unlisted/unpublished posts, marked
 	@SHOW_UNLISTED=1 bash scripts/serve.sh
 
@@ -201,6 +202,8 @@ deploy: ## Build on `source` and push _site/ to the `static` branch
 	  { echo "error: uncommitted changes on $$(git branch --show-current); commit or stash first"; exit 1; }
 	@[ "$$(git branch --show-current)" = "source" ] || \
 	  { echo "error: must be on 'source' branch (currently on $$(git branch --show-current))"; exit 1; }
+	@! pgrep -qf 'scripts/serve\.sh' || \
+	  { echo "error: a dev server (make serve or serve-drafts) is running; its watcher writes into $(OUTDIR) during the build, and in drafts mode that deploys a draft. Stop it first"; exit 1; }
 	@$(MAKE) clean all
 	@git push origin source
 	@git worktree add _deploy static 2>/dev/null || \
