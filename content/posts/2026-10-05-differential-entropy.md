@@ -43,6 +43,7 @@ $$
 <div class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></div>
 <div class="ex-grp"><label class="ex-lab" for="ex-preset">\(p_X\)</label><select id="ex-preset"></select></div>
 <div class="ex-grp ex-disc"><label class="ex-lab" for="de-beta">\(\beta\) = <b id="de-betav">1.00</b></label><input type="range" id="de-beta" min="0" max="5" step="0.05" value="1"></div>
+<div class="ex-grp" id="ex-mix-grp" hidden><label class="ex-lab" for="ex-mix" title="The left bump's share of the mass; the right bump takes the rest">mix = <b id="ex-mixv">0.62</b></label><input type="range" id="ex-mix" min="0.02" max="0.98" step="0.01" value="0.62"></div>
 <div class="ex-grp"><button type="button" id="ex-reset">↺ reset</button></div>
 </div>
 ```

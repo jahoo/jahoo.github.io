@@ -45,6 +45,12 @@ mjx-container[display="true"] { max-width: 100%; overflow-x: auto; overflow-y: h
   display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.2rem;
 }
 .ex-grp { display: flex; align-items: center; gap: .4rem; }
+/* a group a page hides by script (the mix slider, off unless p_X is two bumps): `hidden`
+   must beat the flex display above */
+.ex-grp[hidden] { display: none; }
+/* a slider in the bar (the mix weight here; the entropy post adds β): short, flush with the
+   other controls, in the mass colour */
+.ex-bar input[type=range] { width: 8rem; margin: 0; accent-color: var(--ex-mass); }
 .ex-lab { color: var(--ex-ink-soft); }
 /* every control the same: native select or button, one height, one border */
 .ex-bar select, .ex-bar button {

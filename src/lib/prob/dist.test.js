@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
     log2, erfc, gMass, numEntropy, gPdf, mixDist, unifDist, BIMODAL,
     family, quantH, softmax, shannonH, quantile,
-    temper, withProb, withMass, familyShape, shapeDist, shapeMoments, rescaleShape, setPeak,
+    temper, withProb, withMass, familyShape, shapeDist, shapeMoments, rescaleShape, setPeak, setWeight, MIN_W,
     stepsDist, setBreak, setLevel, MIN_WIDTH,
     cdfOf, discCdfAt, discQuantile, sampleShape, atX, atU, lerp, runningIntegral,
 } from './dist.js';
@@ -141,6 +141,14 @@ describe('editable shapes', () => {
         close(c[0].m, 0.2, 1e-12);
         close(mixDist(c).pdf(0.2), 1.7, 1e-9);
         assert.deepEqual(c[1], comps[1]);
+    });
+    it('setWeight sets one weight, rescales the rest to sum 1, and keeps m and s', () => {
+        const comps = [{ w: .6, m: 0, s: .3 }, { w: .3, m: 1, s: .4 }, { w: .1, m: 2, s: .5 }];
+        const c = setWeight(comps, 0, 0.2);
+        close(c[0].w, 0.2, 1e-12);
+        close(c[1].w, 0.6, 1e-12); close(c[2].w, 0.2, 1e-12); // the others keep their 3:1 ratio
+        c.forEach((k, j) => { assert.equal(k.m, comps[j].m); assert.equal(k.s, comps[j].s); });
+        close(setWeight(comps, 1, 1.5)[1].w, 1 - MIN_W, 1e-12); // clamped: no bump vanishes
     });
     it('h stays accurate for a narrow component far from a wide one', () => {
         // two well-separated components: h = sum w_i h_i + H(w)

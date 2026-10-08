@@ -7,6 +7,7 @@
 // ================================================================
 
 import { DISC_PRESETS, CONT_PRESETS } from './model.js';
+import { setWeight } from './dist.js';
 
 const $ = id => document.getElementById(id);
 
@@ -46,6 +47,19 @@ export function bindCommonControls({ model, pos, redraw }, { beforeCase, afterCa
     preset?.addEventListener('change', () => { stopPlay(); model.setPreset(preset.value); });
     fillPresets();
 
+    // the mixing weight of a two-bump density (#ex-mix, in #ex-mix-grp with a value in
+    // #ex-mixv): the left bump's weight, the right taking the rest. Shown only while the
+    // shape is a mixture of two or more bumps. Like a handle drag, it holds the window so
+    // the axes don't jump mid-slide, and counts as an edit (the preset becomes custom).
+    const mix = $('ex-mix'), mixGrp = $('ex-mix-grp'), mixVal = $('ex-mixv');
+    const isMix = () => model.kase === 'cont' && model.shape.kind === 'mix' && model.shape.comps.length > 1;
+    mix?.addEventListener('pointerdown', () => { stopPlay(); model.hold(true); });
+    mix?.addEventListener('input', () => {
+        if (!isMix() || Math.abs(+mix.value - model.shape.comps[0].w) < 1e-9) return; // unchanged: not an edit
+        model.setShape({ kind: 'mix', comps: setWeight(model.shape.comps, 0, +mix.value) });
+    });
+    for (const ev of ['pointerup', 'pointercancel', 'keyup']) mix?.addEventListener(ev, () => model.hold(false));
+
     // reset: everything as the page loads
     $('ex-reset')?.addEventListener('click', () => {
         stopPlay();
@@ -62,6 +76,12 @@ export function bindCommonControls({ model, pos, redraw }, { beforeCase, afterCa
         for (const b of cases.flatMap(box => [...box.querySelectorAll('button')])) b.setAttribute('aria-pressed', b.dataset.v === model.kase ? 'true' : 'false');
         const key = model.kase === 'disc' ? model.discKey : model.contKey;
         if (preset && preset.value !== key) preset.value = key;
+        if (mixGrp) mixGrp.hidden = !isMix();
+        if (mix && isMix()) {
+            const w = model.shape.comps[0].w;
+            if (Math.abs(+mix.value - w) > 5e-3) mix.value = String(w);
+            if (mixVal) mixVal.textContent = w.toFixed(2);
+        }
     }
 
     return { update, fillPresets };

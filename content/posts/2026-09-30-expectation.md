@@ -61,6 +61,7 @@ Below, play around with visualizing the expectation as an area under a curve. Se
 <div class="ex-bar wide extra-wide" id="ex-bar">
 <div class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></div>
 <div class="ex-grp"><label class="ex-lab" for="ex-preset">\(p_X\)</label><select id="ex-preset"></select></div>
+<div class="ex-grp" id="ex-mix-grp" hidden><label class="ex-lab" for="ex-mix" title="The left bump's share of the mass; the right bump takes the rest">mix = <b id="ex-mixv">0.62</b></label><input type="range" id="ex-mix" min="0.02" max="0.98" step="0.01" value="0.62"></div>
 <div class="ex-grp"><span class="ex-lab" id="ex-g-lab">\(g(x) =\)</span>
 <div class="ex-menu" id="ex-gsel">
 <button type="button" class="ex-menu-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="ex-g-lab"><span class="ex-menu-cur">\(-\log p_X(x)\) <span class="ex-menu-note">(entropy)</span></span><span class="ex-menu-caret" aria-hidden="true">▾</span></button>

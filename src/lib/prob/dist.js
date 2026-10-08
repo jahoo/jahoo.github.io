@@ -307,6 +307,15 @@ export function setPeak(comps, i, x, y) {
     return comps.map((k, j) => (j === i ? { w: k.w, m: x, s } : k));
 }
 
+// Set component i's weight to w (kept inside (0, 1) so no bump vanishes), the
+// others rescaled to keep the total at 1; means and sds stay.
+export const MIN_W = 0.02;
+export function setWeight(comps, i, w) {
+    w = clamp(w, MIN_W, 1 - MIN_W);
+    const rest = 1 - comps[i].w, scale = rest > 0 ? (1 - w) / rest : 0;
+    return comps.map((k, j) => ({ ...k, w: j === i ? w : (rest > 0 ? k.w * scale : (1 - w) / (comps.length - 1)) }));
+}
+
 // Move step point j to x, keeping every chunk's mass (so the two chunks
 // beside it change height) and every chunk at least MIN_WIDTH wide.
 export function setBreak(shape, j, x) {
