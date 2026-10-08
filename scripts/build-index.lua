@@ -5,6 +5,12 @@
 
 local system = pandoc.system
 
+-- SHOW_UNLISTED=1 (set by `make serve-drafts`) lists the posts that the
+-- deployed listing hides — `unlisted: true` and `published: false` — marked
+-- so they read as different. Every other path (`make`, `make serve`,
+-- `make deploy`) leaves it unset and gets the listing as deployed.
+local show_unlisted = os.getenv("SHOW_UNLISTED") == "1"
+
 ------------------------------------------------------------
 -- Minimal YAML front matter parser
 ------------------------------------------------------------
@@ -112,7 +118,10 @@ local function collect_entries(dir)
         -- shouldn't exist as a page at all) and `unlisted: true` (page is
         -- built and deployed at its normal URL, shareable by link, just not
         -- advertised here — see build-content.sh for the noindex header).
-        if meta and meta.published ~= false and meta.unlisted ~= true then
+        -- Both are listed anyway under SHOW_UNLISTED, tagged with which.
+        local hidden = meta and (meta.published == false and "unpublished"
+          or meta.unlisted == true and "unlisted") or nil
+        if meta and (show_unlisted or not hidden) then
           local raw_slug = name:gsub("%.md$", "")
           local clean_slug = strip_date(raw_slug)
           local entry = {
@@ -120,6 +129,10 @@ local function collect_entries(dir)
             date  = meta.date or "0000-00-00",
             tags  = meta.tags or {},
             highlighted = meta.highlighted or false,
+            hidden = hidden,                  -- "unlisted" / "unpublished" / nil
+            -- A page without the site's chrome: either `standalone-page: true`
+            -- (navbar dropped) or an `external` file copied in as-is.
+            standalone = meta["standalone-page"] == true or meta.external ~= nil,
             external = meta.external or nil,  -- source file path, not URL
             raw_slug = raw_slug,              -- with date prefix
             slug = clean_slug,                -- without date prefix
@@ -154,15 +167,30 @@ lines[#lines+1] = "css: [/assets/css/posts-list.css]"
 lines[#lines+1] = "---"
 lines[#lines+1] = ""
 lines[#lines+1] = "```{=html}"
+if show_unlisted then
+  local n = 0
+  for _, e in ipairs(entries) do if e.hidden then n = n + 1 end end
+  lines[#lines+1] = string.format(
+    '<p class="drafts-note">Local preview: %d unlisted post%s shown, marked. '
+    .. 'The deployed listing hides them.</p>', n, n == 1 and "" or "s")
+end
 lines[#lines+1] = '<ul class="post-list">'
 
 for _, e in ipairs(entries) do
   local cls = e.highlighted and "post-link highlighted" or "post-link"
-  lines[#lines+1] = "  <li>"
+  lines[#lines+1] = e.hidden and '  <li class="hidden-post">' or "  <li>"
   lines[#lines+1] = string.format('    <h3><a class="%s" href="%s">%s</a></h3>', cls, e.url, e.title)
   -- Dates stay in the front-matter YYYY-MM-DD format so the listing
   -- matches the post-meta block on individual posts.
   local meta_parts = { e.date }
+  if e.hidden then
+    meta_parts[#meta_parts+1] = '<span class="post-badge">' .. e.hidden .. '</span>'
+  end
+  -- Badges are a working aid, shown only under SHOW_UNLISTED; the
+  -- deployed listing stays unmarked.
+  if show_unlisted and e.standalone then
+    meta_parts[#meta_parts+1] = '<span class="post-badge standalone">standalone</span>'
+  end
   if e.tags and #e.tags > 0 then
     meta_parts[#meta_parts+1] = '<span class="post-tags">' .. table.concat(e.tags, ", ") .. '</span>'
   end

@@ -40,6 +40,68 @@ deps_newer() {
   return 1
 }
 
+# `aliases:` lists old URLs of a page (the same option, and meaning, as
+# Quarto's and Hugo's). Each gets a redirect stub pointing at the page's real
+# URL, so a renamed post keeps its old links working without a second post
+# (which would also show up in the listing under `make serve-drafts`).
+# Accepts the inline form `aliases: [/a/, /b/]` and an indented `- /a/` list.
+# A path ending in `/` gets an index.html; one ending in `.html` is written as is.
+read_aliases() {
+  awk -v q="'" '
+    NR == 1 && /^---/ { fm = 1; next }
+    fm && /^---/      { exit }
+    !fm               { exit }
+    /^aliases:/ {
+      v = $0; sub(/^aliases: */, "", v)
+      if (v ~ /^\[/) {
+        gsub(/[][]/, "", v); n = split(v, a, ",")
+        for (i = 1; i <= n; i++) { x = a[i]; gsub("^[ \t\"" q "]+|[ \t\"" q "]+$", "", x); if (x != "") print x }
+        inlist = 0
+      } else inlist = 1
+      next
+    }
+    inlist && /^[ \t]+- / { x = $0; sub(/^[ \t]+- */, "", x); gsub("^[\"" q "]|[\"" q "][ \t]*$", "", x); print x; next }
+    { inlist = 0 }
+  ' "$1"
+}
+
+write_aliases() {
+  local src="$1" url="$2" alias rel dest
+  for alias in $(read_aliases "$src"); do
+    rel="${alias#/}"
+    case "$rel" in
+      *.html) dest="$OUTDIR/$rel" ;;
+      *)      dest="$OUTDIR/${rel%/}/index.html" ;;
+    esac
+    # Never shadow a real page: refuse an alias some source file builds to.
+    local slug="${rel%/}" taken
+    case "$slug" in
+      posts/*) taken=$(ls content/posts/????-??-??-"${slug#posts/}".md content/posts/"${slug#posts/}".md 2>/dev/null || true) ;;
+      *)       taken=$(ls content/"$slug".md 2>/dev/null || true) ;;
+    esac
+    if [ -n "$taken" ]; then
+      echo "Warning: $src alias $alias is a real page's URL; skipped" >&2
+      continue
+    fi
+    mkdir -p "$(dirname "$dest")"
+    cat > "$dest" <<HTML
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Redirecting…</title>
+<link rel="canonical" href="$url">
+<meta name="robots" content="noindex">
+<meta http-equiv="refresh" content="0; url=$url">
+</head>
+<body>
+<p>This page has moved to <a href="$url">$url</a>.</p>
+</body>
+</html>
+HTML
+  done
+}
+
 # Build a single markdown file to an output path
 build_one() {
   local src="$1" dest="$2"
@@ -68,21 +130,6 @@ build_one() {
   # shareable-by-link without the page becoming publicly discoverable.
   head -30 "$src" | grep -q '^unlisted: *true' && \
     extra_flags="$extra_flags --include-in-header templates/noindex.html"
-  # `redirect-to: /some/url/` turns the page into a redirect stub. Written as a
-  # generated --include-in-header rather than a `header-includes:` field in the
-  # document, because --include-in-header *sets* the header-includes template
-  # variable and so silently displaces any front-matter value — which is easy to
-  # hit here, since `unlisted: true` already adds one for the noindex header.
-  # Repeated --include-in-header flags accumulate, so both survive.
-  local redirect_to
-  redirect_to=$(head -30 "$src" | sed -nE 's/^redirect-to: *//p' | tr -d '"'"'")
-  if [ -n "$redirect_to" ]; then
-    mkdir -p _build
-    local rfile="_build/redirect-$(basename "$src" .md).html"
-    printf '<meta http-equiv="refresh" content="0; url=%s">\n<link rel="canonical" href="%s">\n' \
-      "$redirect_to" "$redirect_to" > "$rfile"
-    extra_flags="$extra_flags --include-in-header $rfile"
-  fi
   # `standalone-page: true` (intended for unlisted posts) drops the site
   # navbar so the page doesn't visibly link back to the site; the template
   # gates the include-before block on it.
@@ -116,6 +163,10 @@ for src in content/posts/*.md; do
     mkdir -p "$(dirname "$dest")"
     cp "${src%.md}.qmd" "$(dirname "$dest")/"
   fi
+
+  # Redirect stubs for the post's old URLs. Outside the staleness check, like
+  # the .qmd copy, so they come back after a clean build.
+  write_aliases "$src" "/posts/$slug/"
 
   # Check for external field — if present, copy the external file over index.html
   external=$(grep '^external:' "$src" 2>/dev/null | sed 's/^external: *//' | tr -d '"'"'" || true)
