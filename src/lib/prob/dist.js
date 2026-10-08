@@ -210,8 +210,15 @@ export function quantile(d, q) {
 
 // ---- tempering and editing a pmf ----
 
-// p^β, renormalized. β = 0 gives the uniform distribution on the support.
+// p^β, renormalized. β = 0 gives the uniform distribution on the support, and
+// β = ∞ (the end snap of a β slider) the limit, uniform on the argmax(es).
 export function temper(p, beta) {
+    if (beta === Infinity) {
+        const max = Math.max(...p);
+        const q = p.map(v => (v === max ? 1 : 0));
+        const Z = q.reduce((a, b) => a + b, 0);
+        return q.map(v => v / Z);
+    }
     const q = p.map(v => (v > 0 ? Math.pow(v, beta) : 0));
     const Z = q.reduce((a, b) => a + b, 0);
     return q.map(v => v / Z);

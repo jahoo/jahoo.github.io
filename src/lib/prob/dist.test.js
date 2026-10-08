@@ -99,6 +99,10 @@ describe('temper', () => {
         temper(p, 1).forEach((v, i) => close(v, p[i], 1e-12));
         temper(p, 0).forEach(v => close(v, 1 / 3, 1e-12));
     });
+    it('is uniform on the argmax(es) at beta = infinity', () => {
+        assert.deepEqual(temper([0.2, 0.5, 0.3], Infinity), [0, 1, 0]);
+        assert.deepEqual(temper([0.4, 0.2, 0.4], Infinity), [0.5, 0, 0.5]);
+    });
     it('tempering a softmax scales its logits', () => {
         const L = [1.9, 0.2, 1.1, -0.6];
         const a = temper(softmax(L, 1), 2.5), b = softmax(L, 2.5);
