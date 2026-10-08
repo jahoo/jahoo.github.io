@@ -103,6 +103,26 @@ a warning if you set it on a listed post, since the listing would then link to
 a page with no navigation back. Under `make serve-drafts` the listing marks
 such posts with a "standalone" badge.
 
+### Old URLs (aliases)
+
+When a post's URL changes (a renamed file), keep the old links working by
+listing the old URLs on the post itself:
+
+```yaml
+aliases: [/posts/rejection-sampling-expo/]
+```
+
+`build-content.sh` writes a redirect stub at each one (a meta refresh to the
+post's current URL, with a canonical link and a noindex header). A path
+ending in `/` gets an `index.html`; one ending in `.html` is written as is.
+The indented `- /old/url/` list form works too. Quarto uses the same name for
+the same thing, so in a notebook-backed post put it in the `.qmd`, which
+`make notebooks` carries into the generated `.md`. An alias that is a real
+page's URL is skipped with a warning rather than overwriting the page.
+
+This replaces keeping a separate unlisted post just to redirect, which would
+also show up in the `make serve-drafts` listing.
+
 ### Tags
 
 Preserve tags for categorization. Use inline list format:
