@@ -1,72 +1,72 @@
 // ================================================================
-//  Stretching the axis: atoms at a·x_i keep their heights, while the
-//  density of aX flattens by 1/a so that its area stays 1.
+//  Differential entropy — fig-stretch.js
+//  Stretching the axis: Y = aX in a panel of its own, the original as
+//  a ghost. A pmf's atoms move apart with their heights unchanged
+//  (shuffle relabels them too); a density flattens by 1/a. The dashed
+//  box is the uniform with the same entropy: 2^H slots, or 2^h long.
+//  The slider, the shuffle and the permutation are this figure's own;
+//  the model's p_X is untouched, and this panel is not editable.
 // ================================================================
 
-import { family, shannonH, quantile } from '../lib/prob/dist.js';
-import { Plot, txt } from './svgplot.js';
-import { fmt, setSigned, setText, MINUS } from './ui.js';
+import { Region, svgContext } from '../lib/prob/region.js';
+import { createMathLayer, texNum } from '../lib/prob/mathlabels.js';
+import { fitWidth } from '../lib/prob/fit.js';
+import { windowPX, drawPX } from '../lib/prob/panel-px.js';
+import { stretchView, randomPerm } from '../lib/prob/stretch.js';
+import { boxOf, positionsOf } from '../lib/prob/width.js';
 
-const XS = [-0.75, -0.3, 0.1, 0.45, 0.8];
-const PS = [0.15, 0.3, 0.25, 0.2, 0.1];
+const W0 = 1000, HP = 340, H0 = HP + 56;
 
-export function initStretch() {
-    const svgDisc = document.getElementById('de-d-disc');
-    const svgCont = document.getElementById('de-d-cont');
-    const slider = document.getElementById('de-d-a');
-    if (!svgDisc || !svgCont || !slider) return;
-    const Hd = shannonH(PS);
-    const base = family('bimodal', 0.5);
-    const q25 = quantile(base, 0.25), q75 = quantile(base, 0.75);
-    const P1 = new Plot(svgDisc, { w: 520, h: 300 });
-    const P2 = new Plot(svgCont, { w: 520, h: 300 });
+// a = 2^s: an integer for an integer s ≥ 0, "1/2^k" for a negative integer s, else 3 figures.
+export function stretchLabel(s) {
+    if (Math.abs(s - Math.round(s)) < 1e-9) { const k = Math.round(s); return k < 0 ? '1/' + 2 ** -k : String(2 ** k); }
+    const a = 2 ** s;
+    return a >= 1 ? String(+a.toPrecision(3)) : a.toPrecision(2);
+}
+const val = x => { const t = texNum(x); return t.startsWith('-') ? `\\class{ex-neg}{${t}}` : t; };
+
+export function createStretchFigure(svg, { model }, { slider, label, shuffle }) {
+    const ctx = svgContext(svg, W0, H0);
+    const R = new Region(ctx, { ox: 0, oy: 0, w: W0, h: HP, m: { l: 58, r: 16, t: 26, b: 42 } });
+    const math = createMathLayer(svg.parentElement, W0, H0);
+    let layoutW = W0, drawn = false, perm = null;
+    function layout(W) {
+        R.o.w = W; layoutW = W;
+        svg.setAttribute('viewBox', `0 0 ${W} ${H0}`); math.resize(W, H0);
+        if (drawn) draw();
+    }
 
     function draw() {
-        const la = +slider.value, a = 2 ** la;
-        setText(document.getElementById('de-d-av'), a >= 1
-            ? String(+a.toPrecision(3))
-            : (Math.abs(la - Math.round(la)) < 1e-9 ? '1/' + (2 ** -Math.round(la)) : a.toPrecision(2)));
-        const moved = Math.abs(a - 1) > 1e-6;
-
-        // discrete
-        P1.domain(-7, 7, 0, 0.42);
-        P1.axes({ xticks: [-6, -4, -2, 0, 2, 4, 6], yticks: [0, .1, .2, .3, .4], xlabel: 'a·x', ylabel: 'p' });
-        XS.forEach((x, i) => {
-            if (moved) { P1.line(x, 0, x, PS[i], 'stem ghost'); P1.circle(x, PS[i], 3.5, 'dot ghost'); }
-            P1.line(a * x, 0, a * x, PS[i], 'stem');
-            P1.circle(a * x, PS[i], 4.5, 'dot');
-        });
-        txt(P1.front, P1.pr - 4, P1.pt + 14, 'heights unchanged: H = ' + Hd.toFixed(2) + ' bits', 'lbl atom b', { 'text-anchor': 'end' });
-
-        // continuous
-        const ymax = 3.2;
-        P2.domain(-7, 7, 0, ymax);
-        P2.axes({ xticks: [-6, -4, -2, 0, 2, 4, 6], yticks: [0, 1, 2, 3], xlabel: 'y = a x', ylabel: 'f(y)' });
-        const fy = y => base.pdf(y / a) / a;
-        const N = 900, pts = [], band = [], ghost = [];
-        for (let i = 0; i <= N; i++) {
-            const y = -7 + 14 * i / N, v = fy(y);
-            pts.push([y, v]);
-            ghost.push([y, base.pdf(y)]);
-            if (y >= a * q25 && y <= a * q75) band.push([y, v]);
-        }
-        P2.area(pts, 'fm');
-        P2.area([[a * q25, fy(a * q25)], ...band, [a * q75, fy(a * q75)]], 'band');
-        if (moved) P2.path(ghost, 'curve ghost');
-        P2.path(pts, 'curve');
-        P2.hline(1, 'ref');
-        const hY = base.h + la, eff = 2 ** hY;
-        P2.rect(-eff / 2, 0, eff / 2, 1 / eff, 'eqbox');
-        const pk = base.peak / a;
-        if (pk > ymax) txt(P2.front, P2.X(0), P2.pt + 12, 'peak ' + pk.toFixed(1) + ' (off the chart)', 'lbl soft', { 'text-anchor': 'middle' });
-        txt(P2.front, P2.pr - 4, P2.pt + (pk > ymax ? 28 : 14), 'ochre area = 0.5 at every a', 'lbl atom', { 'text-anchor': 'end' });
-
-        setText(document.getElementById('de-d-H'), Hd.toFixed(3));
-        setText(document.getElementById('de-d-hx'), fmt(base.h, 3));
-        setText(document.getElementById('de-d-la'), (la >= 0 ? '+ ' : MINUS + ' ') + Math.abs(la).toFixed(2));
-        setSigned(document.getElementById('de-d-h'), hY, 3);
+        drawn = true;
+        const v = model.view(), s = +slider.value, a = 2 ** s;
+        const y = stretchView(v, a, v.disc ? perm : null), moved = Math.abs(s) > 1e-9 || (v.disc && perm !== null);
+        if (label) label.textContent = stretchLabel(s);
+        math.begin();
+        // a window holding both the original and the stretched distribution
+        const w0 = windowPX(v), w1 = windowPX(y);
+        R.domain(Math.min(w0.x0, w1.x0), Math.max(w0.x1, w1.x1), 0, Math.max(w0.y1, w1.y1));
+        R.axes(v.disc ? { xticks: positionsOf(y), yticks: [0, .5, 1] } : {});
+        const [xx, xy] = R.xlabelAt(), [yx, yy] = R.ylabelAt();
+        math.set('x', xx, xy, 'y = a\\,x'); math.set('y', yx, yy, 'p_{aX}(y)', { rotate: -90 });
+        if (moved) drawPX(R, v, { faint: true });
+        drawPX(R, y);
+        if (!v.disc) R.hline(1, 'hline').setAttribute('opacity', '.5');
+        // the uniform with the same entropy as aX
+        const b = boxOf(y);
+        R.rect(b.cx - b.w / 2, 0, b.cx + b.w / 2, b.ht, 'eqbox');
+        math.set('box', R.X(b.cx), R.Y(Math.min(b.ht, R.y1)) - 14,
+            v.disc ? `2^{H} = ${texNum(b.w / a, 2)}\\ \\text{outcomes}` : `2^{h} = ${texNum(b.w, 2)}\\ \\text{wide}`, { cls: 'ex-ml-note' });
+        // readout
+        const h0 = boxOf(v).H;
+        math.set('readout', layoutW / 2, HP + 30, v.disc
+            ? `H(aX) = H(X) = ${val(b.H)}\\text{ bits}`
+            : `h(aX) = h(X) + \\log a = ${val(h0)} ${s < 0 ? '-' : '+'} ${texNum(Math.abs(s))} = ${val(b.H)}\\text{ bits}`,
+            { cls: 'ex-ml-formula' });
+        math.end();
     }
 
     slider.addEventListener('input', draw);
-    draw();
+    shuffle?.addEventListener('click', () => { perm = randomPerm(model.view().p.length); draw(); });
+    fitWidth(svg.parentElement, layout);
+    return { draw };
 }

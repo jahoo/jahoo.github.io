@@ -16,6 +16,7 @@ import { createAreaFigure } from '../lib/prob/fig-area.js';
 import { createTransformFigure } from '../lib/prob/fig-transform.js';
 import { bindControls } from './controls.js';
 import { createQuantizeFigure } from './fig-quantize.js';
+import { createStretchFigure } from './fig-stretch.js';
 import { initMI } from './fig-mi.js';
 
 // Where the pinned figure stands: the whole area, and x past every outcome.
@@ -23,15 +24,16 @@ const WHOLE = { x: Infinity, u: 1 };
 const $ = id => document.getElementById(id);
 
 export function init() {
-    const areaSvg = $('de-area'), widthSvg = $('de-width'), quantSvg = $('de-quantize');
-    if (areaSvg || widthSvg || quantSvg) {
+    const areaSvg = $('de-area'), widthSvg = $('de-width'), quantSvg = $('de-quantize'), stretchSvg = $('de-stretch');
+    if (areaSvg || widthSvg || quantSvg || stretchSvg) {
         const model = createModel(), pos = createPosition(model);
         const ui = { g: 'neglog', gBase: 'neglog', gc: null, ghost: true }; // g is fixed: entropy is E[−log p_X]
-        let controls = null, area = null, width = null, quant = null;
+        let controls = null, area = null, width = null, quant = null, stretch = null;
         function redraw() {
             area?.draw(computeFrame(model, WHOLE, ui.g));
             width?.draw();
             quant?.draw();
+            stretch?.draw();
             controls?.update();
         }
         const ctx = { model, pos, ui, redraw, customG: () => {}, stopPlay: () => {} };
@@ -39,6 +41,7 @@ export function init() {
         if (areaSvg) area = createAreaFigure(areaSvg, ctx, { sweep: false, notes: 'entropy' });
         if (widthSvg) width = createTransformFigure(widthSvg, ctx, { width: true });
         if (quantSvg) quant = createQuantizeFigure(quantSvg, ctx, { slider: $('de-q-delta'), label: $('de-q-deltav') });
+        if (stretchSvg) stretch = createStretchFigure(stretchSvg, ctx, { slider: $('de-s-a'), label: $('de-s-av'), shuffle: $('de-s-shuffle') });
         model.subscribe(() => { pos.refresh(); redraw(); });
         redraw();
     }

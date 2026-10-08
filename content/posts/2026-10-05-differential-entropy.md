@@ -117,30 +117,14 @@ More generally, for a smooth invertible $g$, $h(g(X)) = h(X) + \E\big[\log|g'(X)
 
 Translation is harmless, $h(X + c) = h(X)$, because shifting has Jacobian 1. Scaling is not. Recording the same quantity in centimetres instead of metres adds $\log 100 \approx 6.64$ bits to $h$, and nothing about the uncertainty has changed.
 
-::: {.wide .extra-wide}
+::: {.wide .extra-wide .ex-wrap}
 ```{=html}
-<div class="de-fig">
-<div class="de-controls">
-<div class="de-ctl">
-<label for="de-d-a">stretch factor \(a\) = <b id="de-d-av">1</b></label>
-<input type="range" id="de-d-a" min="-3" max="3" step="0.05" value="0">
+<div class="de-row">
+<div class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></div>
+<div class="ex-grp"><label class="ex-lab" for="de-s-a">stretch \(a\) = <b id="de-s-av">1</b></label><input type="range" id="de-s-a" min="-3" max="3" step="0.05" value="0"></div>
+<div class="ex-grp ex-disc"><button type="button" id="de-s-shuffle">shuffle the outcomes</button></div>
 </div>
-</div>
-<div class="de-panels">
-<div>
-<div class="de-ptitle">Discrete: atoms at \(a x_i\), heights are probabilities</div>
-<svg id="de-d-disc" role="img" aria-label="Stretched discrete distribution"></svg>
-</div>
-<div>
-<div class="de-ptitle">Continuous: density of \(aX\), heights are probability per unit length</div>
-<svg id="de-d-cont" role="img" aria-label="Stretched density"></svg>
-</div>
-</div>
-<div class="de-readouts">
-<span><span class="k">\(H(aX) = H(X)\) = </span><span class="v" id="de-d-H">–</span> bits</span>
-<span><span class="k">\(h(aX) = h(X) + \log a\) = </span><span id="de-d-hx">–</span> <span id="de-d-la">–</span> = <span class="v" id="de-d-h">–</span> bits</span>
-</div>
-</div>
+<figure class="ex-fig"><div class="ex-canvas"><svg class="ex-plot" id="de-stretch" role="img" aria-label="The distribution of a X with the original behind it, and the uniform with the same entropy as a box"></svg></div></figure>
 ```
 :::
 
