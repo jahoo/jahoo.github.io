@@ -11,20 +11,25 @@ css:
 mathjax-macros: assets/prob/macros.json
 ---
 
-Let $X$ be a real random variable, specified by its cumulative distribution function $F_X(x) = P(X \le x)$.^[Formally, $X : \Omega \to \mathbb{R}$ is a measurable map on a probability space $(\Omega, \mathcal{F}, P)$, and its law is the pushforward $P_X \defeq X_* P$, so that $P_X(A) = P(X \in A)$ for every Borel set $A$. The law is determined by $F_X(x) = P_X\big((-\infty, x]\big)$.] The expectation of a function $g$ of $X$ is the sum or integral of $g$ weighted by the probability mass function $\pmf{X}$ or the probability density function $\pdf{X}$:
+Let $X$ be a random variable taking values in (some subset of) $\mathbb{R}$, write its law as $P_X$, and its cumulative distribution function as $F_X(x) = P_X\big((-\infty, x]\big) = P(X \le x)$.^[If we want to be really formal to define all the notation, $X : \Omega \to \mathbb{R}$ is a measurable map on a probability space $(\Omega, \mathcal{F}, P)$, and its law is the pushforward $P_X \defeq X_* P$, so that $P_X(A) = P(X \in A)$ for every Borel set $A$.]
+The expected value of a function $g(X)$ is given by
 
-$$ \E[g(X)] \;\defeq\; \begin{cases} \displaystyle\sum_x g(x)\,\pmf{X}(x) & \text{if } X \text{ is discrete,} \\[1.2ex] \displaystyle\int g(x)\,\pdf{X}(x) \dee{x} & \text{if } X \text{ is continuous.} \end{cases} $$
-
-In what follows, we write $p_X$ for either pdf or pmf.^[This isn't sloppy. Both are densities of the law, $p_X = \dee{P_X} / \dee{\mu}$, with respect to a reference measure $\mu$ on $\mathbb{R}$. We simply swap out which reference measure we are using: in the discrete case, it isthe counting measure, in the continuous case it is the Lebesgue measure. Both cases of the definition are then one: 
 $$
-\begin{aligned}
 \E[g(X)] 
-&\defeq \int_\Omega g \circ X \dee{P} \\
-&= \int_{\mathbb{R}} g \dee{P_X} \\
-&= \int_{\mathbb{R}} g \, p_X \dee{\mu}
-\end{aligned}
+\defeq \int_{\mathbb{R}} g \dee{P_X}
 $$
+
+Writing $p_X$ for the probability density function (or probability mass function), this general definition simplifies to a sum or integral of $g$ weighted by $p_X$:^[In what follows, we'll consider both discrete and continuous cases, and write $p_X$ for either pdf or pmf. This same notation reflects the fact that either can be defined formally as $p_X = \dee{P_X} / \dee{\mu}$, the density of the random variable's law, $P_X$, with respect to some reference measure $\mu$ on $\mathbb{R}$, which is the counting measure for the discrete case, or the Lebesgue measure for the continuous case, so either the integral or the sum is the same:
+$\E[g(X)] = \int_{\mathbb{R}} g \, p_X \dee{\mu}$.
 ]
+$$
+\E[g(X)]
+=
+\begin{cases}
+\displaystyle\int_{-\infty}^{\infty} g(x)\,p_X(x) \dee{x} & \text{if } X \text{ is continuous,}\\[1.2ex]
+\displaystyle\sum_{x \in \supp{X}} g(x)\,p_X(x) & \text{if } X \text{ is discrete.} 
+\end{cases}
+$$
 
 We can equivalently write the expectation as an integral over the unit interval, using a substitution by $F_X^{-1}(u) = \inf\{x : F_X(x) \ge u\}$, the inverse CDF (aka quantile function).^[If $X$ is discrete, $F_X$ is a staircase that jumps by $p_X(x)$ at each outcome $x$. The infimum simply picks the first $x$ at which the staircase reaches $u$, so $F_X^{-1}(u) = x$ for every $u$ in the interval $\big(P(X < x),\, P(X \le x)\big]$. These intervals partition $[0, 1]$ into blocks, one per outcome, each as wide as its probability, in order of $x$; $F_X^{-1}$ is the staircase that takes the value $x$ on the block for $x$.]
 
