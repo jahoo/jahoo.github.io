@@ -89,41 +89,13 @@ $$ H(\Xq) \approx h(X) + \log\frac{1}{\bw}, \qquad h(X) = \lim_{\bw\to 0}\Big[H(
 
 The discrete entropy goes to infinity: pinning down a real number exactly takes infinitely many bits. Differential entropy is what remains after subtracting that divergent term. It is not itself an entropy; it is an *offset*.^[The limit holds for any Riemann-integrable density with finite $h$ [@cover.t:2006book2, ch. 8].]
 
-::: {.wide .extra-wide}
+::: {.wide .extra-wide .ex-wrap}
 ```{=html}
-<div class="de-fig">
-<div class="de-controls">
-<div class="de-seg" role="radiogroup" aria-label="Distribution family" id="de-c-fam">
-<button type="button" role="radio" aria-checked="true" data-v="gauss">Gaussian</button>
-<button type="button" role="radio" aria-checked="false" data-v="unif">Uniform</button>
-<button type="button" role="radio" aria-checked="false" data-v="bimodal">Bimodal</button>
+<div class="de-row">
+<div class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></div>
+<div class="ex-grp"><label class="ex-lab" for="de-q-delta">bin width \(\Delta\) = <b id="de-q-deltav">1/4</b></label><input type="range" id="de-q-delta" min="-3" max="12" step="0.25" value="2"></div>
 </div>
-<div class="de-ctl">
-<label for="de-c-sd">standard deviation \(\sigma\) = <b id="de-c-sdv">1/8</b></label>
-<input type="range" id="de-c-sd" min="-4" max="1.5" step="0.05" value="-3">
-</div>
-<div class="de-ctl">
-<label for="de-c-d">bin width \(\Delta\) = <b id="de-c-dv">1/4</b></label>
-<input type="range" id="de-c-d" min="-3" max="12" step="0.25" value="2">
-</div>
-</div>
-<div class="de-panels de-wide-left">
-<div>
-<div class="de-ptitle">Discrete entropy of the quantized variable, against resolution</div>
-<svg id="de-c-curve" role="img" aria-label="H of the quantized variable against log of one over delta"></svg>
-</div>
-<div>
-<div class="de-ptitle">Density and histogram at bin width \(\Delta\) (drag the handles)</div>
-<svg id="de-c-pdf" role="img" aria-label="Density with histogram bars"></svg>
-</div>
-</div>
-<div class="de-readouts">
-<span><span class="k">\(H(X_\Delta)\) = </span><span class="v" id="de-c-H">–</span> bits</span>
-<span><span class="k">\(\log(1/\Delta)\) = </span><span class="v" id="de-c-L">–</span></span>
-<span><span class="k">\(H(X_\Delta) - \log(1/\Delta)\) = </span><span class="v" id="de-c-diff">–</span></span>
-<span><span class="k">\(h(X)\) = </span><span class="v" id="de-c-h">–</span> bits</span>
-</div>
-</div>
+<figure class="ex-fig"><div class="ex-canvas"><svg class="ex-plot" id="de-quantize" role="img" aria-label="Entropy of the quantized variable against log of one over delta, beside p_X with the histogram at bin width delta"></svg></div></figure>
 ```
 :::
 

@@ -1,124 +1,110 @@
 // ================================================================
-//  Quantize, then subtract: H(X_Δ) against log2(1/Δ), its small-Δ
-//  asymptote h + log2(1/Δ), and the histogram at the current Δ.
+//  Differential entropy — fig-quantize.js
+//  Quantize, then subtract. Left: H(X_Δ) against log(1/Δ), the region
+//  below zero shaded; a density's curve climbs the dashed asymptote
+//  h + log(1/Δ), a pmf's is flat at H once Δ < 1. Right: the shared
+//  p_X (editable) with the histogram at the current Δ in the panel's
+//  own units: bin mass for a pmf, mass/Δ for a density. The Δ slider
+//  is this figure's own; p_X is the page's.
 // ================================================================
 
-import { densityPts, binRange, quantH, familyShape, shapeDist, shapeMoments } from '../lib/prob/dist.js';
-import { Plot, el, txt } from './svgplot.js';
-import { fmt, setSigned, setText } from './ui.js';
-import { createDensityEditor } from './density-edit.js';
-import { bindShapeControls, shapeWindow, growWindow } from './shape-controls.js';
+import { Region, el, svgContext, svgPoint } from '../lib/prob/region.js';
+import { createMathLayer, texNum } from '../lib/prob/mathlabels.js';
+import { fitWidth } from '../lib/prob/fit.js';
+import { createEditor, regionAdapter } from '../lib/prob/edit.js';
+import { windowPX, drawPX } from '../lib/prob/panel-px.js';
+import { binMasses, quantizedH, quantizeCurve } from '../lib/prob/quantize.js';
+import { entropyOf, positionsOf } from '../lib/prob/width.js';
 
-const T_MIN = -3, T_MAX = 12; // range of log2(1/Δ)
+const W0 = 1000, HP = 400, H0 = HP + 56; // the panels, then a line of readouts
+const T_MIN = -3, T_MAX = 12, T_STEP = 0.25; // t = log(1/Δ): Δ from 8 down to 2^-12
+const TS = Array.from({ length: Math.round((T_MAX - T_MIN) / T_STEP) + 1 }, (_, i) => T_MIN + i * T_STEP);
 
-// Δ = 2^-t as "1/2^k", an integer, or ≤ 3 significant figures.
-function deltaLabel(t) {
-    if (Math.abs(t - Math.round(t)) < 1e-9) {
-        const k = Math.round(t);
-        return k > 0 ? '1/' + (2 ** k) : String(2 ** (-k));
-    }
-    const D = 2 ** (-t);
+// Δ = 2^-t as "1/2^k" for a positive integer k, an integer for t ≤ 0, else ≤ 3 significant figures.
+export function deltaLabel(t) {
+    if (Math.abs(t - Math.round(t)) < 1e-9) { const k = Math.round(t); return k > 0 ? '1/' + 2 ** k : String(2 ** -k); }
+    const D = 2 ** -t;
     return D < 0.01 ? D.toExponential(2) : String(+D.toPrecision(3));
 }
+const val = x => { const t = texNum(x); return t.startsWith('-') ? `\\class{ex-neg}{${t}}` : t; };
 
-export function initQuantize() {
-    const svgCurve = document.getElementById('de-c-curve');
-    const svgPdf = document.getElementById('de-c-pdf');
-    const sS = document.getElementById('de-c-sd');
-    const sD = document.getElementById('de-c-d');
-    if (!svgCurve || !svgPdf || !sS || !sD) return;
-    const P1 = new Plot(svgCurve, { w: 600, h: 380, m: { l: 48, r: 16, t: 14, b: 42 } });
-    const P2 = new Plot(svgPdf, { w: 440, h: 380, m: { l: 44, r: 12, t: 14, b: 42 } });
-    let shape = familyShape('gauss', 2 ** (+sS.value));
-    let win = null; // data window of the density panel, held fixed during a drag
-    let cacheKey = '', curve = null; // H(X_Δ) over the whole Δ range depends only on the distribution
-
-    const controls = bindShapeControls({
-        slider: sS, label: document.getElementById('de-c-sdv'), famGroup: document.getElementById('de-c-fam'),
-        get: () => shape, set: s => { shape = s; draw(); },
-    });
-    const editor = createDensityEditor(P2, {
-        getShape: () => shape,
-        setShape: s => { shape = s; draw(); },
-        onEnd: () => draw(),
-    });
+export function createQuantizeFigure(svg, { model }, { slider, label }) {
+    const ctx = svgContext(svg, W0, H0);
+    const RC = new Region(ctx, { ox: 0, oy: 0, w: 560, h: HP, m: { l: 58, r: 16, t: 26, b: 42 } });
+    const RP = new Region(ctx, { ox: 584, oy: 0, w: 416, h: HP, m: { l: 58, r: 16, t: 26, b: 42 } });
+    const handles = el('g', null, ctx.root);
+    const math = createMathLayer(svg.parentElement, W0, H0);
+    const editor = createEditor({ model, adapter: regionAdapter(RP, false) });
+    let layoutW = W0, drawn = false;
+    function layout(W) {
+        const wl = Math.round(0.56 * W), gap = Math.round(0.024 * W);
+        RC.o.w = wl; Object.assign(RP.o, { ox: wl + gap, w: W - wl - gap });
+        layoutW = W;
+        svg.setAttribute('viewBox', `0 0 ${W} ${H0}`); math.resize(W, H0);
+        if (drawn) draw();
+    }
+    // the curve over the whole range depends only on the distribution
+    let cacheKey = null, curve = null;
+    function curveFor(v) {
+        const key = v.disc ? v.p.join(',') : v.S;
+        if (key !== cacheKey) { cacheKey = key; curve = quantizeCurve(v, TS); }
+        return curve;
+    }
+    const yLabel = (key, R, tex) => { const [x, y] = R.ylabelAt(); math.set(key, x, y, tex, { rotate: -90 }); };
+    const xLabel = (key, R, tex) => { const [x, y] = R.xlabelAt(); math.set(key, x, y, tex); };
 
     function draw() {
-        const t = +sD.value, D = 2 ** (-t);
-        setText(document.getElementById('de-c-dv'), deltaLabel(t));
-        const d = shapeDist(shape);
-        controls.sync();
-        // coarser curve while dragging, full resolution once released
-        const key = JSON.stringify(shape) + (editor.dragging ? '|drag' : '');
-        if (key !== cacheKey) {
-            cacheKey = key;
-            curve = [];
-            const step = editor.dragging ? 0.25 : 0.0625;
-            for (let tt = T_MIN; tt <= T_MAX + 1e-4; tt += step) {
-                const DD = 2 ** (-tt);
-                curve.push([tt, DD < d.minScale / 64 ? d.h + tt : quantH(d, DD)]);
-            }
-        }
-        const Hq = quantH(d, D);
-
-        // left: the curve and its asymptote
-        P1.domain(T_MIN, T_MAX, -7, 16);
-        P1.axes({
-            xticks: [-3, -2, -1, 0, 2, 4, 6, 8, 10, 12],
-            yticks: [-6, -4, -2, 0, 2, 4, 6, 8, 10, 12, 14, 16],
-            xlabel: 'log(1/Δ)   (finer bins →)', ylabel: 'bits',
+        drawn = true;
+        const v = model.view(), t = +slider.value, D = 2 ** -t, Hq = quantizedH(v, D), H = entropyOf(v);
+        if (label) label.textContent = deltaLabel(t);
+        math.begin();
+        // ---- left: H(X_Δ) against log(1/Δ) ----
+        const ys = curveFor(v), top = Math.max(1, ...ys) * 1.08;
+        RC.domain(T_MIN, T_MAX, -1.5, top);
+        RC.rect(T_MIN, -1.5, T_MAX, 0, 'negzone');
+        RC.axes({ xticks: [-2, 0, 2, 4, 6, 8, 10, 12] });
+        yLabel('c-y', RC, 'H(X_\\Delta)\\ \\text{(bits)}'); xLabel('c-x', RC, '\\log(1/\\Delta)');
+        if (v.disc) RC.hline(H, 'asym'); else RC.path([[T_MIN, H + T_MIN], [T_MAX, H + T_MAX]], 'asym');
+        RC.path(TS.map((tt, i) => [tt, ys[i]]), 'qcurve');
+        el('circle', { cx: RC.X(t), cy: RC.Y(Hq), r: 5, class: 'dot' }, RC.front);
+        // ---- right: p_X with the histogram at Δ, in the panel's own units ----
+        const w = windowPX(v);
+        RP.domain(w.x0, w.x1, 0, w.y1);
+        RP.axes(v.disc ? { xticks: positionsOf(v), yticks: [0, .5, 1] } : {});
+        yLabel('p-y', RP, 'p_X(x)'); xLabel('p-x', RP, 'x');
+        const { edges, masses } = binMasses(v, D), pts = [];
+        masses.forEach((m, j) => {
+            if (edges[j + 1] < w.x0 || edges[j] > w.x1) return;
+            const h = v.disc ? m : m / D;
+            pts.push([edges[j], h], [edges[j + 1], h]);
         });
-        P1.rect(T_MIN, -7, T_MAX, 0, 'negzone');
-        txt(P1.data, P1.X(11.8), P1.Y(-6.3), 'no discrete entropy is ever down here', 'lbl neg', { 'text-anchor': 'end' });
-        P1.path(curve, 'qcurve');
-        P1.path([[T_MIN, d.h + T_MIN], [T_MAX, d.h + T_MAX]], 'asym');
-        const yA = d.h + t;
-        if (Math.abs(Hq - yA) > 0.02) P1.line(t, yA, t, Hq, 'gap');
-        P1.circle(0, d.h, 5.5, 'ptm', P1.front);
-        if (d.h < 0) txt(P1.front, P1.X(0) + 9, P1.Y(d.h) + 17, 'h(X) = ' + fmt(d.h), 'lbl mass b', {});
-        else txt(P1.front, P1.X(0) - 9, P1.Y(d.h) + (d.h > 13 ? 18 : -9), 'h(X) = ' + fmt(d.h), 'lbl mass b', { 'text-anchor': 'end' });
-        P1.circle(t, Hq, 6, 'pt', P1.front);
-        const anchorEnd = t > 6;
-        const hl = txt(P1.front, P1.X(t) + (anchorEnd ? -10 : 10), P1.Y(Hq) + (Hq > yA ? -10 : 16), 'H(X',
-            'lbl atom b', { 'text-anchor': anchorEnd ? 'end' : 'start' });
-        el('tspan', { 'baseline-shift': 'sub', 'font-size': '9' }, hl).textContent = 'Δ';
-        el('tspan', null, hl).textContent = ') = ' + Hq.toFixed(2);
-        const yEnd = d.h + 11.9;
-        txt(P1.front, P1.X(11.9), P1.Y(Math.min(15.2, yEnd)) + (yEnd > 15.2 ? 14 : -8), 'h(X) + log(1/Δ)', 'lbl mass', { 'text-anchor': 'end' });
-
-        // right: density and histogram (bar height p_i / Δ)
-        if (!editor.dragging || !win) {
-            win = shapeWindow(shape, d, 1.2);
-            const { mean } = shapeMoments(shape), half = Math.max((win.x1 - win.x0) / 2, 0.75 * D);
-            win.x0 = Math.min(win.x0, mean - half); win.x1 = Math.max(win.x1, mean + half);
-        } else growWindow(win, shape, d);
-        const [k0, k1] = binRange(d, D);
-        const kv0 = Math.max(k0, Math.floor(win.x0 / D - 1)), kv1 = Math.min(k1, Math.ceil(win.x1 / D + 1));
-        const drawBars = (kv1 - kv0) <= 360;
-        let barMax = 0;
-        const bars = [];
-        if (drawBars) for (let k = kv0; k <= kv1; k++) {
-            const hgt = d.mass((k - .5) * D, (k + .5) * D) / D;
-            bars.push([k, hgt]);
-            barMax = Math.max(barMax, hgt);
-        }
-        if (!editor.dragging) win.y1 = Math.max(win.y1, barMax * 1.05);
-        P2.domain(win.x0, win.x1, 0, win.y1);
-        P2.axes({ nx: 5, ny: 5, xlabel: 'x', ylabel: 'density' });
-        for (const [k, hgt] of bars) if (hgt > 0) P2.rect((k - .5) * D, 0, (k + .5) * D, hgt, 'bar');
-        const pts = densityPts(d, win.x0, win.x1, 500);
-        P2.area(pts, 'fm');
-        P2.path(pts, 'curve');
-        P2.hline(1, 'ref');
-        editor.draw(d);
-        if (!drawBars) txt(P2.front, P2.pl + 8, P2.pt + 16, 'bins are finer than the plot can show', 'lbl soft', {});
-
-        setText(document.getElementById('de-c-H'), Hq.toFixed(3));
-        setText(document.getElementById('de-c-L'), fmt(t, 2));
-        setSigned(document.getElementById('de-c-diff'), Hq - t, 3);
-        setSigned(document.getElementById('de-c-h'), d.h, 3);
+        if (pts.length) RP.area(pts, 'bin'); // one path, however many bins
+        drawPX(RP, v);
+        handles.replaceChildren(); editor.draw(handles);
+        // ---- readouts ----
+        math.set('readout', layoutW / 2, HP + 30,
+            `H(X_\\Delta) = ${val(Hq)}\\text{ bits}, \\quad \\log(1/\\Delta) = ${texNum(t, 2)}, \\quad H(X_\\Delta) - \\log(1/\\Delta) = ${val(Hq - t)}, \\quad ${v.disc ? 'H' : 'h'}(X) = ${val(H)}`,
+            { cls: 'ex-ml-formula' });
+        math.end();
     }
 
-    sD.addEventListener('input', draw);
-    draw();
+    // ---- editing p_X in the right panel (the model notifies, and the page redraws) ----
+    let editing = false;
+    svg.addEventListener('pointerdown', e => {
+        const p = svgPoint(svg, e), h = editor.hit(p);
+        if (!h) return;
+        editing = true; svg.setPointerCapture(e.pointerId); e.preventDefault();
+        editor.begin(h, p);
+    });
+    svg.addEventListener('pointermove', e => {
+        const p = svgPoint(svg, e);
+        if (editing) { editor.move(p); return; }
+        svg.style.cursor = editor.cursorFor(editor.hit(p));
+    });
+    const end = () => { if (editing) { editing = false; editor.end(); } };
+    svg.addEventListener('pointerup', end);
+    svg.addEventListener('pointercancel', end);
+    slider.addEventListener('input', draw);
+    fitWidth(svg.parentElement, layout);
+    return { draw };
 }
