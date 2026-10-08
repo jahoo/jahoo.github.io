@@ -7,10 +7,11 @@
 //  and p_X on the right with x vertical.
 //  Dragging: the uniform and the graph set u; the p_X panel sets x;
 //  a p_X handle takes precedence.
-//  With width: true the figure also shows entropy as a size: the run
-//  of the tread (pmf) or the slope (density) at the cursor on the graph
-//  of F_X⁻¹, the uniform with the same entropy as a dashed box in the
-//  p_X panel, and a readout of H or h and 2^H or 2^h.
+//  With width: true the figure also shows entropy as a size: the width
+//  of the step (pmf) or the slope (density) at the cursor on the graph
+//  of F_X⁻¹, the uniform with the same entropy as a dashed line on that
+//  graph (slope 2^H or 2^h) and as a dashed box in the p_X panel, and a
+//  readout of H or h as the average log-spread, and 2^H or 2^h.
 // ================================================================
 
 import { clamp, discCdfAt, discQuantile, atX, atU, lerp } from './dist.js';
@@ -173,23 +174,32 @@ export function createTransformFigure(svg, { model, pos, ui, redraw, stopPlay },
                 }
             }
         }
-        // ---- width mode: the run or slope at u, the box of area 1, and the readout ----
+        // ---- width mode: the step width or slope at u, the box of area 1, and the readout ----
         if (width) {
-            const b = boxOf(v);
+            const b = boxOf(v), x0 = b.cx - b.w / 2, x1 = b.cx + b.w / 2;
             // the uniform with the same entropy, in the p_X panel (density across, x up)
-            O.X.rect(0, b.cx - b.w / 2, b.ht, b.cx + b.w / 2, 'eqbox');
+            O.X.rect(0, x0, b.ht, x1, 'eqbox');
+            // ... and its quantile function on the graph: the straight line of slope 2^H or 2^h
+            // (in x-units; a pmf's is 2^H atom slots), the map that spreads at one rate. Its
+            // rise over [0, 1] is the box's width, and x is vertical in both panels, so each end
+            // sits level with a box edge; a faint guide across the gap shows that.
+            el('path', { d: 'M' + [onG(0, x0), onG(1, x1)].map(c => c.join(' ')).join('L'), class: 'eqline', 'clip-path': `url(#${O.G.id})` }, O.G.data);
+            for (const xe of [x0, x1]) {
+                if (xe < xa || xe > xb) continue;
+                polyline(lines, [onG(1, xe), onX(xe, 0)], 'eqguide');
+            }
             const bx = O.X.X(Math.min(b.ht, pmax)), by = O.X.Y(b.cx + b.w / 2);
             const fits = bx < O.X.pr - 90;
             math.set('eq', fits ? bx + 6 : bx - 6, Math.max(by, O.X.pt + 10),
                 `2^{${disc ? 'H' : 'h'}} = ${texNum(b.w, 2)}`, { anchor: fits ? 'start' : 'end', cls: 'ex-ml-note' });
             if (u > 0) {
                 if (disc) {
-                    // the tread holding u: its run is p_X at that atom
+                    // the step holding u: its width is p_X at that atom
                     const k = discQuantile(v.F, u);
                     if (k >= 1 && v.p[k - 1] > 0) {
                         polyline(over, [onG(v.F[k - 1], k), onG(v.F[k], k)], 'tread');
                         const [mx, my] = onG((v.F[k - 1] + v.F[k]) / 2, k);
-                        math.set('local', mx, my - 16, `\\text{run} = p_X(${k}) = ${texNum(v.p[k - 1])}`, { cls: 'ex-ml-note' });
+                        math.set('local', mx, my - 16, `\\text{step width} = p_X(${k}) = ${texNum(v.p[k - 1])}`, { cls: 'ex-ml-note' });
                     }
                 } else {
                     // the tangent at u: its slope is 1 / p_X there (not past the window's ends, where
@@ -200,13 +210,16 @@ export function createTransformFigure(svg, { model, pos, ui, redraw, stopPlay },
                         const seg = [[u - du, q.x - du * slope], [u + du, q.x + du * slope]].map(([uu, xx]) => onG(uu, xx));
                         el('path', { d: 'M' + seg.map(c => c.join(' ')).join('L'), class: 'tangent', 'clip-path': `url(#${O.G.id})` }, over);
                         const [mx, my] = onG(u, q.x);
-                        math.set('local', mx + 14, my - 18, `\\text{slope} = 1/p_X(x) = ${texNum(slope, 2)}`, { anchor: 'start', cls: 'ex-ml-note' });
+                        math.set('local', mx + 14, my - 18, `\\tfrac{\\dee x}{\\dee u} = 1/p_X(x) = ${texNum(slope, 2)}`, { anchor: 'start', cls: 'ex-ml-note' });
                     }
                 }
             }
+            // the entropy as the average log-spread, the section's equation, with its value: the
+            // slope's log for a density, and for a pmf the log of 1 over the step width
             const name = disc ? 'H' : 'h';
+            const integrand = disc ? '\\frac{1}{p_X(F_X^{-1}(u))}' : '\\frac{\\dee x}{\\dee u}';
             math.set('readout', layoutW / 2, TH + 30,
-                `${name}(X) = ${val(b.H)}\\text{ bits}, \\qquad 2^{${name}(X)} = ${texNum(b.w, 2)}\\ \\text{${disc ? 'effective outcomes' : 'effective width'}}`,
+                `${name}(X) = \\int_0^1 \\log ${integrand}\\,\\dee u = ${val(b.H)}\\text{ bits}, \\qquad 2^{${name}(X)} = ${texNum(b.w, 2)}\\ \\text{${disc ? 'effective outcomes' : 'effective width'}}`,
                 { cls: 'ex-ml-formula' });
         }
         editor.draw(handles);

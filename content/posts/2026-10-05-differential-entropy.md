@@ -59,23 +59,27 @@ Drag $p_X$ to reshape it. In the discrete case, I've put in a parameter^[{-} Tem
 :::
 
 
-# $h$ is a width
+# Reading the integrand off the graph of $F_X^{-1}$
 
-Read the integrand off the graph of $F_X^{-1}$. For a pmf the graph is a staircase, and $p_X(F_X^{-1}(u))$ is the run of the tread under $u$. For a density it is $1/(F_X^{-1})'(u)$, the reciprocal of the slope. So
+The integrand $-\log p_X(x)$ is the log of the slope of the inverse CDF at $u = F_X(x)$,^[Since $\frac{\dee F_X}{\dee x} = p_X(x)$, the inverse has $\frac{\dee F_X^{-1}}{\dee u} = \frac{1}{p_X(x)}$ at $u = F_X(x)$, wherever $p_X(x) > 0$. See also [through the quantile function](/posts/quantile-transform/).] which invites a look at the graph of $F_X^{-1}$. For a pmf the graph is a staircase, with a step for each outcome $x$ as wide as $p_X(x)$,^[$F_X^{-1}(u) = \inf\{x : F_X(x) \ge u\}$ takes the value $x$ for every $u$ in $\big(P(X < x),\, P(X \le x)\big]$, an interval of width $p_X(x)$.] so the integrand, there the surprisal of the outcome $x$, is the log of how many steps that wide would fill $[0, 1]$. Either way it is the log of how much the map spreads the probability near $u$.
 
-$$ H(X) = \int_0^1 \log\frac{1}{\operatorname{run}(u)}\,\dee u, \qquad h(X) = \int_0^1 \log (F_X^{-1})'(u)\,\dee u, $$
+The entropy is this log-spread, averaged over $u$:
 
-and $2^{H(X)}$ is the geometric mean of $1/\operatorname{run}$, an **effective number of outcomes**, while $2^{h(X)}$ is the geometric mean of the slope, an **effective width**.^[The perplexity, in the discrete case. A uniform on $n$ outcomes has exactly $n$; a uniform on $[0, L]$ has exactly $L$.] Each is the uniform with the same entropy: on $2^H$ outcomes, or on an interval of length $2^h$. A count is at least 1, so $H \ge 0$; a width can be less than 1, so $h$ can be negative. A count is at most $n$, so $H \le \log n$; a width is at most the support, so $h \le \log L$.^[With the variance fixed instead of the support, the Gaussian is widest: $h \le \tfrac12\log(2\pi e\sigma^2)$ [@cover.t:2006book2, ch. 8].]
+$$
+h(X) = \int_0^1 \log \frac{\dee x}{\dee u}\dee{u}.
+$$
+
+The map that spreads at this one rate everywhere is a straight line of slope $2^{h(X)}$, the quantile function of a uniform on an interval of length $2^{h(X)}$. That uniform has the same entropy as $X$, which is the sense in which $2^{h(X)}$ is an **effective width**. For a pmf the same line has slope $2^{H(X)}$, and the uniform with that many equally likely outcomes has the same entropy as $X$: $2^{H(X)}$ is an **effective number of outcomes**.^[The perplexity, in the discrete case. A uniform on $n$ outcomes has exactly $n$; a uniform on $[0, L]$ has exactly $L$.] A count is at least 1, so $H \ge 0$; a width can be less than 1, so $h$ can be negative. A count is at most $n$, so $H \le \log n$; a width is at most the support, so $h \le \log L$.^[With the variance fixed instead of the support, the Gaussian is widest: $h \le \tfrac12\log(2\pi e\sigma^2)$ [@cover.t:2006book2, ch. 8].]
 
 ::: {.wide .extra-wide .ex-wrap}
 ```{=html}
 <div class="de-row"><div class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></div></div>
-<figure class="ex-fig"><div class="ex-canvas"><svg class="ex-plot" id="de-width" role="img" aria-label="Evenly spaced u carried through the quantile function to x, with the run or slope at the cursor, and the uniform with the same entropy drawn as a box over p_X"></svg></div></figure>
+<figure class="ex-fig"><div class="ex-canvas"><svg class="ex-plot" id="de-width" role="img" aria-label="Evenly spaced u carried through the quantile function to x, with the slope or step width at the cursor, the straight line of the uniform with the same entropy, and the uniform with the same entropy drawn as a box over p_X"></svg></div></figure>
 ```
 :::
 
 ::: {.de-caption}
-Drag $u$ to read the run or the slope, and $p_X$ to reshape it. The dashed box is the uniform with the same entropy: $2^H$ slots or $2^h$ long, and 1 over that high. The uniform presets make it coincide with $p_X$.
+Drag $u$ to read the slope of $F_X^{-1}$ there, or the width of its step, and $p_X$ to reshape it. The dashed line is the uniform with the same entropy as $X$: it climbs $2^h$ (or $2^H$ outcome slots) over the unit interval, and that rise is the dashed box in the $p_X$ panel, an interval $2^h$ long and $1/2^h$ high. The uniform presets make both coincide with $p_X$.
 :::
 
 
