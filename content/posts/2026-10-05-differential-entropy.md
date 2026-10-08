@@ -198,20 +198,3 @@ Each row traces back to one of two facts: a density is probability per unit leng
 :::
 
 Shannon [-@shannon.c:1948a, Part III] introduces the integral form, noting there that it is measured relative to the coordinate system. The quantization argument above is the one in @cover.t:2006book2 [ch. 8].
-
-<!-- DRAFT for phase 2 (moved here from the expectation post, 2026-09-30): the transform figure,
-     to be reworked around the slope of the quantile function, h(X) = ∫₀¹ log (F_X⁻¹)′(u) du, with
-     (F_X⁻¹)′(u) = 1/p_X(F_X⁻¹(u)). It runs on the expectation post's bundle (src/expectation,
-     fig-transform.js) and styles. Not for publishing as is. -->
-
-# Draft: the quantile function
-
-$X$ is <span class="ex-seg ex-case" role="group" aria-label="Case"><button type="button" data-v="disc" aria-pressed="true">discrete</button><button type="button" data-v="cont" aria-pressed="false">continuous</button></span>.
-
-::: {.wide .extra-wide .ex-wrap}
-```{=html}
-<figure class="ex-fig">
-<div class="ex-canvas"><svg class="ex-plot" id="ex-transform" role="img" aria-label="Evenly spaced values of a uniform U, carried through the quantile function to X"></svg></div>
-</figure>
-```
-:::
