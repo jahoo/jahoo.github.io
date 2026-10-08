@@ -1,6 +1,5 @@
 ---
 title: Differential entropy
-subtitle: Entropy, once the outcomes stop being countable
 date: 2026-10-05
 author: Jacob Hoover Vigly
 tags: [exploration]
@@ -16,17 +15,28 @@ link-citations: true
 mathjax-macros: [assets/prob/macros.json, assets/differential-entropy/macros.json]
 ---
 
-For a discrete random variable $X$ with pmf $p_X$, the entropy is the expected value of the *surprisal* $-\log p_X(X)$:^[The surprisal of an outcome $x$ is the number of bits an optimal code spends on it.]
+For a discrete random variable $X$ with pmf $p_X$, the entropy $H(X)$ is a measure of the uncertainty of the variable, defined as the expected value of the negative logarithm of $p_X$:^[That is, it is the expected *surprisal*.]
 
-$$ H(X) \defeq \E\big[-\log p_X(X)\big] = -\sum_{x} p_X(x)\log p_X(x). $$
+$$
+H(X)
+\defeq \E\big[-\log p_X(X)\big]
+= -\sum_{x} p_X(x)\log p_X(x).
+$$
 
-It is natural to ask what happens for a continuous $X$, with $p_X$ now its pdf:
+If instead we say $X$ is a *continuous* random variable, and $p_X$ is its pdf, then we can define a similar quantity:
 
-$$ h(X) \defeq \E\big[-\log p_X(X)\big] = -\int p_X(x)\log p_X(x)\,\dee x. $$
+$$
+h(X)
+\defeq \E\big[-\log p_X(X)\big]
+= -\int p_X(x)\log p_X(x)\dee{x}.
+$$
 
-This is the *differential entropy*, and its properties differ.^[The recipe looks the same, but $p_X(x)\,\dee x$ is a probability and $p_X(x)$ alone is not: $-\log p_X(x)$ is a log-density, not the information content of an event. The sections after the figure take this apart.] Both are the expectation of one function, $g(x) = -\log p_X(x)$. As in [Visualizing expected value](/posts/expectation/), lay the probability out along $[0, 1]$ with $u = F_X(x)$, and the expectation is an area:
+This is the *differential entropy*, and its interpretation and properties differ.^[The recipe looks the same, but in the continuous case, $-\log p_X(x)$ is a negative log-density at a point, not the information content of an event. For starters, note it is negative whenever density is greater than 1.] Both are the expectation of one function, $g(x) = -\log p_X(x)$. As in [Visualizing expected value](/posts/expectation/), lay the probability out along $[0, 1]$ with $u = F_X(x)$, and the expectation is an area:
 
-$$ \E\big[-\log p_X(X)\big] = \int_0^1 -\log p_X\big(F_X^{-1}(u)\big)\,\dee u. $$
+$$
+\E\big[-\log p_X(X)\big] 
+= \int_0^1 -\log p_X\big(F_X^{-1}(u)\big)\dee{u}.
+$$
 
 ```{=html}
 <div class="ex-bar wide extra-wide" id="ex-bar">
@@ -44,7 +54,7 @@ $$ \E\big[-\log p_X(X)\big] = \int_0^1 -\log p_X\big(F_X^{-1}(u)\big)\,\dee u. $
 :::
 
 ::: {.de-caption}
-Drag $p_X$ to reshape it. In the discrete case, $\beta$ tempers the pmf: the figure shows $p_X^{\beta}(x) \propto p_X(x)^{\beta}$, uniform on its support at $\beta = 0$ and a single outcome as $\beta \to \infty$.^[{-} Temperature scaling with $\beta = 1/T$; see [temperature scaling and truncation](/posts/temperature-scaling/).]
+Drag $p_X$ to reshape it. In the discrete case, I've put in a parameter^[{-} Temperature scaling with $\beta = 1/T$; see [temperature scaling and truncation](/posts/temperature-scaling/).] $\beta$ to temper the pmf as $p_X^{\beta}(x) \propto p_X(x)^{\beta}$, just so you can easily see how the entropy changes when the distribution slides from uniform on its support (at $\beta = 0$) through to a single outcome as $\beta \to \infty$.
 :::
 
 
@@ -72,7 +82,11 @@ Drag $u$ to read the run or the slope, and $p_X$ to reshape it. The dashed box i
 
 Cut the line into bins of width $\bw$ and let $\Xq$ be the bin $X$ lands in. Its Shannon entropy counts the width in bins, $2^{H(\Xq)} \approx 2^{h(X)}/\bw$:^[For small $\bw$, bin $i$ has mass $p_i \approx p_X(x_i)\,\bw$, so $H(\Xq) = -\sum_i p_i\log p_i \approx -\sum_i p_X(x_i)\log p_X(x_i)\,\bw \;-\; \log\bw\sum_i p_X(x_i)\,\bw$. The first sum is a Riemann sum for $h(X)$; the second tends to 1. The limit holds for any Riemann-integrable density with finite $h$ [@cover.t:2006book2, ch. 8].]
 
-$$ H(\Xq) \approx h(X) + \log\frac{1}{\bw}, \qquad h(X) = \lim_{\bw\to 0}\Big[H(\Xq) + \log\bw\Big]. $$
+$$
+H(\Xq) \approx h(X) + \log\frac{1}{\bw},
+\qquad 
+h(X) = \lim_{\bw\to 0}\Big[H(\Xq) + \log\bw\Big].
+$$
 
 Pinning down a real number exactly takes infinitely many bits; $h$ is what is left once that cost, the unit, is subtracted. A pmf has nothing to subtract: once the bins are finer than the atoms' spacing, $H(\Xq) = H(X)$. An atom inside a density does the same at its point, which is why a distribution with atoms has no differential entropy.^[$h = -\infty$ for a point mass, and undefined for a mixed distribution, whose $H(\Xq)$ grows like $\log(1/\bw)$ times the mass of its continuous part.]
 
@@ -94,7 +108,11 @@ The curve is $H(\Xq)$ against $\log(1/\bw)$; the bars are the bin masses at the 
 
 Relabel the outcomes of a pmf, by shuffling them or by spreading them out, and every probability is kept: $H$ and the count do not move. Stretch a density by $a$ and the same mass covers $a$ times the length, so the density drops and the width grows:^[For a smooth invertible $g$, $h(g(X)) = h(X) + \E\log\lvert g'(X)\rvert$: the Jacobian enters the density, and so the log. A shift has Jacobian 1, so $h(X + c) = h(X)$. Recording the same quantity in centimetres instead of metres adds $\log 100 \approx 6.64$ bits, and nothing about the uncertainty has changed. See also the [density of a transformed random variable](/posts/transform-pdf/).]
 
-$$ p_{aX}(y) = \frac{1}{a}\,p_X\!\Big(\frac{y}{a}\Big) \qquad\Longrightarrow\qquad h(aX) = h(X) + \log a. $$
+$$
+p_{aX}(y) = \frac{1}{a}\,p_X\!\Big(\frac{y}{a}\Big)
+\qquad\Longrightarrow\qquad
+h(aX) = h(X) + \log a.
+$$
 
 ::: {.wide .extra-wide .ex-wrap}
 ```{=html}
@@ -113,11 +131,16 @@ Same stretch, two responses. Atoms move apart and keep their heights, and the bo
 
 # What survives: differences
 
-Both anomalies are units. The divergent $\log(1/\bw)$ and the shift $\log a$ are the same for every entropy of the same variable, so they cancel in differences: a difference of log-widths is a log-ratio, and unit-free.^[This also says what $h$ is: $h(X) = -\KL{p_X}{1}$, a negative divergence from the flat reference "density" 1, Lebesgue measure with a chosen unit length. Jaynes' *limiting density of discrete points* replaces the 1 with an explicit reference density $m(x)$, $-\int p_X\log(p_X/m)\,\dee x$, which is coordinate-free since $p_X$ and $m$ transform alike [@jaynes.e:1968, sec. VI].] Mutual information is the main example,
+Both anomalies are units. The divergent $\log(1/\bw)$ and the shift $\log a$ are the same for every entropy of the same variable, so they cancel in differences: a difference of log-widths is a log-ratio, and unit-free.^[This also says what $h$ is: $h(X) = -\KL{p_X}{1}$, a negative divergence from the flat reference "density" 1, Lebesgue measure with a chosen unit length. Jaynes' *limiting density of discrete points* replaces the 1 with an explicit reference density $m(x)$, $-\int p_X\log(p_X/m)\dee{x}$, which is coordinate-free since $p_X$ and $m$ transform alike [@jaynes.e:1968, sec. VI].] Mutual information is the main example,
 
-$$ I(X;Y) = h(X) - h(X\mid Y) = \lim_{\bw\to0} I(\Xq; Y_{\bw}) \;\ge\; 0, $$
+$$
+I(X;Y)
+= h(X) - h(X\mid Y)
+= \lim_{\bw\to0} I(\Xq; Y_{\bw})
+\ge 0,
+$$
 
-unchanged by any invertible transformation of $X$ or $Y$ separately, as is KL divergence, $\KL{p_X}{g} = \int p_X\log(p_X/g)\,\dee x$, where the Jacobians cancel in the ratio.
+unchanged by any invertible transformation of $X$ or $Y$ separately, as is KL divergence, $\KL{p_X}{g} = \int p_X\log(p_X/g)\dee{x}$, where the Jacobians cancel in the ratio.
 
 ::: {.wide .extra-wide}
 ```{=html}
@@ -162,7 +185,7 @@ Each row traces back to one fact: $2^H$ counts outcomes, and $2^h$ measures a le
 ::: {.wide .extra-wide}
 | | Shannon entropy, pmf | Differential entropy, pdf | Why |
 |--|-----|-----|-----|
-| Definition | $-\sum p_X\log p_X$ | $-\int p_X\log p_X\dee x$ | The same expectation of $-\log p_X$, as a sum or an integral. |
+| Definition | $-\sum p_X\log p_X$ | $-\int p_X\log p_X\dee{x}$ | The same expectation of $-\log p_X$, as a sum or an integral. |
 | Effective size | $2^H$ outcomes, $\ge 1$ | $2^h$ long, any positive length | The uniform with the same entropy. |
 | Inside the log | A probability, $\le 1$ | A density, unbounded | Density is probability per unit length; only its integral is fixed. |
 | Sign | $H \ge 0$, zero iff deterministic | [Any real number]{.de-flag}; $\to -\infty$ as the distribution concentrates | A count is at least 1; a width can be less than 1. |
