@@ -1,11 +1,8 @@
 // src/lib/prob/width.test.js
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { createModel } from './model.js';
 import { entropyOf, meanOf, boxOf } from './width.js';
-
-export const view = (kase, key) => { const m = createModel(); m.setCase(kase); m.setPreset(key); return m.view(); };
-export const near = (a, b, tol, msg = '') => assert.ok(Math.abs(a - b) < tol, `${msg} ${a} vs ${b} (tol ${tol})`);
+import { view, near } from './test-util.js';
 
 describe('entropy as a size', () => {
     it('the uniform pmf on 8 outcomes has 2^H = 8: a box 8 slots wide, 1/8 high, centred at 4.5', () => {
